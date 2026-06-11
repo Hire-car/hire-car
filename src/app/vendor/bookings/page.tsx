@@ -2,7 +2,6 @@ import { requireUser } from "@/lib/security/auth";
 import { getVendorContext } from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
-import { DashboardShell } from "@/components/dashboard-shell";
 import BookingsClient from "./bookings-client";
 
 export const metadata = { title: "Bookings" };
@@ -25,7 +24,7 @@ export default async function BookingsPage() {
     .order("start_date", { ascending: true });
 
   return (
-    <DashboardShell mode="vendor">
+    <>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">
@@ -42,6 +41,6 @@ export default async function BookingsPage() {
       </div>
 
       <BookingsClient organizationId={org.id} initialBookings={bookings ?? []} />
-    </DashboardShell>
+    </>
   );
 }

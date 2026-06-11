@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 import { createVehicle, updateVehicle } from "./actions";
-import { generateVehicleSeoContent } from "./ai-actions";
+import { getVehicleAutofill } from "./ai-actions";
 import { uploadVehicleImage, deleteVehicleImage } from "./image-actions";
 
 interface VehicleFormProps {
@@ -72,27 +72,43 @@ export default function VehicleForm({
   const [pendingUploads, setPendingUploads] = useState<File[]>([]);
   const [notes, setNotes] = useState(editVehicle?.notes || "");
   const [aiLoading, setAiLoading] = useState(false);
+  const [formState, setFormState] = useState({
+    title: editVehicle?.title || "",
+    seats: editVehicle?.seats || 5,
+    fuel: editVehicle?.fuel || "Petrol",
+    transmission: editVehicle?.transmission || "Automatic",
+    category: editVehicle?.category || "Sedan",
+  });
 
   async function handleAiGenerate(form: HTMLFormElement) {
     if (!canUseAi) return;
+    const make = String(new FormData(form).get("make") ?? "");
+    const model = String(new FormData(form).get("model") ?? "");
+    const year = Number(new FormData(form).get("year") ?? new Date().getFullYear());
+    
+    if (!make || !model || !year) {
+      toast.error("Please fill out Make, Model, and Year first.");
+      return;
+    }
+
     setAiLoading(true);
     try {
-      const fd = new FormData(form);
-      const branchId = String(fd.get("branchId") ?? "");
-      const branch = branches.find((b) => b.id === branchId);
-      const result = await generateVehicleSeoContent({
+      const result = await getVehicleAutofill({
         organizationId,
-        make: String(fd.get("make") ?? ""),
-        model: String(fd.get("model") ?? ""),
-        year: Number(fd.get("year") ?? new Date().getFullYear()),
-        category: String(fd.get("category") ?? "Sedan"),
-        city: branch?.city,
-        seats: Number(fd.get("seats") ?? 5),
-        fuel: String(fd.get("fuel") ?? "Petrol"),
-        transmission: String(fd.get("transmission") ?? "Automatic"),
+        make,
+        model,
+        year,
+      });
+      
+      setFormState({
+        title: result.title,
+        seats: result.seats,
+        fuel: result.fuel,
+        transmission: result.transmission,
+        category: result.category,
       });
       setNotes(result.description);
-      toast.success("AI description generated");
+      toast.success("Magic Autofill complete!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "AI generation failed");
     } finally {
@@ -211,7 +227,8 @@ export default function VehicleForm({
             Title
             <input
               name="title"
-              defaultValue={editVehicle?.title || ""}
+              value={formState.title}
+              onChange={(e) => setFormState({ ...formState, title: e.target.value })}
               required
               maxLength={140}
               placeholder="e.g., 2023 Toyota Camry Hybrid"
@@ -245,7 +262,20 @@ export default function VehicleForm({
           </label>
 
           <label className="grid gap-1.5 text-sm font-medium text-foreground">
-            Year
+            <div className="flex items-center justify-between">
+              Year
+              {canUseAi && (
+                <button
+                  type="button"
+                  disabled={aiLoading}
+                  onClick={(e) => handleAiGenerate(e.currentTarget.closest("form")!)}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#ea580c] hover:text-orange-700 disabled:opacity-50"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  {aiLoading ? "Thinking..." : "✨ Magic Autofill"}
+                </button>
+              )}
+            </div>
             <input
               name="year"
               type="number"
@@ -262,7 +292,8 @@ export default function VehicleForm({
             <input
               name="seats"
               type="number"
-              defaultValue={editVehicle?.seats || 5}
+              value={formState.seats}
+              onChange={(e) => setFormState({ ...formState, seats: Number(e.target.value) })}
               required
               min={2}
               max={12}
@@ -401,7 +432,8 @@ export default function VehicleForm({
             Fuel Type
             <select
               name="fuel"
-              defaultValue={editVehicle?.fuel || "Petrol"}
+              value={formState.fuel}
+              onChange={(e) => setFormState({ ...formState, fuel: e.target.value })}
               required
               className="rounded-lg border border-input bg-background px-3 py-2 font-normal text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
             >
@@ -417,7 +449,8 @@ export default function VehicleForm({
             Transmission
             <select
               name="transmission"
-              defaultValue={editVehicle?.transmission || "Automatic"}
+              value={formState.transmission}
+              onChange={(e) => setFormState({ ...formState, transmission: e.target.value })}
               required
               className="rounded-lg border border-input bg-background px-3 py-2 font-normal text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
             >
@@ -433,7 +466,8 @@ export default function VehicleForm({
             Category
             <select
               name="category"
-              defaultValue={editVehicle?.category || "Sedan"}
+              value={formState.category}
+              onChange={(e) => setFormState({ ...formState, category: e.target.value })}
               required
               className="rounded-lg border border-input bg-background px-3 py-2 font-normal text-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
             >
@@ -448,17 +482,6 @@ export default function VehicleForm({
           <label className="grid gap-1.5 text-sm font-medium text-foreground md:col-span-3">
             <span className="flex items-center justify-between">
               Listing description / notes
-              {canUseAi && (
-                <button
-                  type="button"
-                  disabled={aiLoading}
-                  onClick={(e) => handleAiGenerate(e.currentTarget.closest("form")!)}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600 hover:text-orange-700 disabled:opacity-50"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {aiLoading ? "Generating..." : "Generate with AI"}
-                </button>
-              )}
             </span>
             <textarea
               name="notes"

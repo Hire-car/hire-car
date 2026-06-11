@@ -15,7 +15,7 @@ const profileSchema = z.object({
   address: z.string().trim().min(6).max(240).optional().or(z.literal("")),
 });
 
-export async function updateOrganizationProfile(formData: FormData) {
+export async function updateOrganizationProfile(prevState: any, formData: FormData) {
   const user = await requireUser();
 
   const parsed = profileSchema.safeParse({
@@ -27,7 +27,7 @@ export async function updateOrganizationProfile(formData: FormData) {
   });
 
   if (!parsed.success) {
-    throw new Error("Invalid form data. Please check your inputs.");
+    return { error: "Invalid form data. Please check your inputs.", success: false };
   }
 
   const { organizationId, name, phone, website, address } = parsed.data;
@@ -47,7 +47,7 @@ export async function updateOrganizationProfile(formData: FormData) {
     .eq("id", organizationId);
 
   if (error) {
-    throw new Error(`Failed to update organization: ${error.message}`);
+    return { error: `Failed to update organization: ${error.message}`, success: false };
   }
 
   await supabase.from("audit_logs").insert({
@@ -59,6 +59,7 @@ export async function updateOrganizationProfile(formData: FormData) {
   });
 
   revalidatePath("/vendor/settings");
+  return { success: true, error: null };
 }
 
 export async function updateBrandProfile(prevState: any, formData: FormData) {

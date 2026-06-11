@@ -5,6 +5,7 @@ import { getVendorContext } from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { updateOrganizationProfile, uploadVendorDocument } from "./actions";
 import { BrandForm } from "./brand-form";
+import { ProfileForm } from "./profile-form";
 import { getOrganizationPlanCode, getSupportTierLabel, organizationHasFeature } from "@/lib/plan-features";
 import { ApiKeysPanel } from "@/components/vendor/api-keys-panel";
 import {
@@ -122,79 +123,15 @@ export default async function VendorSettingsPage() {
             </div>
           </div>
 
-          <form action={updateOrganizationProfile} className="space-y-4">
-            <input type="hidden" name="organizationId" value={organization.id} />
-
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">Business Name</label>
-              <input
-                id="name"
-                name="name"
-                defaultValue={org?.name ?? ""}
-                required
-                minLength={2}
-                maxLength={160}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
-                placeholder="Your business name"
-                aria-describedby="name-helper"
-              />
-              <p id="name-helper" className="mt-1.5 text-xs text-muted-foreground">Displayed on your public profile</p>
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1.5">
-                <Phone className="inline h-3.5 w-3.5 text-muted-foreground mr-1.5" />
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                defaultValue={org?.phone ?? ""}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
-                placeholder="+61 4XX XXX XXX"
-                aria-describedby="phone-helper"
-              />
-              <p id="phone-helper" className="mt-1.5 text-xs text-muted-foreground">Visible to customers for direct contact</p>
-            </div>
-
-            <div>
-              <label htmlFor="website" className="block text-sm font-medium text-foreground mb-1.5">
-                <Globe className="inline h-3.5 w-3.5 text-muted-foreground mr-1.5" />
-                Website
-              </label>
-              <input
-                id="website"
-                name="website"
-                type="url"
-                defaultValue={org?.website ?? ""}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
-                placeholder="https://yourwebsite.com.au"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-foreground mb-1.5">
-                <MapPin className="inline h-3.5 w-3.5 text-muted-foreground mr-1.5" />
-                Business Address
-              </label>
-              <input
-                id="address"
-                name="address"
-                defaultValue={org?.address ?? ""}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
-                placeholder="123 Main St, Sydney NSW 2000"
-                aria-describedby="address-helper"
-              />
-              <p id="address-helper" className="mt-1.5 text-xs text-muted-foreground">Used for business verification</p>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Save Changes
-            </button>
-          </form>
+          <ProfileForm
+            organizationId={organization.id}
+            defaultValues={{
+              name: org?.name ?? "",
+              phone: org?.phone ?? "",
+              website: org?.website ?? "",
+              address: org?.address ?? "",
+            }}
+          />
         </div>
 
         {/* Public Profile & Brand */}

@@ -5,6 +5,7 @@ import {
   type AuthRole,
   resolvePostAuthDestination,
 } from "@/lib/routing";
+import { sendWelcomeEmail } from "@/lib/email/resend";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -32,6 +33,15 @@ export async function GET(request: NextRequest) {
     if (data.user) {
       const admin = createAdminClient();
 
+      // Check if this is a brand-new user (no existing profile row)
+      const { data: existingProfile } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      const isNewUser = !existingProfile;
+
       await admin.from("profiles").upsert({
         id: data.user.id,
         full_name:
@@ -41,6 +51,19 @@ export async function GET(request: NextRequest) {
         email: data.user.email,
         updated_at: new Date().toISOString(),
       });
+
+      // Send welcome email for brand-new registrations (non-blocking)
+      if (isNewUser && data.user.email) {
+        const name =
+          data.user.user_metadata?.full_name ??
+          data.user.user_metadata?.name ??
+          data.user.email.split("@")[0];
+        sendWelcomeEmail({
+          to: data.user.email,
+          name,
+          role: role ?? "customer",
+        }).catch((err) => console.error("[Auth Callback] Welcome email failed:", err));
+      }
     }
   }
 
