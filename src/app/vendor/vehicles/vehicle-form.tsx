@@ -99,15 +99,20 @@ export default function VehicleForm({
         model,
         year,
       });
-      
+
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+
       setFormState({
-        title: result.title,
-        seats: result.seats,
-        fuel: result.fuel,
-        transmission: result.transmission,
-        category: result.category,
+        title: result.data.title,
+        seats: result.data.seats,
+        fuel: result.data.fuel,
+        transmission: result.data.transmission,
+        category: result.data.category,
       });
-      setNotes(result.description);
+      setNotes(result.data.description);
       toast.success("Magic Autofill complete!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "AI generation failed");
