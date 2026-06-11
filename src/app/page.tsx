@@ -12,6 +12,7 @@ import { searchVehicles } from "@/lib/search/typesense";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MotionScroll } from "@/components/motion-scroll";
 import { Section } from "@/components/ui/section";
+import { buildWebSiteSchema, serializeSchemas } from "@/lib/seo";
 import {
   ArrowRight,
   ChevronDown,
@@ -127,6 +128,10 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white text-foreground font-sans overflow-x-hidden">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeSchemas([buildWebSiteSchema()]) }}
+      />
       <SiteHeader />
 
       <main>

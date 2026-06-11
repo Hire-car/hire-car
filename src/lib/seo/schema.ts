@@ -92,6 +92,39 @@ export function buildProductSchema(input: {
   };
 }
 
+export function buildWebSiteSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Hire Car",
+    url: SEO_BASE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SEO_BASE_URL}/search?city={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+export function buildOrganizationSchema(input: {
+  name: string;
+  url: string;
+  logo?: string;
+  description?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: input.name,
+    url: `${SEO_BASE_URL}${input.url}`,
+    logo: input.logo,
+    description: input.description,
+  };
+}
+
 export function serializeSchemas(schemas: object[]) {
   return JSON.stringify(schemas);
 }

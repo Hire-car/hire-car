@@ -23,9 +23,10 @@ export function vehicleDescription(input: {
   return `Hire a ${input.year} ${input.make} ${input.model} (${input.category}) for $${input.pricePerDayAud}/day${location}. Verified local rental operator.`;
 }
 
-export function cityTitle(citySlug: string, state?: string) {
+export function cityTitle(citySlug: string, state?: string, lowestPrice?: number) {
   const { title } = getCityMeta(citySlug, state);
-  return `Car Hire ${title}${state ? ` ${state}` : ""} | Hire Car`;
+  const priceString = lowestPrice ? ` (From $${lowestPrice}/day)` : "";
+  return `Car Hire ${title}${state ? ` ${state}` : ""}${priceString} | Hire Car`;
 }
 
 export function cityDescription(citySlug: string, state?: string) {
@@ -40,9 +41,10 @@ export function categoryNationalDescription(category: VehicleCategory, total: nu
   return `Compare ${total} ${category} rental vehicles across Australia from verified local operators. No booking fees — contact vendors directly.`;
 }
 
-export function cityCategoryTitle(citySlug: string, category: VehicleCategory, state?: string) {
+export function cityCategoryTitle(citySlug: string, category: VehicleCategory, state?: string, lowestPrice?: number) {
   const { title } = getCityMeta(citySlug, state);
-  return `${category} Hire ${title} | Hire Car`;
+  const priceString = lowestPrice ? ` (From $${lowestPrice}/day)` : "";
+  return `${category} Hire ${title}${priceString} | Hire Car`;
 }
 
 export function cityCategoryDescription(

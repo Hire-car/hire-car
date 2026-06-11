@@ -21,9 +21,22 @@ import {
   cityCategoryTitle,
   cityCategoryDescription,
 } from "@/lib/seo";
+import { getIndexableSitemapUrls } from "@/lib/seo/discovery";
 import { Filter, Tag } from "lucide-react";
 
 export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const { cityCategoryUrls } = await getIndexableSitemapUrls();
+  return cityCategoryUrls.map((url) => {
+    // url is like /locations/sydney/suv
+    const parts = url.split("/");
+    return {
+      city: parts[2],
+      segment: parts[3],
+    };
+  });
+}
 
 export async function generateMetadata({
   params,
@@ -35,12 +48,14 @@ export async function generateMetadata({
   if (isCategorySlug(segment)) {
     const category = slugToCategory(segment)!;
     const meta = getCityMeta(city);
-    const { total } = await searchVehicles("", { city: meta.title, category }, { page: 1, perPage: 1 });
+    const { total, vehicles } = await searchVehicles("", { city: meta.title, category }, { page: 1, perPage: 24 });
+    const lowestPrice = vehicles.length > 0 ? Math.min(...vehicles.map(v => v.pricePerDayAud)) : undefined;
+
     return {
-      title: cityCategoryTitle(city, category, meta.state),
+      title: cityCategoryTitle(city, category, meta.state, lowestPrice),
       description: cityCategoryDescription(city, category, total, meta.state),
       openGraph: {
-        title: cityCategoryTitle(city, category, meta.state),
+        title: cityCategoryTitle(city, category, meta.state, lowestPrice),
         description: cityCategoryDescription(city, category, total, meta.state),
       },
       alternates: { canonical: `/locations/${city}/${segment}` },

@@ -32,6 +32,17 @@ export async function middleware(request: NextRequest) {
   });
 
   const path = request.nextUrl.pathname;
+
+  // Strict SEO canonical lowercasing for programmatic routes
+  if (
+    (path.startsWith("/locations/") || path.startsWith("/categories/")) &&
+    path !== path.toLowerCase()
+  ) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = path.toLowerCase();
+    return NextResponse.redirect(redirectUrl, 301); // 301 Permanent Redirect for SEO
+  }
+
   const isAdminRoute =
     path.startsWith("/admin") && !path.startsWith("/admin-login");
 

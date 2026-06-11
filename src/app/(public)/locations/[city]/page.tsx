@@ -19,8 +19,17 @@ import {
   buildItemListSchema,
   serializeSchemas,
 } from "@/lib/seo";
+import { getIndexableSitemapUrls, getCitiesWithCounts } from "@/lib/seo/discovery";
+import { cityToSlug } from "@/lib/seo/slugs";
 
 export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const { cityUrls } = await getIndexableSitemapUrls();
+  return cityUrls.map((url) => ({
+    city: url.replace("/locations/", ""),
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -32,13 +41,14 @@ export async function generateMetadata({
   const meta = getCityMeta(slug);
   const searchCity = meta.title;
 
-  const { total } = await searchVehicles("", { city: searchCity }, { page: 1, perPage: 1 });
+  const { total, vehicles } = await searchVehicles("", { city: searchCity }, { page: 1, perPage: 24 });
+  const lowestPrice = vehicles.length > 0 ? Math.min(...vehicles.map(v => v.pricePerDayAud)) : undefined;
 
   return {
-    title: cityTitle(slug, meta.state),
+    title: cityTitle(slug, meta.state, lowestPrice),
     description: cityDescription(slug, meta.state),
     openGraph: {
-      title: cityTitle(slug, meta.state),
+      title: cityTitle(slug, meta.state, lowestPrice),
       description: cityDescription(slug, meta.state),
     },
     alternates: { canonical: `/locations/${slug}` },
@@ -56,8 +66,11 @@ export default async function LocationPage({
   const meta = getCityMeta(slug);
   const searchCity = meta.title;
 
-  // Fetch vehicles via search
-  const { vehicles, total } = await searchVehicles("", { city: searchCity }, { page: 1, perPage: 24 });
+  // Fetch vehicles via search and other cities for internal linking
+  const [{ vehicles, total }, allCities] = await Promise.all([
+    searchVehicles("", { city: searchCity }, { page: 1, perPage: 24 }),
+    getCitiesWithCounts()
+  ]);
 
   const displayCity = meta.title;
   const state = meta.state;
@@ -76,6 +89,11 @@ export default async function LocationPage({
     vehicles.length > 0
       ? Math.round(vehicles.reduce((acc, v) => acc + v.pricePerDayAud, 0) / vehicles.length)
       : null;
+
+  const nearbyCities = allCities
+    .filter(c => c.state === state && c.slug !== slug)
+    .sort((a, b) => b.vehicleCount - a.vehicleCount)
+    .slice(0, 10);
 
   const schemas = [
     buildBreadcrumbSchema([
@@ -232,6 +250,29 @@ export default async function LocationPage({
                     className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-colors"
                   >
                     {cat} hire in {displayCity}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Nearby Cities (Internal Linking Hub) */}
+        {nearbyCities.length > 0 && (
+          <section className="bg-slate-50 border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl">
+              <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-amber-500" />
+                Other locations in {state}
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {nearbyCities.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/locations/${c.slug}`}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-amber-300 hover:text-amber-700 transition-colors"
+                  >
+                    Car hire {c.city} <span className="text-slate-400 ml-1">({c.vehicleCount})</span>
                   </Link>
                 ))}
               </div>

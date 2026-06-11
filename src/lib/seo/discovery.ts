@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { unstable_cache } from "next/cache";
 import { VEHICLE_CATEGORIES, categoryToSlug, type VehicleCategory } from "./categories";
 import { cityToSlug } from "./slugs";
 import {
@@ -12,16 +13,33 @@ type VehicleRow = {
   branches: { city: string; state: string; status: string } | null;
 };
 
-async function fetchApprovedVehiclesWithBranches(): Promise<VehicleRow[]> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("vehicles")
-    .select("category, branches!inner(city, state, status)")
-    .eq("status", "approved")
-    .eq("branches.status", "approved");
+const getCachedApprovedVehiclesWithBranches = unstable_cache(
+  async (): Promise<VehicleRow[]> => {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("vehicles")
+      .select("category, branches!inner(city, state, status)")
+      .eq("status", "approved")
+      .eq("branches.status", "approved");
 
-  return (data ?? []) as unknown as VehicleRow[];
-}
+    return (data ?? []) as unknown as VehicleRow[];
+  },
+  ["approved-vehicles-branches"],
+  { revalidate: 3600 } // Cache for 1 hour
+);
+
+const getCachedBranchCounts = unstable_cache(
+  async () => {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("branches")
+      .select("city, state, organization_id")
+      .eq("status", "approved");
+    return data;
+  },
+  ["approved-branches"],
+  { revalidate: 3600 }
+);
 
 export type CityInventory = {
   city: string;
@@ -32,14 +50,9 @@ export type CityInventory = {
 };
 
 export async function getCitiesWithCounts(): Promise<CityInventory[]> {
-  const supabase = createAdminClient();
-
-  const [{ data: branchCounts }, vehicles] = await Promise.all([
-    supabase
-      .from("branches")
-      .select("city, state, organization_id")
-      .eq("status", "approved"),
-    fetchApprovedVehiclesWithBranches(),
+  const [branchCounts, vehicles] = await Promise.all([
+    getCachedBranchCounts(),
+    getCachedApprovedVehiclesWithBranches(),
   ]);
 
   const cityMap = new Map<
@@ -91,7 +104,7 @@ export async function getCitiesWithCounts(): Promise<CityInventory[]> {
 export async function getCategoryCounts(): Promise<
   { category: VehicleCategory; slug: string; count: number }[]
 > {
-  const vehicles = await fetchApprovedVehiclesWithBranches();
+  const vehicles = await getCachedApprovedVehiclesWithBranches();
   const counts = new Map<VehicleCategory, number>();
 
   for (const cat of VEHICLE_CATEGORIES) {
@@ -115,7 +128,7 @@ export async function getCategoryCounts(): Promise<
 export async function getCityCategoryCombos(): Promise<
   { city: string; citySlug: string; category: VehicleCategory; categorySlug: string; count: number }[]
 > {
-  const vehicles = await fetchApprovedVehiclesWithBranches();
+  const vehicles = await getCachedApprovedVehiclesWithBranches();
   const comboMap = new Map<string, { city: string; category: VehicleCategory; count: number }>();
 
   for (const v of vehicles) {

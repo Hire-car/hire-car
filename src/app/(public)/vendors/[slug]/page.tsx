@@ -20,6 +20,7 @@ import { EmptyState } from "@/components/empty-state";
 import { VendorProfileHeader } from "@/components/vendor-profile-header";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Vehicle } from "@/lib/types";
+import { buildOrganizationSchema, serializeSchemas } from "@/lib/seo";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Branch = {
@@ -266,11 +267,17 @@ export default async function VendorPage({
     },
   };
 
+  const organizationSchema = buildOrganizationSchema({
+    name: vendor.name,
+    url: `/vendors/${vendor.slug}`,
+    description: vendor.description || undefined,
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(autoRentalSchema) }}
+        dangerouslySetInnerHTML={{ __html: serializeSchemas([autoRentalSchema, organizationSchema]) }}
       />
       <SiteHeader />
 

@@ -20,9 +20,17 @@ import {
   getTopCitiesForCategory,
   VEHICLE_CATEGORIES,
 } from "@/lib/seo";
+import { getIndexableSitemapUrls } from "@/lib/seo/discovery";
 import { Car, MapPin } from "lucide-react";
 
 export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const { categoryUrls } = await getIndexableSitemapUrls();
+  return categoryUrls.map((url) => ({
+    category: url.replace("/categories/", ""),
+  }));
+}
 
 export async function generateMetadata({
   params,
