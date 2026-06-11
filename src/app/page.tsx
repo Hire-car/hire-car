@@ -24,6 +24,8 @@ export const metadata = {
   description: "Premium car rental. Without the premium price.",
 };
 
+export const revalidate = 3600;
+
 const popularLocations = [
   { name: "Sydney", imageUrl: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80", href: "/locations/sydney" },
   { name: "Melbourne", imageUrl: "https://images.unsplash.com/photo-1514395462725-fb4566210144?auto=format&fit=crop&w=600&q=80", href: "/locations/melbourne" },

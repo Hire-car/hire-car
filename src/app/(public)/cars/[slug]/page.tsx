@@ -11,6 +11,8 @@ import { ImageGallery } from "@/components/image-gallery";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { planHasFeature } from "@/lib/plan-features";
 import ReviewSection from "@/components/review-section";
+import { ScrollIndicator } from "@/components/scroll-indicator";
+import { StickyCtaNotifier } from "@/components/sticky-cta-notifier";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -241,7 +243,8 @@ export default async function VehicleDetailPage({
 
       <main className="mx-auto max-w-7xl px-4 py-8 pb-28 lg:pb-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-medium overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
+        <ScrollIndicator gradientColor="#f8fafc">
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6 font-medium overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
           <Link href="/" className="hover:text-foreground transition-colors flex items-center gap-1">Home</Link>
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
           <Link href="/locations" className="hover:text-foreground transition-colors">Locations</Link>
@@ -262,7 +265,8 @@ export default async function VehicleDetailPage({
           )}
           <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/60" />
           <span className="text-foreground font-bold truncate max-w-[200px]">{vehicle.title}</span>
-        </nav>
+          </nav>
+        </ScrollIndicator>
 
         {/* Image Gallery */}
         <Card variant="elevated" className="mb-8 overflow-hidden">
@@ -546,7 +550,8 @@ export default async function VehicleDetailPage({
       </main>
 
       {/* Mobile Sticky Bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-[60] bg-card border-t border-border p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:hidden flex items-center justify-between pb-safe">
+      <StickyCtaNotifier />
+      <div className="fixed bottom-0 left-0 right-0 z-[var(--z-sticky-cta,50)] bg-card border-t border-border p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:hidden flex items-center justify-between pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <div>
           <p className="text-2xl font-black text-foreground">${vehicle.price_per_day_aud}</p>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">AUD / day</p>

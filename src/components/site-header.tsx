@@ -1,17 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 // usePathname removed
 import { Menu, X, ChevronDown, ShieldCheck, User, Headphones } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createBrowserClient } from "@supabase/ssr";
+import { useHeaderHeight } from "@/hooks/use-header-height";
+import { MobileDrawerNav, DrawerSection } from "./mobile-drawer-nav";
+import { useMobileState } from "@/components/mobile-state-provider";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isMobileNavOpen: isMobileMenuOpen, setIsMobileNavOpen: setIsMobileMenuOpen } = useMobileState();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  const headerRef = useRef<HTMLElement>(null);
+  useHeaderHeight(headerRef);
 
   // pathname removed
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -112,9 +119,9 @@ export function SiteHeader() {
   return (
     <>
       {/* Invisible spacer to push page content down, fixing overlap on all pages */}
-      <div className="h-[116px] w-full shrink-0" aria-hidden="true" />
+      <div style={{ height: "var(--header-height, 116px)" }} className="w-full shrink-0" aria-hidden="true" />
       
-      <header className="fixed top-0 left-0 right-0 z-50 flex flex-col">
+      <header ref={headerRef as any} className="fixed top-0 left-0 right-0 z-[var(--z-header,40)] flex flex-col pt-[env(safe-area-inset-top)]">
         {/* Vibrant Top Info Bar - Hides on scroll */}
         <AnimatePresence>
           {!isScrolled && (
@@ -236,7 +243,12 @@ export function SiteHeader() {
 
               {/* CTAs */}
               <div className="flex items-center gap-4">
-                {!isLoadingAuth && (
+                {isLoadingAuth ? (
+                  <div className="hidden md:flex items-center gap-3">
+                    <Skeleton className="h-11 w-32 rounded-full" />
+                    <Skeleton className="h-11 w-36 rounded-full" />
+                  </div>
+                ) : (
                   isLoggedIn ? (
                     <div className="hidden md:flex items-center gap-3">
                       {isVendor ? (
@@ -271,66 +283,77 @@ export function SiteHeader() {
       </header>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-white text-slate-900 flex flex-col"
-          >
-            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white">
-              <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2">
-                <span className="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl shadow-lg">
-                  <ShieldCheck className="h-6 w-6 text-orange-400" strokeWidth={2.5} />
-                </span>
-                <span className="text-2xl font-black tracking-tight">Carhire</span>
-              </Link>
-              <button onClick={closeMobileMenu} className="flex h-11 w-11 items-center justify-center text-slate-500 hover:text-primary transition-colors bg-slate-100 rounded-full" aria-label="Close mobile menu">
-                <X className="h-6 w-6" strokeWidth={2.5} />
-              </button>
-            </div>
+      <MobileDrawerNav isOpen={isMobileMenuOpen} onClose={closeMobileMenu}>
+        <div className="flex flex-col gap-2 pt-2">
+          <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2 pb-6 border-b border-slate-100">
+            <span className="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl shadow-lg">
+              <ShieldCheck className="h-6 w-6 text-orange-400" strokeWidth={2.5} />
+            </span>
+            <span className="text-2xl font-black tracking-tight">Carhire</span>
+          </Link>
+          
+          <Link href="/search" onClick={closeMobileMenu} className="mt-6 bg-gradient-to-r from-primary to-amber-500 text-white font-bold text-lg rounded-2xl px-6 py-4 text-center shadow-lg shadow-primary/20 flex items-center justify-center min-h-[56px] touch-target">
+            Find a Car
+          </Link>
+          
+          <div className="flex flex-col gap-2 mt-4">
+            <DrawerSection title="Locations">
+              <div className="flex flex-col gap-2">
+                {locations.map((loc) => (
+                  <Link key={loc.name} href={loc.href} onClick={closeMobileMenu} className="block py-3 px-2 text-base text-slate-600 min-h-[44px] touch-target">
+                    {loc.name}
+                  </Link>
+                ))}
+              </div>
+            </DrawerSection>
             
-            <div className="flex-1 overflow-auto p-6 flex flex-col gap-6">
-              <Link href="/search" onClick={closeMobileMenu} className="bg-gradient-to-r from-primary to-amber-500 text-white font-bold text-lg rounded-2xl px-6 py-4 text-center shadow-lg shadow-primary/20">
-                Find a Car
-              </Link>
-              
-              <div className="flex flex-col gap-4 mt-4">
-                <Link href="/pricing" onClick={closeMobileMenu} className="font-bold text-xl text-slate-800 hover:text-primary hover:translate-x-2 transition-transform">Pricing</Link>
-                <Link href="/for-vendors" onClick={closeMobileMenu} className="font-bold text-xl text-slate-800 hover:text-primary hover:translate-x-2 transition-transform">Vendors</Link>
-                <Link href="/about" onClick={closeMobileMenu} className="font-bold text-xl text-slate-800 hover:text-primary hover:translate-x-2 transition-transform">About</Link>
-                <Link href="/contact" onClick={closeMobileMenu} className="font-bold text-xl text-slate-800 hover:text-primary hover:translate-x-2 transition-transform">Contact</Link>
+            <DrawerSection title="Vehicles">
+              <div className="flex flex-col gap-2">
+                {vehicleCategories.map((cat) => (
+                  <Link key={cat.name} href={cat.href} onClick={closeMobileMenu} className="block py-3 px-2 text-base text-slate-600 min-h-[44px] touch-target">
+                    {cat.name}
+                  </Link>
+                ))}
               </div>
-              
-              <div className="mt-auto flex flex-col pt-8 border-t border-slate-100">
-                {!isLoadingAuth && (
-                  isLoggedIn ? (
-                    <div className="flex flex-col gap-3">
-                      {isVendor ? (
-                        <Link href="/customer/dashboard" onClick={closeMobileMenu} className="font-bold text-lg text-center bg-white border border-slate-200 text-slate-900 rounded-2xl py-4 hover:bg-slate-50 transition-colors flex justify-center items-center gap-2">
-                          My Enquiries
-                        </Link>
-                      ) : (
-                        <Link href={vendorUpgradeHref} onClick={closeMobileMenu} className="font-bold text-lg text-center bg-white border border-orange-200 text-orange-700 rounded-2xl py-4 hover:bg-orange-50 transition-colors flex justify-center items-center gap-2">
-                          {listFleetLabel}
-                        </Link>
-                      )}
-                      <Link href={profileHref} onClick={closeMobileMenu} className="font-bold text-lg text-center bg-slate-100 text-slate-900 rounded-2xl py-4 hover:bg-slate-200 transition-colors flex justify-center items-center gap-2">
-                        <User className="h-5 w-5" /> {profileLabel}
-                      </Link>
-                    </div>
-                  ) : (
-                    <Link href="/auth/sign-in" onClick={closeMobileMenu} className="font-bold text-lg text-center bg-slate-900 text-white rounded-2xl py-4 hover:bg-slate-800 transition-colors flex justify-center items-center gap-2">
-                      Log in / Sign up
+            </DrawerSection>
+
+            <Link href="/pricing" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Pricing</Link>
+            <Link href="/for-vendors" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Vendors</Link>
+            <Link href="/about" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">About</Link>
+            <Link href="/contact" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Contact</Link>
+          </div>
+          
+          <div className="mt-6 flex flex-col pt-6 border-t border-slate-100 gap-3">
+            {isLoadingAuth ? (
+              <div className="flex flex-col gap-3">
+                <Skeleton className="h-12 w-full rounded-2xl" />
+                <Skeleton className="h-12 w-full rounded-2xl" />
+              </div>
+            ) : (
+              isLoggedIn ? (
+                <>
+                  {isVendor ? (
+                    <Link href="/customer/dashboard" onClick={closeMobileMenu} className="font-bold text-base text-center bg-white border border-slate-200 text-slate-900 rounded-2xl py-3 hover:bg-slate-50 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                      My Enquiries
                     </Link>
-                  )
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  ) : (
+                    <Link href={vendorUpgradeHref} onClick={closeMobileMenu} className="font-bold text-base text-center bg-white border border-orange-200 text-orange-700 rounded-2xl py-3 hover:bg-orange-50 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                      {listFleetLabel}
+                    </Link>
+                  )}
+                  <Link href={profileHref} onClick={closeMobileMenu} className="font-bold text-base text-center bg-slate-100 text-slate-900 rounded-2xl py-3 hover:bg-slate-200 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                    <User className="h-5 w-5" /> {profileLabel}
+                  </Link>
+                </>
+              ) : (
+                <Link href="/auth/sign-in" onClick={closeMobileMenu} className="font-bold text-base text-center bg-slate-900 text-white rounded-2xl py-3 hover:bg-slate-800 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                  Log in / Sign up
+                </Link>
+              )
+            )}
+          </div>
+        </div>
+      </MobileDrawerNav>
     </>
   );
 }

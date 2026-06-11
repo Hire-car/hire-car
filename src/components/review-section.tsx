@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { StarRating } from "./star-rating";
 import { Turnstile } from "@marsidev/react-turnstile";
 
 interface Review {
@@ -23,6 +24,7 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [selectedRating, setSelectedRating] = useState(0);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -129,21 +131,14 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
 
             <label className="block">
               <span className="text-sm font-medium text-slate-700">Rating</span>
-              <div className="mt-1 flex gap-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <label key={star} className="cursor-pointer">
-                    <input
-                      type="radio"
-                      name="rating"
-                      value={star}
-                      required
-                      className="sr-only peer"
-                    />
-                    <span className="text-2xl text-slate-300 peer-checked:text-amber-400 hover:text-amber-300">
-                      ★
-                    </span>
-                  </label>
-                ))}
+              <div className="mt-1">
+                <StarRating 
+                  rating={selectedRating} 
+                  interactive 
+                  size={28} 
+                  onRatingChange={setSelectedRating} 
+                />
+                <input type="hidden" name="rating" value={selectedRating || ""} required />
               </div>
             </label>
 

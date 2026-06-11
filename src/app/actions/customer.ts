@@ -33,7 +33,11 @@ export async function updateCustomerProfile(formData: FormData) {
   return { success: true };
 }
 
-export async function deleteCustomerAccount() {
+export async function deleteCustomerAccount(confirmation: string) {
+  if (confirmation !== "DELETE") {
+    return { error: "Invalid confirmation phrase." };
+  }
+
   const user = await requireUser();
   const supabase = createAdminClient();
 
@@ -57,3 +61,4 @@ export async function deleteCustomerAccount() {
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
+

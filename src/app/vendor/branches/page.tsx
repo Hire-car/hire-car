@@ -1,5 +1,7 @@
 // import removed
-import { createBranch, getCurrentVendorContext } from "./actions";
+import { getCurrentVendorContext } from "./actions";
+import { BranchForm } from "./branch-form";
+import { BranchCard } from "./branch-card";
 import { GitBranch, MapPin, Phone, Plus, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 
@@ -68,43 +70,11 @@ export default async function VendorBranchesPage() {
               ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                   {organization.branches.map((branch) => (
-                    <div key={branch.id} className="rounded-xl border border-slate-200 bg-white p-5 hover:shadow-md transition-shadow group">
-                      <div className="flex items-start justify-between gap-4 mb-3">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4.5 w-4.5 text-amber-500 shrink-0" />
-                          <h4 className="font-bold text-slate-900">{branch.name}</h4>
-                        </div>
-                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider ${
-                          branch.status === "approved" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" :
-                          "bg-amber-50 text-amber-600 border border-amber-100"
-                        }`}>
-                          {branch.status}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-2 pl-6.5">
-                        <p className="text-sm text-slate-600">
-                          {branch.city}, {branch.state}
-                        </p>
-                        <p className="text-sm text-slate-500 truncate" title={branch.address}>
-                          {branch.address}
-                        </p>
-                        {(branch.phone || branch.whatsapp) && (
-                          <div className="flex flex-wrap gap-3 mt-3 pt-3 border-t border-slate-100">
-                            {branch.phone && (
-                              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                                <Phone className="h-3 w-3" /> {branch.phone}
-                              </span>
-                            )}
-                            {branch.whatsapp && (
-                              <span className="flex items-center gap-1.5 text-xs text-slate-500">
-                                <span className="text-green-500 font-bold">WA</span> {branch.whatsapp}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <BranchCard 
+                      key={branch.id} 
+                      branch={branch as any} 
+                      organizationId={organization.id} 
+                    />
                   ))}
                 </div>
               )}
@@ -122,61 +92,10 @@ export default async function VendorBranchesPage() {
             </h2>
           </div>
           
-          <form action={createBranch} className="p-6">
-            <input type="hidden" name="organizationId" value={firstOrganization.id} />
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              <Field label="Branch name" name="name" placeholder="e.g. Sydney Airport" className="lg:col-span-1" helper="A recognisable pickup location name" />
-              <Field label="City" name="city" placeholder="e.g. Sydney" />
-              <Field label="State" name="state" placeholder="e.g. NSW" helper="Australian state or territory abbreviation" />
-              <Field label="Phone" name="phone" required={false} placeholder="e.g. 02 1234 5678" helper="Visible to customers for direct contact" />
-              <Field label="WhatsApp" name="whatsapp" required={false} placeholder="e.g. +61412345678" helper="Include country code for WhatsApp click-to-chat" />
-              <Field label="Address" name="address" className="md:col-span-2 lg:col-span-3" placeholder="Full street address" helper="Used for map display and directions" />
-            </div>
-            <div className="mt-6 pt-6 border-t border-border">
-              <button className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm w-full sm:w-auto">
-                Save Branch for Review
-              </button>
-            </div>
-          </form>
+          <BranchForm organizationId={firstOrganization.id} />
         </div>
       )}
     </div>
   );
 }
 
-function Field({
-  label,
-  name,
-  className = "",
-  required = true,
-  placeholder = "",
-  helper,
-}: {
-  label: string;
-  name: string;
-  className?: string;
-  required?: boolean;
-  placeholder?: string;
-  helper?: string;
-}) {
-  return (
-    <div className={`space-y-1.5 ${className}`}>
-      <label htmlFor={name} className="block text-sm font-medium text-foreground">
-        {label} {required && <span className="text-destructive">*</span>}
-      </label>
-      <input
-        id={name}
-        name={name}
-        required={required}
-        placeholder={placeholder}
-        aria-describedby={helper ? `${name}-helper` : undefined}
-        className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm font-normal text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive aria-invalid:ring-destructive/20"
-      />
-      {helper && (
-        <p id={`${name}-helper`} className="text-xs text-muted-foreground">
-          {helper}
-        </p>
-      )}
-    </div>
-  );
-}

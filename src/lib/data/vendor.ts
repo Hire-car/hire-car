@@ -126,7 +126,7 @@ export async function getVendorContext(userId: string): Promise<VendorContext> {
     return { organizations: [] };
   }
 
-  const [{ data: organizations }, { data: branches }] = await Promise.all([
+  const [orgResult, branchResult] = await Promise.all([
     supabase
       .from("organizations")
       .select("id, name, slug, status, abn")
@@ -139,13 +139,25 @@ export async function getVendorContext(userId: string): Promise<VendorContext> {
       .order("created_at", { ascending: true }),
   ]);
 
+  if (orgResult.error || branchResult.error) {
+    console.error("Organizations fetch error:", orgResult.error);
+    console.error("Branches fetch error:", branchResult.error);
+    return {
+      organizations: [],
+      setupError: "Failed to load vendor data. Please try again or contact support."
+    };
+  }
+
+  const organizations = orgResult.data;
+  const branches = branchResult.data;
+
   return {
     organizations:
       organizations?.map((organization) => ({
         ...organization,
         branches:
-          branches
-            ?.filter((branch) => branch.organization_id === organization.id)
+          (branches || [])
+            .filter((branch) => branch.organization_id === organization.id)
             .map((branch) => ({
               id: branch.id,
               name: branch.name,
@@ -155,7 +167,7 @@ export async function getVendorContext(userId: string): Promise<VendorContext> {
               status: branch.status,
               phone: branch.phone,
               whatsapp: branch.whatsapp,
-            })) ?? [],
+            })),
       })) ?? [],
   };
 }

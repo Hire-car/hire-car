@@ -109,19 +109,15 @@ export async function POST(request: NextRequest) {
   if (!validCities.has(requestedCity)) {
     console.info(`[Lead API] Spam attempt detected: City ${payload.data.pickupCity} not valid for vendor ${payload.data.vendorId}`);
     
-    // Log potential spam/fraud attempt
+    // Log potential spam/fraud attempt but DO NOT block the lead 
+    // because users might type partial city names (e.g. "Syd" instead of "Sydney")
     await supabase.from("fraud_flags").insert({
       resource_type: "lead_attempt",
       resource_id: payload.data.vehicleId,
-      severity: "medium",
-      reason: `Pickup city "${payload.data.pickupCity}" does not match vendor's branch cities: ${Array.from(validCities).join(", ")}`,
+      severity: "low",
+      reason: `Pickup city "${payload.data.pickupCity}" does not strictly match vendor's branch cities: ${Array.from(validCities).join(", ")}`,
       status: "open",
     });
-
-    return NextResponse.json(
-      { error: `Pickup location must be one of the vendor's service areas: ${Array.from(validCities).join(", ")}` },
-      { status: 400 },
-    );
   }
 
   // Check for duplicate lead within last hour (same email + vehicle)

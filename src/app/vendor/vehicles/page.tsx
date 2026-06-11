@@ -16,7 +16,7 @@ export const metadata = {
 };
 
 interface VehiclesPageProps {
-  searchParams: Promise<{ org?: string; edit?: string }>;
+  searchParams: Promise<{ org?: string; edit?: string; page?: string }>;
 }
 
 export default async function VendorVehiclesPage({ searchParams }: VehiclesPageProps) {
@@ -44,10 +44,11 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
     redirect("/vendor/vehicles?org=" + context.organizations[0]?.id);
   }
 
+  const page = parseInt(params.page || "1", 10) || 1;
   const limitInfo = await getVehicleLimitInfo(selectedOrgId);
   const hasBulkUpload = await organizationHasFeature(selectedOrgId, "bulkUpload");
   const canUseAi = await organizationHasFeature(selectedOrgId, "aiSeoContent");
-  const vehicles = await getOrganizationVehicles(selectedOrgId);
+  const { vehicles, totalCount, pageSize } = await getOrganizationVehicles(selectedOrgId, page);
 
   let editVehicle: (typeof vehicles)[number] | null = null;
   let editImages: Awaited<ReturnType<typeof getVehicleImages>> = [];
@@ -131,7 +132,7 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
       {/* Vehicles List */}
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div className="border-b border-slate-100 px-6 py-5 bg-slate-50/50">
-          <h2 className="text-base font-semibold text-slate-900">Your Fleet ({vehicles.length})</h2>
+          <h2 className="text-base font-semibold text-slate-900">Your Fleet ({totalCount})</h2>
         </div>
 
         {vehicles.length === 0 ? (
@@ -205,6 +206,32 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {totalCount > pageSize && (
+          <div className="border-t border-slate-100 px-6 py-4 flex items-center justify-between bg-slate-50/50">
+            <p className="text-sm text-slate-500 font-medium">
+              Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, totalCount)} of {totalCount} vehicles
+            </p>
+            <div className="flex gap-2">
+              {page > 1 && (
+                <Link
+                  href={`/vendor/vehicles?org=${selectedOrgId}&page=${page - 1}`}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm transition-colors"
+                >
+                  Previous
+                </Link>
+              )}
+              {page * pageSize < totalCount && (
+                <Link
+                  href={`/vendor/vehicles?org=${selectedOrgId}&page=${page + 1}`}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm transition-colors"
+                >
+                  Next
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -156,25 +156,30 @@ export function PricingTable() {
           const period = isAnnual ? "/year" : "/month";
 
           return (
-            <Card
+            <div 
               key={plan.id}
-              variant={isPro ? "elevated" : "default"}
               className={cn(
                 "relative flex flex-col",
-                isPro &&
-                  "border-2 border-primary scale-[1.02] md:scale-105 shadow-lg z-10"
+                isPro && "scale-[1.02] md:scale-105 z-10"
               )}
             >
               {/* "Most Popular - Best Value" badge for Pro */}
               {plan.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge variant="default" className="whitespace-nowrap">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                  <Badge variant="default" className="whitespace-nowrap px-3 py-1 text-xs shadow-md">
                     {plan.badge}
                   </Badge>
                 </div>
               )}
 
-              <CardHeader className="pt-6">
+              <Card
+                variant={isPro ? "elevated" : "default"}
+                className={cn(
+                  "flex-1 flex flex-col h-full",
+                  isPro && "border-2 border-primary shadow-lg"
+                )}
+              >
+                <CardHeader className="pt-6">
                 <CardTitle className="text-xl font-bold text-foreground">
                   {plan.name}
                 </CardTitle>
@@ -246,6 +251,7 @@ export function PricingTable() {
                 </p>
               </CardContent>
             </Card>
+            </div>
           );
         })}
       </div>

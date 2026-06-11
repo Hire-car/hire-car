@@ -7,14 +7,11 @@ const footerLinks = {
     { label: "Browse Cars", href: "/search" },
     { label: "Operators Directory", href: "/vendors" },
     { label: "Pricing", href: "/pricing" },
-    { label: "List Your Fleet", href: "/vendor/upgrade" },
+    { label: "List Your Fleet", href: "/for-vendors" },
   ],
   company: [
     { label: "About Us", href: "/about" },
-    { label: "Careers", href: "/careers" },
-    { label: "Press", href: "/press" },
-    { label: "Blog", href: "/blog" },
-    { label: "Success Stories", href: "/success-stories" },
+    { label: "Contact Us", href: "/contact" },
   ],
   legal: [
     { label: "Privacy Policy", href: "/legal/privacy" },
@@ -24,7 +21,6 @@ const footerLinks = {
   support: [
     { label: "Contact Us", href: "/contact" },
     { label: "FAQs", href: "/faq" },
-    { label: "Help Center", href: "/contact" },
   ],
 };
 

@@ -1,0 +1,18 @@
+{
+  "name": "HireCar Marketplace",
+  "short_name": "HireCar",
+  "description": "Premium car rental. Without the premium price.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ea580c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/LOGO.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

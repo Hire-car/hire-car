@@ -396,16 +396,18 @@ export default async function VendorBillingPage(props: {
                       : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
-                {p.badge && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-amber-500 px-3 py-0.5 text-xs font-bold text-white shadow-sm">
-                    {p.badge}
-                  </span>
-                )}
-                {isCurrent && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-slate-950 border-2 border-emerald-400 px-3 py-0.5 text-xs font-bold text-emerald-400">
-                    <CheckCircle className="h-3 w-3" /> Current plan
-                  </span>
-                )}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+                  {p.badge && !isCurrent && (
+                    <span className="inline-flex items-center rounded-full bg-amber-500 px-3 py-0.5 text-xs font-bold text-white shadow-sm whitespace-nowrap">
+                      {p.badge}
+                    </span>
+                  )}
+                  {isCurrent && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-950 border-2 border-emerald-400 px-3 py-0.5 text-xs font-bold text-emerald-400 whitespace-nowrap">
+                      <CheckCircle className="h-3 w-3" /> Current plan
+                    </span>
+                  )}
+                </div>
 
                 <div className="mb-4">
                   <h3 className={`text-lg font-bold ${isCurrent ? "text-white" : "text-slate-900"}`}>

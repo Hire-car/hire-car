@@ -29,7 +29,10 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
       )
     `)
     .lte("starts_at", now)
-    .gte("ends_at", now);
+    .gte("ends_at", now)
+    .eq("vehicles.status", "approved")
+    .eq("vehicles.branches.status", "approved")
+    .eq("vehicles.organizations.status", "approved");
 
   if (city) {
     query = query.or(`city.is.null,city.ilike.${city}`);
@@ -59,8 +62,6 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
     };
 
     const v = row.vehicles as unknown as VehicleRow;
-    if (v.status !== "approved" || v.organizations.status !== "approved") continue;
-    if (v.branches.status !== "approved") continue;
 
     results.push({
       id: v.id,

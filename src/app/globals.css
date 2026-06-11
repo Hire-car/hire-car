@@ -62,6 +62,25 @@
   --tracking-heading-sm: -0.01em;
   --tracking-heading-md: -0.02em;
   --tracking-heading-lg: -0.03em;
+
+  /* Z-Index Scale */
+  --z-header: 40;
+  --z-sticky-cta: 50;
+  --z-whatsapp: 50;
+  --z-mobile-nav: 60;
+  --z-modal: 70;
+
+  /* Header Height (dynamically set by JS, fallback value) */
+  --header-height: 116px;
+
+  /* Touch Target */
+  --touch-min: 44px;
+  --touch-gap: 8px;
+
+  /* Fluid Type Scale */
+  --fluid-h1: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+  --fluid-h2: clamp(1.5rem, 1.25rem + 1.5vw, 2.5rem);
+  --fluid-h3: clamp(1.25rem, 1.1rem + 1vw, 2rem);
 }
 
 @theme inline {
@@ -129,6 +148,7 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 1rem; /* 16px minimum */
 }
 
 /* Friendly, clean typography (no extreme uppercase forcing) */
@@ -136,12 +156,21 @@ h1, .h1 {
   font-family: var(--font-heading);
   font-weight: 800;
   letter-spacing: var(--tracking-heading-lg);
+  font-size: var(--fluid-h1);
 }
 
-h2, h3, .h2, .h3 {
+h2, .h2 {
   font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: var(--tracking-heading-md);
+  font-size: var(--fluid-h2);
+}
+
+h3, .h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: var(--tracking-heading-md);
+  font-size: var(--fluid-h3);
 }
 
 h4, h5, h6 {
@@ -204,5 +233,66 @@ h4, h5, h6 {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ===== Mobile Optimisation Utilities ===== */
+
+/* Touch Target Utility */
+.touch-target {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Safe Area Utilities */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Paragraph readability */
+p {
+  max-width: 75ch;
+}
+
+/* Mobile overflow prevention */
+@media (max-width: 767px) {
+  body,
+  main {
+    overflow-x: hidden;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --header-height: 64px;
+  }
+
+  h1, .h1 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h2, .h2,
+  h3, .h3 {
+    margin-top: 0.375rem;
+    margin-bottom: 0.375rem;
+  }
+
+  section {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
 }

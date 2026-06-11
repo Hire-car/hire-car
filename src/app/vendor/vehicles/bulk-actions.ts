@@ -142,11 +142,23 @@ export async function processBulkUpload(formData: FormData) {
     }
 
     if (inserts.length > 0) {
-      const { data, error } = await supabase.from("vehicles").insert(inserts).select("id");
+      const CHUNK_SIZE = 200;
+      const allData: any[] = [];
       
-      if (error) {
-        return { success: false, error: "Database error during bulk insert: " + error.message };
+      for (let i = 0; i < inserts.length; i += CHUNK_SIZE) {
+        const chunk = inserts.slice(i, i + CHUNK_SIZE);
+        const { data, error } = await supabase.from("vehicles").insert(chunk).select("id");
+        
+        if (error) {
+          return { success: false, error: `Database error during bulk insert (batch ${Math.floor(i / CHUNK_SIZE) + 1}): ` + error.message };
+        }
+        
+        if (data) {
+          allData.push(...data);
+        }
       }
+      
+      const data = allData;
 
       // Create search index jobs for the inserted vehicles
       if (data && data.length > 0) {
@@ -155,8 +167,13 @@ export async function processBulkUpload(formData: FormData) {
           operation: "upsert",
           status: "pending",
         }));
-        await supabase.from("search_index_jobs").insert(jobs);
+        
+        // Batch insert jobs as well
+        for (let i = 0; i < jobs.length; i += CHUNK_SIZE) {
+          await supabase.from("search_index_jobs").insert(jobs.slice(i, i + CHUNK_SIZE));
+        }
 
+        // Run PSEO invalidation synchronously but individually to prevent enormous payloads
         for (const v of data) {
           await invalidatePseoForVehicle(supabase, v.id);
         }

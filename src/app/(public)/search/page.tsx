@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
 import { FilterSidebar } from "@/components/filter-sidebar";
+import { FilterChips } from "@/components/filter-chips";
 import { SearchWidget } from "@/components/search-widget";
 import { ErrorState } from "@/components/error-state";
 import {
@@ -195,6 +196,18 @@ function SearchContent() {
   const showingFrom = total === 0 ? 0 : (page - 1) * PER_PAGE + 1;
   const showingTo = Math.min(page * PER_PAGE, total);
 
+  const activeFilterChips = Object.entries(filters)
+    .filter(([_, v]) => v !== undefined && v !== "" && v !== 0)
+    .map(([k, v]) => {
+      let label = `${v}`;
+      if (k === "minPrice") label = `Min $${v}`;
+      if (k === "maxPrice") label = `Max $${v}`;
+      if (k === "seats") label = `${v}+ Seats`;
+      if (k === "returnDate") label = `Return: ${v}`;
+      if (k === "pickup") label = `Pickup: ${v}`;
+      return { key: k, label };
+    });
+
   // Build visible page numbers (max 5)
   const visiblePages = (() => {
     const range: number[] = [];
@@ -272,6 +285,14 @@ function SearchContent() {
 
           {/* Results */}
           <div className="flex-1 min-w-0">
+            {/* Filter Chips */}
+            <div className="mb-4">
+              <FilterChips 
+                filters={activeFilterChips} 
+                onRemove={(k) => handleFilterChange({ ...filters, [k]: undefined })} 
+              />
+            </div>
+
             {/* Toolbar */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-2 bg-white rounded-lg border border-border shadow-[var(--shadow-sm)]">
               <div className="flex items-center gap-4 pl-3">

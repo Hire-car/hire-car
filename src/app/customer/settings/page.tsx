@@ -92,7 +92,7 @@ export default function CustomerSettingsPage() {
     setIsDeleting(true);
     setMessage(null);
 
-    const result = await deleteCustomerAccount();
+    const result = await deleteCustomerAccount(deleteText);
     
     if (result.error) {
       setMessage({ type: "error", text: result.error });

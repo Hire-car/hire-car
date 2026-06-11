@@ -336,36 +336,36 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
     return { success: false, error: "Vehicle not found or does not belong to your organization" };
   }
 
-  // Delete vehicle images first (RLS will handle cascading)
+  // Fetch image paths BEFORE deleting so we can clean up storage later
   const { data: images } = await supabase
     .from("vehicle_images")
     .select("id, storage_path, approved")
     .eq("vehicle_id", vehicleId);
 
+  // Delete vehicle FIRST. DB will handle cascading deletions for vehicle_images, leads, etc.
+  const { error } = await supabase.from("vehicles").delete().eq("id", vehicleId);
+
+  if (error) {
+    return { success: false, error: `Failed to delete vehicle: ${error.message}` };
+  }
+
+  // Only if DB deletion succeeds, delete from storage
   if (images && images.length > 0) {
-    // Delete from storage - split by bucket (approved vs pending)
     const approvedPaths = images.filter((img) => img.approved).map((img) => img.storage_path);
     const pendingPaths = images.filter((img) => !img.approved).map((img) => img.storage_path);
 
     if (approvedPaths.length > 0) {
       const { error: storageError } = await supabase.storage.from("vehicle-images").remove(approvedPaths);
       if (storageError) {
-        console.error("Failed to delete approved images from storage:", storageError);
-        // Continue with deletion even if storage cleanup fails - orphaned files can be cleaned up later
+        console.error("Failed to delete approved images from storage after vehicle deletion:", storageError);
       }
     }
 
     if (pendingPaths.length > 0) {
       const { error: storageError } = await supabase.storage.from("pending-vehicle-images").remove(pendingPaths);
       if (storageError) {
-        console.error("Failed to delete pending images from storage:", storageError);
+        console.error("Failed to delete pending images from storage after vehicle deletion:", storageError);
       }
-    }
-
-    // Delete image records
-    const { error: imagesError } = await supabase.from("vehicle_images").delete().eq("vehicle_id", vehicleId);
-    if (imagesError) {
-      console.error("Failed to delete image records:", imagesError);
     }
   }
 
@@ -377,13 +377,6 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
   });
 
   await invalidatePseoForVehicle(supabase, vehicleId);
-
-  // Delete vehicle
-  const { error } = await supabase.from("vehicles").delete().eq("id", vehicleId);
-
-  if (error) {
-    return { success: false, error: `Failed to delete vehicle: ${error.message}` };
-  }
 
   // Log audit event
   await supabase.from("audit_logs").insert({
@@ -400,21 +393,25 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
   return { success: true, vehicleId };
 }
 
-export async function getOrganizationVehicles(organizationId: string) {
+export async function getOrganizationVehicles(organizationId: string, page: number = 1, pageSize: number = 50) {
   const user = await requireUser();
   await ensureUserCanManageOrganization(user.id, organizationId);
 
   const supabase = createAdminClient();
+  
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
 
-  const { data: vehicles, error } = await supabase
+  const { data: vehicles, error, count } = await supabase
     .from("vehicles")
-    .select("*, branches(name, city, state)")
+    .select("*, branches(name, city, state)", { count: "exact" })
     .eq("organization_id", organizationId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(start, end);
 
   if (error) {
     throw new Error(`Failed to fetch vehicles: ${error.message}`);
   }
 
-  return vehicles ?? [];
+  return { vehicles: vehicles ?? [], totalCount: count ?? 0, page, pageSize };
 }

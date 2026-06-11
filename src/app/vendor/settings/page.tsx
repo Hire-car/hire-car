@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/security/auth";
 import { getVendorContext } from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { updateOrganizationProfile, uploadVendorDocument } from "./actions";
+import { BrandForm } from "./brand-form";
 import { getOrganizationPlanCode, getSupportTierLabel, organizationHasFeature } from "@/lib/plan-features";
 import { ApiKeysPanel } from "@/components/vendor/api-keys-panel";
 import {
@@ -208,36 +209,11 @@ export default async function VendorSettingsPage() {
             </div>
           </div>
 
-          <form className="space-y-5">
-            <div>
-              <label htmlFor="logo" className="block text-sm font-medium text-foreground mb-1.5">Brand Logo</label>
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-muted/50 cursor-pointer hover:bg-muted hover:border-muted-foreground/30 transition-colors">
-                  <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <div>
-                  <button type="button" className="text-sm font-semibold text-primary hover:text-primary/80">Upload Image</button>
-                  <p className="text-xs text-muted-foreground mt-0.5">JPG, PNG or SVG. Max 2MB.</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="bio" className="block text-sm font-medium text-foreground mb-1.5">About Us (Bio)</label>
-              <textarea
-                id="bio"
-                rows={4}
-                className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all resize-none"
-                placeholder="Tell customers about your fleet, service quality, and history..."
-                aria-describedby="bio-helper"
-              />
-              <p id="bio-helper" className="mt-1.5 text-xs text-muted-foreground">Displayed on your public vendor profile page</p>
-            </div>
-            
-            <button type="button" className="w-full rounded-xl bg-card border border-border px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors shadow-sm">
-              Save Profile Settings
-            </button>
-          </form>
+          <BrandForm 
+            organizationId={org!.id} 
+            defaultBio={(org as any)?.bio} 
+            defaultLogoUrl={(org as any)?.logo_url} 
+          />
         </div>
 
         {/* Global Policies */}

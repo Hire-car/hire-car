@@ -61,6 +61,64 @@ export async function updateOrganizationProfile(formData: FormData) {
   revalidatePath("/vendor/settings");
 }
 
+export async function updateBrandProfile(prevState: any, formData: FormData) {
+  const user = await requireUser();
+  const organizationId = formData.get("organizationId") as string;
+  const bio = formData.get("bio") as string;
+  const logo = formData.get("logo") as File | null;
+
+  if (!organizationId) return { error: "Missing organization ID" };
+
+  await ensureUserCanManageOrganization(user.id, organizationId);
+  const supabase = createAdminClient();
+
+  let logoUrl: string | undefined = undefined;
+
+  if (logo && logo.size > 0) {
+    if (logo.size > 2 * 1024 * 1024) {
+      return { error: "Logo must be less than 2MB" };
+    }
+
+    const ext = logo.name.split(".").pop() ?? "png";
+    const path = `logos/${organizationId}-${Date.now()}.${ext}`;
+
+    // Upload to a generic public bucket (e.g. vendor-documents or vehicle-images)
+    // we use vehicle-images since it's already configured as public in the DB
+    const buffer = await logo.arrayBuffer();
+    const { error: uploadError } = await supabase.storage
+      .from("vehicle-images")
+      .upload(path, buffer, { 
+        upsert: true,
+        contentType: logo.type,
+      });
+
+    if (uploadError) {
+      return { error: `Failed to upload logo: ${uploadError.message}` };
+    }
+
+    const { data } = supabase.storage.from("vehicle-images").getPublicUrl(path);
+    logoUrl = data.publicUrl;
+  }
+
+  const updates: any = {};
+  if (bio !== undefined) updates.bio = bio;
+  if (logoUrl !== undefined) updates.logo_url = logoUrl;
+
+  if (Object.keys(updates).length > 0) {
+    const { error } = await supabase
+      .from("organizations")
+      .update(updates)
+      .eq("id", organizationId);
+
+    if (error) {
+      return { error: error.message };
+    }
+  }
+
+  revalidatePath("/vendor/settings");
+  return { success: true, error: null };
+}
+
 export async function uploadVendorDocument(formData: FormData) {
   const user = await requireUser();
   const organizationId = String(formData.get("organizationId") ?? "");

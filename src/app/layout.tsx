@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
+import { MobileStateProvider } from "@/components/mobile-state-provider";
+import { ScrollToTop } from "@/components/scroll-to-top";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,6 +19,13 @@ const outfit = Outfit({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#ea580c",
+};
+
 export const metadata: Metadata = {
   title: {
     default: "HireCar Marketplace — Premium car rental. Without the premium price.",
@@ -29,7 +38,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  // Removed duplicate blocks
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/LOGO.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "HireCar",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: "website",
     locale: "en_AU",
@@ -101,9 +122,21 @@ export default function RootLayout({
             </Script>
           </>
         )}
-        {children}
-        <WhatsAppFloat phone={process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "61412345678"} />
+        <MobileStateProvider>
+          {children}
+          <WhatsAppFloat phone={process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "61412345678"} />
+          <ScrollToTop />
+        </MobileStateProvider>
         <Toaster richColors position="top-right" />
+        <Script id="sw-register" strategy="lazyOnload">
+          {`
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                console.log('SW registration failed:', err);
+              });
+            }
+          `}
+        </Script>
       </body>
     </html>
   );

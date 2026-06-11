@@ -1,4 +1,3 @@
-"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -40,11 +39,11 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               <span className="text-sm text-muted-foreground truncate">{vehicle.vendorName}</span>
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-2 gap-2">
             <span className="text-lg font-extrabold text-foreground">${vehicle.pricePerDayAud}<span className="text-xs font-medium text-muted-foreground">/day</span></span>
             <Link
               href={`/cars/${vehicle.slug}`}
-              className="inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
+              className="touch-target inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
             >
               View
               <ArrowRight className="h-3.5 w-3.5" />
