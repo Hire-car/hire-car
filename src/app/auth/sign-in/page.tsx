@@ -2,7 +2,6 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
 import {
   User,
   Store,
@@ -16,6 +15,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   defaultDashboardForRole,
   isValidRedirectForRole,
@@ -132,17 +132,9 @@ function SignInContent() {
       <div className="flex w-full lg:w-1/2 items-center justify-center px-4 py-12 sm:px-6 lg:px-12">
         <Card variant="elevated" className="w-full max-w-[768px] py-8 sm:py-10">
           <CardHeader className="text-center space-y-4">
-            {/* RentLeads / HireCar Logo */}
+            {/* HireCar Marketplace Logo */}
             <div className="flex justify-center">
-              <div className="relative w-[180px] h-[48px] sm:w-[220px] sm:h-[56px]">
-                <Image
-                  src="/LOGO.png"
-                  alt="HireCar Marketplace"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+              <BrandLogo priority className="h-[48px] w-[180px] sm:h-[56px] sm:w-[220px]" />
             </div>
             <div>
               <CardTitle className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.03em" }}>

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Home, Search } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 
 export default function NotFound() {
@@ -9,15 +9,7 @@ export default function NotFound() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center">
       {/* Logo / Wordmark */}
       <Link href="/" className="mb-8">
-        <div className="relative h-[48px] w-[180px] sm:h-[56px] sm:w-[220px]">
-          <Image
-            src="/LOGO.png"
-            alt="HireCar Marketplace"
-            fill
-            priority
-            className="object-contain"
-          />
-        </div>
+        <BrandLogo priority className="h-[48px] w-[180px] sm:h-[56px] sm:w-[220px]" />
       </Link>
 
       {/* 404 Indicator */}

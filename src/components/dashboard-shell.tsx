@@ -19,17 +19,20 @@ import {
   ClipboardList,
   Star,
   ExternalLink,
-  ShieldCheck,
   LogOut,
   Menu,
   X,
   Bell,
-  ChevronDown
+  ChevronDown,
+  Calendar,
+  Megaphone
 } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
+import { BrandLogo } from "@/components/brand-logo";
 
 const vendorLinks = [
   { label: "Dashboard", href: "/vendor/dashboard", icon: LayoutDashboard },
+  { label: "Bookings", href: "/vendor/bookings", icon: Calendar },
   { label: "Branches", href: "/vendor/branches", icon: GitBranch },
   { label: "Vehicles", href: "/vendor/vehicles", icon: Car },
   { label: "Leads", href: "/vendor/leads", icon: MessageSquare },
@@ -49,6 +52,7 @@ const adminLinks = [
   { label: "Reviews", href: "/admin/reviews", icon: ClipboardList },
   { label: "Fraud", href: "/admin/fraud", icon: AlertTriangle },
   { label: "Audit", href: "/admin/audit", icon: ClipboardList },
+  { label: "Marketing", href: "/admin/marketing", icon: Megaphone },
   { label: "WhatsApp", href: "/admin/whatsapp", icon: MessageSquare },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
@@ -113,6 +117,133 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
               <LogOut className="h-4 w-4" />
               Sign Out
             </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NotificationDropdown({ mode }: { mode: "vendor" | "admin" }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{
+    id: string; title: string; message: string; type: string; read: boolean; created_at: string; link?: string | null;
+  }>>([]);
+  const [orgId, setOrgId] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Load org ID and notifications on mount
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    );
+
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: membership } = await supabase
+        .from("organization_members")
+        .select("organization_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (membership?.organization_id) {
+        setOrgId(membership.organization_id);
+        const { data } = await supabase
+          .from("notifications")
+          .select("id, title, message, type, read, created_at, link")
+          .eq("organization_id", membership.organization_id)
+          .order("created_at", { ascending: false })
+          .limit(10);
+        setNotifications(data ?? []);
+      }
+    })();
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAllRead = async () => {
+    if (!orgId || unreadCount === 0) return;
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    );
+    await supabase.from("notifications").update({ read: true }).eq("organization_id", orgId).eq("read", false);
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const typeIcon: Record<string, string> = { info: "🔔", success: "✅", warning: "⚠️", error: "🚨" };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => { setIsOpen(!isOpen); if (!isOpen) markAllRead(); }}
+        className="relative p-2.5 text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+        aria-label="View notifications"
+      >
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse"></span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-3 w-80 rounded-2xl bg-white border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.08)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <p className="text-sm font-bold text-slate-900">Notifications</p>
+            {unreadCount > 0 && (
+              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">{unreadCount} new</span>
+            )}
+          </div>
+          <div className="max-h-[320px] overflow-y-auto">
+            {notifications.length === 0 ? (
+              <div className="p-8 text-center">
+                <p className="text-sm text-slate-400">You&apos;re all caught up!</p>
+              </div>
+            ) : (
+              notifications.map((n) => (
+                <div
+                  key={n.id}
+                  onClick={() => { if (n.link) window.location.href = n.link; setIsOpen(false); }}
+                  className={`p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group ${!n.read ? "bg-orange-50/40" : ""}`}
+                >
+                  <div className="flex gap-3">
+                    <div className="h-9 w-9 rounded-full bg-orange-50 flex items-center justify-center shrink-0 text-base">
+                      {typeIcon[n.type] ?? "🔔"}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 truncate">{n.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 leading-relaxed line-clamp-2">{n.message}</p>
+                      <p className="text-[10px] font-medium text-slate-400 mt-1.5 uppercase tracking-wider">
+                        {new Date(n.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="p-2 border-t border-slate-100 bg-slate-50/50">
+            <Link
+              href={mode === "vendor" ? "/vendor/bookings" : "/admin/audit"}
+              onClick={() => setIsOpen(false)}
+              className="block w-full text-center px-3 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
+            >
+              View all activity
+            </Link>
           </div>
         </div>
       )}
@@ -265,11 +396,13 @@ export function DashboardShell({
               href="/"
               className="flex items-center gap-3 group"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ea580c] to-amber-500 text-white shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform duration-300">
-                <ShieldCheck className="h-5 w-5" />
-              </span>
-              <span className="hidden sm:block text-xl font-black tracking-tight text-slate-900">
-                HireCar <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500">{mode === "admin" ? "Admin" : "Vendor"}</span>
+              <BrandLogo
+                priority
+                className="h-[44px] w-[140px] transition-transform duration-300 group-hover:scale-105 sm:h-[52px] sm:w-[180px]"
+                imageClassName="object-left mix-blend-multiply"
+              />
+              <span className="hidden rounded-full bg-orange-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-orange-700 sm:block">
+                {mode === "admin" ? "Admin" : "Vendor"}
               </span>
             </Link>
           </div>
@@ -285,10 +418,7 @@ export function DashboardShell({
             
             <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
             
-            <button className="relative p-2.5 text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors border border-transparent hover:border-slate-200">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse"></span>
-            </button>
+            <NotificationDropdown mode={mode} />
             
             {/* Custom Dropdown */}
             <ProfileDropdown onLogout={handleLogout} />
@@ -321,10 +451,12 @@ export function DashboardShell({
           >
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
               <div className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#ea580c] to-amber-500 text-white shadow-md">
-                  <ShieldCheck className="h-4 w-4" />
-                </span>
-                <span className="text-base font-black tracking-tight text-slate-900">
+                <BrandLogo
+                  priority
+                  className="h-[40px] w-[120px]"
+                  imageClassName="object-left mix-blend-multiply"
+                />
+                <span className="sr-only">
                   {mode === "admin" ? "Admin Panel" : "Vendor Portal"}
                 </span>
               </div>

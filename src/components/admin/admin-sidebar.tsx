@@ -12,6 +12,7 @@ import {
   LogOut,
   Settings
 } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 const navigation = [
   { name: "Control Room", href: "/admin", icon: LayoutDashboard },
@@ -27,12 +28,10 @@ export function AdminSidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-border bg-card px-4 py-6 text-foreground">
-      <div className="flex items-center gap-3 px-2 mb-8">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <ShieldAlert className="h-5 w-5" />
-        </div>
-        <span className="text-lg font-bold text-foreground tracking-tight">Hire Car Admin</span>
-      </div>
+      <Link href="/" className="mb-8 flex items-center px-2">
+        <BrandLogo className="h-[48px] w-[180px]" imageClassName="object-left mix-blend-multiply" />
+        <span className="sr-only">HireCar Marketplace Admin</span>
+      </Link>
 
       <nav className="flex-1 space-y-1.5">
         {navigation.map((item) => {

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { MapPin, ShieldCheck } from "lucide-react";
+import { MapPin } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 const footerLinks = {
   product: [
@@ -83,12 +84,12 @@ export function SiteFooter() {
           <div className="lg:col-span-2">
             <Link
               href="/"
-              className="flex items-center gap-3 text-2xl font-bold text-white"
+              className="inline-flex items-center rounded-lg bg-white p-1.5 shadow-sm transition-opacity hover:opacity-95"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <span className="font-heading tracking-tight">Hire Car</span>
+              <BrandLogo
+                className="h-[90px] w-[180px]"
+                imageClassName="rounded-md"
+              />
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
               Australia&apos;s trusted premium marketplace for verified car

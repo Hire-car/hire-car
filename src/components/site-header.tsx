@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 // usePathname removed
-import { Menu, X, ChevronDown, ShieldCheck, User, Headphones } from "lucide-react";
+import { Menu, ChevronDown, User, Headphones } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createBrowserClient } from "@supabase/ssr";
+import { BrandLogo } from "@/components/brand-logo";
 import { useHeaderHeight } from "@/hooks/use-header-height";
 import { MobileDrawerNav, DrawerSection } from "./mobile-drawer-nav";
 import { useMobileState } from "@/components/mobile-state-provider";
@@ -121,7 +121,7 @@ export function SiteHeader() {
       {/* Invisible spacer to push page content down, fixing overlap on all pages */}
       <div style={{ height: "var(--header-height, 116px)" }} className="w-full shrink-0" aria-hidden="true" />
       
-      <header ref={headerRef as any} className="fixed top-0 left-0 right-0 z-[var(--z-header,40)] flex flex-col pt-[env(safe-area-inset-top)]">
+      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-[var(--z-header,40)] flex flex-col pt-[env(safe-area-inset-top)]">
         {/* Vibrant Top Info Bar - Hides on scroll */}
         <AnimatePresence>
           {!isScrolled && (
@@ -152,15 +152,11 @@ export function SiteHeader() {
               
               {/* HireCar Marketplace Logo */}
               <Link href="/" className="flex items-center gap-3.5 group hover:opacity-95 transition-opacity">
-                <div className="relative w-[180px] h-[48px] sm:w-[220px] sm:h-[56px] transition-transform duration-300 group-hover:scale-105">
-                  <Image 
-                    src="/LOGO.png" 
-                    alt="HireCar Marketplace" 
-                    fill 
-                    priority
-                    className="object-contain object-left mix-blend-multiply" 
-                  />
-                </div>
+                <BrandLogo
+                  priority
+                  className="h-[48px] w-[180px] transition-transform duration-300 group-hover:scale-105 sm:h-[56px] sm:w-[220px]"
+                  imageClassName="object-left mix-blend-multiply"
+                />
               </Link>
 
               {/* Desktop Nav */}
@@ -286,10 +282,11 @@ export function SiteHeader() {
       <MobileDrawerNav isOpen={isMobileMenuOpen} onClose={closeMobileMenu}>
         <div className="flex flex-col gap-2 pt-2">
           <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2 pb-6 border-b border-slate-100">
-            <span className="flex h-10 w-10 items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl shadow-lg">
-              <ShieldCheck className="h-6 w-6 text-orange-400" strokeWidth={2.5} />
-            </span>
-            <span className="text-2xl font-black tracking-tight">Carhire</span>
+            <BrandLogo
+              priority
+              className="h-[48px] w-[180px]"
+              imageClassName="object-left mix-blend-multiply"
+            />
           </Link>
           
           <Link href="/search" onClick={closeMobileMenu} className="mt-6 bg-gradient-to-r from-primary to-amber-500 text-white font-bold text-lg rounded-2xl px-6 py-4 text-center shadow-lg shadow-primary/20 flex items-center justify-center min-h-[56px] touch-target">

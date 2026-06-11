@@ -4,22 +4,22 @@ import { getAppUrl, optionalEnv } from "@/lib/config";
 const apiKey = optionalEnv("RESEND_API_KEY");
 export const resend = apiKey ? new Resend(apiKey) : null;
 
+const FROM = process.env.EMAIL_FROM ?? "Hire Car Marketplace <noreply@hirecarmarketplace.com.au>";
+const REPLY_TO = process.env.REPLY_TO_EMAIL ?? process.env.CONTACT_EMAIL_TO ?? "admin.hirecar@gmail.com";
+
 export async function sendLeadAlert(input: {
   to: string;
   vehicleTitle: string;
   customerName: string;
 }) {
-  if (!resend) {
-    return { skipped: true };
-  }
-
+  if (!resend) return { skipped: true };
   await resend.emails.send({
-    from: process.env.EMAIL_FROM ?? "Hire Car Leads <leads@example.com>",
+    from: FROM,
+    replyTo: REPLY_TO,
     to: input.to,
     subject: `New rental lead for ${input.vehicleTitle}`,
     text: `${input.customerName} submitted a rental enquiry. Open the vendor dashboard to review and respond.`,
   });
-
   return { skipped: false };
 }
 
@@ -29,32 +29,157 @@ export async function sendCustomerEnquiryConfirmation(input: {
   vehicleTitle: string;
   leadId: string;
 }) {
-  if (!resend) {
-    return { skipped: true };
-  }
-
+  if (!resend) return { skipped: true };
   const chatUrl = `${getAppUrl()}/messages/${input.leadId}`;
   const signInUrl = `${getAppUrl()}/auth/sign-in?redirectedFrom=${encodeURIComponent(chatUrl)}`;
-
   await resend.emails.send({
-    from: process.env.EMAIL_FROM ?? "Hire Car <noreply@hirecarmarketplace.com.au>",
+    from: FROM,
+    replyTo: REPLY_TO,
     to: input.to,
     subject: `Your enquiry for ${input.vehicleTitle}`,
-    text: [
-      `Hi ${input.customerName},`,
-      "",
-      `We've sent your rental enquiry for ${input.vehicleTitle} to the vendor.`,
-      "",
-      `Sign in to chat with the vendor and track your enquiry:`,
-      signInUrl,
-      "",
-      `Or open your conversation directly after signing in:`,
-      chatUrl,
-    ].join("\n"),
+    text: [`Hi ${input.customerName},`, "", `We've sent your rental enquiry for ${input.vehicleTitle} to the vendor.`, "", `Sign in to chat with the vendor:`, signInUrl, "", `Or open your conversation:`, chatUrl].join("\n"),
   });
-
   return { skipped: false };
 }
+
+// ─── Welcome Email ────────────────────────────────────────────────────────────
+
+export async function sendWelcomeEmail(input: {
+  to: string;
+  name: string;
+  role?: "vendor" | "customer";
+}) {
+  if (!resend) return { skipped: true };
+  const isVendor = input.role === "vendor";
+  const dashboardUrl = isVendor ? `${getAppUrl()}/vendor/dashboard` : `${getAppUrl()}/search`;
+  const greeting = isVendor
+    ? "Your vendor account is ready. Start adding your fleet and reach thousands of customers across Australia."
+    : "You're all set to find your perfect rental car across Australia. Browse thousands of vehicles from verified local vendors.";
+  const ctaLabel = isVendor ? "Go to Vendor Dashboard" : "Browse Cars";
+
+  await resend.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: input.to,
+    subject: "Welcome to Hire Car Marketplace! 🚗",
+    html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#fff;">
+      <div style="background:linear-gradient(135deg,#ea580c,#f59e0b);border-radius:16px;padding:32px;text-align:center;margin-bottom:24px;">
+        <h1 style="color:#fff;font-size:28px;margin:0;font-weight:900;">Welcome to HireCar! 🎉</h1>
+      </div>
+      <p style="color:#334155;font-size:16px;">Hi ${input.name || "there"},</p>
+      <p style="color:#334155;font-size:15px;line-height:1.6;">${greeting}</p>
+      <div style="text-align:center;margin:32px 0;">
+        <a href="${dashboardUrl}" style="background:linear-gradient(135deg,#ea580c,#f59e0b);color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">${ctaLabel} →</a>
+      </div>
+      <p style="color:#94a3b8;font-size:13px;text-align:center;">Hire Car Marketplace · Australia</p>
+    </div>`,
+  });
+  return { skipped: false };
+}
+
+// ─── Booking Emails ────────────────────────────────────────────────────────────
+
+export async function sendBookingRequestConfirmation(input: {
+  to: string;
+  customerName: string;
+  vehicleTitle: string;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+}) {
+  if (!resend) return { skipped: true };
+  await resend.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: input.to,
+    subject: `Booking request received — ${input.vehicleTitle}`,
+    html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#fff;">
+      <div style="background:linear-gradient(135deg,#ea580c,#f59e0b);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
+        <h1 style="color:#fff;font-size:22px;margin:0;font-weight:900;">Booking Request Received ✅</h1>
+      </div>
+      <p style="color:#334155;font-size:16px;">Hi ${input.customerName},</p>
+      <p style="color:#334155;font-size:15px;line-height:1.6;">Your booking request for <strong>${input.vehicleTitle}</strong> has been received. The vendor will confirm shortly.</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:20px 0;">
+        <p style="margin:4px 0;color:#334155;font-size:14px;"><strong>Vehicle:</strong> ${input.vehicleTitle}</p>
+        <p style="margin:4px 0;color:#334155;font-size:14px;"><strong>Pickup:</strong> ${input.startDate}</p>
+        <p style="margin:4px 0;color:#334155;font-size:14px;"><strong>Return:</strong> ${input.endDate}</p>
+        <p style="margin:4px 0;color:#ea580c;font-size:14px;font-weight:700;"><strong>Total:</strong> $${input.totalPrice} AUD</p>
+      </div>
+      <p style="color:#94a3b8;font-size:13px;text-align:center;">Hire Car Marketplace · Australia</p>
+    </div>`,
+  });
+  return { skipped: false };
+}
+
+export async function sendVendorBookingAlert(input: {
+  to: string;
+  vehicleTitle: string;
+  customerName: string;
+  customerEmail: string;
+  startDate: string;
+  endDate: string;
+  totalPrice: number;
+}) {
+  if (!resend) return { skipped: true };
+  const dashboardUrl = `${getAppUrl()}/vendor/bookings`;
+  await resend.emails.send({
+    from: FROM,
+    replyTo: input.customerEmail || REPLY_TO,
+    to: input.to,
+    subject: `New booking request for ${input.vehicleTitle}`,
+    html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#fff;">
+      <div style="background:linear-gradient(135deg,#1e293b,#334155);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
+        <h1 style="color:#fff;font-size:22px;margin:0;font-weight:900;">New Booking Request 🗓️</h1>
+      </div>
+      <p style="color:#334155;font-size:15px;line-height:1.6;"><strong>${input.customerName}</strong> (${input.customerEmail}) has requested to book <strong>${input.vehicleTitle}</strong>.</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:20px 0;">
+        <p style="margin:4px 0;color:#334155;font-size:14px;"><strong>Pickup:</strong> ${input.startDate}</p>
+        <p style="margin:4px 0;color:#334155;font-size:14px;"><strong>Return:</strong> ${input.endDate}</p>
+        <p style="margin:4px 0;color:#334155;font-size:14px;"><strong>Total Value:</strong> $${input.totalPrice} AUD</p>
+      </div>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="${dashboardUrl}" style="background:#ea580c;color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">Review &amp; Confirm Booking →</a>
+      </div>
+      <p style="color:#94a3b8;font-size:13px;text-align:center;">Hire Car Marketplace Vendor Portal</p>
+    </div>`,
+  });
+  return { skipped: false };
+}
+
+// ─── Marketing Email ───────────────────────────────────────────────────────────
+
+export async function sendMarketingEmail(input: {
+  to: string;
+  recipientName: string;
+  subject: string;
+  heading: string;
+  bodyHtml: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+}) {
+  if (!resend) return { skipped: true };
+  const cta = input.ctaLabel && input.ctaUrl
+    ? `<div style="text-align:center;margin:28px 0;"><a href="${input.ctaUrl}" style="background:linear-gradient(135deg,#ea580c,#f59e0b);color:#fff;padding:14px 32px;border-radius:12px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">${input.ctaLabel} →</a></div>`
+    : "";
+  await resend.emails.send({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: input.to,
+    subject: input.subject,
+    html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#fff;">
+      <div style="background:linear-gradient(135deg,#ea580c,#f59e0b);border-radius:16px;padding:24px;text-align:center;margin-bottom:24px;">
+        <h1 style="color:#fff;font-size:22px;margin:0;font-weight:900;">${input.heading}</h1>
+      </div>
+      <p style="color:#334155;font-size:16px;">Hi ${input.recipientName},</p>
+      <div style="color:#334155;font-size:15px;line-height:1.7;">${input.bodyHtml}</div>
+      ${cta}
+      <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:32px;">You're receiving this because you have an account at hirecarmarketplace.com.au.</p>
+    </div>`,
+  });
+  return { skipped: false };
+}
+
+// ─── Internal utilities ─────────────────────────────────────────────────────────
 
 export async function sendNewMessageNotification(input: {
   to: string;
@@ -65,30 +190,18 @@ export async function sendNewMessageNotification(input: {
   leadId: string;
   isVendorRecipient: boolean;
 }) {
-  if (!resend) {
-    return { skipped: true };
-  }
-
+  if (!resend) return { skipped: true };
   const preview = sanitizeMessagePreview(input.messagePreview);
   const chatUrl = input.isVendorRecipient
     ? `${getAppUrl()}/vendor/leads/${input.leadId}`
     : `${getAppUrl()}/messages/${input.leadId}`;
-
   await resend.emails.send({
-    from: process.env.EMAIL_FROM ?? "Hire Car <noreply@hirecarmarketplace.com.au>",
+    from: FROM,
+    replyTo: REPLY_TO,
     to: input.to,
     subject: `New message about ${input.vehicleTitle}`,
-    text: [
-      `Hi ${input.recipientName},`,
-      "",
-      `${input.senderName} sent you a message about ${input.vehicleTitle}:`,
-      "",
-      `"${preview}"`,
-      "",
-      `Reply here: ${chatUrl}`,
-    ].join("\n"),
+    text: [`Hi ${input.recipientName},`, "", `${input.senderName} sent you a message about ${input.vehicleTitle}:`, "", `"${preview}"`, "", `Reply here: ${chatUrl}`].join("\n"),
   });
-
   return { skipped: false };
 }
 
@@ -98,52 +211,27 @@ export async function sendContactMessage(input: {
   topic: string;
   message: string;
 }) {
-  if (!resend) {
-    return { skipped: true };
-  }
-
+  if (!resend) return { skipped: true };
   const to = process.env.CONTACT_EMAIL_TO ?? process.env.EMAIL_FROM ?? "admin.hirecar@gmail.com";
-
   await resend.emails.send({
     from: process.env.EMAIL_FROM ?? "Hire Car Support <admin.hirecar@gmail.com>",
     to,
     replyTo: input.email,
     subject: `Hire Car contact: ${input.topic}`,
-    text: [
-      `Name: ${input.name}`,
-      `Email: ${input.email}`,
-      `Topic: ${input.topic}`,
-      "",
-      input.message,
-    ].join("\n"),
+    text: [`Name: ${input.name}`, `Email: ${input.email}`, `Topic: ${input.topic}`, "", input.message].join("\n"),
   });
-
   return { skipped: false };
 }
 
 /** Maximum characters of untrusted inbound content included in a notification email. */
 const WHATSAPP_PREVIEW_MAX_LENGTH = 300;
 
-/**
- * Collapse and truncate untrusted inbound message content for safe inclusion in
- * a plain-text email body. Strips control characters (defends against header
- * injection / log spoofing) and caps length, since the preview originates from
- * an external WhatsApp sender.
- */
 function sanitizeMessagePreview(raw: string): string {
-  // Replace any control characters (including CR/LF/tabs) with a single space.
   const collapsed = raw.replace(/[\u0000-\u001F\u007F]+/g, " ").replace(/\s+/g, " ").trim();
-  if (collapsed.length <= WHATSAPP_PREVIEW_MAX_LENGTH) {
-    return collapsed;
-  }
+  if (collapsed.length <= WHATSAPP_PREVIEW_MAX_LENGTH) return collapsed;
   return `${collapsed.slice(0, WHATSAPP_PREVIEW_MAX_LENGTH)}…`;
 }
 
-/**
- * Retry an async operation up to `maxAttempts` times with a small linear
- * backoff, throwing the last error if every attempt fails. Used so transient
- * email-delivery failures are retried before the caller records the outcome.
- */
 async function withRetry<T>(operation: () => Promise<T>, maxAttempts = 3): Promise<T> {
   const attempts = Math.max(1, Math.floor(maxAttempts));
   let lastError: unknown;
@@ -153,8 +241,6 @@ async function withRetry<T>(operation: () => Promise<T>, maxAttempts = 3): Promi
     } catch (error) {
       lastError = error;
       if (attempt < attempts) {
-        // Linear backoff: 100ms, 200ms, ... keeps the webhook responsive while
-        // smoothing over brief upstream blips.
         await new Promise((resolve) => setTimeout(resolve, 100 * attempt));
       }
     }
@@ -162,21 +248,6 @@ async function withRetry<T>(operation: () => Promise<T>, maxAttempts = 3): Promi
   throw lastError;
 }
 
-/**
- * Notify a lead recipient (vendor or support) about a new inbound WhatsApp lead.
- *
- * Contract:
- * - Returns `{ skipped: true }` without sending when Resend is unconfigured
- *   (`RESEND_API_KEY` unset), matching {@link sendLeadAlert} / {@link sendContactMessage}.
- * - Returns `{ skipped: false }` once the email has been accepted by Resend.
- * - Retries transient send failures up to `maxAttempts` times (default 3). If
- *   every attempt fails, the underlying error is thrown so the caller (the
- *   webhook) can record the final delivery status on the lead. Callers are
- *   expected to catch this and persist a failed status rather than crashing.
- *
- * The `messagePreview` is treated as untrusted inbound content: it is sanitized
- * and length-limited before inclusion, and no secrets are referenced.
- */
 export async function sendWhatsAppLeadAlert(
   input: {
     to: string;
@@ -187,31 +258,18 @@ export async function sendWhatsAppLeadAlert(
   },
   maxAttempts = 3,
 ): Promise<{ skipped: boolean }> {
-  if (!resend) {
-    return { skipped: true };
-  }
-
+  if (!resend) return { skipped: true };
   const client = resend;
   const preview = sanitizeMessagePreview(input.messagePreview);
-
   await withRetry(
-    () =>
-      client.emails.send({
-        from: process.env.EMAIL_FROM ?? "Hire Car Leads <leads@example.com>",
-        to: input.to,
-        subject: `New WhatsApp lead from ${input.senderName}`,
-        text: [
-          `${input.senderName} sent a new WhatsApp enquiry.`,
-          "",
-          `Name: ${input.senderName}`,
-          `Phone: ${input.senderPhone}`,
-          `Message: ${preview}`,
-          "",
-          `View the lead: ${input.leadUrl}`,
-        ].join("\n"),
-      }),
+    () => client.emails.send({
+      from: FROM,
+      replyTo: REPLY_TO,
+      to: input.to,
+      subject: `New WhatsApp lead from ${input.senderName}`,
+      text: [`${input.senderName} sent a new WhatsApp enquiry.`, "", `Name: ${input.senderName}`, `Phone: ${input.senderPhone}`, `Message: ${preview}`, "", `View the lead: ${input.leadUrl}`].join("\n"),
+    }),
     maxAttempts,
   );
-
   return { skipped: false };
 }
