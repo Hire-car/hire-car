@@ -427,7 +427,7 @@ export default async function Home() {
 
             <MotionScroll variant="stagger-container" className="space-y-4">
               {[
-                { q: "How do I book a vehicle?", a: "Simply search for your location and dates, select a vehicle, and send a booking request directly to the local operator. Confirmation is usually instant." },
+                { q: "How do I book a vehicle?", a: "Search for your location and dates, select a vehicle, and send an enquiry directly to the local operator. They will confirm availability and terms with you." },
                 { q: "Are there any hidden fees?", a: "No. The price you see includes all taxes and basic insurance. Operators may offer optional extras like child seats or GPS at the counter." },
                 { q: "Can I cancel my reservation?", a: "Most operators offer free cancellation up to 48 hours before pickup. You can view the specific cancellation policy of any vehicle before booking." },
                 { q: "Do I need a special license?", a: "A valid standard driver's license from your home country is required. International drivers may need an International Driving Permit (IDP)." },

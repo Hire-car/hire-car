@@ -7,7 +7,6 @@ import { SimilarVehicles } from "@/components/similar-vehicles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/security/auth";
 import { EnquiryWidget } from "@/components/enquiry-widget";
-import { BookingRequestForm } from "@/components/booking-request-form";
 import { ImageGallery } from "@/components/image-gallery";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { planHasFeature } from "@/lib/plan-features";
@@ -452,16 +451,6 @@ export default async function VehicleDetailPage({
                   </Badge>
                 )}
               </CardContent>
-            </Card>
-
-            {/* Booking Form */}
-            <Card variant="elevated" className="overflow-hidden">
-              <BookingRequestForm
-                vehicleId={vehicle.id}
-                organizationId={vehicle.organization_id}
-                pricePerDayAud={vehicle.price_per_day_aud}
-                userProfile={userProfile}
-              />
             </Card>
 
             {/* Enquiry Form */}

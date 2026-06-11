@@ -24,7 +24,6 @@ import {
   X,
   Bell,
   ChevronDown,
-  Calendar,
   Megaphone
 } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
@@ -32,7 +31,6 @@ import { BrandLogo } from "@/components/brand-logo";
 
 const vendorLinks = [
   { label: "Dashboard", href: "/vendor/dashboard", icon: LayoutDashboard },
-  { label: "Bookings", href: "/vendor/bookings", icon: Calendar },
   { label: "Branches", href: "/vendor/branches", icon: GitBranch },
   { label: "Vehicles", href: "/vendor/vehicles", icon: Car },
   { label: "Leads", href: "/vendor/leads", icon: MessageSquare },
@@ -238,7 +236,7 @@ function NotificationDropdown({ mode }: { mode: "vendor" | "admin" }) {
           </div>
           <div className="p-2 border-t border-slate-100 bg-slate-50/50">
             <Link
-              href={mode === "vendor" ? "/vendor/bookings" : "/admin/audit"}
+              href={mode === "vendor" ? "/vendor/leads" : "/admin/audit"}
               onClick={() => setIsOpen(false)}
               className="block w-full text-center px-3 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors"
             >
