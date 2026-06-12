@@ -13,7 +13,7 @@ export default async function CustomerLayout({
 
   const allowedAdminEmails = [
     "pankaj@techtonika-autolink.com",
-    "anandujjawalofficia11@gmail.com",
+    "anandujjawalofficial11@gmail.com",
     "ybikash919@gmail.com",
   ];
   const isAdmin = allowedAdminEmails.includes(user.email ?? "");
