@@ -267,7 +267,11 @@ export function DashboardShell({
   let baseLinks = mode === "vendor" ? vendorLinks : adminLinks;
   
   if (mode === "admin" && adminRole) {
-    baseLinks = adminLinks.filter(link => !link.roles || link.roles.includes(adminRole));
+    if (["super_admin", "admin", "owner"].includes(adminRole)) {
+      baseLinks = adminLinks;
+    } else {
+      baseLinks = adminLinks.filter(link => !link.roles || link.roles.includes(adminRole));
+    }
   }
   
   const links = mode === "vendor" && isAdmin 
