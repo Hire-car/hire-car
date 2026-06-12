@@ -1,31 +1,4 @@
--- RBAC Roles
-CREATE TYPE admin_role_type AS ENUM ('support', 'moderator', 'finance', 'super_admin');
-
-CREATE TABLE admin_roles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    role admin_role_type NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    UNIQUE(user_id)
-);
-
-ALTER TABLE admin_roles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Super admins can manage roles" ON admin_roles FOR ALL USING (
-    EXISTS (SELECT 1 FROM admin_roles WHERE user_id = auth.uid() AND role = 'super_admin')
-);
-CREATE POLICY "Users can read own role" ON admin_roles FOR SELECT USING (user_id = auth.uid());
-
--- Add the initial admins specified by user
-INSERT INTO admin_roles (user_id, role)
-SELECT id, 'super_admin'::admin_role_type
-FROM auth.users
-WHERE email IN (
-    'pankaj@techtonika-autolink.com',
-    'anandujjawalofficia11@gmail.com',
-    'ybikash919@gmail.com'
-) ON CONFLICT (user_id) DO NOTHING;
+-- RBAC Roles already exist in the database from a previous partial run.
 
 -- Function to get admin dashboard metrics
 CREATE OR REPLACE FUNCTION get_admin_dashboard_metrics()

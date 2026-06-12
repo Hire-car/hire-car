@@ -16,7 +16,7 @@ export default async function AdminLeadsPage() {
     .from("leads")
     .select(
       `
-      id, customer_name, customer_email, customer_phone, message, status, lead_type, created_at,
+      id, customer_name, customer_email, customer_phone, message, status, created_at,
       organizations(id, name),
       vehicles(id, title)
     `,
@@ -44,7 +44,7 @@ export default async function AdminLeadsPage() {
     id: lead.id,
     customer_name: lead.customer_name ?? "Anonymous",
     customer_email: lead.customer_email ?? "",
-    lead_type: lead.lead_type ?? "enquiry",
+    lead_type: "enquiry",
     status: lead.status ?? "new",
     vendor_name: (lead.organizations as unknown as { name: string })?.name ?? "Unknown",
     vehicle_title: (lead.vehicles as unknown as { title: string })?.title ?? "N/A",
