@@ -86,12 +86,6 @@ export async function getUserAdminRole(user: SupabaseUser): Promise<string> {
   return "viewer";
 }
 
-async function userHasAal2Session() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  return data?.currentLevel === "aal2";
-}
-
 export async function requireAdmin() {
   const user = await requireUser();
 
@@ -99,22 +93,11 @@ export async function requireAdmin() {
     redirect("/customer/dashboard");
   }
 
-  // Bypass MFA requirement for the hardcoded founders to prevent lockouts
-  if (!user.email || !SUPER_ADMIN_EMAILS.includes(user.email)) {
-    if (!(await userHasAal2Session())) {
-      redirect("/auth/mfa");
-    }
-  }
-
   return user;
 }
 
 export async function requireAdminRole(allowedRoles: string[]) {
   const user = await requireUser();
-
-  if (!(await userHasAal2Session())) {
-    redirect("/auth/mfa");
-  }
 
   // Check if they have an active admin role record for these specific roles
   // or if they are an owner/admin (who can do everything)
@@ -155,13 +138,6 @@ export async function requireApiAdmin() {
     return {
       user: null,
       response: NextResponse.json({ error: "Admin access required" }, { status: 403 }),
-    };
-  }
-
-  if (!(await userHasAal2Session()) && !(user.email && SUPER_ADMIN_EMAILS.includes(user.email))) {
-    return {
-      user: null,
-      response: NextResponse.json({ error: "MFA required" }, { status: 403 }),
     };
   }
 
