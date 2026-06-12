@@ -73,7 +73,27 @@ export async function middleware(request: NextRequest) {
       "ybikash919@gmail.com",
     ];
     
-    if (!allowedAdminEmails.includes(user.email ?? "")) {
+    let isAuthorizedAdmin = allowedAdminEmails.includes(user.email ?? "");
+
+    if (!isAuthorizedAdmin) {
+      const platformRole = user.app_metadata?.platform_role;
+      if (platformRole === "owner" || platformRole === "admin" || platformRole === "moderator") {
+        isAuthorizedAdmin = true;
+      } else {
+        const { data: roleRecord } = await supabase
+          .from("admin_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("active", true)
+          .maybeSingle();
+          
+        if (roleRecord) {
+          isAuthorizedAdmin = true;
+        }
+      }
+    }
+
+    if (!isAuthorizedAdmin) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/"; // Redirect unauthorized users away from admin
       return NextResponse.redirect(redirectUrl);
