@@ -299,7 +299,7 @@ export default function ForVendorsPage() {
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
                 <a
-                  href="tel:1800123456"
+                  href="tel:0434930437"
                   className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm px-8 py-5 font-bold text-white text-lg hover:bg-white/10 transition-colors"
                 >
                   <PhoneCall className="h-5 w-5" />
