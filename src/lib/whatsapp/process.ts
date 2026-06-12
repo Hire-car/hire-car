@@ -43,6 +43,7 @@ import {
   logProcessedMessage,
   reportWhatsAppError,
 } from "@/lib/whatsapp/observability";
+import { handleBotRouting } from "./bot-router";
 
 /** Structured outcome of processing a single inbound message. */
 export interface ProcessInboundResult {
@@ -169,22 +170,35 @@ export async function processInboundMessage(
     }
 
     if (ackAllowed) {
-      const body =
-        variant === "in_hours"
-          ? config.inHoursMessage
-          : `${config.awayMessage} ${describeNextOpen(now, config.businessHours)}`;
+      try {
+        // If out of hours, send the away message first
+        if (variant !== "in_hours") {
+          const awayBody = `${config.awayMessage} ${describeNextOpen(now, config.businessHours)}`;
+          const sendResult = await sendCloudApiText(message.from, awayBody);
+          if (!sendResult.ok) {
+            reportWhatsAppError(
+              new Error(sendResult.error ?? sendResult.errorCode ?? "unknown error"),
+              {
+                stage: "process.acknowledge.away",
+                leadId,
+                messageId: message.messageId,
+                errorCode: sendResult.errorCode,
+                variant,
+                messageLength: message.text.length,
+              },
+            );
+          }
+        }
 
-      // sendCloudApiText never throws; a failed send is recorded (the lead is
-      // already saved) and we continue to notification.
-      const sendResult = await sendCloudApiText(message.from, body);
-      if (!sendResult.ok) {
+        // Delegate to the interactive bot router
+        await handleBotRouting(message);
+      } catch (error) {
         reportWhatsAppError(
-          new Error(sendResult.error ?? sendResult.errorCode ?? "unknown error"),
+          error instanceof Error ? error : new Error("Bot routing failed"),
           {
-            stage: "process.acknowledge",
+            stage: "process.bot_routing",
             leadId,
             messageId: message.messageId,
-            errorCode: sendResult.errorCode,
             variant,
             messageLength: message.text.length,
           },

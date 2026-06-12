@@ -201,6 +201,10 @@ export const whatsappInboundSchema = z.object({
   text: z.string().max(4096).default(""),
   type: z.string().max(40).default("text"),
   timestamp: z.number().int().nonnegative(),
+  interactive: z.object({
+    id: z.string().max(200),
+    title: z.string().max(200).optional()
+  }).optional(),
 });
 
 /**

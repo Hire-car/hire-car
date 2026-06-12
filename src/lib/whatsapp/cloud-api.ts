@@ -192,3 +192,22 @@ export async function sendCloudApiTemplate(
     },
   });
 }
+
+/**
+ * Send an interactive message (list or buttons) via the Cloud API.
+ *
+ * @param to - Recipient phone number (any format; normalised internally).
+ * @param interactive - The interactive object matching Meta's spec.
+ */
+export async function sendCloudApiInteractive(
+  to: string,
+  interactive: Record<string, unknown>,
+): Promise<SendMessageResult> {
+  return postMessage({
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: normaliseWhatsAppNumber(to),
+    type: "interactive",
+    interactive,
+  });
+}

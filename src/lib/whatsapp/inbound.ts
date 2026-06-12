@@ -62,6 +62,8 @@ export interface ParsedInboundMessage {
   type: string;
   /** Epoch seconds (Meta sends this as a string; coerced to a number here). */
   timestamp: number;
+  /** Interactive payload when type is "interactive" (button or list reply). */
+  interactive?: { id: string; title?: string };
   /** Click-to-chat / reply association, when the message carries one. */
   referral?: InboundReferral;
 }
@@ -218,12 +220,28 @@ function parseMessage(raw: unknown, contactName: string | undefined): ParsedInbo
   const textObj = asRecord(message.text);
   const text = asTrimmedString(textObj?.body) ?? "";
 
+  let interactive: { id: string; title?: string } | undefined = undefined;
+  if (type === "interactive") {
+    const intObj = asRecord(message.interactive);
+    if (intObj) {
+      const intType = asTrimmedString(intObj.type);
+      if (intType === "button_reply") {
+        const btn = asRecord(intObj.button_reply);
+        if (btn && btn.id) interactive = { id: String(btn.id), title: asTrimmedString(btn.title) };
+      } else if (intType === "list_reply") {
+        const list = asRecord(intObj.list_reply);
+        if (list && list.id) interactive = { id: String(list.id), title: asTrimmedString(list.title) };
+      }
+    }
+  }
+
   const parsed: ParsedInboundMessage = {
     messageId,
     from,
     text,
     type,
     timestamp: coerceTimestamp(message.timestamp),
+    ...(interactive ? { interactive } : {}),
   };
 
   if (contactName) {
