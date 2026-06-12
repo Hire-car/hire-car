@@ -41,6 +41,7 @@ export default async function AdminFraudPage({ searchParams }: AdminFraudPagePro
     .range(from, to);
 
   if (error) {
+    console.error("Fraud Flags Error:", error);
     throw new Error(`Failed to fetch fraud flags: ${error.message}`);
   }
 

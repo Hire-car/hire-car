@@ -7,6 +7,12 @@ import { sendMarketingEmail } from "@/lib/email/resend";
 export type MarketingEmailState = {
   status: "idle" | "success" | "error";
   message: string;
+  details?: {
+    sent: number;
+    failed: number;
+    skipped: number;
+    recipientCount: number;
+  };
 };
 
 type Recipient = {
@@ -78,19 +84,46 @@ async function getAudienceRecipients(audience: string, manualRecipients: string)
     }));
   }
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("full_name, email")
-    .not("email", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(MAX_RECIPIENTS);
+  // "accounts" audience - fetch from auth.users via admin API for reliable emails
+  // The profiles table may not have emails populated if users signed up without updating their profile.
+  // Use supabase admin to list users from auth which always has email.
+  if (audience === "accounts") {
+    // Try to get from profiles first (most likely has full_name), falling back to auth
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .not("email", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(MAX_RECIPIENTS);
 
-  if (error) throw new Error(`Could not load account recipients: ${error.message}`);
+    if (profileError) throw new Error(`Could not load account recipients: ${profileError.message}`);
 
-  return (data ?? []).map((profile) => ({
-    email: String(profile.email).trim().toLowerCase(),
-    name: profile.full_name || "there",
-  }));
+    const profileRecipients = (profileData ?? [])
+      .filter((p) => p.email)
+      .map((profile) => ({
+        email: String(profile.email).trim().toLowerCase(),
+        name: profile.full_name || "there",
+      }));
+
+    // If profiles have no emails, fall back to listing auth users
+    if (profileRecipients.length === 0) {
+      const { data: usersData, error: usersError } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: MAX_RECIPIENTS,
+      });
+      if (usersError) throw new Error(`Could not load auth users: ${usersError.message}`);
+      return (usersData?.users ?? [])
+        .filter((u) => u.email)
+        .map((u) => ({
+          email: u.email!.trim().toLowerCase(),
+          name: u.user_metadata?.full_name || u.email!.split("@")[0] || "there",
+        }));
+    }
+
+    return profileRecipients;
+  }
+
+  throw new Error(`Unknown audience: ${audience}`);
 }
 
 export async function sendMarketingCampaign(
@@ -106,6 +139,14 @@ export async function sendMarketingCampaign(
   const body = String(formData.get("body") ?? "").trim();
   const ctaLabel = String(formData.get("ctaLabel") ?? "").trim();
   const ctaUrl = String(formData.get("ctaUrl") ?? "").trim();
+
+  // Check for RESEND_API_KEY upfront and give a clear error
+  if (!process.env.RESEND_API_KEY) {
+    return {
+      status: "error",
+      message: "RESEND_API_KEY is not configured. Email sending is disabled. Please add it to your environment variables.",
+    };
+  }
 
   if (subject.length < 4 || subject.length > 160) {
     return { status: "error", message: "Subject must be between 4 and 160 characters." };
@@ -128,15 +169,25 @@ export async function sendMarketingCampaign(
   }
 
   try {
-    const recipients = dedupeRecipients(await getAudienceRecipients(audience, manualRecipients));
+    const allRecipients = await getAudienceRecipients(audience, manualRecipients);
+    const recipients = dedupeRecipients(allRecipients);
+
     if (recipients.length === 0) {
-      return { status: "error", message: "No valid recipients found for this campaign." };
+      return {
+        status: "error",
+        message: `No valid recipients found for audience "${audience}". ${
+          audience === "manual"
+            ? "Please enter at least one valid email address."
+            : "No users found in the database."
+        }`,
+      };
     }
 
     let sent = 0;
     let skipped = 0;
     let failed = 0;
     const bodyHtml = textToHtml(body);
+    const errors: string[] = [];
 
     for (const recipient of recipients) {
       try {
@@ -154,6 +205,8 @@ export async function sendMarketingCampaign(
         else sent += 1;
       } catch (error) {
         failed += 1;
+        const errMsg = error instanceof Error ? error.message : String(error);
+        errors.push(`${recipient.email}: ${errMsg}`);
         console.error("[Marketing] Failed to send campaign email", {
           recipient: recipient.email,
           error,
@@ -161,16 +214,25 @@ export async function sendMarketingCampaign(
       }
     }
 
-    if (sent === 0 && skipped > 0) {
+    // All skipped means the Resend client is null (API key missing at runtime)
+    if (sent === 0 && skipped > 0 && failed === 0) {
       return {
         status: "error",
-        message: "Campaign was not sent because RESEND_API_KEY is not configured.",
+        message:
+          "Campaign was not sent — the RESEND_API_KEY is missing at runtime. Verify the environment variable is loaded correctly.",
+        details: { sent, failed, skipped, recipientCount: recipients.length },
       };
     }
 
+    const statusMsg =
+      failed > 0
+        ? `Campaign sent with ${failed} failure(s). Sent: ${sent}, Failed: ${failed}, Skipped: ${skipped}.${errors.length > 0 ? ` First error: ${errors[0]}` : ""}`
+        : `Campaign sent successfully! Delivered to ${sent} recipient${sent !== 1 ? "s" : ""}${skipped > 0 ? `, ${skipped} skipped` : ""}.`;
+
     return {
-      status: failed > 0 ? "error" : "success",
-      message: `Campaign complete. Sent ${sent}, failed ${failed}, skipped ${skipped}.`,
+      status: failed > 0 && sent === 0 ? "error" : "success",
+      message: statusMsg,
+      details: { sent, failed, skipped, recipientCount: recipients.length },
     };
   } catch (error) {
     return {
