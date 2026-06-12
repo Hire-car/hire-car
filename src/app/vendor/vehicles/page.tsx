@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext, getVehicleLimitInfo } from "@/lib/data/vendor";
-import { getOrganizationVehicles } from "./actions";
+import { getOrganizationVehicles, deleteVehicle } from "./actions";
 import { getVehicleImages } from "./image-actions";
 import VehicleForm from "./vehicle-form";
 import { DeleteVehicleButton } from "./delete-button";
@@ -197,7 +197,10 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
                     >
                       <Edit2 className="h-4 w-4" />
                     </Link>
-                    <form action="/api/vehicles/delete" method="POST">
+                    <form action={async (formData) => {
+                      "use server";
+                      await deleteVehicle(formData);
+                    }}>
                       <input type="hidden" name="vehicleId" value={vehicle.id} />
                       <input type="hidden" name="organizationId" value={selectedOrgId} />
                       <DeleteVehicleButton />
