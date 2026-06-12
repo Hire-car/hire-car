@@ -26,7 +26,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   // Scroll to bottom whenever messages change
   const scrollToBottom = () => {
