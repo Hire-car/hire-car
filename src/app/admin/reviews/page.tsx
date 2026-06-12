@@ -1,86 +1,46 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/security/auth";
+import { requireAdminRole } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidatePath } from "next/cache";
 import { Badge } from "@/components/ui/badge";
 import { AdminReviewsTable } from "./reviews-table";
+import { moderateReview } from "../actions";
 
 export const metadata = {
   title: "Review Moderation",
 };
 
 interface AdminReviewsPageProps {
-  searchParams: Promise<{
-    status?: string;
-  }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }
 
-async function moderateReview(action: string, reviewId: string, reason: string) {
-  "use server";
-
-  const user = await requireAdmin();
-  const supabase = createAdminClient();
-
-  const statusMap: Record<string, string> = {
-    approve: "approved",
-    reject: "rejected",
-  };
-
-  const newStatus = statusMap[action];
-  if (!newStatus) {
-    throw new Error("Invalid action");
-  }
-
-  // Update review
-  const { error } = await supabase
-    .from("reviews")
-    .update({
-      status: newStatus,
-    })
-    .eq("id", reviewId);
-
-  if (error) {
-    throw new Error(`Failed to ${action} review: ${error.message}`);
-  }
-
-  // Add moderation note
-  await supabase.from("moderation_notes").insert({
-    resource_type: "review",
-    resource_id: reviewId,
-    author_user_id: user.id,
-    body: `[${action.toUpperCase()}] ${reason}`,
-  });
-
-  // Log audit event
-  await supabase.from("audit_logs").insert({
-    actor_user_id: user.id,
-    action: `moderation_${action}`,
-    resource_type: "review",
-    resource_id: reviewId,
-    metadata: { reason },
-  });
-
-  revalidatePath("/admin/reviews");
-  revalidatePath("/admin");
-}
 
 export default async function AdminReviewsPage({ searchParams }: AdminReviewsPageProps) {
-  await requireAdmin();
+  await requireAdminRole(["support", "super_admin"]);
   const params = await searchParams;
   const supabase = createAdminClient();
 
   // Get counts by status
-  const { data: statusCounts } = await supabase
-    .from("reviews")
-    .select("status");
+  const [
+    { count: pendingCount },
+    { count: approvedCount },
+    { count: rejectedCount },
+  ] = await Promise.all([
+    supabase.from("reviews").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("reviews").select("id", { count: "exact", head: true }).eq("status", "approved"),
+    supabase.from("reviews").select("id", { count: "exact", head: true }).eq("status", "rejected"),
+  ]);
 
   const counts = {
-    pending: statusCounts?.filter((r) => r.status === "pending").length ?? 0,
-    approved: statusCounts?.filter((r) => r.status === "approved").length ?? 0,
-    rejected: statusCounts?.filter((r) => r.status === "rejected").length ?? 0,
+    pending: pendingCount ?? 0,
+    approved: approvedCount ?? 0,
+    rejected: rejectedCount ?? 0,
   };
 
   const statusFilter = params.status || "pending";
+  const page = parseInt(params.page || "1", 10);
+  const pageSize = 20;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
   // Fetch reviews
   const { data: reviews, error } = await supabase
@@ -95,7 +55,7 @@ export default async function AdminReviewsPage({ searchParams }: AdminReviewsPag
     )
     .eq("status", statusFilter)
     .order("created_at", { ascending: false })
-    .limit(200);
+    .range(from, to);
 
   if (error) {
     throw new Error(`Failed to fetch reviews: ${error.message}`);
@@ -168,6 +128,31 @@ export default async function AdminReviewsPage({ searchParams }: AdminReviewsPag
         statusFilter={statusFilter}
         moderateReview={moderateReview}
       />
+      
+      {/* Basic Pagination Controls */}
+      <div className="flex justify-between items-center py-4 text-sm text-muted-foreground">
+        <div>
+          Showing page {page}
+        </div>
+        <div className="flex gap-2">
+          {page > 1 && (
+            <Link
+              href={`/admin/reviews?status=${statusFilter}&page=${page - 1}`}
+              className="px-4 py-2 border rounded hover:bg-accent transition-colors"
+            >
+              Previous
+            </Link>
+          )}
+          {tableData.length === pageSize && (
+            <Link
+              href={`/admin/reviews?status=${statusFilter}&page=${page + 1}`}
+              className="px-4 py-2 border rounded hover:bg-accent transition-colors"
+            >
+              Next
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

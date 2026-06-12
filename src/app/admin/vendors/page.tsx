@@ -1,93 +1,31 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/security/auth";
+import { requireAdminRole } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { revalidatePath } from "next/cache";
 import { Badge } from "@/components/ui/badge";
 import { AdminVendorsTable } from "./vendors-table";
+import { moderateVendor } from "../actions";
 
 export const metadata = {
   title: "Vendor Moderation",
 };
 
 interface AdminVendorsPageProps {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }
 
-async function moderateVendor(action: string, vendorId: string, reason: string) {
-  "use server";
-
-  const user = await requireAdmin();
-  const supabase = createAdminClient();
-
-  const statusMap: Record<string, string> = {
-    approve: "approved",
-    reject: "rejected",
-    suspend: "suspended",
-    restore: "approved",
-  };
-
-  const newStatus = statusMap[action];
-  if (!newStatus) {
-    throw new Error("Invalid action");
-  }
-
-  const updateData: Record<string, unknown> = {
-    status: newStatus,
-    updated_at: new Date().toISOString(),
-  };
-
-  if (action === "suspend") {
-    updateData.suspended_at = new Date().toISOString();
-  }
-
-  if (action === "restore") {
-    updateData.suspended_at = null;
-  }
-
-  // Update vendor
-  const { error } = await supabase.from("organizations").update(updateData).eq("id", vendorId);
-
-  if (error) {
-    throw new Error(`Failed to ${action} vendor: ${error.message}`);
-  }
-
-  // Approve all branches if approving vendor
-  if (action === "approve" || action === "restore") {
-    await supabase
-      .from("branches")
-      .update({ status: "approved", updated_at: new Date().toISOString() })
-      .eq("organization_id", vendorId)
-      .eq("status", "pending");
-  }
-
-  // Add moderation note
-  await supabase.from("moderation_notes").insert({
-    resource_type: "vendor",
-    resource_id: vendorId,
-    author_user_id: user.id,
-    body: `[${action.toUpperCase()}] ${reason}`,
-  });
-
-  // Log audit event
-  await supabase.from("audit_logs").insert({
-    actor_user_id: user.id,
-    action: `moderation_${action}`,
-    resource_type: "vendor",
-    resource_id: vendorId,
-    metadata: { reason },
-  });
-
-  revalidatePath("/admin/vendors");
-  revalidatePath("/admin");
-}
 
 export default async function AdminVendorsPage({ searchParams }: AdminVendorsPageProps) {
-  await requireAdmin();
+  await requireAdminRole(["moderator", "super_admin"]);
   const params = await searchParams;
   const supabase = createAdminClient();
 
   // Fetch vendors
   const statusFilter = params.status || "pending";
+  const page = parseInt(params.page || "1", 10);
+  const pageSize = 20;
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
   const { data: vendors, error } = await supabase
     .from("organizations")
     .select(
@@ -98,23 +36,31 @@ export default async function AdminVendorsPage({ searchParams }: AdminVendorsPag
     `,
     )
     .eq("status", statusFilter)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     throw new Error(`Failed to fetch vendors: ${error.message}`);
   }
 
   // Count by status
-  const { data: allVendors } = await supabase
-    .from("organizations")
-    .select("status")
-    .in("status", ["pending", "approved", "suspended", "rejected"]);
+  const [
+    { count: pendingCount },
+    { count: approvedCount },
+    { count: suspendedCount },
+    { count: rejectedCount },
+  ] = await Promise.all([
+    supabase.from("organizations").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("organizations").select("id", { count: "exact", head: true }).eq("status", "approved"),
+    supabase.from("organizations").select("id", { count: "exact", head: true }).eq("status", "suspended"),
+    supabase.from("organizations").select("id", { count: "exact", head: true }).eq("status", "rejected"),
+  ]);
 
   const counts = {
-    pending: allVendors?.filter((v) => v.status === "pending").length ?? 0,
-    approved: allVendors?.filter((v) => v.status === "approved").length ?? 0,
-    suspended: allVendors?.filter((v) => v.status === "suspended").length ?? 0,
-    rejected: allVendors?.filter((v) => v.status === "rejected").length ?? 0,
+    pending: pendingCount ?? 0,
+    approved: approvedCount ?? 0,
+    suspended: suspendedCount ?? 0,
+    rejected: rejectedCount ?? 0,
   };
 
   // Transform vendors for the DataTable
@@ -183,6 +129,31 @@ export default async function AdminVendorsPage({ searchParams }: AdminVendorsPag
         statusFilter={statusFilter}
         moderateVendor={moderateVendor}
       />
+      
+      {/* Basic Pagination Controls */}
+      <div className="flex justify-between items-center py-4 text-sm text-muted-foreground">
+        <div>
+          Showing page {page}
+        </div>
+        <div className="flex gap-2">
+          {page > 1 && (
+            <Link
+              href={`/admin/vendors?status=${statusFilter}&page=${page - 1}`}
+              className="px-4 py-2 border rounded hover:bg-accent transition-colors"
+            >
+              Previous
+            </Link>
+          )}
+          {tableData.length === pageSize && (
+            <Link
+              href={`/admin/vendors?status=${statusFilter}&page=${page + 1}`}
+              className="px-4 py-2 border rounded hover:bg-accent transition-colors"
+            >
+              Next
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

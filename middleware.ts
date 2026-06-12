@@ -66,6 +66,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  if (isAdminRoute && user) {
+    const allowedAdminEmails = [
+      "pankaj@techtonika-autolink.com",
+      "anandujjawalofficia11@gmail.com",
+      "ybikash919@gmail.com",
+    ];
+    
+    if (!allowedAdminEmails.includes(user.email ?? "")) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/"; // Redirect unauthorized users away from admin
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   // Vendor zone: customers without an org see the upgrade prompt first
   if (user && path.startsWith("/vendor") && !isVendorPreOrgPath(path)) {
     const { count } = await supabase

@@ -29,10 +29,11 @@ interface AdminVendorsTableProps {
 
 const statusBadgeVariant = (status: string) => {
   switch (status) {
-    case "approved": return "success" as const;
-    case "pending": return "warning" as const;
-    case "suspended": return "destructive" as const;
-    default: return "outline" as const;
+    case "approved": return "badge-glow-success";
+    case "pending": return "badge-glow-warning";
+    case "suspended": return "badge-glow-destructive";
+    case "rejected": return "badge-glow-destructive";
+    default: return "bg-slate-100 text-slate-600";
   }
 };
 
@@ -93,9 +94,9 @@ export function AdminVendorsTable({ data, statusFilter, moderateVendor }: AdminV
       label: "Status",
       sortable: true,
       render: (val) => (
-        <Badge variant={statusBadgeVariant(val as string)}>
+        <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase ${statusBadgeVariant(val as string)}`}>
           {val as string}
-        </Badge>
+        </span>
       ),
     },
     {
@@ -106,12 +107,12 @@ export function AdminVendorsTable({ data, statusFilter, moderateVendor }: AdminV
           {row.status === "pending" && (
             <>
               <form action={moderateVendor.bind(null, "approve", row.id as string, "Approved from admin dashboard")}>
-                <Button type="submit" size="sm" variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4">
                   Approve
                 </Button>
               </form>
               <form action={moderateVendor.bind(null, "reject", row.id as string, "Rejected from admin dashboard")}>
-                <Button type="submit" size="sm" variant="destructive">
+                <Button type="submit" size="sm" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300 rounded-xl px-4">
                   Reject
                 </Button>
               </form>
@@ -119,14 +120,14 @@ export function AdminVendorsTable({ data, statusFilter, moderateVendor }: AdminV
           )}
           {row.status === "approved" && (
             <form action={moderateVendor.bind(null, "suspend", row.id as string, "Suspended from admin dashboard")}>
-              <Button type="submit" size="sm" variant="outline" className="text-amber-600 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-600 dark:hover:bg-amber-900/20">
+              <Button type="submit" size="sm" variant="outline" className="text-amber-600 border-amber-200 hover:bg-amber-50 rounded-xl px-4">
                 Suspend
               </Button>
             </form>
           )}
           {(row.status === "suspended" || row.status === "rejected") && (
             <form action={moderateVendor.bind(null, "restore", row.id as string, "Restored from admin dashboard")}>
-              <Button type="submit" size="sm" variant="default">
+              <Button type="submit" size="sm" className="bg-slate-800 hover:bg-slate-900 text-white shadow-sm rounded-xl px-4">
                 Restore
               </Button>
             </form>
@@ -154,16 +155,18 @@ export function AdminVendorsTable({ data, statusFilter, moderateVendor }: AdminV
       </div>
 
       {filteredData.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground">No {statusFilter} vendors found.</p>
+        <div className="rounded-3xl border border-slate-200/60 bg-white/50 p-12 text-center glass-panel">
+          <p className="text-slate-500 font-medium">No {statusFilter} vendors found.</p>
         </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={filteredData as unknown as Record<string, unknown>[]}
-          pageSize={20}
-          pageSizeOptions={[10, 20, 50]}
-        />
+        <div className="glass-panel rounded-3xl border-white/40 shadow-xl overflow-hidden bg-white/50">
+          <DataTable
+            columns={columns}
+            data={filteredData as unknown as Record<string, unknown>[]}
+            pageSize={20}
+            pageSizeOptions={[10, 20, 50]}
+          />
+        </div>
       )}
     </div>
   );

@@ -29,19 +29,19 @@ interface AdminFraudTableProps {
 
 const severityBadgeVariant = (severity: string) => {
   switch (severity) {
-    case "critical": return "destructive" as const;
-    case "high": return "warning" as const;
-    case "medium": return "warning" as const;
-    default: return "outline" as const;
+    case "critical": return "badge-glow-destructive";
+    case "high": return "badge-glow-warning";
+    case "medium": return "badge-glow-warning";
+    default: return "bg-slate-100 text-slate-600";
   }
 };
 
 const statusBadgeVariant = (status: string) => {
   switch (status) {
-    case "open": return "destructive" as const;
-    case "reviewing": return "warning" as const;
-    case "closed": return "success" as const;
-    default: return "outline" as const;
+    case "open": return "badge-glow-destructive";
+    case "reviewing": return "badge-glow-warning";
+    case "closed": return "badge-glow-success";
+    default: return "bg-slate-100 text-slate-600";
   }
 };
 
@@ -66,9 +66,9 @@ export function AdminFraudTable({ data, updateFraudFlagStatus }: AdminFraudTable
       label: "Severity",
       sortable: true,
       render: (val) => (
-        <Badge variant={severityBadgeVariant(val as string)}>
+        <span className={`px-2.5 py-1 rounded-full text-xs font-bold tracking-wide uppercase ${severityBadgeVariant(val as string)}`}>
           {val as string}
-        </Badge>
+        </span>
       ),
     },
     {
@@ -102,9 +102,9 @@ export function AdminFraudTable({ data, updateFraudFlagStatus }: AdminFraudTable
       label: "Status",
       sortable: true,
       render: (val) => (
-        <Badge variant={statusBadgeVariant(val as string)}>
+        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${statusBadgeVariant(val as string)}`}>
           {val as string}
-        </Badge>
+        </span>
       ),
     },
     {
@@ -125,31 +125,31 @@ export function AdminFraudTable({ data, updateFraudFlagStatus }: AdminFraudTable
           {row.status === "open" && (
             <>
               <form action={updateFraudFlagStatus.bind(null, "close", row.id as string)}>
-                <Button type="submit" size="sm" variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4">
                   Close
                 </Button>
               </form>
               <Link href={`/admin/audit?type=${row.resource_type}&id=${row.resource_id}`}>
-                <Button variant="ghost" size="sm">Audit</Button>
+                <Button variant="ghost" size="sm" className="rounded-xl">Audit</Button>
               </Link>
             </>
           )}
           {row.status === "reviewing" && (
             <>
               <form action={updateFraudFlagStatus.bind(null, "close", row.id as string)}>
-                <Button type="submit" size="sm" variant="default" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4">
                   Close
                 </Button>
               </form>
               <form action={updateFraudFlagStatus.bind(null, "reopen", row.id as string)}>
-                <Button type="submit" size="sm" variant="outline">
+                <Button type="submit" size="sm" variant="outline" className="rounded-xl">
                   Reopen
                 </Button>
               </form>
             </>
           )}
           {row.status === "closed" && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground font-medium bg-slate-100 px-2 py-1 rounded-md">
               {row.reviewer ? `By ${row.reviewer}` : "Closed"}
             </span>
           )}
@@ -173,16 +173,18 @@ export function AdminFraudTable({ data, updateFraudFlagStatus }: AdminFraudTable
       </div>
 
       {filteredData.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground">No fraud flags found.</p>
+        <div className="rounded-3xl border border-slate-200/60 bg-white/50 p-12 text-center glass-panel">
+          <p className="text-slate-500 font-medium">No fraud flags found.</p>
         </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={filteredData as unknown as Record<string, unknown>[]}
-          pageSize={20}
-          pageSizeOptions={[10, 20, 50]}
-        />
+        <div className="glass-panel rounded-3xl border-white/40 shadow-xl overflow-hidden bg-white/50">
+          <DataTable
+            columns={columns}
+            data={filteredData as unknown as Record<string, unknown>[]}
+            pageSize={20}
+            pageSizeOptions={[10, 20, 50]}
+          />
+        </div>
       )}
     </div>
   );

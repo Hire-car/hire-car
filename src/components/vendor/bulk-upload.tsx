@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UploadCloud, FileSpreadsheet, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, X, CheckCircle2, AlertCircle, Download } from "lucide-react";
 import { processBulkUpload } from "@/app/vendor/vehicles/bulk-actions";
 
 const MAX_UPLOAD_SIZE_BYTES = 8 * 1024 * 1024;
@@ -78,13 +78,24 @@ export function BulkUpload({ organizationId, branches }: BulkUploadProps) {
 
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-      >
-        <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-        Bulk Upload Vehicles
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+        >
+          <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+          Bulk Upload Vehicles
+        </button>
+        <a
+          href="/templates/vehicle-upload-template.csv"
+          download
+          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+          title="Download CSV Template"
+        >
+          <Download className="h-4 w-4 text-blue-600" />
+          Download Template
+        </a>
+      </div>
     );
   }
 
@@ -104,7 +115,10 @@ export function BulkUpload({ organizationId, branches }: BulkUploadProps) {
         <div className="flex-1">
           <h2 className="text-lg font-bold text-slate-900">Bulk Upload Vehicles</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Upload your fleet spreadsheet. We support CSV and Excel formats. Ensure your columns match: Make, Model, Year, Category, Daily Rate, etc.
+            Upload your fleet spreadsheet. We support CSV and Excel formats. Ensure your columns match: Make, Model, Year, Category, Daily Rate, etc.{" "}
+            <a href="/templates/vehicle-upload-template.csv" download className="text-emerald-600 font-semibold hover:underline">
+              Download the template here.
+            </a>
           </p>
 
           <form onSubmit={handleUpload} className="mt-6 space-y-4 max-w-xl">

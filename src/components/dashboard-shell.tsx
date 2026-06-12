@@ -24,7 +24,8 @@ import {
   X,
   Bell,
   ChevronDown,
-  Megaphone
+  Megaphone,
+  Shield
 } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 import { BrandLogo } from "@/components/brand-logo";
@@ -40,19 +41,19 @@ const vendorLinks = [
 ];
 
 const adminLinks = [
-  { label: "Overview", href: "/admin", icon: LayoutGrid },
-  { label: "Vendors", href: "/admin/vendors", icon: Users },
-  { label: "Branches", href: "/admin/branches", icon: GitBranch },
-  { label: "Listings", href: "/admin/listings", icon: List },
-  { label: "Featured", href: "/admin/featured", icon: Star },
-  { label: "Leads", href: "/admin/leads", icon: MessageSquare },
-  { label: "Billing", href: "/admin/billing", icon: CreditCard },
-  { label: "Reviews", href: "/admin/reviews", icon: ClipboardList },
-  { label: "Fraud", href: "/admin/fraud", icon: AlertTriangle },
-  { label: "Audit", href: "/admin/audit", icon: ClipboardList },
-  { label: "Marketing", href: "/admin/marketing", icon: Megaphone },
-  { label: "WhatsApp", href: "/admin/whatsapp", icon: MessageSquare },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
+  { label: "Overview", href: "/admin", icon: LayoutGrid, roles: ["moderator", "support", "finance", "super_admin"] },
+  { label: "Vendors", href: "/admin/vendors", icon: Users, roles: ["moderator", "super_admin"] },
+  { label: "Branches", href: "/admin/branches", icon: GitBranch, roles: ["moderator", "super_admin"] },
+  { label: "Listings", href: "/admin/listings", icon: List, roles: ["moderator", "super_admin"] },
+  { label: "Featured", href: "/admin/featured", icon: Star, roles: ["moderator", "super_admin"] },
+  { label: "Leads", href: "/admin/leads", icon: MessageSquare, roles: ["support", "super_admin"] },
+  { label: "Billing", href: "/admin/billing", icon: CreditCard, roles: ["finance", "super_admin"] },
+  { label: "Reviews", href: "/admin/reviews", icon: ClipboardList, roles: ["support", "super_admin"] },
+  { label: "Fraud", href: "/admin/fraud", icon: AlertTriangle, roles: ["moderator", "super_admin"] },
+  { label: "Audit", href: "/admin/audit", icon: ClipboardList, roles: ["super_admin"] },
+  { label: "Marketing", href: "/admin/marketing", icon: Megaphone, roles: ["super_admin"] },
+  { label: "WhatsApp", href: "/admin/whatsapp", icon: MessageSquare, roles: ["support", "super_admin"] },
+  { label: "Settings", href: "/admin/settings", icon: Settings, roles: ["super_admin"] },
 ];
 
 function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
@@ -99,8 +100,8 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-64 rounded-2xl bg-white border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.08)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50">
+        <div className="absolute right-0 mt-3 w-64 rounded-2xl glass-panel shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="p-4 border-b border-slate-100/50 bg-slate-50/30">
             <p className="text-sm font-bold text-slate-900">Signed In As</p>
             <p className="text-xs font-medium text-slate-500 mt-0.5 truncate">{email}</p>
           </div>
@@ -199,8 +200,8 @@ function NotificationDropdown({ mode }: { mode: "vendor" | "admin" }) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 rounded-2xl bg-white border border-slate-100 shadow-[0_10px_40px_rgba(0,0,0,0.08)] overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+        <div className="absolute right-0 mt-3 w-80 rounded-2xl glass-panel shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="p-4 border-b border-slate-100/50 bg-slate-50/30 flex items-center justify-between">
             <p className="text-sm font-bold text-slate-900">Notifications</p>
             {unreadCount > 0 && (
               <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">{unreadCount} new</span>
@@ -252,12 +253,24 @@ function NotificationDropdown({ mode }: { mode: "vendor" | "admin" }) {
 export function DashboardShell({
   children,
   mode,
+  isAdmin = false,
+  adminRole,
 }: {
   children: ReactNode;
   mode: "vendor" | "admin";
+  isAdmin?: boolean;
+  adminRole?: string;
 }) {
   const pathname = usePathname();
-  const links = mode === "vendor" ? vendorLinks : adminLinks;
+  let baseLinks = mode === "vendor" ? vendorLinks : adminLinks;
+  
+  if (mode === "admin" && adminRole) {
+    baseLinks = adminLinks.filter(link => !link.roles || link.roles.includes(adminRole));
+  }
+  
+  const links = mode === "vendor" && isAdmin 
+    ? [...baseLinks, { label: "Admin Portal", href: "/admin", icon: Shield }]
+    : baseLinks;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -356,15 +369,15 @@ export function DashboardShell({
               href={href}
               className={`group flex items-center gap-3 rounded-xl px-4 min-h-[44px] text-sm font-bold transition-all duration-300 ${
                 isActive
-                  ? "bg-orange-50 text-[#ea580c] shadow-sm relative overflow-hidden"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-gradient-to-r from-orange-50 to-amber-50/30 text-primary shadow-sm relative overflow-hidden"
+                  : "text-slate-500 hover:bg-slate-50/80 hover:text-slate-900 hover:shadow-sm"
               }`}
               aria-current={isActive ? "page" : undefined}
             >
               {isActive && (
-                <span className="absolute left-0 top-0 bottom-0 w-1 bg-[#ea580c] rounded-r-md"></span>
+                <span className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-amber-500 rounded-r-md shadow-[0_0_8px_rgba(234,88,12,0.6)]"></span>
               )}
-              <Icon className={`h-5 w-5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : "group-hover:scale-110 group-hover:text-slate-700"}`} />
+              <Icon className={`h-5 w-5 shrink-0 transition-all duration-300 ${isActive ? "scale-110 drop-shadow-md text-primary" : "group-hover:scale-110 group-hover:text-slate-700"}`} />
               <span className="transform transition-transform duration-300 group-hover:translate-x-1">{label}</span>
             </Link>
           );
@@ -374,9 +387,14 @@ export function DashboardShell({
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50/50 relative selection:bg-primary/20 selection:text-primary">
+      {/* Dynamic Background Blurs */}
+      <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-orange-50/40 to-transparent pointer-events-none -z-10" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] rounded-full bg-blue-500/5 blur-[100px] pointer-events-none -z-10" />
+
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+      <header className="sticky top-0 z-40 glass-panel border-b-0 shadow-sm">
         <div className="mx-auto flex w-full items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             {/* Mobile hamburger button */}
@@ -445,9 +463,9 @@ export function DashboardShell({
             role="dialog"
             aria-modal="true"
             aria-label={`${mode === "admin" ? "Admin" : "Vendor"} navigation`}
-            className="absolute left-0 top-0 h-full w-[280px] max-w-[80vw] bg-white border-r border-slate-100 shadow-2xl animate-in slide-in-from-left duration-300"
+            className="absolute left-0 top-0 h-full w-[280px] max-w-[80vw] glass-panel bg-white/90 shadow-2xl animate-in slide-in-from-left duration-300"
           >
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100/50 bg-slate-50/30">
               <div className="flex items-center gap-3">
                 <BrandLogo
                   priority
@@ -484,7 +502,7 @@ export function DashboardShell({
         <div className="flex flex-col md:flex-row gap-8">
           {/* Desktop sidebar */}
           <aside className="hidden md:block w-[260px] shrink-0">
-            <div className="sticky top-24 rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-xl shadow-sm p-4 h-[calc(100vh-8rem)] overflow-y-auto hidden-scrollbar">
+            <div className="sticky top-24 rounded-3xl glass-panel bg-white/40 p-4 h-[calc(100vh-8rem)] overflow-y-auto hidden-scrollbar">
               <nav>{navContent}</nav>
             </div>
           </aside>

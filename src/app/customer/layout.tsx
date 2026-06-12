@@ -2,20 +2,28 @@ import Link from "next/link";
 import { requireUser } from "@/lib/security/auth";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
-import { LayoutDashboard, MessageCircle, Settings, LogOut, Heart } from "lucide-react";
+import { LayoutDashboard, MessageCircle, Settings, LogOut, Heart, Shield } from "lucide-react";
 
 export default async function CustomerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireUser();
+  const user = await requireUser();
+
+  const allowedAdminEmails = [
+    "pankaj@techtonika-autolink.com",
+    "anandujjawalofficia11@gmail.com",
+    "ybikash919@gmail.com",
+  ];
+  const isAdmin = allowedAdminEmails.includes(user.email ?? "");
 
   const navItems = [
     { name: "Dashboard", href: "/customer/dashboard", icon: LayoutDashboard },
     { name: "My Enquiries", href: "/customer/enquiries", icon: MessageCircle },
     { name: "Saved", href: "/customer/saved", icon: Heart },
     { name: "Settings", href: "/customer/settings", icon: Settings },
+    ...(isAdmin ? [{ name: "Admin Portal", href: "/admin", icon: Shield }] : []),
   ];
 
   return (
