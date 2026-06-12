@@ -10,6 +10,7 @@ import {
 import { vehicleSchema } from "@/lib/validation/schemas";
 import { uniqueSlug } from "@/lib/slug";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
+import { evaluateVehicleListing } from "@/lib/ai/vehicle-moderation";
 
 export type VehicleActionResult =
   | { success: true; vehicleId: string }
@@ -85,9 +86,32 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       return { success: false, error: "Invalid branch or organization" };
     }
 
-    const vehicleStatus = orgData.status === "approved" ? "approved" : "pending";
+    let vehicleStatus = orgData.status === "approved" ? "approved" : "pending";
+    let isAiApproved = true;
+    let aiReason = "";
+    let aiSeverity = "medium";
 
-    // Create vehicle with pending status (requires admin approval)
+    // Run AI Moderation Check
+    if (orgData.status === "approved") {
+      const moderation = await evaluateVehicleListing({
+        title: data.title,
+        make: data.make,
+        model: data.model,
+        year: data.year,
+        category: data.category,
+        pricePerDayAud: Number(data.pricePerDayAud),
+        notes: data.notes || undefined,
+      });
+
+      if (!moderation.isApproved) {
+        vehicleStatus = "suspended";
+        isAiApproved = false;
+        aiReason = moderation.reason;
+        aiSeverity = moderation.flagSeverity || "medium";
+      }
+    }
+
+    // Create vehicle
     const { data: vehicle, error } = await supabase
       .from("vehicles")
       .insert({
@@ -121,6 +145,17 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
 
     if (error) {
       return { success: false, error: `Failed to create vehicle: ${error.message}` };
+    }
+
+    // Create a fraud flag if AI rejected the listing
+    if (!isAiApproved) {
+      await supabase.from("fraud_flags").insert({
+        resource_type: "vehicle",
+        resource_id: vehicle.id,
+        severity: aiSeverity,
+        reason: `AI Moderation Auto-Suspension: ${aiReason}`,
+        status: "open",
+      }).then(({ error: e }) => { if (e) console.warn("fraud_flags insert failed:", e.message); });
     }
 
     // Create search index job (fire and forget - don't fail on this)
@@ -255,15 +290,35 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
   if (Object.keys(updateData).length > 0) {
     updateData.updated_at = new Date().toISOString();
 
-    if (isOrgApproved) {
-      // Vendor is approved, so vehicle is always approved
+    let aiRejectionReason = "";
+    let aiSeverity = "medium";
+
+    // Re-evaluate material changes with AI
+    if (isOrgApproved && hasMaterialChanges) {
+      const moderation = await evaluateVehicleListing({
+        title: updateData.title as string ?? existingVehicle.title,
+        make: updateData.make as string ?? existingVehicle.make,
+        model: updateData.model as string ?? existingVehicle.model,
+        year: updateData.year as number ?? existingVehicle.year,
+        category: updateData.category as string ?? existingVehicle.category,
+        pricePerDayAud: Number(updateData.price_per_day_aud ?? existingVehicle.price_per_day_aud),
+        notes: updateData.notes as string ?? existingVehicle.notes,
+      });
+
+      if (!moderation.isApproved) {
+        updateData.status = "suspended";
+        aiRejectionReason = moderation.reason;
+        aiSeverity = moderation.flagSeverity || "medium";
+      } else {
+        updateData.status = "approved";
+        updateData.suspended_at = null;
+      }
+    } else if (isOrgApproved) {
       updateData.status = "approved";
       updateData.suspended_at = null;
     } else {
-      // Revert to pending if material changes on approved vehicle
       if (existingVehicle.status === "approved" && hasMaterialChanges) {
         updateData.status = "pending";
-        // Clear suspended_at if it was set
         updateData.suspended_at = null;
       }
     }
@@ -281,13 +336,21 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
       status: "pending",
     });
 
-    // Create fraud flag for admin attention if reverted to pending
-    if (existingVehicle.status === "approved" && hasMaterialChanges) {
+    // Create fraud flag for admin attention
+    if (aiRejectionReason) {
+      await supabase.from("fraud_flags").insert({
+        resource_type: "vehicle",
+        resource_id: vehicleId,
+        severity: aiSeverity,
+        reason: `AI Moderation Auto-Suspension on Update: ${aiRejectionReason}`,
+        status: "open",
+      });
+    } else if (existingVehicle.status === "approved" && hasMaterialChanges && !isOrgApproved) {
       await supabase.from("fraud_flags").insert({
         resource_type: "vehicle",
         resource_id: vehicleId,
         severity: "low",
-        reason: `Vehicle reverted to pending after material update by vendor. Fields changed: ${Object.keys(updateData).filter(k => materialFields.includes(k)).join(", ")}`,
+        reason: `Vehicle reverted to pending after material update by pending vendor. Fields changed: ${Object.keys(updateData).filter(k => materialFields.includes(k)).join(", ")}`,
         status: "open",
       });
     }
