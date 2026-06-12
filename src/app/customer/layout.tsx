@@ -11,12 +11,8 @@ export default async function CustomerLayout({
 }) {
   const user = await requireUser();
 
-  const allowedAdminEmails = [
-    "pankaj@techtonika-autolink.com",
-    "anandujjawalofficial11@gmail.com",
-    "ybikash919@gmail.com",
-  ];
-  const isAdmin = allowedAdminEmails.includes(user.email ?? "");
+  const { userHasAdminAccess } = await import("@/lib/security/auth");
+  const isAdmin = await userHasAdminAccess(user);
 
   const navItems = [
     { name: "Dashboard", href: "/customer/dashboard", icon: LayoutDashboard },
