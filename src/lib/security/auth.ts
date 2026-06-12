@@ -10,6 +10,12 @@ type SupabaseUser = {
   factors?: unknown[];
 };
 
+const SUPER_ADMIN_EMAILS = [
+  "pankaj@techtonika-autolink.com",
+  "anandujjawalofficial11@gmail.com",
+  "ybikash919@gmail.com"
+];
+
 export async function getCurrentUser() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
@@ -56,10 +62,13 @@ async function userHasAdminRoleRecord(
 }
 
 async function userHasAdminAccess(user: SupabaseUser) {
+  if (user.email && SUPER_ADMIN_EMAILS.includes(user.email)) return true;
   return userHasPlatformRole(user) || userHasAdminRoleRecord(user.id);
 }
 
 export async function getUserAdminRole(user: SupabaseUser): Promise<string> {
+  if (user.email && SUPER_ADMIN_EMAILS.includes(user.email)) return "super_admin";
+
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("admin_roles")
@@ -90,8 +99,11 @@ export async function requireAdmin() {
     redirect("/customer/dashboard");
   }
 
-  if (!(await userHasAal2Session())) {
-    redirect("/auth/mfa");
+  // Bypass MFA requirement for the hardcoded founders to prevent lockouts
+  if (!user.email || !SUPER_ADMIN_EMAILS.includes(user.email)) {
+    if (!(await userHasAal2Session())) {
+      redirect("/auth/mfa");
+    }
   }
 
   return user;
@@ -107,7 +119,7 @@ export async function requireAdminRole(allowedRoles: string[]) {
   // Check if they have an active admin role record for these specific roles
   // or if they are an owner/admin (who can do everything)
   const isGlobalAdmin = await userHasAdminRoleRecord(user.id, ["owner", "admin"]);
-  if (isGlobalAdmin) {
+  if (isGlobalAdmin || (user.email && SUPER_ADMIN_EMAILS.includes(user.email))) {
     return user;
   }
 
@@ -146,7 +158,7 @@ export async function requireApiAdmin() {
     };
   }
 
-  if (!(await userHasAal2Session())) {
+  if (!(await userHasAal2Session()) && !(user.email && SUPER_ADMIN_EMAILS.includes(user.email))) {
     return {
       user: null,
       response: NextResponse.json({ error: "MFA required" }, { status: 403 }),
