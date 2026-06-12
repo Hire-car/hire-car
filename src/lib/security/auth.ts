@@ -61,7 +61,7 @@ async function userHasAdminRoleRecord(
   return !!data;
 }
 
-async function userHasAdminAccess(user: SupabaseUser) {
+export async function userHasAdminAccess(user: SupabaseUser) {
   if (user.email && SUPER_ADMIN_EMAILS.includes(user.email)) return true;
   return userHasPlatformRole(user) || userHasAdminRoleRecord(user.id);
 }
