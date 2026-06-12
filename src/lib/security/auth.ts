@@ -47,16 +47,20 @@ export function userHasPlatformRole(
 
 async function userHasAdminRoleRecord(
   userId: string,
-  roles = ["owner", "admin", "moderator"],
+  roles?: string[],
 ) {
   const supabase = createAdminClient();
-  const { data } = await supabase
+  let query = supabase
     .from("admin_roles")
     .select("role")
     .eq("user_id", userId)
-    .eq("active", true)
-    .in("role", roles)
-    .maybeSingle();
+    .eq("active", true);
+
+  if (roles && roles.length > 0) {
+    query = query.in("role", roles);
+  }
+
+  const { data } = await query.maybeSingle();
 
   return !!data;
 }
