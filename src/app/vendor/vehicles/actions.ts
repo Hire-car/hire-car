@@ -234,7 +234,7 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
   // Verify vehicle belongs to organization and get current org status
   const { data: existingVehicle } = await supabase
     .from("vehicles")
-    .select("id, branch_id, status, organizations!inner(status)")
+    .select("id, branch_id, status, title, make, model, year, category, price_per_day_aud, notes, organizations!inner(status)")
     .eq("id", vehicleId)
     .eq("organization_id", organizationId)
     .single();
