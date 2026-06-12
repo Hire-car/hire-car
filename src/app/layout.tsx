@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Inter, Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -137,6 +138,7 @@ export default function RootLayout({
             }
           `}
         </Script>
+        <SpeedInsights />
       </body>
     </html>
   );
