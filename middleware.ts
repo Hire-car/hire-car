@@ -69,7 +69,7 @@ export async function middleware(request: NextRequest) {
   if (isAdminRoute && user) {
     const allowedAdminEmails = [
       "pankaj@techtonika-autolink.com",
-      "anandujjawalofficia11@gmail.com",
+      "anandujjawalofficial11@gmail.com",
       "ybikash919@gmail.com",
     ];
     
