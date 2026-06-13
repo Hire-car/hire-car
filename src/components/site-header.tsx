@@ -133,7 +133,7 @@ export function SiteHeader() {
             >
               <span className="hidden sm:inline-block">Australia&apos;s trusted premium car rental marketplace</span>
               <span className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                <Headphones className="h-3.5 w-3.5" /> 1800 123 456
+                <Headphones className="h-3.5 w-3.5" /> <a href="tel:0434930437" className="hover:text-amber-100 transition-colors">0434 930 437</a>
               </span>
             </motion.div>
           )}
