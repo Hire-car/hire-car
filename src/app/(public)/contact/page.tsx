@@ -51,7 +51,7 @@ export default function ContactPage() {
                     <div>
                       <h4 className="text-base font-bold text-slate-900">Email Us</h4>
                       <p className="mt-1 text-sm text-slate-500 mb-2">Our friendly team is here to help.</p>
-                      <a href="mailto:admin.hirecar@gmail.com" className="text-[#ea580c] font-semibold hover:text-[#c2410c] transition-colors">admin.hirecar@gmail.com</a>
+                      <a href="mailto:support@hirecarmarketplace.com.au" className="text-[#ea580c] font-semibold hover:text-[#c2410c] transition-colors">support@hirecarmarketplace.com.au</a>
                     </div>
                   </div>
 

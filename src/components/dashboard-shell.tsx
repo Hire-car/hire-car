@@ -26,7 +26,8 @@ import {
   ChevronDown,
   Megaphone,
   Shield,
-  UserCog
+  UserCog,
+  FileText,
 } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 import { BrandLogo } from "@/components/brand-logo";
@@ -53,6 +54,7 @@ const adminLinks = [
   { label: "Fraud", href: "/admin/fraud", icon: AlertTriangle, roles: ["moderator", "super_admin"] },
   { label: "Audit", href: "/admin/audit", icon: ClipboardList, roles: ["super_admin"] },
   { label: "Marketing", href: "/admin/marketing", icon: Megaphone, roles: ["super_admin"] },
+  { label: "Blog", href: "/admin/blog", icon: FileText, roles: ["super_admin"] },
   { label: "Roles", href: "/admin/roles", icon: UserCog, roles: ["owner", "admin", "super_admin"] },
   { label: "WhatsApp", href: "/admin/whatsapp", icon: MessageSquare, roles: ["support", "super_admin"] },
   { label: "Settings", href: "/admin/settings", icon: Settings, roles: ["super_admin"] },

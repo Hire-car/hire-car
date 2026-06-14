@@ -231,6 +231,10 @@ export function SiteHeader() {
                   About
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
                 </Link>
+                <Link href="/blog" className="relative font-bold text-sm text-slate-600 hover:text-primary transition-colors group">
+                  Blog
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                </Link>
                 <Link href="/contact" className="relative font-bold text-sm text-slate-600 hover:text-primary transition-colors group">
                   Contact
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
@@ -317,6 +321,7 @@ export function SiteHeader() {
             <Link href="/pricing" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Pricing</Link>
             <Link href="/for-vendors" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Vendors</Link>
             <Link href="/about" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">About</Link>
+            <Link href="/blog" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Blog</Link>
             <Link href="/contact" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Contact</Link>
           </div>
           

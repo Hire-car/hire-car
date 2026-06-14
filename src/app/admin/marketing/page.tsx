@@ -13,7 +13,7 @@ export default async function AdminMarketingPage() {
   await requireAdmin();
 
   const fromEmail = process.env.EMAIL_FROM ?? "Hire Car Marketplace <noreply@hirecarmarketplace.com.au>";
-  const replyToEmail = process.env.REPLY_TO_EMAIL ?? process.env.CONTACT_EMAIL_TO ?? "admin.hirecar@gmail.com";
+  const replyToEmail = process.env.REPLY_TO_EMAIL ?? process.env.CONTACT_EMAIL_TO ?? "support@hirecarmarketplace.com.au";
   const isSandboxSender = fromEmail.includes("@resend.dev");
 
   return (

@@ -39,22 +39,25 @@ export async function handleBotRouting(message: ParsedInboundMessage): Promise<v
 
     if (actionId === "SUPPORT_BTN") {
       await updateSession(phone, "awaiting_support_desc");
-      await sendCloudApiText(phone, "Please describe the issue you are facing in a single message, and our support team will get back to you.");
+      const res = await sendCloudApiText(phone, "Please describe the issue you are facing in a single message, and our support team will get back to you.");
+      if (!res.ok) throw new Error(`Failed to send support text: ${res.error}`);
       return;
     }
 
     if (actionId === "MANAGE_BOOKING_BTN") {
       await updateSession(phone, "awaiting_booking_id");
-      await sendCloudApiText(phone, "Please enter your Booking ID.");
+      const res = await sendCloudApiText(phone, "Please enter your Booking ID.");
+      if (!res.ok) throw new Error(`Failed to send booking text: ${res.error}`);
       return;
     }
 
     if (actionId === "INFO_BTN") {
       await clearSession(phone);
-      await sendCloudApiText(
+      const res = await sendCloudApiText(
         phone,
         "HireCar Marketplace is Australia's premium platform for booking verified rental vehicles.\n\nBrowse cars: https://www.hirecarmarketplace.com.au/search\nFAQ: https://www.hirecarmarketplace.com.au/about"
       );
+      if (!res.ok) throw new Error(`Failed to send info text: ${res.error}`);
       return;
     }
   }
@@ -71,7 +74,8 @@ export async function handleBotRouting(message: ParsedInboundMessage): Promise<v
       });
 
       await clearSession(phone);
-      await sendCloudApiText(phone, "Your support ticket has been created successfully. A member of our team will review it shortly.");
+      const res = await sendCloudApiText(phone, "Your support ticket has been created successfully. A member of our team will review it shortly.");
+      if (!res.ok) throw new Error(`Failed to send support success: ${res.error}`);
       return;
     }
 
@@ -89,15 +93,18 @@ export async function handleBotRouting(message: ParsedInboundMessage): Promise<v
 
         if (booking) {
           const vehicleTitle = Array.isArray(booking.vehicles) ? booking.vehicles[0]?.title : (booking.vehicles as any)?.title;
-          await sendCloudApiText(
+          const res = await sendCloudApiText(
             phone,
             `Booking Found!\nVehicle: ${vehicleTitle}\nStatus: ${booking.status}\nDates: ${booking.start_date} to ${booking.end_date}`
           );
+          if (!res.ok) throw new Error(`Failed to send booking found: ${res.error}`);
         } else {
-          await sendCloudApiText(phone, "We couldn't find a booking with that ID. Please ensure it's correct or contact support.");
+          const res = await sendCloudApiText(phone, "We couldn't find a booking with that ID. Please ensure it's correct or contact support.");
+          if (!res.ok) throw new Error(`Failed to send booking not found: ${res.error}`);
         }
       } else {
-         await sendCloudApiText(phone, "Invalid Booking ID format. Please contact support if you need help finding your booking.");
+         const res = await sendCloudApiText(phone, "Invalid Booking ID format. Please contact support if you need help finding your booking.");
+         if (!res.ok) throw new Error(`Failed to send invalid booking format: ${res.error}`);
       }
 
       await clearSession(phone);
@@ -106,7 +113,8 @@ export async function handleBotRouting(message: ParsedInboundMessage): Promise<v
 
     // Default to main menu if no state and they sent text
     await clearSession(phone);
-    await sendCloudApiInteractive(phone, MAIN_MENU);
+    const res = await sendCloudApiInteractive(phone, MAIN_MENU);
+    if (!res.ok) throw new Error(`Failed to send MAIN_MENU: ${res.error}`);
     return;
   }
 }

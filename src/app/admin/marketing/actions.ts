@@ -20,7 +20,7 @@ type Recipient = {
   name: string;
 };
 
-const ADMIN_EMAIL = process.env.CONTACT_EMAIL_TO ?? "admin.hirecar@gmail.com";
+const ADMIN_EMAIL = process.env.CONTACT_EMAIL_TO ?? "support@hirecarmarketplace.com.au";
 const MAX_RECIPIENTS = 500;
 
 function parseManualRecipients(raw: string): Recipient[] {

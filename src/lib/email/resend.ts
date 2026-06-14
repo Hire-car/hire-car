@@ -5,7 +5,7 @@ const apiKey = optionalEnv("RESEND_API_KEY");
 export const resend = apiKey ? new Resend(apiKey) : null;
 
 const FROM = process.env.EMAIL_FROM ?? "Hire Car Marketplace <noreply@hirecarmarketplace.com.au>";
-const REPLY_TO = process.env.REPLY_TO_EMAIL ?? process.env.CONTACT_EMAIL_TO ?? "admin.hirecar@gmail.com";
+const REPLY_TO = process.env.REPLY_TO_EMAIL ?? process.env.CONTACT_EMAIL_TO ?? "support@hirecarmarketplace.com.au";
 
 export async function sendLeadAlert(input: {
   to: string;
@@ -143,9 +143,9 @@ export async function sendContactMessage(input: {
   message: string;
 }) {
   if (!resend) return { skipped: true };
-  const to = process.env.CONTACT_EMAIL_TO ?? process.env.EMAIL_FROM ?? "admin.hirecar@gmail.com";
+  const to = process.env.CONTACT_EMAIL_TO ?? process.env.EMAIL_FROM ?? "support@hirecarmarketplace.com.au";
   await resend.emails.send({
-    from: process.env.EMAIL_FROM ?? "Hire Car Support <admin.hirecar@gmail.com>",
+    from: process.env.EMAIL_FROM ?? "Hire Car Support <support@hirecarmarketplace.com.au>",
     to,
     replyTo: input.email,
     subject: `Hire Car contact: ${input.topic}`,

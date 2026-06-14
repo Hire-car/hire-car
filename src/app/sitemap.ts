@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getAllPublishedArticleSlugs } from "@/lib/blog/queries";
 import { getIndexableSitemapUrls } from "@/lib/seo/discovery";
 
 const PAGE_SIZE = 5000;
@@ -46,7 +47,21 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
       { url: `${base}/vendors`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
       { url: `${base}/legal/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
       { url: `${base}/legal/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
+      { url: `${base}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.75 },
     ];
+
+    let blogRoutes: MetadataRoute.Sitemap = [];
+    try {
+      const articles = await getAllPublishedArticleSlugs();
+      blogRoutes = articles.map((a) => ({
+        url: `${base}/blog/${a.slug}`,
+        lastModified: new Date(a.updated_at),
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      }));
+    } catch {
+      // graceful fallback
+    }
 
     let pseoRoutes: MetadataRoute.Sitemap = [];
     try {
@@ -78,7 +93,7 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
       // graceful fallback
     }
 
-    return [...staticRoutes, ...pseoRoutes];
+    return [...staticRoutes, ...blogRoutes, ...pseoRoutes];
   }
 
   if (chunkId === 1) {

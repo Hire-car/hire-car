@@ -125,6 +125,74 @@ export function buildOrganizationSchema(input: {
   };
 }
 
+export function buildArticleSchema(input: {
+  title: string;
+  description: string;
+  slug: string;
+  imageUrl?: string | null;
+  datePublished: string;
+  dateModified: string;
+  authorName?: string;
+  baseUrl?: string;
+}) {
+  const base = input.baseUrl ?? SEO_BASE_URL;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: input.title,
+    description: input.description,
+    image: input.imageUrl ? [input.imageUrl] : [],
+    datePublished: input.datePublished,
+    dateModified: input.dateModified,
+    author: {
+      "@type": "Organization",
+      name: input.authorName ?? "Hire Car Marketplace",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Hire Car Marketplace",
+      logo: {
+        "@type": "ImageObject",
+        url: `${base}/logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${base}/blog/${input.slug}`,
+    },
+  };
+}
+
+export function buildBlogBreadcrumbSchema(input: {
+  slug: string;
+  title: string;
+  categoryName?: string | null;
+  categorySlug?: string | null;
+  baseUrl?: string;
+}) {
+  const base = input.baseUrl ?? SEO_BASE_URL;
+  const items: BreadcrumbItem[] = [
+    { name: "Home", path: "/" },
+    { name: "Blog", path: "/blog" },
+  ];
+
+  if (input.categoryName && input.categorySlug) {
+    items.push({ name: input.categoryName, path: `/blog?category=${input.categorySlug}` });
+  }
+
+  items.push({ name: input.title, path: `/blog/${input.slug}` });
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: `${base}${item.path}`,
+    })),
+  };
+}
+
 export function serializeSchemas(schemas: object[]) {
   return JSON.stringify(schemas);
 }

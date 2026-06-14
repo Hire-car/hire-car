@@ -50,7 +50,7 @@ function defaultRoutingEmail(): string {
   return (
     process.env.CONTACT_EMAIL_TO ??
     process.env.EMAIL_FROM ??
-    "admin.hirecar@gmail.com"
+    "support@hirecarmarketplace.com.au"
   );
 }
 
