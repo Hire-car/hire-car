@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         customer_name: payload.data.customerName,
         rating: payload.data.rating,
         body: payload.data.body,
-        status: "pending", // admin must approve public reviews
+        status: "approved", // instantly approved based on user feedback
       });
 
     if (insertError) {

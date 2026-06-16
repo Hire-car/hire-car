@@ -59,11 +59,14 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
       if (response.ok) {
         setMessage({
           type: "success",
-          text: "Thank you! Your review has been submitted and is pending approval.",
+          text: "Thank you! Your review has been published.",
         });
         setShowForm(false);
         setTurnstileToken("");
         (e.target as HTMLFormElement).reset();
+        
+        // Refresh the page to show the new review
+        window.location.reload();
       } else {
         setMessage({ type: "error", text: result.error?.message || result.error || "Failed to submit review" });
       }
