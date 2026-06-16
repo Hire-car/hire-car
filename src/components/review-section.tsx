@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { StarRating } from "./star-rating";
-import { Turnstile } from "@marsidev/react-turnstile";
 
 interface Review {
   id: string;
@@ -23,16 +22,10 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
   const [selectedRating, setSelectedRating] = useState(0);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    if (!turnstileToken) {
-      setMessage({ type: "error", text: "Please complete the security challenge. (If you don't see it, your adblocker or browser shields might be blocking it)" });
-      return;
-    }
 
     setIsSubmitting(true);
     setMessage(null);
@@ -44,7 +37,6 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
       customerName: formData.get("customerName"),
       rating: parseInt(formData.get("rating") as string, 10),
       body: formData.get("body"),
-      turnstileToken,
     };
 
     try {
@@ -80,14 +72,12 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
         }
 
         setShowForm(false);
-        setTurnstileToken("");
         (e.target as HTMLFormElement).reset();
       } else {
         setMessage({ type: "error", text: result.error?.message || result.error || "Failed to submit review" });
       }
     } catch {
       setMessage({ type: "error", text: "An unexpected error occurred" });
-      setTurnstileToken("");
     } finally {
       setIsSubmitting(false);
     }
@@ -172,15 +162,6 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
                 placeholder="Share your experience with this rental..."
               />
             </label>
-
-            <div className="flex justify-center">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                onSuccess={(token) => setTurnstileToken(token)}
-                onExpire={() => setTurnstileToken("")}
-                onError={() => setTurnstileToken("")}
-              />
-            </div>
 
             <button
               type="submit"

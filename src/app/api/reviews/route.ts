@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { verifyTurnstile } from "@/lib/security/turnstile";
 import { clientIp } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { evaluateReview } from "@/lib/ai/review-moderation";
@@ -11,7 +10,6 @@ const reviewSchema = z.object({
   customerName: z.string().trim().min(2).max(120),
   rating: z.number().int().min(1).max(5),
   body: z.string().trim().min(10).max(2000),
-  turnstileToken: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -21,13 +19,6 @@ export async function POST(request: NextRequest) {
 
     if (!payload.success) {
       return NextResponse.json({ error: "Invalid review data provided" }, { status: 400 });
-    }
-
-    const ip = clientIp(request.headers);
-    const challenge = await verifyTurnstile(payload.data.turnstileToken, ip);
-
-    if (!challenge.ok) {
-      return NextResponse.json({ error: "Security challenge failed" }, { status: 403 });
     }
 
     const supabase = createAdminClient();
