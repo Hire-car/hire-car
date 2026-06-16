@@ -143,6 +143,7 @@ export default function VehicleForm({
       if (pendingUploads.length > 0) {
         setUploadingImage(true);
         let uploadErrors = 0;
+        let lastError = "";
         
         for (const file of pendingUploads) {
           const imgFormData = new FormData();
@@ -152,16 +153,20 @@ export default function VehicleForm({
           
           try {
             const upRes = await uploadVehicleImage(imgFormData);
-            if (!upRes.success) uploadErrors++;
-          } catch {
+            if (!upRes.success) {
+              uploadErrors++;
+              lastError = upRes.error;
+            }
+          } catch (err) {
             uploadErrors++;
+            lastError = err instanceof Error ? err.message : String(err);
           }
         }
         
         setUploadingImage(false);
         
         if (uploadErrors > 0) {
-           setMessage({ type: "error", text: `Vehicle saved, but ${uploadErrors} images failed to upload.` });
+           setMessage({ type: "error", text: `Vehicle saved, but ${uploadErrors} images failed to upload. Error: ${lastError}` });
            router.push(`/vendor/vehicles?org=${organizationId}&edit=${vehicleId}`);
            return;
         }
@@ -171,6 +176,20 @@ export default function VehicleForm({
         type: "success",
         text: editVehicle ? "Vehicle updated successfully!" : "Vehicle created successfully!",
       });
+      
+      if (!editVehicle) {
+        setPendingUploads([]);
+        setNotes("");
+        setFormState({
+          title: "",
+          seats: 5,
+          fuel: "Petrol",
+          transmission: "Automatic",
+          category: "Sedan",
+        });
+        const formEl = document.getElementById("vehicle-form") as HTMLFormElement;
+        if (formEl) formEl.reset();
+      }
       
       router.push(`/vendor/vehicles?org=${organizationId}`);
     } catch (err) {
