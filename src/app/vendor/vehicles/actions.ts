@@ -180,6 +180,26 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       metadata: { organization_id: organizationId, branch_id: branchId },
     }).then(({ error: e }) => { if (e) console.warn("audit_logs insert failed:", e.message); });
 
+    // Handle temporary uploaded images
+    const tempImagePathsJson = formData.get("tempImagePaths") as string;
+    if (tempImagePathsJson) {
+      try {
+        const tempImagePaths = JSON.parse(tempImagePathsJson);
+        if (Array.isArray(tempImagePaths) && tempImagePaths.length > 0) {
+          const newImages = tempImagePaths.map((path: string, index: number) => ({
+            vehicle_id: vehicle.id,
+            storage_path: path,
+            alt_text: "",
+            sort_order: index,
+            approved: orgData.status === "approved",
+          }));
+          await supabase.from("vehicle_images").insert(newImages);
+        }
+      } catch (err) {
+        console.warn("Failed to parse tempImagePaths", err);
+      }
+    }
+
     revalidatePath("/vendor/vehicles");
     revalidatePath("/vendor/dashboard");
     await invalidatePseoForVehicle(supabase, vehicle.id);
@@ -376,6 +396,39 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
     resource_id: vehicleId,
     metadata: { organization_id: organizationId, updated_fields: Object.keys(updateData) },
   });
+
+  // Handle temporary uploaded images
+  const tempImagePathsJson = formData.get("tempImagePaths") as string;
+  if (tempImagePathsJson) {
+    try {
+      const tempImagePaths = JSON.parse(tempImagePathsJson);
+      if (Array.isArray(tempImagePaths) && tempImagePaths.length > 0) {
+        const { data: existingImages } = await supabase
+          .from("vehicle_images")
+          .select("sort_order")
+          .eq("vehicle_id", vehicleId)
+          .order("sort_order", { ascending: false })
+          .limit(1);
+          
+        let nextSortOrder = (existingImages?.[0]?.sort_order ?? -1) + 1;
+
+        const newImages = tempImagePaths.map((path: string) => {
+          const img = {
+            vehicle_id: vehicleId,
+            storage_path: path,
+            alt_text: "",
+            sort_order: nextSortOrder,
+            approved: isOrgApproved,
+          };
+          nextSortOrder++;
+          return img;
+        });
+        await supabase.from("vehicle_images").insert(newImages);
+      }
+    } catch (err) {
+      console.warn("Failed to parse tempImagePaths", err);
+    }
+  }
 
   revalidatePath("/vendor/vehicles");
   revalidatePath(`/vendor/vehicles/${vehicleId}`);

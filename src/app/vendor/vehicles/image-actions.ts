@@ -15,6 +15,10 @@ const uploadImageSchema = z.object({
   altText: z.string().max(200).optional().default(""),
 });
 
+const uploadTempImageSchema = z.object({
+  organizationId: z.string().uuid(),
+});
+
 export type ImageActionResult =
   | { success: true; imageId: string; path: string }
   | { success: false; error: string };
@@ -151,6 +155,95 @@ export async function uploadVehicleImage(
     imageId: imageRecord.id,
     path: storagePath,
   };
+}
+
+export async function uploadTempVehicleImage(
+  formData: FormData,
+): Promise<{ success: true; path: string; url: string } | { success: false; error: string }> {
+  const user = await requireUser();
+
+  const organizationId = formData.get("organizationId") as string;
+  const file = formData.get("file") as File | null;
+
+  if (!file) {
+    return { success: false, error: "No file provided" };
+  }
+
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE) {
+    return { success: false, error: "File too large. Maximum size is 10MB." };
+  }
+
+  // Validate file type
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return {
+      success: false,
+      error: "Invalid file type. Only JPEG, PNG, and WebP are allowed.",
+    };
+  }
+
+  const parsed = uploadTempImageSchema.safeParse({ organizationId });
+  if (!parsed.success) {
+    return { success: false, error: "Invalid input: " + parsed.error.message };
+  }
+
+  // Verify user has permission
+  await ensureUserCanManageOrganization(user.id, organizationId);
+
+  const supabase = createAdminClient();
+
+  // Generate storage path: pending-vehicle-images/{organizationId}/temp_{timestamp}_{filename}
+  const timestamp = Date.now();
+  const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+  const storagePath = `${organizationId}/temp_${timestamp}-${sanitizedFilename}`;
+  
+  const bucketName = "pending-vehicle-images";
+
+  // Upload to Supabase Storage
+  const { error: uploadError } = await supabase.storage
+    .from(bucketName)
+    .upload(storagePath, file, {
+      contentType: file.type,
+      cacheControl: "3600",
+    });
+
+  if (uploadError) {
+    return { success: false, error: `Upload failed: ${uploadError.message}` };
+  }
+
+  // Get signed URL for instant preview
+  const { data } = await supabase.storage.from(bucketName).createSignedUrl(storagePath, 3600);
+
+  return {
+    success: true,
+    path: storagePath,
+    url: data?.signedUrl || "",
+  };
+}
+
+export async function deleteTempVehicleImage(formData: FormData): Promise<{ success: boolean; error?: string }> {
+  const user = await requireUser();
+  const path = formData.get("path") as string;
+  const organizationId = formData.get("organizationId") as string;
+
+  if (!path || !organizationId) {
+    return { success: false, error: "Missing required fields" };
+  }
+
+  await ensureUserCanManageOrganization(user.id, organizationId);
+  const supabase = createAdminClient();
+
+  // Make sure it's a temp image to avoid deleting approved ones via this endpoint
+  if (!path.includes("temp_")) {
+    return { success: false, error: "Can only delete temporary images" };
+  }
+
+  const { error } = await supabase.storage.from("pending-vehicle-images").remove([path]);
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 }
 
 export async function deleteVehicleImage(formData: FormData): Promise<ImageActionResult> {
