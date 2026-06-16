@@ -197,14 +197,7 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
                     >
                       <Edit2 className="h-4 w-4" />
                     </Link>
-                    <form action={async (formData) => {
-                      "use server";
-                      await deleteVehicle(formData);
-                    }}>
-                      <input type="hidden" name="vehicleId" value={vehicle.id} />
-                      <input type="hidden" name="organizationId" value={selectedOrgId} />
-                      <DeleteVehicleButton />
-                    </form>
+                    <DeleteVehicleButton vehicleId={vehicle.id} organizationId={selectedOrgId} />
                   </div>
                 </div>
               );
