@@ -84,6 +84,13 @@ export async function publishDailyBlog(options?: {
       .maybeSingle();
 
     if (existingToday) {
+      try {
+        revalidatePath("/blog");
+        revalidatePath(`/blog/${existingToday.slug}`);
+        revalidatePath("/sitemap.xml");
+      } catch {
+        // revalidatePath only works inside Next.js request context
+      }
       return {
         ok: true,
         skipped: true,
@@ -199,9 +206,13 @@ export async function publishDailyBlog(options?: {
     return { ok: false, error: lastError ?? "Failed to insert article after retries" };
   }
 
-  revalidatePath("/blog");
-  revalidatePath(`/blog/${inserted.slug}`);
-  revalidatePath("/sitemap.xml");
+  try {
+    revalidatePath("/blog");
+    revalidatePath(`/blog/${inserted.slug}`);
+    revalidatePath("/sitemap.xml");
+  } catch {
+    // revalidatePath only works inside Next.js request context; ignore in scripts
+  }
 
   return {
     ok: true,

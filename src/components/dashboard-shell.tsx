@@ -60,26 +60,11 @@ const adminLinks = [
   { label: "Settings", href: "/admin/settings", icon: Settings, roles: ["super_admin"] },
 ];
 
-function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
+function ProfileDropdown({ onLogout, email, initial }: { onLogout: () => void, email: string, initial: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [email, setEmail] = useState("Loading...");
-  const [initial, setInitial] = useState("U");
 
-  useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    );
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email) {
-        setEmail(data.user.email);
-        setInitial(data.user.email.charAt(0).toUpperCase());
-      } else {
-        setEmail("Account");
-      }
-    });
-  }, []);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -127,44 +112,30 @@ function ProfileDropdown({ onLogout }: { onLogout: () => void }) {
   );
 }
 
-function NotificationDropdown({ mode }: { mode: "vendor" | "admin" }) {
+export type DashboardNotification = {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  created_at: string;
+  link?: string | null;
+};
+
+function NotificationDropdown({ 
+  mode, 
+  initialNotifications = [], 
+  orgId 
+}: { 
+  mode: "vendor" | "admin",
+  initialNotifications?: DashboardNotification[],
+  orgId?: string | null
+}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Array<{
-    id: string; title: string; message: string; type: string; read: boolean; created_at: string; link?: string | null;
-  }>>([]);
-  const [orgId, setOrgId] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<DashboardNotification[]>(initialNotifications);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load org ID and notifications on mount
-  useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    );
 
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data: membership } = await supabase
-        .from("organization_members")
-        .select("organization_id")
-        .eq("user_id", user.id)
-        .limit(1)
-        .maybeSingle();
-
-      if (membership?.organization_id) {
-        setOrgId(membership.organization_id);
-        const { data } = await supabase
-          .from("notifications")
-          .select("id, title, message, type, read, created_at, link")
-          .eq("organization_id", membership.organization_id)
-          .order("created_at", { ascending: false })
-          .limit(10);
-        setNotifications(data ?? []);
-      }
-    })();
-  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -259,11 +230,17 @@ export function DashboardShell({
   mode,
   isAdmin = false,
   adminRole,
+  userEmail,
+  orgId,
+  initialNotifications,
 }: {
   children: ReactNode;
   mode: "vendor" | "admin";
   isAdmin?: boolean;
   adminRole?: string;
+  userEmail?: string;
+  orgId?: string;
+  initialNotifications?: DashboardNotification[];
 }) {
   const pathname = usePathname();
   let baseLinks = mode === "vendor" ? vendorLinks : adminLinks;
@@ -442,10 +419,14 @@ export function DashboardShell({
             
             <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
             
-            <NotificationDropdown mode={mode} />
+            <NotificationDropdown mode={mode} initialNotifications={initialNotifications} orgId={orgId} />
             
             {/* Custom Dropdown */}
-            <ProfileDropdown onLogout={handleLogout} />
+            <ProfileDropdown 
+              onLogout={handleLogout} 
+              email={userEmail ?? "Account"} 
+              initial={userEmail ? userEmail.charAt(0).toUpperCase() : "U"} 
+            />
           </div>
         </div>
       </header>

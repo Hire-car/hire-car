@@ -22,6 +22,14 @@ async function run() {
     "buckets:",
     buckets?.map((b) => b.name),
   );
+
+  const { data: latest } = await supabase
+    .from("blog_articles")
+    .select("slug, title, featured_image_url, published_at")
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  console.log("latest article:", latest);
 }
 
 run();

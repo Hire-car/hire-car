@@ -3,6 +3,7 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { requireUser } from "@/lib/security/auth";
 
 import { getVendorContext } from "@/lib/data/vendor";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -17,5 +18,25 @@ export default async function VendorLayout({ children }: { children: ReactNode }
     return <div className="min-h-screen bg-slate-50">{children}</div>;
   }
 
-  return <DashboardShell mode="vendor" isAdmin={isAdmin}>{children}</DashboardShell>;
+  const organizationId = context.organizations[0].id;
+  
+  const supabase = createAdminClient();
+  const { data: notifications } = await supabase
+    .from("notifications")
+    .select("id, title, message, type, read, created_at, link")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  return (
+    <DashboardShell 
+      mode="vendor" 
+      isAdmin={isAdmin} 
+      userEmail={user.email} 
+      orgId={organizationId} 
+      initialNotifications={notifications ?? []}
+    >
+      {children}
+    </DashboardShell>
+  );
 }
