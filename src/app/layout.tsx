@@ -126,7 +126,7 @@ export default function RootLayout({
         )}
         <MobileStateProvider>
           {children}
-          <WhatsAppFloat phone={process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "61412345678"} />
+          <WhatsAppFloat phone={process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "61434930437"} />
           <ScrollToTop />
         </MobileStateProvider>
         <Toaster richColors position="top-right" />

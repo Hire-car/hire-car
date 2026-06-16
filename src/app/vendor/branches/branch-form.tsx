@@ -47,7 +47,7 @@ export function BranchForm({
         <Field label="City" name="city" defaultValue={branch?.city} placeholder="e.g. Sydney" />
         <Field label="State" name="state" defaultValue={branch?.state} placeholder="e.g. NSW" helper="Australian state or territory abbreviation" />
         <Field label="Phone" name="phone" defaultValue={branch?.phone || ""} required={false} placeholder="e.g. 02 1234 5678" helper="Visible to customers for direct contact" />
-        <Field label="WhatsApp" name="whatsapp" defaultValue={branch?.whatsapp || ""} required={false} placeholder="e.g. +61412345678" helper="Include country code for WhatsApp click-to-chat" />
+        <Field label="WhatsApp" name="whatsapp" defaultValue={branch?.whatsapp || ""} required={false} placeholder="e.g. +61434930437" helper="Include country code for WhatsApp click-to-chat" />
         <Field label="Address" name="address" defaultValue={branch?.address} className="md:col-span-2 lg:col-span-3" placeholder="Full street address" helper="Used for map display and directions" />
       </div>
       <div className="mt-6 pt-6 border-t border-border flex gap-3">
