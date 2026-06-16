@@ -144,6 +144,12 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       .single();
 
     if (error) {
+      if (error.message.includes("idx_vehicles_vin_org") || error.message.includes("vehicles_vin_organization_id_key")) {
+        return { success: false, error: "This VIN is already registered to another vehicle in your fleet." };
+      }
+      if (error.message.includes("idx_vehicles_plate_org") || error.message.includes("vehicles_license_plate_organization_id_key")) {
+        return { success: false, error: "This License Plate is already registered to another vehicle in your fleet." };
+      }
       return { success: false, error: `Failed to create vehicle: ${error.message}` };
     }
 
@@ -326,6 +332,12 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
     const { error } = await supabase.from("vehicles").update(updateData).eq("id", vehicleId);
 
     if (error) {
+      if (error.message.includes("idx_vehicles_vin_org") || error.message.includes("vehicles_vin_organization_id_key")) {
+        return { success: false, error: "This VIN is already registered to another vehicle in your fleet." };
+      }
+      if (error.message.includes("idx_vehicles_plate_org") || error.message.includes("vehicles_license_plate_organization_id_key")) {
+        return { success: false, error: "This License Plate is already registered to another vehicle in your fleet." };
+      }
       return { success: false, error: `Failed to update vehicle: ${error.message}` };
     }
 
