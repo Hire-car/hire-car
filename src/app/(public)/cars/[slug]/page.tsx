@@ -430,6 +430,8 @@ export default async function VehicleDetailPage({
                   organizationId={vehicle.organization_id}
                   vehicleId={vehicle.id}
                   initialReviews={safeReviews}
+                  isLoggedIn={!!user}
+                  userName={userProfile?.name}
                 />
               </CardContent>
             </Card>

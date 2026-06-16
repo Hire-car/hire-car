@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/security/auth";
 import { clientIp } from "@/lib/security/rate-limit";
 import { z } from "zod";
 import { evaluateReview } from "@/lib/ai/review-moderation";
@@ -19,6 +20,11 @@ export async function POST(request: NextRequest) {
 
     if (!payload.success) {
       return NextResponse.json({ error: "Invalid review data provided" }, { status: 400 });
+    }
+
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized. Please sign in to write a review." }, { status: 401 });
     }
 
     const supabase = createAdminClient();
