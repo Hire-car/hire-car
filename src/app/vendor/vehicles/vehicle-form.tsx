@@ -589,9 +589,9 @@ export default function VehicleForm({
         </section>
       </div>
 
-      {/* Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-slate-200 bg-white/80 backdrop-blur-md shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] p-4 sm:pl-[256px]">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      {/* Action Bar */}
+      <div className="sticky bottom-4 z-20 mt-8 rounded-xl border border-slate-200 bg-white/95 backdrop-blur-md shadow-lg p-4">
+        <div className="flex items-center justify-between gap-4">
           <div className="text-sm font-medium text-slate-600 hidden sm:block">
             {isUploading ? "Uploading images..." : "Ready to save."}
           </div>
