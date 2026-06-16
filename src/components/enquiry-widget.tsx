@@ -75,7 +75,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     e.preventDefault();
 
     if (!turnstileToken) {
-      setError("Please complete the security challenge.");
+      setError("Please complete the security challenge. (If you don't see it, your adblocker or browser shields might be blocking it)");
       return;
     }
 
@@ -327,7 +327,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
 
         <button
           type="submit"
-          disabled={isSubmitting || !turnstileToken || !licenseConfirmed}
+          disabled={isSubmitting || !licenseConfirmed}
           className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c2410c] to-[#ea580c] px-4 py-3.5 text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2 transition-all"
         >
           {isSubmitting ? (

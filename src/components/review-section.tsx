@@ -30,7 +30,7 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
     e.preventDefault();
 
     if (!turnstileToken) {
-      setMessage({ type: "error", text: "Please complete the security challenge." });
+      setMessage({ type: "error", text: "Please complete the security challenge. (If you don't see it, your adblocker or browser shields might be blocking it)" });
       return;
     }
 
@@ -166,7 +166,7 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
 
             <button
               type="submit"
-              disabled={isSubmitting || !turnstileToken}
+              disabled={isSubmitting}
               className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:bg-slate-400"
             >
               {isSubmitting ? "Submitting..." : "Submit Review"}
