@@ -19,7 +19,7 @@ interface ReviewSectionProps {
 }
 
 export default function ReviewSection({ organizationId, vehicleId, initialReviews }: ReviewSectionProps) {
-  const [reviews] = useState<Review[]>(initialReviews);
+  const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -57,16 +57,31 @@ export default function ReviewSection({ organizationId, vehicleId, initialReview
       const result = await response.json();
 
       if (response.ok) {
-        setMessage({
-          type: "success",
-          text: "Thank you! Your review has been published.",
-        });
+        if (result.status === "rejected") {
+          setMessage({
+            type: "error",
+            text: "Your review was flagged by our automated moderation system. It will not be published.",
+          });
+        } else {
+          setMessage({
+            type: "success",
+            text: "Thank you! Your review has been published.",
+          });
+          
+          // Append instantly without a page refresh
+          const newReview = {
+            id: Math.random().toString(36).substring(7),
+            customer_name: data.customerName as string,
+            rating: data.rating as number,
+            body: data.body as string,
+            created_at: new Date().toISOString()
+          };
+          setReviews([newReview, ...reviews]);
+        }
+
         setShowForm(false);
         setTurnstileToken("");
         (e.target as HTMLFormElement).reset();
-        
-        // Refresh the page to show the new review
-        window.location.reload();
       } else {
         setMessage({ type: "error", text: result.error?.message || result.error || "Failed to submit review" });
       }

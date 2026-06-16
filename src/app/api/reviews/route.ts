@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { clientIp } from "@/lib/security/rate-limit";
 import { z } from "zod";
+import { evaluateReview } from "@/lib/ai/review-moderation";
 
 const reviewSchema = z.object({
   organizationId: z.string().uuid(),
@@ -57,6 +58,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // AI Moderation Check
+    const moderationResult = await evaluateReview({
+      customerName: payload.data.customerName,
+      rating: payload.data.rating,
+      body: payload.data.body,
+    });
+
+    const status = moderationResult.isApproved ? "approved" : "rejected";
+
     // Insert review
     const { error: insertError } = await supabase
       .from("reviews")
@@ -66,7 +76,7 @@ export async function POST(request: NextRequest) {
         customer_name: payload.data.customerName,
         rating: payload.data.rating,
         body: payload.data.body,
-        status: "approved", // instantly approved based on user feedback
+        status: status,
       });
 
     if (insertError) {
@@ -74,7 +84,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to submit review" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true }, { status: 201 });
+    return NextResponse.json({ success: true, status: status }, { status: 201 });
   } catch (error) {
     console.error("[Review API] Exception:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
