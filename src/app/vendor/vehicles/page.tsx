@@ -9,7 +9,7 @@ import { DeleteVehicleButton } from "./delete-button";
 import { BulkUpload } from "@/components/vendor/bulk-upload";
 import { OrgSwitcher } from "@/components/vendor/org-switcher";
 import { organizationHasFeature } from "@/lib/plan-features";
-import { Car, MapPin, Tag, Fuel, Settings2, Users, AlertCircle, Edit2 } from "lucide-react";
+import { Car, MapPin, Tag, Fuel, Settings2, Users, AlertCircle, Edit2, Eye } from "lucide-react";
 
 export const metadata = {
   title: "Vehicles",
@@ -190,6 +190,14 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
                   </div>
 
                   <div className="flex gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <Link
+                      href={`/cars/${vehicle.slug}`}
+                      target="_blank"
+                      className="flex items-center justify-center h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-brand-600 shadow-sm transition-all"
+                      title="View Public Listing"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
                     <Link
                       href={`/vendor/vehicles?org=${selectedOrgId}&edit=${vehicle.id}`}
                       className="flex items-center justify-center h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition-all"
