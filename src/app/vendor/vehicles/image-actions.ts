@@ -192,12 +192,20 @@ export async function uploadTempVehicleImage(
 
   const supabase = createAdminClient();
 
-  // Generate storage path: pending-vehicle-images/{organizationId}/temp_{timestamp}_{filename}
+  // Fetch organization status to determine the correct bucket
+  const { data: orgData } = await supabase
+    .from("organizations")
+    .select("status")
+    .eq("id", organizationId)
+    .single();
+
+  const isApproved = orgData?.status === "approved";
+  const bucketName = isApproved ? "vehicle-images" : "pending-vehicle-images";
+
+  // Generate storage path: {organizationId}/temp_{timestamp}_{filename}
   const timestamp = Date.now();
   const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
   const storagePath = `${organizationId}/temp_${timestamp}-${sanitizedFilename}`;
-  
-  const bucketName = "pending-vehicle-images";
 
   // Upload to Supabase Storage
   const { error: uploadError } = await supabase.storage
@@ -238,7 +246,17 @@ export async function deleteTempVehicleImage(formData: FormData): Promise<{ succ
     return { success: false, error: "Can only delete temporary images" };
   }
 
-  const { error } = await supabase.storage.from("pending-vehicle-images").remove([path]);
+  // Fetch organization status to determine the correct bucket
+  const { data: orgData } = await supabase
+    .from("organizations")
+    .select("status")
+    .eq("id", organizationId)
+    .single();
+
+  const isApproved = orgData?.status === "approved";
+  const bucketName = isApproved ? "vehicle-images" : "pending-vehicle-images";
+
+  const { error } = await supabase.storage.from(bucketName).remove([path]);
   if (error) {
     return { success: false, error: error.message };
   }
