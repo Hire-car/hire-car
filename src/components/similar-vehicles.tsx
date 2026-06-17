@@ -11,6 +11,12 @@ interface SimilarVehiclesProps {
   make: string;
 }
 
+type VehicleImageRecord = {
+  storage_path: string;
+  approved: boolean;
+  sort_order: number;
+};
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function SimilarVehicles({ currentVehicleId, city, category: _category, make: _make }: SimilarVehiclesProps) {
   const supabase = createAdminClient();
@@ -23,7 +29,8 @@ export async function SimilarVehicles({ currentVehicleId, city, category: _categ
       id, slug, title, make, model, year, seats, fuel, transmission, category,
       price_per_day_aud, status, instant_book,
       organizations!inner(name, slug),
-      branches!inner(name, city, state, status)
+      branches!inner(name, city, state, status),
+      vehicle_images(storage_path, approved, sort_order)
     `)
     .eq("status", "approved")
     .eq("branches.city", city)
@@ -37,6 +44,19 @@ export async function SimilarVehicles({ currentVehicleId, city, category: _categ
   const vehicles: Vehicle[] = data.map((v) => {
     const org = v.organizations as unknown as { name: string; slug: string };
     const branch = v.branches as unknown as { name: string; city: string; state: string };
+
+    // Pick the first approved image sorted by sort_order, then fall back to any image
+    const imgs = ((v.vehicle_images as unknown as VehicleImageRecord[]) ?? [])
+      .slice()
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const firstImg = imgs.find((img) => img.approved) ?? imgs[0] ?? null;
+    let imageUrl = "/vehicle-placeholder.jpg";
+    if (firstImg) {
+      const bucket = firstImg.approved ? "vehicle-images" : "pending-vehicle-images";
+      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(firstImg.storage_path);
+      imageUrl = urlData.publicUrl;
+    }
+
     return {
       id: v.id,
       slug: v.slug,
@@ -51,7 +71,7 @@ export async function SimilarVehicles({ currentVehicleId, city, category: _categ
       pricePerDayAud: v.price_per_day_aud,
       city: branch.city,
       state: branch.state,
-      imageUrl: "/vehicle-placeholder.jpg",
+      imageUrl,
       vendorName: org.name,
       vendorSlug: org.slug,
       branchName: branch.name,

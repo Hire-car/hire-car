@@ -97,7 +97,7 @@ export default async function VehicleDetailPage({
       price_per_day_aud, daily_distance_limit_km, extra_distance_fee_aud, instant_book, status, organization_id, views_count,
       organizations(id, name, slug, status, verified_at),
       branches(name, city, state, status, phone, whatsapp),
-      vehicle_images(id, storage_path, alt_text, sort_order),
+      vehicle_images(id, storage_path, alt_text, sort_order, approved),
       vehicle_features(feature)
     `)
     .eq("slug", slug)
@@ -143,7 +143,7 @@ export default async function VehicleDetailPage({
   // Cast related records
   type OrgRecord = { id: string; name: string; slug: string; status: string; verified_at: string | null };
   type BranchRecord = { name: string; city: string; state: string; status: string; phone: string | null; whatsapp: string | null };
-  type ImageRecord = { id: string; storage_path: string; alt_text: string | null; sort_order: number };
+  type ImageRecord = { id: string; storage_path: string; alt_text: string | null; sort_order: number; approved: boolean };
   type FeatureRecord = { feature: string };
 
   const org = vehicle.organizations as unknown as OrgRecord;
@@ -162,10 +162,14 @@ export default async function VehicleDetailPage({
     .maybeSingle();
   const directContactEnabled = planHasFeature(vendorSub?.plan_code, "directContact");
 
-  // Sort images and generate public URLs
+  // Sort images and generate public URLs.
+  // Images uploaded while the org was pending land in "pending-vehicle-images" (private bucket);
+  // once the org is approved they land in "vehicle-images" (public bucket).
+  // The `approved` boolean on vehicle_images tracks which bucket holds the file.
   dbImages.sort((a, b) => a.sort_order - b.sort_order);
   const images = dbImages.map((img) => {
-    const { data } = supabase.storage.from("vehicle-images").getPublicUrl(img.storage_path);
+    const bucket = img.approved ? "vehicle-images" : "pending-vehicle-images";
+    const { data } = supabase.storage.from(bucket).getPublicUrl(img.storage_path);
     return {
       id: img.id,
       url: data.publicUrl,
