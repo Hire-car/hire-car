@@ -117,3 +117,71 @@ export function resolveGalleryImages(
       alt_text: img.alt_text || `${vehicleTitle} rental car image`,
     }));
 }
+
+/**
+ * Resolves a list of GalleryImage objects for a vehicle.
+ * Combines Supabase database images with standard and custom image fields,
+ * and falls back to a category-specific stock photo placeholder if all fields are empty.
+ */
+export function getVehicleImages(vehicle: any): GalleryImage[] {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const title = vehicle.title || "Rental Car";
+  
+  // 1. Collect from database vehicle_images relation
+  const dbImages = (vehicle.vehicle_images as FullImageRecord[]) || [];
+  const galleryImages = resolveGalleryImages(supabaseUrl, dbImages, title);
+  
+  // 2. Collect other potential custom/standard fields defensively
+  const rawUrls: string[] = [];
+  if (typeof vehicle.featuredImage === "string" && vehicle.featuredImage.trim()) {
+    rawUrls.push(vehicle.featuredImage);
+  }
+  if (typeof vehicle.image === "string" && vehicle.image.trim()) {
+    rawUrls.push(vehicle.image);
+  }
+  if (typeof vehicle.thumbnail === "string" && vehicle.thumbnail.trim()) {
+    rawUrls.push(vehicle.thumbnail);
+  }
+  
+  if (Array.isArray(vehicle.images)) {
+    vehicle.images.forEach((img: any) => {
+      if (typeof img === "string" && img.trim()) {
+        rawUrls.push(img);
+      } else if (img && typeof img.url === "string" && img.url.trim()) {
+        rawUrls.push(img.url);
+      }
+    });
+  }
+  
+  if (Array.isArray(vehicle.gallery)) {
+    vehicle.gallery.forEach((img: any) => {
+      if (typeof img === "string" && img.trim()) {
+        rawUrls.push(img);
+      } else if (img && typeof img.url === "string" && img.url.trim()) {
+        rawUrls.push(img.url);
+      }
+    });
+  }
+  
+  const customImages: GalleryImage[] = rawUrls.map((url, index) => ({
+    id: `custom-img-${index}-${Date.now()}`,
+    url,
+    alt_text: `${title} rental car image`,
+  }));
+  
+  const combined = [...galleryImages, ...customImages];
+  
+  // 3. Fallback to category stock photo if completely empty
+  if (combined.length === 0) {
+    const fallbackUrl = getCategoryFallback(vehicle.category);
+    return [
+      {
+        id: "fallback-category-stock",
+        url: fallbackUrl,
+        alt_text: `${title} placeholder stock image`,
+      },
+    ];
+  }
+  
+  return combined;
+}

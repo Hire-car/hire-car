@@ -29,7 +29,7 @@ import {
   buildFaqSchema,
   serializeSchemas,
 } from "@/lib/seo";
-import { resolveGalleryImages, buildStorageUrl } from "@/lib/image-utils";
+import { resolveGalleryImages, buildStorageUrl, getVehicleImages } from "@/lib/image-utils";
 
 export const revalidate = 3600; // Cache for 1 hour at edge (ISR)
 
@@ -165,10 +165,8 @@ export default async function VehicleDetailPage({
   const directContactEnabled = planHasFeature(vendorSub?.plan_code, "directContact");
 
   // Build gallery images using the central helper.
-  // resolveGalleryImages routes each image to the correct bucket (vehicle-images for
-  // approved=true, pending-vehicle-images for approved=false) and builds direct public URLs.
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const images = resolveGalleryImages(supabaseUrl, dbImages, vehicle.title);
+  // getVehicleImages maps database images, custom fields, and handles fallbacks.
+  const images = getVehicleImages(vehicle);
 
   // Fetch approved reviews for this organization
   const { data: reviews } = await supabase
