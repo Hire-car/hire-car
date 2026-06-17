@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { VehicleCard } from "@/components/vehicle-card";
+import { resolveVehicleImage } from "@/lib/image-utils";
+import type { VehicleImageRecord } from "@/lib/image-utils";
 
 export const metadata = { title: "Saved Vehicles | Hire Car" };
 
@@ -17,11 +19,14 @@ export default async function SavedVehiclesPage() {
         id, slug, title, make, model, year, seats, fuel, transmission, category,
         price_per_day_aud, instant_book, status,
         branches(city, state, name),
-        organizations(name, slug, verified_at)
+        organizations(name, slug, verified_at),
+        vehicle_images(storage_path, approved, sort_order)
       )
     `)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
   const vehicles = (saved ?? [])
     .map((row) => {
@@ -31,9 +36,11 @@ export default async function SavedVehiclesPage() {
         price_per_day_aud: number; instant_book: boolean; status: string;
         branches: { city: string; state: string; name: string };
         organizations: { name: string; slug: string; verified_at: string | null };
+        vehicle_images: VehicleImageRecord[];
       };
       const v = row.vehicles as unknown as V | null;
       if (!v || v.status !== "approved") return null;
+      const imgs = v.vehicle_images ?? [];
       return {
         id: v.id,
         slug: v.slug,
@@ -48,7 +55,7 @@ export default async function SavedVehiclesPage() {
         fuel: v.fuel,
         transmission: v.transmission,
         category: v.category,
-        imageUrl: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80",
+        imageUrl: resolveVehicleImage(supabaseUrl, imgs, v.category),
         vendorName: v.organizations?.name ?? "",
         vendorSlug: v.organizations?.slug ?? "",
         branchName: v.branches?.name ?? "",

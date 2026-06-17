@@ -29,6 +29,7 @@ import {
   buildFaqSchema,
   serializeSchemas,
 } from "@/lib/seo";
+import { resolveGalleryImages, buildStorageUrl } from "@/lib/image-utils";
 
 export const revalidate = 3600; // Cache for 1 hour at edge (ISR)
 
@@ -62,12 +63,13 @@ export async function generateMetadata({
     state: branch?.state,
   });
 
-  const images = (data.vehicle_images as unknown as ImageRecord[]) ?? [];
-  const firstImage = images
+  const images = (data.vehicle_images as unknown as { storage_path: string; approved: boolean; sort_order: number }[]) ?? [];
+  const firstApproved = images
     .filter((img) => img.approved)
     .sort((a, b) => a.sort_order - b.sort_order)[0];
-  const ogImage = firstImage
-    ? supabase.storage.from("vehicle-images").getPublicUrl(firstImage.storage_path).data.publicUrl
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const ogImage = firstApproved
+    ? buildStorageUrl(supabaseUrl, firstApproved)
     : undefined;
 
   return {
@@ -162,20 +164,11 @@ export default async function VehicleDetailPage({
     .maybeSingle();
   const directContactEnabled = planHasFeature(vendorSub?.plan_code, "directContact");
 
-  // Sort images and generate public URLs.
-  // Images uploaded while the org was pending land in "pending-vehicle-images" (private bucket);
-  // once the org is approved they land in "vehicle-images" (public bucket).
-  // The `approved` boolean on vehicle_images tracks which bucket holds the file.
-  dbImages.sort((a, b) => a.sort_order - b.sort_order);
-  const images = dbImages.map((img) => {
-    const bucket = img.approved ? "vehicle-images" : "pending-vehicle-images";
-    const { data } = supabase.storage.from(bucket).getPublicUrl(img.storage_path);
-    return {
-      id: img.id,
-      url: data.publicUrl,
-      alt_text: img.alt_text || `${vehicle.title} rental car image`,
-    };
-  });
+  // Build gallery images using the central helper.
+  // resolveGalleryImages routes each image to the correct bucket (vehicle-images for
+  // approved=true, pending-vehicle-images for approved=false) and builds direct public URLs.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const images = resolveGalleryImages(supabaseUrl, dbImages, vehicle.title);
 
   // Fetch approved reviews for this organization
   const { data: reviews } = await supabase

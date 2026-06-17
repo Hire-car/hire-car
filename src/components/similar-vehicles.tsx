@@ -2,7 +2,9 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { VehicleCard } from "@/components/vehicle-card";
+import { resolveVehicleImage } from "@/lib/image-utils";
 import type { Vehicle } from "@/lib/types";
+import type { VehicleImageRecord } from "@/lib/image-utils";
 
 interface SimilarVehiclesProps {
   currentVehicleId: string;
@@ -11,18 +13,10 @@ interface SimilarVehiclesProps {
   make: string;
 }
 
-type VehicleImageRecord = {
-  storage_path: string;
-  approved: boolean;
-  sort_order: number;
-};
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function SimilarVehicles({ currentVehicleId, city, category: _category, make: _make }: SimilarVehiclesProps) {
   const supabase = createAdminClient();
 
-  // Query similar vehicles: same city, same category or make, not the current one
-  // In Supabase, we can use an 'or' filter for category/make, and 'eq' for city
   const { data } = await supabase
     .from("vehicles")
     .select(`
@@ -41,21 +35,12 @@ export async function SimilarVehicles({ currentVehicleId, city, category: _categ
     return null;
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
   const vehicles: Vehicle[] = data.map((v) => {
     const org = v.organizations as unknown as { name: string; slug: string };
     const branch = v.branches as unknown as { name: string; city: string; state: string };
-
-    // Pick the first approved image sorted by sort_order, then fall back to any image
-    const imgs = ((v.vehicle_images as unknown as VehicleImageRecord[]) ?? [])
-      .slice()
-      .sort((a, b) => a.sort_order - b.sort_order);
-    const firstImg = imgs.find((img) => img.approved) ?? imgs[0] ?? null;
-    let imageUrl = "/vehicle-placeholder.jpg";
-    if (firstImg) {
-      const bucket = firstImg.approved ? "vehicle-images" : "pending-vehicle-images";
-      const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(firstImg.storage_path);
-      imageUrl = urlData.publicUrl;
-    }
+    const imgs = (v.vehicle_images as unknown as VehicleImageRecord[]) ?? [];
 
     return {
       id: v.id,
@@ -71,7 +56,7 @@ export async function SimilarVehicles({ currentVehicleId, city, category: _categ
       pricePerDayAud: v.price_per_day_aud,
       city: branch.city,
       state: branch.state,
-      imageUrl,
+      imageUrl: resolveVehicleImage(supabaseUrl, imgs, v.category),
       vendorName: org.name,
       vendorSlug: org.slug,
       branchName: branch.name,

@@ -1,4 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveVehicleImage } from "@/lib/image-utils";
+import type { VehicleImageRecord } from "@/lib/image-utils";
 
 export type FeaturedVehicle = {
   id: string;
@@ -25,7 +27,8 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
       vehicles!inner(
         id, slug, title, make, model, year, category, price_per_day_aud, status,
         branches!inner(city, status),
-        organizations!inner(name, status)
+        organizations!inner(name, status),
+        vehicle_images(storage_path, approved, sort_order)
       )
     `)
     .lte("starts_at", now)
@@ -45,6 +48,7 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
   }
 
   const results: FeaturedVehicle[] = [];
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
   for (const row of data) {
     type VehicleRow = {
@@ -59,9 +63,12 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
       status: string;
       branches: { city: string; status: string };
       organizations: { name: string; status: string };
+      vehicle_images: VehicleImageRecord[];
     };
 
     const v = row.vehicles as unknown as VehicleRow;
+    const imgs = v.vehicle_images ?? [];
+    const imageUrl = resolveVehicleImage(supabaseUrl, imgs, v.category);
 
     results.push({
       id: v.id,
@@ -74,6 +81,7 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
       pricePerDay: v.price_per_day_aud,
       city: v.branches.city,
       organizationName: v.organizations.name,
+      imageUrl,
     });
   }
 

@@ -21,6 +21,8 @@ import { VendorProfileHeader } from "@/components/vendor-profile-header";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Vehicle } from "@/lib/types";
 import { buildOrganizationSchema, serializeSchemas } from "@/lib/seo";
+import { resolveVehicleImage } from "@/lib/image-utils";
+import type { VehicleImageRecord } from "@/lib/image-utils";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 type Branch = {
@@ -151,7 +153,8 @@ async function getVendorVehicles(organizationId: string): Promise<Vehicle[]> {
       id, slug, title, make, model, year, seats, fuel, transmission, category,
       price_per_day_aud, status,
       organizations!inner(name, slug),
-      branches!inner(name, city, state, status)
+      branches!inner(name, city, state, status),
+      vehicle_images(storage_path, approved, sort_order)
     `)
     .eq("organization_id", organizationId)
     .eq("status", "approved")
@@ -160,9 +163,12 @@ async function getVendorVehicles(organizationId: string): Promise<Vehicle[]> {
 
   if (!data) return [];
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
   return data.map((v) => {
     const org = v.organizations as unknown as { name: string; slug: string };
     const branch = v.branches as unknown as { name: string; city: string; state: string };
+    const imgs = (v.vehicle_images as unknown as VehicleImageRecord[]) ?? [];
     return {
       id: v.id,
       slug: v.slug,
@@ -177,7 +183,7 @@ async function getVendorVehicles(organizationId: string): Promise<Vehicle[]> {
       pricePerDayAud: v.price_per_day_aud,
       city: branch.city,
       state: branch.state,
-      imageUrl: "/vehicle-placeholder.jpg",
+      imageUrl: resolveVehicleImage(supabaseUrl, imgs, v.category),
       vendorName: org.name,
       vendorSlug: org.slug,
       branchName: branch.name,

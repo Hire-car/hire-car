@@ -2,6 +2,8 @@ import Typesense from "typesense";
 import { optionalEnv } from "@/lib/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Vehicle } from "@/lib/types";
+import { resolveVehicleImage } from "@/lib/image-utils";
+import type { VehicleImageRecord } from "@/lib/image-utils";
 
 const VEHICLE_COLLECTION_NAME = "vehicles";
 
@@ -203,19 +205,22 @@ export async function searchVehicles(
       
       const { data: imagesData } = await supabase
         .from("vehicle_images")
-        .select("vehicle_id, storage_path")
+        .select("vehicle_id, storage_path, approved, sort_order")
         .in("vehicle_id", vehicleIds)
-        .eq("approved", true)
         .order("sort_order", { ascending: true });
+
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
       if (imagesData && imagesData.length > 0) {
         vehicles.forEach(v => {
-          const img = imagesData.find(i => i.vehicle_id === v.id);
-          if (img) {
-            v.imageUrl = supabase.storage.from("vehicle-images").getPublicUrl(img.storage_path).data.publicUrl;
-          } else {
-            v.imageUrl = getCategoryPlaceholder(v.category);
-          }
+          const matchingImgs = imagesData
+            .filter(i => i.vehicle_id === v.id)
+            .map(i => ({
+              storage_path: i.storage_path,
+              approved: i.approved,
+              sort_order: i.sort_order,
+            }));
+          v.imageUrl = resolveVehicleImage(supabaseUrl, matchingImgs, v.category);
         });
       } else {
         vehicles.forEach(v => { v.imageUrl = getCategoryPlaceholder(v.category); });
@@ -290,7 +295,7 @@ async function fallbackDatabaseSearch(
       status,
       organizations!inner(id, name, slug, status),
       branches!inner(id, name, city, state, status),
-      vehicle_images(storage_path, sort_order)
+      vehicle_images(storage_path, approved, sort_order)
     `,
       { count: "exact" },
     )
@@ -384,13 +389,9 @@ async function fallbackDatabaseSearch(
       const org = v.organizations as unknown as { name: string; slug: string };
       const branch = v.branches as unknown as { name: string; city: string; state: string };
       
-      let imageUrl = getCategoryPlaceholder(v.category);
-      const images = (v.vehicle_images as unknown as { storage_path: string; sort_order: number }[]) ?? [];
-      if (images.length > 0) {
-        // Find the image with the lowest sort_order (already ordered by supabase if possible, but safe to sort)
-        images.sort((a, b) => a.sort_order - b.sort_order);
-        imageUrl = supabase.storage.from("vehicle-images").getPublicUrl(images[0].storage_path).data.publicUrl;
-      }
+      const images = (v.vehicle_images as unknown as VehicleImageRecord[]) ?? [];
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const imageUrl = resolveVehicleImage(supabaseUrl, images, v.category);
 
       return {
         id: v.id,
