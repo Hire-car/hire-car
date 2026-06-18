@@ -94,6 +94,9 @@ export async function POST(request: NextRequest) {
         vendor_id: vendorId,
         customer_name: profile.full_name || "Interested User",
         customer_email: profile.email,
+        // Store the authenticated user's UUID so that chat authorization can
+        // use a direct UUID match instead of the fragile email sub-select.
+        customer_user_id: user.id,
         customer_phone: profile.phone || "Not provided",
         pickup_city: branch?.city || "Unknown",
         start_date: startDate.toISOString().split('T')[0],

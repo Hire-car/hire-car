@@ -303,7 +303,7 @@ export default function ForVendorsPage() {
                   className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm px-8 py-5 font-bold text-white text-lg hover:bg-white/10 transition-colors"
                 >
                   <PhoneCall className="h-5 w-5" />
-                  Talk to Sales
+                  0434 930 437
                 </a>
               </div>
               <p className="mt-8 text-sm text-slate-500">No credit card required · Set up in 2 minutes · Cancel anytime</p>

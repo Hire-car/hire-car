@@ -13,11 +13,11 @@ interface SimilarVehiclesProps {
   make: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function SimilarVehicles({ currentVehicleId, city, category: _category, make: _make }: SimilarVehiclesProps) {
+export async function SimilarVehicles({ currentVehicleId, city, category, make }: SimilarVehiclesProps) {
   const supabase = createAdminClient();
 
-  const { data } = await supabase
+  // First try: same city + same category (most relevant)
+  const { data: byCategoryData } = await supabase
     .from("vehicles")
     .select(`
       id, slug, title, make, model, year, seats, fuel, transmission, category,
@@ -28,10 +28,35 @@ export async function SimilarVehicles({ currentVehicleId, city, category: _categ
     `)
     .eq("status", "approved")
     .eq("branches.city", city)
+    .eq("category", category)
     .neq("id", currentVehicleId)
     .limit(4);
 
-  if (!data || data.length === 0) {
+  let data = byCategoryData ?? [];
+
+  // Top up with same make if fewer than 4 results
+  if (data.length < 4) {
+    const existingIds = new Set([currentVehicleId, ...data.map((v) => v.id)]);
+    const { data: byMakeData } = await supabase
+      .from("vehicles")
+      .select(`
+        id, slug, title, make, model, year, seats, fuel, transmission, category,
+        price_per_day_aud, status, instant_book,
+        organizations!inner(name, slug),
+        branches!inner(name, city, state, status),
+        vehicle_images(storage_path, approved, sort_order)
+      `)
+      .eq("status", "approved")
+      .eq("branches.city", city)
+      .eq("make", make)
+      .neq("id", currentVehicleId)
+      .limit(4 - data.length);
+
+    const extras = (byMakeData ?? []).filter((v) => !existingIds.has(v.id));
+    data = [...data, ...extras];
+  }
+
+  if (data.length === 0) {
     return null;
   }
 

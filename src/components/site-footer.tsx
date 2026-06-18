@@ -189,6 +189,14 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <a
+                  href="tel:0434930437"
+                  className="block py-2 text-sm text-slate-400 hover:text-white transition-colors md:inline md:py-0"
+                >
+                  0434 930 437
+                </a>
+              </li>
             </ul>
           </div>
         </div>

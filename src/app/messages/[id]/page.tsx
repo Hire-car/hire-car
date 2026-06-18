@@ -22,22 +22,39 @@ export default async function CustomerChatRoomPage({
     .eq("id", user.id)
     .single();
 
-  if (!profile?.email) {
-    notFound();
-  }
-
-  // Fetch lead and verify ownership
+  // Fetch lead without customer_email filter so both customers and vendor
+  // org members can reach this page. Ownership is verified below.
   const { data: lead } = await supabase
     .from("leads")
     .select(`
-      id, customer_email,
+      id, customer_email, customer_user_id, vendor_id,
       organizations(name)
     `)
     .eq("id", id)
-    .eq("customer_email", profile.email)
     .single();
 
   if (!lead) {
+    notFound();
+  }
+
+  // Verify the current user is authorized to view this conversation:
+  //   (a) UUID match via customer_user_id  — most reliable
+  //   (b) email match                      — fallback for leads created before customer_user_id
+  //   (c) vendor org membership            — lets vendor staff reply
+  const isCustomerById = !!lead.customer_user_id && lead.customer_user_id === user.id;
+  const isCustomerByEmail =
+    !!profile?.email &&
+    lead.customer_email.toLowerCase() === profile.email.toLowerCase();
+
+  const { data: membership } = await supabase
+    .from("organization_members")
+    .select("user_id")
+    .eq("organization_id", lead.vendor_id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const isVendorMember = !!membership;
+
+  if (!isCustomerById && !isCustomerByEmail && !isVendorMember) {
     notFound();
   }
 
@@ -59,14 +76,14 @@ export default async function CustomerChatRoomPage({
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Enquiries
           </Link>
-          
+
           <LeaveReviewModal leadId={lead.id} vendorName={org?.name || "Vendor"} />
         </div>
 
-        <ChatInterface 
-          leadId={lead.id} 
-          currentUserId={user.id} 
-          initialMessages={messages || []} 
+        <ChatInterface
+          leadId={lead.id}
+          currentUserId={user.id}
+          initialMessages={messages || []}
           otherPartyName={org?.name || "Vendor"}
         />
       </main>

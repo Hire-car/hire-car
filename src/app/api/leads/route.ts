@@ -5,10 +5,15 @@ import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
 import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { leadSchema } from "@/lib/validation/schemas";
+import { getCurrentUser } from "@/lib/security/auth";
 
 export async function POST(request: NextRequest) {
   const ip = clientIp(request.headers);
   const ipHash = hashIpForStorage(ip);
+
+  // Capture the authenticated user if one exists (optional — the form also
+  // accepts anonymous submissions protected by Turnstile).
+  const sessionUser = await getCurrentUser();
 
   // Use distributed Redis rate limiting by IP (falls back to memory if Redis unavailable)
   const ipLimit = await rateLimitSlidingWindow(`lead:ip:${ip}`, 5, 60_000);
@@ -144,6 +149,9 @@ export async function POST(request: NextRequest) {
       vendor_id: payload.data.vendorId,
       customer_name: payload.data.name,
       customer_email: payload.data.email,
+      // Attach the authenticated user's UUID when available so that the
+      // UUID-based RLS policies and chat auth work without needing email match.
+      ...(sessionUser ? { customer_user_id: sessionUser.id } : {}),
       customer_phone: payload.data.phone,
       pickup_city: payload.data.pickupCity,
       start_date: payload.data.startDate,
