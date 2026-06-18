@@ -161,19 +161,29 @@ export async function POST(request: NextRequest) {
       status: "new",
     })
     .select("id")
-    .single();
+    .maybeSingle();
 
   if (error) {
-    console.error(`[Lead API] Failed to save lead: ${error.message}`);
-    return NextResponse.json({ error: "Unable to save lead" }, { status: 500 });
+    console.error(`[Lead API] Failed to save lead: ${error.message}`, error);
+    return NextResponse.json({ error: "Unable to save lead", details: error.message }, { status: 500 });
+  }
+
+  if (!lead) {
+    console.error("[Lead API] Lead insertion succeeded but returned no data.");
+    return NextResponse.json({ error: "Unable to save lead: no record returned" }, { status: 500 });
   }
 
   // Log lead event
-  await supabase.from("lead_events").insert({
+  const { error: eventError } = await supabase.from("lead_events").insert({
     lead_id: lead.id,
     event_type: "submitted",
     metadata: { ip_hash: ipHash },
+    ...(sessionUser ? { actor_user_id: sessionUser.id } : {}),
   });
+
+  if (eventError) {
+    console.error(`[Lead API] Failed to log lead event: ${eventError.message}`);
+  }
 
   // Send lead alert to vendor's actual billing email
   const vendorEmail = organization.billing_email;

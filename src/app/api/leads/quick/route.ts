@@ -24,44 +24,62 @@ export async function POST(request: NextRequest) {
     const supabase = createAdminClient();
 
     // 1. Get user profile
-    const { data: profile } = await supabase
+    const { data: profile, error: profileErr } = await supabase
       .from("profiles")
       .select("full_name, email, phone")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
+
+    if (profileErr) {
+      console.error("[quick lead] User profile query error:", profileErr);
+    }
 
     if (!profile || !profile.email) {
+      console.warn("[quick lead] User profile or email not found for ID:", user.id);
       return NextResponse.json({ error: "Complete your profile first" }, { status: 400 });
     }
 
     // 2. Validate vehicle and vendor
-    const { data: vehicle } = await supabase
+    const { data: vehicle, error: vehicleErr } = await supabase
       .from("vehicles")
       .select("id, branch_id, title")
       .eq("id", vehicleId)
       .eq("organization_id", vendorId)
       .eq("status", "approved")
-      .single();
+      .maybeSingle();
+
+    if (vehicleErr) {
+      console.error("[quick lead] Vehicle query error:", vehicleErr);
+    }
 
     if (!vehicle) {
+      console.warn("[quick lead] Vehicle not found, not approved, or org mismatch:", { vehicleId, vendorId });
       return NextResponse.json({ error: "Vehicle not available" }, { status: 404 });
     }
 
-    const { data: organization } = await supabase
+    const { data: organization, error: orgErr } = await supabase
       .from("organizations")
       .select("billing_email")
       .eq("id", vendorId)
-      .single();
+      .maybeSingle();
+
+    if (orgErr) {
+      console.error("[quick lead] Organization query error:", orgErr);
+    }
 
     // Get pickup city from branch
-    const { data: branch } = await supabase
+    const { data: branch, error: branchErr } = await supabase
       .from("branches")
       .select("city")
       .eq("id", vehicle.branch_id)
-      .single();
+      .maybeSingle();
+
+    if (branchErr) {
+      console.error("[quick lead] Branch query error:", branchErr);
+    }
 
     // 3. Prevent duplicate leads in short timeframe
-    const { data: duplicateLead } = await supabase
+    const { data: duplicateLead, error: duplicateErr } = await supabase
       .from("leads")
       .select("id")
       .eq("vehicle_id", vehicleId)
@@ -69,7 +87,12 @@ export async function POST(request: NextRequest) {
       .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString())
       .maybeSingle();
 
+    if (duplicateErr) {
+      console.error("[quick lead] Duplicate check query error:", duplicateErr);
+    }
+
     if (duplicateLead) {
+      console.info("[quick lead] Duplicate lead detected. Reusing lead ID:", duplicateLead.id);
       return NextResponse.json({
         success: true,
         leadId: duplicateLead.id,
@@ -87,6 +110,7 @@ export async function POST(request: NextRequest) {
     const endDate = new Date(today);
     endDate.setDate(today.getDate() + 4);
 
+    console.info("[quick lead] Creating lead record for user:", user.id);
     const { data: lead, error: leadError } = await supabase
       .from("leads")
       .insert({
@@ -106,25 +130,43 @@ export async function POST(request: NextRequest) {
         status: "new",
       })
       .select("id")
-      .single();
+      .maybeSingle();
 
     if (leadError) {
-      console.error("Lead insertion error:", leadError);
-      return NextResponse.json({ error: "Failed to create lead" }, { status: 500 });
+      console.error("[quick lead] Lead insertion failed with error:", leadError);
+      return NextResponse.json({ error: "Failed to create lead", details: leadError.message }, { status: 500 });
     }
 
+    if (!lead) {
+      console.error("[quick lead] Lead insertion succeeded but returned no data.");
+      return NextResponse.json({ error: "Failed to create lead: no record returned" }, { status: 500 });
+    }
+
+    console.info("[quick lead] Lead created successfully with ID:", lead.id);
+
     // 5. Auto-create the first message in the chat thread
-    await supabase.from("messages").insert({
+    const { error: messageError } = await supabase.from("messages").insert({
       lead_id: lead.id,
       sender_user_id: user.id,
       body: "I am interested in this vehicle. Is it still available?",
     });
 
-    await supabase.from("lead_events").insert({
+    if (messageError) {
+      console.error("[quick lead] Initial message creation failed:", messageError);
+    } else {
+      console.info("[quick lead] Initial message created successfully for lead:", lead.id);
+    }
+
+    const { error: eventError } = await supabase.from("lead_events").insert({
       lead_id: lead.id,
       event_type: "quick_interest_submitted",
       metadata: { ip_hash: ipHash, user_id: user.id },
+      actor_user_id: user.id,
     });
+
+    if (eventError) {
+      console.error("[quick lead] Lead event creation failed:", eventError);
+    }
 
     if (organization?.billing_email) {
       try {

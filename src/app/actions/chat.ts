@@ -96,18 +96,26 @@ export async function sendMessage(leadId: string, body: string) {
   const supabase = createAdminClient();
 
   // Step 1: Fetch the current user's profile email.
-  const { data: profile } = await supabase
+  const { data: profile, error: profileErr } = await supabase
     .from("profiles")
     .select("email")
     .eq("id", user.id)
     .maybeSingle();
 
+  if (profileErr) {
+    console.error("[chat:sendMessage] profile query failed:", profileErr);
+  }
+
   // Step 2: Fetch the target lead so we can check ownership.
-  const { data: lead } = await supabase
+  const { data: lead, error: leadErr } = await supabase
     .from("leads")
     .select("id, customer_email, customer_user_id, vendor_id")
     .eq("id", payload.data.leadId)
     .maybeSingle();
+
+  if (leadErr) {
+    console.error("[chat:sendMessage] lead query failed:", leadErr);
+  }
 
   // Step 3: Check if the user is the customer who created the lead.
   // Primary check: UUID match via customer_user_id (populated for all new leads).
@@ -120,14 +128,18 @@ export async function sendMessage(leadId: string, body: string) {
   const isCustomer = isCustomerById || isCustomerByEmail;
 
   // Step 4: Check if the user is a vendor org member (vendors reply in the same thread).
-  const { data: membership } = lead
+  const { data: membership, error: memberErr } = lead
     ? await supabase
         .from("organization_members")
         .select("user_id")
         .eq("organization_id", lead.vendor_id)
         .eq("user_id", user.id)
         .maybeSingle()
-    : { data: null };
+    : { data: null, error: null };
+
+  if (memberErr) {
+    console.error("[chat:sendMessage] membership query failed:", memberErr);
+  }
   const isVendorMember = !!membership;
 
   const isAuthorized = isCustomer || isVendorMember;
