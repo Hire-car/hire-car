@@ -8,7 +8,6 @@ import { Toaster } from "sonner";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { MobileStateProvider } from "@/components/mobile-state-provider";
 import { ScrollToTop } from "@/components/scroll-to-top";
-import { AssistantUI } from "@/components/ai/assistant-ui";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -128,7 +127,6 @@ export default function RootLayout({
         <MobileStateProvider>
           {children}
           <WhatsAppFloat phone={process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "61434930437"} />
-          <AssistantUI />
           <ScrollToTop />
         </MobileStateProvider>
         <Toaster richColors position="top-right" />
