@@ -7,7 +7,7 @@ import { useMobileState } from "@/components/mobile-state-provider";
 
 interface WhatsAppFloatProps {
   /** Platform support WhatsApp number */
-  phone: string;
+  phone?: string;
   /** Whether the sticky CTA bar is visible on the current page (mobile only) */
   stickyCtaVisible?: boolean;
   /** When true, hide the button entirely (e.g. modal or mobile nav is open) */
@@ -27,7 +27,7 @@ const HIDDEN_PREFIXES = ["/vendor", "/admin", "/auth", "/customer"];
  * - Respects safe area insets on modern devices
  */
 export function WhatsAppFloat({
-  phone,
+  phone = "61434930437",
   stickyCtaVisible = false,
   hidden = false,
 }: WhatsAppFloatProps) {
