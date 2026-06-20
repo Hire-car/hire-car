@@ -119,6 +119,29 @@ export const checkoutSchema = z.object({
   organizationId: z.string().uuid(),
 });
 
+/**
+ * Public API (`POST /api/v1/vehicles`) vehicle creation payload. JSON body with
+ * camelCase fields. Optional fields default to the same values the route
+ * previously hardcoded, preserving backward compatibility while enforcing
+ * types/ranges. `branchId` ownership is verified separately against the
+ * authenticated API key's organization.
+ */
+export const apiVehicleCreateSchema = z.object({
+  branchId: z.string().uuid(),
+  slug: z.string().trim().min(1).max(200).optional(),
+  title: z.string().trim().min(3).max(140),
+  make: z.string().trim().min(2).max(80),
+  model: z.string().trim().min(1).max(80),
+  year: z.coerce.number().int().min(1990).max(2030),
+  seats: z.coerce.number().int().min(2).max(12).default(5),
+  fuel: z.enum(["Petrol", "Diesel", "Hybrid", "Electric"]).default("Petrol"),
+  transmission: z.enum(["Automatic", "Manual"]).default("Automatic"),
+  category: z
+    .enum(["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury"])
+    .default("Sedan"),
+  pricePerDayAud: z.coerce.number().int().min(20).max(2000),
+});
+
 export const moderationSchema = z.object({
   resourceType: z.enum(["vendor", "branch", "vehicle", "review", "fraud_flag"]),
   resourceId: z.string().uuid(),

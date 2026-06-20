@@ -76,7 +76,7 @@ export async function GET(request: NextRequest): Promise<Response> {
  *
  * Pipeline: raw body → size guard (413) → rate limit (429) → HMAC (401) →
  * JSON parse → parse + dedupe messages → per-message idempotent claim in
- * `whatsapp_webhook_events` → placeholder processing → fast 200.
+ * `whatsapp_webhook_events` → auto-responder processing → fast 200.
  */
 export async function POST(request: NextRequest): Promise<Response> {
   // 1. Read the raw body BEFORE parsing — required for the HMAC check.
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 /**
  * Idempotently claim a single inbound message in `whatsapp_webhook_events` and
- * run the (placeholder) processing pipeline.
+ * run the auto-responder processing pipeline.
  *
  * Claim semantics (mirrors the Stripe handler):
  *   - already `processed` → skip (idempotent duplicate delivery).
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest): Promise<Response> {
  *   - existing `failed`    → re-claim by flipping back to `processing`.
  *   - no row               → insert a new `processing` row.
  *
- * After the stub runs the event is marked `processed`; if processing reports a
+ * After processing runs the event is marked `processed`; if processing reports a
  * failure it is marked `failed` with `last_error`, but the caller still returns
  * HTTP 200.
  */
@@ -207,7 +207,7 @@ async function claimAndProcess(
       return;
     }
 
-    // Run the (placeholder) processing pipeline.
+    // Run the auto-responder processing pipeline.
     const result = await processInboundMessage(message);
 
     if (result.ok) {

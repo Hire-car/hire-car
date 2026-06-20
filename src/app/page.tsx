@@ -6,8 +6,9 @@ import { SearchWidget } from "@/components/search-widget";
 import { LocationCard } from "@/components/location-card";
 import { TrustSignals } from "@/components/trust-signals";
 import { HowItWorks } from "@/components/how-it-works";
+import { TestimonialCard } from "@/components/testimonial-card";
 import { SiteFooter } from "@/components/site-footer";
-import { getActiveFeaturedVehicles } from "@/lib/data/featured";
+import { getActiveFeaturedVehicles, getApprovedTestimonials, getMarketplaceStats } from "@/lib/data/featured";
 import { searchVehicles } from "@/lib/search/typesense";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MotionScroll } from "@/components/motion-scroll";
@@ -16,7 +17,6 @@ import { buildWebSiteSchema, serializeSchemas } from "@/lib/seo";
 import {
   ArrowRight,
   ChevronDown,
-  Star,
   CheckCircle2,
 } from "lucide-react";
 
@@ -45,33 +45,14 @@ const browseCategories = [
   { name: "Luxury", href: "/categories/luxury" },
 ];
 
-const testimonials = [
-  {
-    quote: "Found a great deal on a van in Melbourne. The vendor was responsive and the booking process was seamless. Will definitely use again.",
-    rating: 5,
-    name: "Sarah M.",
-  },
-  {
-    quote: "Compared prices across multiple operators in Sydney and saved over $200 on a week-long rental. Highly recommend this platform.",
-    rating: 5,
-    name: "James T.",
-  },
-  {
-    quote: "As a frequent traveller, having verified operators gives me peace of mind. Clean cars, fair prices, no surprises.",
-    rating: 4,
-    name: "Michelle K.",
-  },
-  {
-    quote: "Booked a ute for a weekend move in Brisbane. Direct contact with the owner made everything simple and stress-free.",
-    rating: 5,
-    name: "David R.",
-  },
-];
-
 export default async function Home() {
   const featuredFromDb = await getActiveFeaturedVehicles();
+  // Real, moderation-approved customer reviews only. No fabricated testimonials.
+  const testimonials = await getApprovedTestimonials(4);
+  // Live, provable marketplace counts derived from approved records only.
+  const stats = await getMarketplaceStats();
   const { vehicles: searchFallback } = await searchVehicles("", {}, { page: 1, perPage: 6 });
-  const featuredVehicles =
+  const featuredVehicles = (
     featuredFromDb.length > 0
       ? featuredFromDb.map((v) => ({
           id: v.id,
@@ -94,7 +75,8 @@ export default async function Home() {
           verified: true,
           instantBook: false,
         }))
-      : searchFallback;
+      : searchFallback
+  ).slice(0, 6);
 
   // Fetch live vehicle counts and min prices per city
   const supabase = createAdminClient();
@@ -125,6 +107,26 @@ export default async function Home() {
     vehicleCount: cityDataMap[loc.name]?.count ?? 0,
     startingPrice: cityDataMap[loc.name]?.minPrice ?? 0,
   }));
+
+  // Build honest stat cards: numeric cards only when the count is provable
+  // (> 0), padded with truthful qualitative claims about the platform model.
+  // "$0 booking fees" reflects the actual no-marketplace-fee business model.
+  const numericStats: { value: string; label: string }[] = [];
+  if (stats.operatorCount > 0) {
+    numericStats.push({ value: String(stats.operatorCount), label: stats.operatorCount === 1 ? "Verified operator" : "Verified operators" });
+  }
+  if (stats.cityCount > 0) {
+    numericStats.push({ value: String(stats.cityCount), label: stats.cityCount === 1 ? "City covered" : "Cities covered" });
+  }
+  if (stats.vehicleCount > 0) {
+    numericStats.push({ value: String(stats.vehicleCount), label: stats.vehicleCount === 1 ? "Vehicle listed" : "Vehicles listed" });
+  }
+  const qualitativeStats = [
+    { value: "$0", label: "Booking fees" },
+    { value: "100%", label: "Verified operators" },
+    { value: "AU", label: "Australia-wide" },
+  ];
+  const heroStats = [...numericStats, ...qualitativeStats].slice(0, 4);
 
   return (
     <div className="min-h-screen bg-white text-foreground font-sans overflow-x-hidden">
@@ -218,7 +220,7 @@ export default async function Home() {
             <MotionScroll variant="stagger-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredVehicles.map((vehicle) => (
                 <MotionScroll key={vehicle.id} variant="stagger-item">
-                  <VehicleCard vehicle={vehicle} priority={false} />
+                  <VehicleCard vehicle={vehicle} variant="featured" priority={false} />
                 </MotionScroll>
               ))}
             </MotionScroll>
@@ -234,47 +236,32 @@ export default async function Home() {
           </Section>
         )}
 
-        {/* ===== 5. TESTIMONIALS ===== */}
-        <Section variant="default" size="md" container>
-          <MotionScroll variant="fade-up" className="mb-10 text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-              What Our Customers Say
-            </h2>
-            <p className="mt-3 text-muted-foreground text-lg max-w-2xl mx-auto">
-              Trusted by thousands of renters across Australia
-            </p>
-          </MotionScroll>
+        {/* ===== 5. TESTIMONIALS (real approved reviews only) ===== */}
+        {testimonials.length > 0 && (
+          <Section variant="default" size="md" container>
+            <MotionScroll variant="fade-up" className="mb-10 text-center">
+              <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+                What Our Customers Say
+              </h2>
+              <p className="mt-3 text-muted-foreground text-lg max-w-2xl mx-auto">
+                Verified reviews from renters across Australia
+              </p>
+            </MotionScroll>
 
-          <MotionScroll variant="stagger-container" className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <MotionScroll key={index} variant="stagger-item">
-                <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-                  {/* Star rating */}
-                  <div className="flex items-center gap-1 mb-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < testimonial.rating
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-muted-foreground/30"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  {/* Quote */}
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    &ldquo;{testimonial.quote}&rdquo;
-                  </p>
-                  {/* Reviewer name */}
-                  <p className="text-sm font-bold text-foreground">
-                    {testimonial.name}
-                  </p>
-                </div>
-              </MotionScroll>
-            ))}
-          </MotionScroll>
-        </Section>
+            <MotionScroll variant="stagger-container" className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {testimonials.map((testimonial) => (
+                <MotionScroll key={testimonial.id} variant="stagger-item">
+                  <TestimonialCard
+                    quote={testimonial.quote}
+                    author={testimonial.author}
+                    location={testimonial.location}
+                    rating={testimonial.rating}
+                  />
+                </MotionScroll>
+              ))}
+            </MotionScroll>
+          </Section>
+        )}
 
         {/* ===== 6. POPULAR LOCATIONS ===== */}
         <Section variant="muted" size="md" container>
@@ -294,7 +281,7 @@ export default async function Home() {
                   name={location.name}
                   imageUrl={location.imageUrl}
                   vehicleCount={location.vehicleCount}
-                  startingPrice={location.startingPrice || 35}
+                  startingPrice={location.startingPrice}
                   href={location.href}
                 />
               </MotionScroll>
@@ -335,81 +322,64 @@ export default async function Home() {
         </Section>
 
         {/* ===== 7. VENDOR CTA ===== */}
-        <section className="relative py-24 md:py-32 overflow-hidden">
-          {/* Dramatic background */}
-          <div className="absolute inset-0">
-            <Image
-              src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1600&q=80"
-              alt="Fleet of premium cars"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] via-[#0f172a]/90 to-transparent" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(234,88,12,0.15)_0%,_transparent_60%)]" />
-          </div>
+        <Section variant="navy" size="lg" container className="relative overflow-hidden">
+          {/* Soft decorative glows using the premium blue accent */}
+          <div className="pointer-events-none absolute top-10 right-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-10 left-1/3 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
 
-          {/* Floating decorative elements */}
-          <div className="absolute top-10 right-10 w-72 h-72 rounded-full bg-[#ea580c]/5 blur-3xl" />
-          <div className="absolute bottom-10 left-1/3 w-96 h-96 rounded-full bg-blue-500/5 blur-3xl" />
+          <div className="relative max-w-2xl">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/15 border border-primary/30 px-4 py-1.5 mb-8">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+              </span>
+              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Now accepting new operators</span>
+            </div>
 
-          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#ea580c]/10 border border-[#ea580c]/20 px-4 py-1.5 mb-8">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#ea580c] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ea580c]" />
-                </span>
-                <span className="text-xs font-bold text-[#ea580c] uppercase tracking-wider">Now accepting new operators</span>
-              </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1] mb-6">
+              Grow your rental business
+              <br />
+              <span className="text-primary">with qualified leads</span>
+            </h2>
 
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1] mb-6">
-                Get More Leads<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ea580c] to-amber-400">
-                  for Your Fleet
-                </span>
-              </h2>
+            <p className="text-lg md:text-xl text-slate-300 font-medium mb-10 max-w-lg leading-relaxed">
+              List your fleet alongside verified operators across Australia — with zero booking fees.
+            </p>
 
-              <p className="text-lg md:text-xl text-slate-300 font-medium mb-10 max-w-lg leading-relaxed">
-                Join verified operators reaching thousands of renters every month across Australia.
-              </p>
-
-              {/* Benefits with premium styling */}
-              <div className="grid sm:grid-cols-2 gap-4 mb-10">
-                {[
-                  "Reach more customers Australia-wide",
-                  "Direct enquiries — no middleman fees",
-                  "Verified operator badge builds trust",
-                  "Analytics dashboard included",
-                ].map((benefit) => (
-                  <div
-                    key={benefit}
-                    className="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#ea580c] text-white text-xs font-bold shadow-lg shadow-[#ea580c]/20">
-                      ✓
-                    </span>
-                    <span className="text-sm font-medium text-slate-200">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTA with glow effect */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <Link
-                  href="/vendor/upgrade"
-                  className="group relative inline-flex items-center gap-2 rounded-full bg-[#ea580c] px-8 py-4 font-bold text-white text-lg hover:bg-[#dc5409] transition-all shadow-xl shadow-[#ea580c]/25 hover:shadow-[#ea580c]/40 hover:scale-[1.02]"
+            {/* Benefit bullet points */}
+            <ul className="grid sm:grid-cols-2 gap-4 mb-10">
+              {[
+                "Reach more customers Australia-wide",
+                "Direct enquiries — no middleman fees",
+                "Verified operator badge builds trust",
+                "Analytics dashboard included",
+              ].map((benefit) => (
+                <li
+                  key={benefit}
+                  className="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
                 >
-                  List Your Fleet Free
-                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-                <span className="text-sm text-slate-400 font-medium">
-                  No credit card required · 2 min setup
-                </span>
-              </div>
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
+                  <span className="text-sm font-medium text-slate-200">{benefit}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Primary CTA → vendor sign-up flow */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <Link
+                href="/auth/sign-in"
+                className="group inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                List Your Fleet Free
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <span className="text-sm text-slate-400 font-medium">
+                No credit card required · 2 min setup
+              </span>
             </div>
           </div>
-        </section>
+        </Section>
 
         {/* ===== ADDITIONAL SECTIONS (SEO & FAQ — not in spec order but add value) ===== */}
 
@@ -494,22 +464,12 @@ export default async function Home() {
 
               <div className="hidden md:flex flex-col items-center justify-center">
                 <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-                  <div className="rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm p-6 text-center">
-                    <p className="text-3xl font-black text-white">12+</p>
-                    <p className="text-sm text-slate-400 mt-1">Cities Covered</p>
-                  </div>
-                  <div className="rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm p-6 text-center">
-                    <p className="text-3xl font-black text-white">150+</p>
-                    <p className="text-sm text-slate-400 mt-1">Operators</p>
-                  </div>
-                  <div className="rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm p-6 text-center">
-                    <p className="text-3xl font-black text-[#ea580c]">$0</p>
-                    <p className="text-sm text-slate-400 mt-1">Booking Fees</p>
-                  </div>
-                  <div className="rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm p-6 text-center">
-                    <p className="text-3xl font-black text-white">24/7</p>
-                    <p className="text-sm text-slate-400 mt-1">Support</p>
-                  </div>
+                  {heroStats.map((stat) => (
+                    <div key={stat.label} className="rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm p-6 text-center">
+                      <p className={`text-3xl font-black ${stat.value === "$0" ? "text-[#ea580c]" : "text-white"}`}>{stat.value}</p>
+                      <p className="text-sm text-slate-400 mt-1">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

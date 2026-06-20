@@ -68,12 +68,17 @@ function LinkedinIcon({ className }: { className?: string }) {
   );
 }
 
+// Social links are env-driven so we never ship placeholder ("#") links.
+// Configure the optional NEXT_PUBLIC_SOCIAL_* vars to surface each icon; any
+// link left unset is simply hidden.
 const socialLinks = [
-  { icon: XIcon, href: "#", label: "Twitter / X" },
-  { icon: FacebookIcon, href: "#", label: "Facebook" },
-  { icon: InstagramIcon, href: "#", label: "Instagram" },
-  { icon: LinkedinIcon, href: "#", label: "LinkedIn" },
-];
+  { icon: XIcon, href: process.env.NEXT_PUBLIC_SOCIAL_X_URL, label: "Twitter / X" },
+  { icon: FacebookIcon, href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL, label: "Facebook" },
+  { icon: InstagramIcon, href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL, label: "Instagram" },
+  { icon: LinkedinIcon, href: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL, label: "LinkedIn" },
+].filter((s): s is { icon: typeof XIcon; href: string; label: string } =>
+  typeof s.href === "string" && s.href.trim().length > 0,
+);
 
 export function SiteFooter() {
   return (
@@ -189,14 +194,6 @@ export function SiteFooter() {
                   </Link>
                 </li>
               ))}
-              <li>
-                <a
-                  href="tel:0434930437"
-                  className="block py-2 text-sm text-slate-400 hover:text-white transition-colors md:inline md:py-0"
-                >
-                  0434 930 437
-                </a>
-              </li>
             </ul>
           </div>
         </div>
@@ -213,18 +210,22 @@ export function SiteFooter() {
             </p>
 
             {/* Social Media Links */}
-            <div className="flex items-center gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:bg-primary hover:text-white transition-colors"
-                  aria-label={social.label}
-                >
-                  <social.icon className="h-4 w-4" aria-hidden="true" />
-                </a>
-              ))}
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="flex items-center gap-3">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-800 text-slate-400 hover:bg-primary hover:text-white transition-colors"
+                    aria-label={social.label}
+                  >
+                    <social.icon className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

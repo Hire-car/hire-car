@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isAllowlistedAdminEmail } from "@/lib/security/admin-allowlist";
 
 type SupabaseUser = {
   id: string;
@@ -9,12 +10,6 @@ type SupabaseUser = {
   app_metadata?: Record<string, unknown>;
   factors?: unknown[];
 };
-
-const SUPER_ADMIN_EMAILS = [
-  "pankaj@techtonika-autolink.com",
-  "anandujjawalofficial11@gmail.com",
-  "ybikash919@gmail.com"
-];
 
 export async function getCurrentUser() {
   const supabase = await createClient();
@@ -66,12 +61,12 @@ async function userHasAdminRoleRecord(
 }
 
 export async function userHasAdminAccess(user: SupabaseUser) {
-  if (user.email && SUPER_ADMIN_EMAILS.includes(user.email)) return true;
+  if (isAllowlistedAdminEmail(user.email)) return true;
   return userHasPlatformRole(user) || userHasAdminRoleRecord(user.id);
 }
 
 export async function getUserAdminRole(user: SupabaseUser): Promise<string> {
-  if (user.email && SUPER_ADMIN_EMAILS.includes(user.email)) return "super_admin";
+  if (isAllowlistedAdminEmail(user.email)) return "super_admin";
 
   const supabase = createAdminClient();
   const { data } = await supabase
@@ -106,7 +101,7 @@ export async function requireAdminRole(allowedRoles: string[]) {
   // Check if they have an active admin role record for these specific roles
   // or if they are an owner/admin (who can do everything)
   const isGlobalAdmin = await userHasAdminRoleRecord(user.id, ["owner", "admin"]);
-  if (isGlobalAdmin || (user.email && SUPER_ADMIN_EMAILS.includes(user.email))) {
+  if (isGlobalAdmin || isAllowlistedAdminEmail(user.email)) {
     return user;
   }
 

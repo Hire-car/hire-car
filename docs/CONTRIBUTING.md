@@ -29,6 +29,19 @@ npm run build
 **Zero Warnings Policy:**
 The codebase has been strictly audited to have zero unused variables and zero unused imports. A PR that introduces ESLint warnings will fail in Vercel CI and will not be merged.
 
+## Continuous Integration
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every pull request
+and on pushes to `master`/`main`. The enforced **quality** job runs:
+```bash
+npm run lint
+npx tsc --noEmit
+npm run test
+```
+The production `build` job is opt-in (it needs Supabase env/secrets to render
+pages). Enable it by setting the repo variable `RUN_BUILD=true` and providing the
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and
+`SUPABASE_SERVICE_ROLE_KEY` secrets (plus the `NEXT_PUBLIC_APP_URL` variable).
+
 ## Documentation Updates
 If you add a new database table, update `docs/DATABASE.md`.
 If you add a new public API endpoint, update `docs/API.md`.

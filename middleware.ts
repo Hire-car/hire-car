@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isVendorPreOrgPath } from "@/lib/routing";
+import { isAllowlistedAdminEmail } from "@/lib/security/admin-allowlist";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -67,13 +68,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isAdminRoute && user) {
-    const allowedAdminEmails = [
-      "pankaj@techtonika-autolink.com",
-      "anandujjawalofficial11@gmail.com",
-      "ybikash919@gmail.com",
-    ];
-    
-    let isAuthorizedAdmin = allowedAdminEmails.includes(user.email ?? "");
+    let isAuthorizedAdmin = isAllowlistedAdminEmail(user.email);
 
     if (!isAuthorizedAdmin) {
       const platformRole = user.app_metadata?.platform_role;

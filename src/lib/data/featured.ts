@@ -1,6 +1,4 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { resolveVehicleImage } from "@/lib/image-utils";
-import type { VehicleImageRecord } from "@/lib/image-utils";
 
 export type FeaturedVehicle = {
   id: string;
@@ -27,8 +25,7 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
       vehicles!inner(
         id, slug, title, make, model, year, category, price_per_day_aud, status,
         branches!inner(city, status),
-        organizations!inner(name, status),
-        vehicle_images(storage_path, approved, sort_order)
+        organizations!inner(name, status)
       )
     `)
     .lte("starts_at", now)
@@ -48,7 +45,6 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
   }
 
   const results: FeaturedVehicle[] = [];
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
   for (const row of data) {
     type VehicleRow = {
@@ -63,12 +59,9 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
       status: string;
       branches: { city: string; status: string };
       organizations: { name: string; status: string };
-      vehicle_images: VehicleImageRecord[];
     };
 
     const v = row.vehicles as unknown as VehicleRow;
-    const imgs = v.vehicle_images ?? [];
-    const imageUrl = resolveVehicleImage(supabaseUrl, imgs, v.category);
 
     results.push({
       id: v.id,
@@ -81,9 +74,113 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
       pricePerDay: v.price_per_day_aud,
       city: v.branches.city,
       organizationName: v.organizations.name,
-      imageUrl,
     });
   }
 
   return results;
+}
+
+export type HomeTestimonial = {
+  id: string;
+  author: string;
+  location: string;
+  quote: string;
+  rating: number;
+};
+
+/**
+ * Returns genuine, approved customer reviews for use as homepage testimonials.
+ * Only reviews that passed moderation (status = "approved") on approved
+ * organizations are eligible, and only ratings of 4-5. Never fabricates data:
+ * if there are no qualifying reviews the homepage simply hides the section.
+ */
+export async function getApprovedTestimonials(limit = 4): Promise<HomeTestimonial[]> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("reviews")
+    .select(`
+      id, customer_name, rating, body, created_at,
+      organizations!inner(name, status, branches(city, status))
+    `)
+    .eq("status", "approved")
+    .gte("rating", 4)
+    .eq("organizations.status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error || !data) {
+    return [];
+  }
+
+  type ReviewRow = {
+    id: string;
+    customer_name: string | null;
+    rating: number;
+    body: string | null;
+    organizations: {
+      name: string;
+      branches?: { city: string | null; status: string }[] | null;
+    } | null;
+  };
+
+  const results: HomeTestimonial[] = [];
+
+  for (const row of data as unknown as ReviewRow[]) {
+    if (!row.body || !row.customer_name) continue;
+
+    const org = row.organizations;
+    const approvedBranch = org?.branches?.find((b) => b.status === "approved" && b.city);
+    const location = approvedBranch?.city ?? org?.name ?? "Australia";
+
+    results.push({
+      id: row.id,
+      author: row.customer_name,
+      location,
+      quote: row.body,
+      rating: row.rating,
+    });
+  }
+
+  return results;
+}
+
+export type MarketplaceStats = {
+  operatorCount: number;
+  cityCount: number;
+  vehicleCount: number;
+};
+
+/**
+ * Returns live, provable marketplace counts derived only from approved records.
+ * Used to render honest homepage stats. Returns zeros on error so the caller
+ * can decide whether to show a stat or fall back to a qualitative claim.
+ */
+export async function getMarketplaceStats(): Promise<MarketplaceStats> {
+  const supabase = createAdminClient();
+
+  const [{ count: operatorCount }, vehicleResult] = await Promise.all([
+    supabase
+      .from("organizations")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "approved"),
+    supabase
+      .from("vehicles")
+      .select("id, branches!inner(city, status)", { count: "exact" })
+      .eq("status", "approved")
+      .eq("branches.status", "approved"),
+  ]);
+
+  const cities = new Set<string>();
+  type CityRow = { branches?: { city: string | null } | null };
+  (vehicleResult.data as unknown as CityRow[] | null)?.forEach((row) => {
+    const city = row.branches?.city;
+    if (city) cities.add(city.toLowerCase());
+  });
+
+  return {
+    operatorCount: operatorCount ?? 0,
+    cityCount: cities.size,
+    vehicleCount: vehicleResult.count ?? 0,
+  };
 }

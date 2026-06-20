@@ -8,7 +8,6 @@ const MAIN_MENU = {
   body: { text: "Welcome! How can we assist you today?" },
   action: {
     buttons: [
-      { type: "reply", reply: { id: "MANAGE_BOOKING_BTN", title: "Manage Booking" } },
       { type: "reply", reply: { id: "SUPPORT_BTN", title: "Customer Support" } },
       { type: "reply", reply: { id: "INFO_BTN", title: "General Info" } },
     ],
@@ -44,13 +43,6 @@ export async function handleBotRouting(message: ParsedInboundMessage): Promise<v
       return;
     }
 
-    if (actionId === "MANAGE_BOOKING_BTN") {
-      await updateSession(phone, "awaiting_booking_id");
-      const res = await sendCloudApiText(phone, "Please enter your Booking ID.");
-      if (!res.ok) throw new Error(`Failed to send booking text: ${res.error}`);
-      return;
-    }
-
     if (actionId === "INFO_BTN") {
       await clearSession(phone);
       const res = await sendCloudApiText(
@@ -76,38 +68,6 @@ export async function handleBotRouting(message: ParsedInboundMessage): Promise<v
       await clearSession(phone);
       const res = await sendCloudApiText(phone, "Your support ticket has been created successfully. A member of our team will review it shortly.");
       if (!res.ok) throw new Error(`Failed to send support success: ${res.error}`);
-      return;
-    }
-
-    if (currentState === "awaiting_booking_id") {
-      const bookingId = message.text.trim();
-      // Try to find booking (assuming bookingId might be a UUID, we must handle invalid UUID formats)
-      const isUUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(bookingId);
-      
-      if (isUUID) {
-        const { data: booking } = await supabase
-          .from("bookings")
-          .select("status, start_date, end_date, vehicles(title)")
-          .eq("id", bookingId)
-          .maybeSingle();
-
-        if (booking) {
-          const vehicleTitle = Array.isArray(booking.vehicles) ? booking.vehicles[0]?.title : (booking.vehicles as any)?.title;
-          const res = await sendCloudApiText(
-            phone,
-            `Booking Found!\nVehicle: ${vehicleTitle}\nStatus: ${booking.status}\nDates: ${booking.start_date} to ${booking.end_date}`
-          );
-          if (!res.ok) throw new Error(`Failed to send booking found: ${res.error}`);
-        } else {
-          const res = await sendCloudApiText(phone, "We couldn't find a booking with that ID. Please ensure it's correct or contact support.");
-          if (!res.ok) throw new Error(`Failed to send booking not found: ${res.error}`);
-        }
-      } else {
-         const res = await sendCloudApiText(phone, "Invalid Booking ID format. Please contact support if you need help finding your booking.");
-         if (!res.ok) throw new Error(`Failed to send invalid booking format: ${res.error}`);
-      }
-
-      await clearSession(phone);
       return;
     }
 

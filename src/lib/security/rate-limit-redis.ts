@@ -2,11 +2,24 @@ import { Redis } from "ioredis";
 import { optionalEnv } from "@/lib/config";
 
 let redisClient: Redis | null = null;
+let warnedMissingRedisInProd = false;
 
 export function getRedisClient(): Redis | null {
   const redisUrl = optionalEnv("REDIS_URL");
 
   if (!redisUrl) {
+    // In production, per-instance in-memory rate limiting is NOT reliable on
+    // serverless/multi-instance deployments. Warn loudly (once) so this is
+    // visible in logs/monitoring instead of silently degrading abuse limits.
+    if (process.env.NODE_ENV === "production" && !warnedMissingRedisInProd) {
+      warnedMissingRedisInProd = true;
+      console.error(
+        "[rate-limit] REDIS_URL is not set in production. Falling back to " +
+          "per-instance in-memory rate limiting, which does NOT enforce limits " +
+          "across serverless instances. Configure REDIS_URL to restore " +
+          "distributed rate limiting for leads, contact, and webhook endpoints.",
+      );
+    }
     return null;
   }
 

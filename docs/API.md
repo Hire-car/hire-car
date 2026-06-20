@@ -5,9 +5,10 @@ This outlines the structure of the Next.js API Routes and Server Actions handlin
 ## Public Endpoints (REST)
 
 ### `GET /api/health`
-Checks the database connection and returns the system status.
-- **Auth Required**: No
-- **Response Shape**: `{ status: "healthy", timestamp: string }`
+Checks the database connection (read-only) and returns the system status. Safe for public uptime monitors; performs no writes and leaks no configuration details.
+- **Auth Required**: No (a read-only liveness probe)
+- **Response Shape**: `{ status: "ok" | "unhealthy", timestamp: string }`
+- **Optional deep check**: Send `Authorization: Bearer <WORKER_API_KEY>` to also run a webhook-table write probe and include a `diagnostics` object in the response.
 
 ### `GET /api/search`
 Queries Typesense for vehicles, with a fallback to Supabase Postgres.

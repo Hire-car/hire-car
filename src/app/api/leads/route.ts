@@ -5,15 +5,10 @@ import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
 import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { leadSchema } from "@/lib/validation/schemas";
-import { getCurrentUser } from "@/lib/security/auth";
 
 export async function POST(request: NextRequest) {
   const ip = clientIp(request.headers);
   const ipHash = hashIpForStorage(ip);
-
-  // Capture the authenticated user if one exists (optional — the form also
-  // accepts anonymous submissions protected by Turnstile).
-  const sessionUser = await getCurrentUser();
 
   // Use distributed Redis rate limiting by IP (falls back to memory if Redis unavailable)
   const ipLimit = await rateLimitSlidingWindow(`lead:ip:${ip}`, 5, 60_000);
@@ -48,7 +43,7 @@ export async function POST(request: NextRequest) {
   const emailLimit = await rateLimitSlidingWindow(`lead:email:${payload.data.email}`, 3, 60_000);
   
   if (!emailLimit.allowed) {
-    console.info(`[Lead API] Rate limit hit for email ${payload.data.email}`);
+    console.info(`[Lead API] Rate limit hit for email (ip ${ipHash})`);
     return NextResponse.json(
       {
         error: "Too many lead submissions for this email",
@@ -135,7 +130,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (duplicateLead) {
-    console.info(`[Lead API] Returning existing lead for email ${payload.data.email} and vehicle ${payload.data.vehicleId}`);
+    console.info(`[Lead API] Returning existing lead ${duplicateLead.id} for vehicle ${payload.data.vehicleId}`);
     return NextResponse.json(
       { leadId: duplicateLead.id, duplicate: true },
       { status: 200 },
@@ -149,9 +144,6 @@ export async function POST(request: NextRequest) {
       vendor_id: payload.data.vendorId,
       customer_name: payload.data.name,
       customer_email: payload.data.email,
-      // Attach the authenticated user's UUID when available so that the
-      // UUID-based RLS policies and chat auth work without needing email match.
-      ...(sessionUser ? { customer_user_id: sessionUser.id } : {}),
       customer_phone: payload.data.phone,
       pickup_city: payload.data.pickupCity,
       start_date: payload.data.startDate,
@@ -161,29 +153,19 @@ export async function POST(request: NextRequest) {
       status: "new",
     })
     .select("id")
-    .maybeSingle();
+    .single();
 
   if (error) {
-    console.error(`[Lead API] Failed to save lead: ${error.message}`, error);
-    return NextResponse.json({ error: "Unable to save lead", details: error.message }, { status: 500 });
-  }
-
-  if (!lead) {
-    console.error("[Lead API] Lead insertion succeeded but returned no data.");
-    return NextResponse.json({ error: "Unable to save lead: no record returned" }, { status: 500 });
+    console.error(`[Lead API] Failed to save lead: ${error.message}`);
+    return NextResponse.json({ error: "Unable to save lead" }, { status: 500 });
   }
 
   // Log lead event
-  const { error: eventError } = await supabase.from("lead_events").insert({
+  await supabase.from("lead_events").insert({
     lead_id: lead.id,
     event_type: "submitted",
     metadata: { ip_hash: ipHash },
-    ...(sessionUser ? { actor_user_id: sessionUser.id } : {}),
   });
-
-  if (eventError) {
-    console.error(`[Lead API] Failed to log lead event: ${eventError.message}`);
-  }
 
   // Send lead alert to vendor's actual billing email
   const vendorEmail = organization.billing_email;
@@ -194,7 +176,7 @@ export async function POST(request: NextRequest) {
         vehicleTitle: vehicle.title,
         customerName: payload.data.name,
       });
-      console.info(`[Lead API] Successfully processed lead ${lead.id} and sent alert to ${vendorEmail}`);
+      console.info(`[Lead API] Successfully processed lead ${lead.id} and sent vendor alert`);
     } catch (emailErr) {
       console.error(`[Lead API] Lead ${lead.id} created but failed to send email:`, emailErr);
     }
