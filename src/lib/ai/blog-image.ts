@@ -16,7 +16,7 @@ async function fetchUnsplashImage(query: string): Promise<{ buffer: Buffer; mime
   try {
     const searchUrl = new URL("https://api.unsplash.com/search/photos");
     searchUrl.searchParams.set("query", query);
-    searchUrl.searchParams.set("per_page", "1");
+    searchUrl.searchParams.set("per_page", "15");
     searchUrl.searchParams.set("orientation", "landscape");
 
     const searchRes = await fetch(searchUrl.toString(), {
@@ -31,7 +31,12 @@ async function fetchUnsplashImage(query: string): Promise<{ buffer: Buffer; mime
     const searchData = (await searchRes.json()) as {
       results?: { urls?: { regular?: string } }[];
     };
-    const imageUrl = searchData.results?.[0]?.urls?.regular;
+    
+    if (!searchData.results || searchData.results.length === 0) return null;
+    
+    const randomIndex = Math.floor(Math.random() * searchData.results.length);
+    const imageUrl = searchData.results[randomIndex]?.urls?.regular;
+    
     if (!imageUrl) return null;
 
     const imageRes = await fetch(imageUrl);
