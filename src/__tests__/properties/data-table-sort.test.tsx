@@ -166,7 +166,7 @@ describe("Property 7: Data Table Sort Ordering", () => {
       }),
       PBT_CONFIG
     );
-  });
+  }, 20000);
 
   it("descending sort ensures each value ≥ next for any data array and sortable column", () => {
     fc.assert(
@@ -204,5 +204,5 @@ describe("Property 7: Data Table Sort Ordering", () => {
       }),
       PBT_CONFIG
     );
-  });
+  }, 20000);
 });

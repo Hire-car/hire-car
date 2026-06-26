@@ -7,6 +7,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { MobileStateProvider } from "@/components/mobile-state-provider";
+import { MobileAnimationProvider } from "@/components/mobile-animation-provider";
 import { ScrollToTop } from "@/components/scroll-to-top";
 
 const inter = Inter({
@@ -110,9 +111,9 @@ export default function RootLayout({
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
-            <Script id="google-analytics" strategy="afterInteractive">
+            <Script id="google-analytics" strategy="lazyOnload">
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
@@ -125,9 +126,11 @@ export default function RootLayout({
           </>
         )}
         <MobileStateProvider>
-          {children}
-          <WhatsAppFloat phone="61434930437" />
-          <ScrollToTop />
+          <MobileAnimationProvider>
+            {children}
+            <WhatsAppFloat phone="61434930437" />
+            <ScrollToTop />
+          </MobileAnimationProvider>
         </MobileStateProvider>
         <Toaster richColors position="top-right" />
         <Script id="sw-register" strategy="lazyOnload">

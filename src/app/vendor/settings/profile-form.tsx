@@ -41,6 +41,7 @@ export function ProfileForm({ organizationId, defaultValues }: ProfileFormProps)
           required
           minLength={2}
           maxLength={160}
+          autoComplete="organization"
           className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
           placeholder="Your business name"
           aria-describedby="name-helper"
@@ -56,6 +57,9 @@ export function ProfileForm({ organizationId, defaultValues }: ProfileFormProps)
         <input
           id="phone"
           name="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
           defaultValue={defaultValues.phone}
           className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
           placeholder="+61 4XX XXX XXX"
@@ -73,6 +77,8 @@ export function ProfileForm({ organizationId, defaultValues }: ProfileFormProps)
           id="website"
           name="website"
           type="url"
+          inputMode="url"
+          autoComplete="url"
           defaultValue={defaultValues.website}
           className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
           placeholder="https://yourwebsite.com.au"
@@ -87,6 +93,7 @@ export function ProfileForm({ organizationId, defaultValues }: ProfileFormProps)
         <input
           id="address"
           name="address"
+          autoComplete="street-address"
           defaultValue={defaultValues.address}
           className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all aria-invalid:border-destructive"
           placeholder="123 Main St, Sydney NSW 2000"

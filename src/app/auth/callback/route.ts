@@ -6,6 +6,7 @@ import {
   resolvePostAuthDestination,
 } from "@/lib/routing";
 import { sendWelcomeEmail } from "@/lib/email/resend";
+import { deriveProfileFromUser } from "@/lib/auth/profile";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -42,15 +43,7 @@ export async function GET(request: NextRequest) {
 
       const isNewUser = !existingProfile;
 
-      await admin.from("profiles").upsert({
-        id: data.user.id,
-        full_name:
-          data.user.user_metadata?.full_name ??
-          data.user.user_metadata?.name ??
-          null,
-        email: data.user.email,
-        updated_at: new Date().toISOString(),
-      });
+      await admin.from("profiles").upsert(deriveProfileFromUser(data.user));
 
       // Send welcome email for brand-new registrations (non-blocking)
       if (isNewUser && data.user.email) {

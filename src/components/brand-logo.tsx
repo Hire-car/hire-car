@@ -19,7 +19,8 @@ export function BrandLogo({
         src="/LOGO.png"
         alt="HireCar Marketplace"
         fill
-        priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         sizes="(max-width: 640px) 180px, 220px"
         className={cn("object-contain", imageClassName)}
       />

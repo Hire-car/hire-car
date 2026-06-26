@@ -27,6 +27,17 @@ export const metadata = {
 
 export const revalidate = 3600;
 
+// LCP hero background. Extracted to a constant so the same URL is used by both
+// the <Image> element and the mobile <link rel="preload"> below, guaranteeing
+// the preloaded resource matches what the browser actually fetches.
+const HERO_IMAGE_SRC =
+  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80";
+
+// Build a Next.js image-optimizer URL for a given width (q=75 is the default
+// allowed quality). Used to construct a responsive preload srcset for mobile.
+const heroOptimisedUrl = (width: number) =>
+  `/_next/image?url=${encodeURIComponent(HERO_IMAGE_SRC)}&w=${width}&q=75`;
+
 const popularLocations = [
   { name: "Sydney", imageUrl: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80", href: "/locations/sydney" },
   { name: "Melbourne", imageUrl: "https://images.unsplash.com/photo-1514395462725-fb4566210144?auto=format&fit=crop&w=600&q=80", href: "/locations/melbourne" },
@@ -130,6 +141,22 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-white text-foreground font-sans overflow-x-hidden">
+      {/*
+        Preload the LCP hero image specifically for the Mobile_Viewport so it
+        begins downloading from the document <head>, before it is discovered in
+        the <body>. The media query scopes the preload to phones (≤767px), and
+        the responsive imageSrcSet lets the browser pick the width that matches
+        what next/image will request (Requirement 6.6).
+      */}
+      <link
+        rel="preload"
+        as="image"
+        href={heroOptimisedUrl(1080)}
+        imageSrcSet={`${heroOptimisedUrl(640)} 640w, ${heroOptimisedUrl(828)} 828w, ${heroOptimisedUrl(1080)} 1080w`}
+        imageSizes="100vw"
+        media="(max-width: 767px)"
+        fetchPriority="high"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeSchemas([buildWebSiteSchema()]) }}
@@ -142,10 +169,11 @@ export default async function Home() {
           <div className="relative overflow-hidden bg-slate-950 min-h-[520px] flex items-center">
             {/* Background car image */}
             <Image
-              src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80"
+              src={HERO_IMAGE_SRC}
               alt="Premium rental car"
               fill
-              priority
+              loading="eager"
+              fetchPriority="high"
               sizes="100vw"
               className="object-cover object-right opacity-90"
             />
@@ -428,6 +456,8 @@ export default async function Home() {
               src="https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?auto=format&fit=crop&w=1600&q=80"
               alt="Australian road"
               fill
+              loading="lazy"
+              sizes="100vw"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/95 via-[#0f172a]/85 to-[#0f172a]/70" />

@@ -73,7 +73,7 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Accept boolean `isLocked` parameter; clean up on unmount
     - _Requirements: 3.3_
 
-- [~] 3. Checkpoint - Verify hooks compile
+- [x] 3. Checkpoint - Verify hooks compile
   - Ensure all tests pass, ask the user if questions arise.
 
 - [x] 4. New UI components
@@ -135,11 +135,11 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Animate in from bottom; respect reduced motion
     - _Requirements: 10.5_
 
-- [~] 5. Checkpoint - Verify new components compile
+- [x] 5. Checkpoint - Verify new components compile
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Modify existing components — Header and Navigation
-  - [-] 6.1 Refactor site-header to use useHeaderHeight and MobileDrawerNav
+- [x] 6. Modify existing components — Header and Navigation
+  - [x] 6.1 Refactor site-header to use useHeaderHeight and MobileDrawerNav
     - Replace hardcoded `h-[116px]` spacer with dynamic spacer using `--header-height` CSS variable
     - Add ref to header element; pass to `useHeaderHeight`
     - Add `env(safe-area-inset-top)` padding to the fixed header
@@ -148,7 +148,7 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Reduce header height in landscape orientation via CSS
     - _Requirements: 5.3, 13.1, 14.1, 14.2, 14.3, 15.2_
 
-  - [-] 6.2 Refactor whatsapp-float for context-aware positioning
+  - [x] 6.2 Refactor whatsapp-float for context-aware positioning
     - Accept `stickyCtaVisible` prop (boolean)
     - When CTA visible on mobile: set bottom offset to `CTA_height + 12px + 24px`
     - When modal or mobile nav is open: hide the button entirely (visibility or conditional render)
@@ -156,34 +156,34 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Apply `env(safe-area-inset-bottom)` to base offset
     - _Requirements: 13.2, 13.3, 13.4_
 
-- [ ] 7. Modify existing components — Image Gallery
-  - [-] 7.1 Add swipe and pinch-zoom to image-gallery
+- [x] 7. Modify existing components — Image Gallery
+  - [x] 7.1 Add swipe and pinch-zoom to image-gallery
     - Integrate `useSwipeGesture` for horizontal navigation between images
     - Integrate `usePinchZoom` for zoom on touch
     - Apply `will-change: transform` only during gesture, remove after
     - Implement gallery index wrapping: `(index + 1) % N` and `(index - 1 + N) % N`
     - _Requirements: 2.1, 2.2, 11.5_
 
-  - [~] 7.2 Replace arrow buttons with PaginationDots on mobile
+  - [x] 7.2 Replace arrow buttons with PaginationDots on mobile
     - Hide arrow navigation buttons on mobile viewport (below 768px)
     - Render `PaginationDots` below gallery on mobile
     - Keep arrows visible on desktop/tablet
     - _Requirements: 2.3, 2.4_
 
-  - [ ]* 7.3 Write property test for gallery index navigation
+  - [x] 7.3 Write property test for gallery index navigation
     - **Property 1: Gallery index navigation wraps correctly**
     - Test that for any N ≥ 1 and 0 ≤ I < N, swipe-left produces `(I + 1) % N` and swipe-right produces `(I - 1 + N) % N`
     - Place in `src/__tests__/properties/gallery-navigation.property.test.ts`
     - **Validates: Requirements 2.1**
 
-  - [ ]* 7.4 Write property test for pinch zoom scale clamping
+  - [x] 7.4 Write property test for pinch zoom scale clamping
     - **Property 2: Pinch zoom scale is proportional and clamped**
     - Test that for any pinch delta, computed scale is within [minScale, maxScale]
     - Place in `src/__tests__/properties/pinch-zoom-scale.property.test.ts`
     - **Validates: Requirements 2.2**
 
-- [ ] 8. Modify existing components — Vehicle Detail and Search
-  - [~] 8.1 Update cars/[slug]/page for mobile optimisation
+- [x] 8. Modify existing components — Vehicle Detail and Search
+  - [x] 8.1 Update cars/[slug]/page for mobile optimisation
     - Add `ScrollIndicator` wrapper around breadcrumb navigation
     - Add sticky CTA bar at bottom of mobile viewport showing price and booking button
     - Apply `env(safe-area-inset-bottom)` to sticky CTA
@@ -194,7 +194,7 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Limit gallery height to 50vh in landscape
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 5.2, 15.3_
 
-  - [~] 8.2 Update search page for mobile filter UX
+  - [x] 8.2 Update search page for mobile filter UX
     - Stack search widget inputs vertically with full-width on mobile
     - Convert filter panel to bottom-sheet (or right slide-over) on mobile
     - Add floating filter button with active filter count badge
@@ -202,46 +202,46 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Position search/apply button in lower half of screen within filter panel
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-  - [ ]* 8.3 Write property test for active filter UI state
+  - [x] 8.3 Write property test for active filter UI state
     - **Property 3: Active filters produce correct UI state**
     - Test that for 0..N active filters, chip count equals N and badge displays N
     - Place in `src/__tests__/properties/filter-ui-state.property.test.ts`
     - **Validates: Requirements 8.3, 8.4**
 
-  - [ ]* 8.4 Write property test for scroll indicator visibility
+  - [x] 8.4 Write property test for scroll indicator visibility
     - **Property 4: Scroll indicator visibility reflects scroll position**
     - Test leading gradient visible iff scrollLeft > 0; trailing visible iff scrollLeft + clientWidth < scrollWidth
     - Place in `src/__tests__/properties/scroll-indicator.property.test.ts`
     - **Validates: Requirements 9.5, 16.1, 16.2, 16.3**
 
-- [ ] 9. Modify existing components — WhatsApp repositioning and vehicle-card
-  - [-] 9.1 Update vehicle-card touch targets
+- [x] 9. Modify existing components — WhatsApp repositioning and vehicle-card
+  - [x] 9.1 Update vehicle-card touch targets
     - Ensure all interactive elements (links, buttons) meet 44x44px minimum via padding or pseudo-elements
     - Maintain 8px minimum spacing between adjacent targets
     - Apply touch-target utility class where needed
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ]* 9.2 Write property test for WhatsApp button repositioning
+  - [x] 9.2 Write property test for WhatsApp button repositioning
     - **Property 5: WhatsApp button repositions above sticky CTA**
     - Test that for any CTA height H > 0, bottom offset equals H + 12 + 24
     - Place in `src/__tests__/properties/whatsapp-reposition.property.test.ts`
     - **Validates: Requirements 13.2**
 
-  - [ ]* 9.3 Write property test for header spacer synchronisation
+  - [x] 9.3 Write property test for header spacer synchronisation
     - **Property 6: Header spacer synchronises with header height**
     - Test that for any measured header height H, CSS variable and spacer equal H
     - Place in `src/__tests__/properties/header-spacer.property.test.ts`
     - **Validates: Requirements 14.1, 14.2, 14.3**
 
-- [ ] 10. Form optimisation and accessibility
-  - [~] 10.1 Optimise mobile form inputs across all forms
+- [x] 10. Form optimisation and accessibility
+  - [x] 10.1 Optimise mobile form inputs across all forms
     - Ensure all text inputs have computed font-size ≥ 16px on mobile (prevents iOS zoom)
     - Add `inputMode="email"` to email fields, `inputMode="tel"` to phone fields
     - Add appropriate `autocomplete` attributes to name, email, phone, address fields
     - On validation failure: scroll first invalid field into view and focus it
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [~] 10.2 Ensure mobile accessibility compliance
+  - [x] 10.2 Ensure mobile accessibility compliance
     - Verify colour contrast ratio ≥ 4.5:1 for body text and ≥ 3:1 for large text
     - Add visible focus indicators on all interactive elements for keyboard navigation
     - Add `aria-label` or visually-hidden text to all icon-only buttons
@@ -249,11 +249,11 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Ensure footer nav links meet 44x44px touch targets on all viewports including tablet
     - _Requirements: 12.1, 12.3, 12.4, 12.5, 1.4_
 
-- [~] 11. Checkpoint - Verify modified components compile and render
+- [x] 11. Checkpoint - Verify modified components compile and render
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 12. Animation governance
-  - [~] 12.1 Implement mobile animation constraints
+- [x] 12. Animation governance
+  - [x] 12.1 Implement mobile animation constraints
     - Ensure all mobile animations use only `transform` and `opacity` (GPU-accelerated)
     - Apply `will-change` only during animation lifetime, remove after completion (framer-motion `onAnimationComplete`)
     - Limit concurrent animating elements to 3 on mobile during scroll
@@ -261,16 +261,16 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Integrate `useReducedMotion` hook — disable non-essential animations when OS preference set
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
-- [ ] 13. Performance optimisation
-  - [~] 13.1 Optimise images and loading for mobile
+- [x] 13. Performance optimisation
+  - [x] 13.1 Optimise images and loading for mobile
     - Ensure Next.js Image components have appropriate `sizes` attributes for mobile/tablet/desktop
     - Apply `loading="lazy"` to below-fold images; use `priority` for above-fold hero
     - Add `<link rel="preload">` for LCP hero image with mobile media query
     - Defer non-critical JS (analytics, Turnstile) until after FCP using `next/script` strategy "lazyOnload"
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
 
-- [ ] 14. PWA setup
-  - [~] 14.1 Create manifest.json and service worker
+- [x] 14. PWA setup
+  - [x] 14.1 Create manifest.json and service worker
     - Create `public/manifest.json` with app name "HireCar", theme_color "#ea580c", display "standalone", icons array
     - Create `public/sw.js` implementing:
       - Cache-first for static assets (CSS, JS, fonts)
@@ -281,32 +281,32 @@ This plan implements mobile-first optimisations for the HireCar Marketplace, pro
     - Create placeholder PWA icons at `public/icons/icon-192.png` and `public/icons/icon-512.png`
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-  - [~] 14.2 Register service worker in layout.tsx
+  - [x] 14.2 Register service worker in layout.tsx
     - Add conditional SW registration in a client component or script tag
     - Handle registration failure gracefully (console.log, no user-facing error)
     - _Requirements: 10.1_
 
-  - [ ]* 14.3 Write property test for scroll-to-top visibility threshold
+  - [x] 14.3 Write property test for scroll-to-top visibility threshold
     - **Property 7: Scroll-to-top button visibility threshold**
     - Test that for any scrollY and vh, button visible iff scrollY > 2 * vh
     - Place in `src/__tests__/properties/scroll-to-top.property.test.ts`
     - **Validates: Requirements 16.4**
 
-- [ ] 15. Landscape orientation and final wiring
-  - [~] 15.1 Ensure landscape orientation support
+- [x] 15. Landscape orientation and final wiring
+  - [x] 15.1 Ensure landscape orientation support
     - Verify layouts re-render without page reload on orientation change (React handles this naturally)
     - Apply reduced vertical spacing and header height in landscape via CSS media queries (already in 1.1)
     - Ensure gallery max-height 50vh in landscape (already in 8.1)
     - Verify all touch targets remain 44x44px in both orientations
     - _Requirements: 15.1, 15.2, 15.3, 15.4_
 
-  - [~] 15.2 Wire ScrollToTop into layout and connect WhatsApp visibility
+  - [x] 15.2 Wire ScrollToTop into layout and connect WhatsApp visibility
     - Add `ScrollToTop` component to root layout or public layout
     - Connect WhatsApp float visibility to mobile nav open state and modal state via context or prop drilling
     - Ensure no z-index conflicts between all floating elements
     - _Requirements: 16.4, 13.3, 13.4_
 
-- [~] 16. Final checkpoint - Ensure all tests pass
+- [x] 16. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

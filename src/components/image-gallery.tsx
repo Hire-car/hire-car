@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
+import { ImageWithFallback } from "@/components/image-with-fallback";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import { useSwipeGesture } from "@/hooks/use-swipe-gesture";
 import { usePinchZoom } from "@/hooks/use-pinch-zoom";
@@ -32,9 +33,9 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
   });
 
   // Pinch-to-zoom on touch devices
-  const { scale, origin } = usePinchZoom(galleryRef);
+  const { scale, origin, isPinching } = usePinchZoom(galleryRef);
 
-  // Apply will-change: transform only during active pinch gesture (scale > 1)
+  // Apply the zoom transform whenever the image is scaled beyond its natural size
   const isZoomed = scale > 1;
 
   if (!images || images.length === 0) {
@@ -51,10 +52,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="group relative h-[420px] w-full overflow-hidden bg-slate-100 touch-none"
-        style={{
-          willChange: isZoomed ? "transform" : "auto",
-        }}
+        className="gallery-main-frame group relative h-[420px] w-full overflow-hidden bg-slate-100 touch-none"
       >
         <div
           style={{
@@ -64,16 +62,22 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             transformOrigin: isZoomed
               ? `${origin.x}px ${origin.y}px`
               : undefined,
+            // will-change is a GPU performance hint placed on the element that is
+            // actually transformed. It is only present during the active pinch
+            // gesture and removed (set to "auto") once the gesture completes, so the
+            // browser does not keep a compositor layer alive longer than needed.
+            willChange: isPinching ? "transform" : "auto",
             width: "100%",
             height: "100%",
             position: "relative",
           }}
         >
-          <Image
+          <ImageWithFallback
             src={images[currentIndex].url}
             alt={images[currentIndex].alt_text || "Vehicle Image"}
             fill
-            priority={currentIndex === 0}
+            loading={currentIndex === 0 ? "eager" : "lazy"}
+            fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
             className="object-cover transition-opacity duration-300"
           />
@@ -110,6 +114,8 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
               <button
                 key={img.id}
                 onClick={() => setCurrentIndex(index)}
+                aria-label={`View image ${index + 1} of ${images.length}`}
+                aria-current={index === currentIndex}
                 className={`relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-md border-2 transition-all ${
                   index === currentIndex ? "border-[#FF5F00] opacity-100" : "border-transparent opacity-60 hover:opacity-100"
                 }`}

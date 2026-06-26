@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Turnstile } from "@marsidev/react-turnstile";
+import Script from "next/script";
+import { Turnstile, SCRIPT_URL, DEFAULT_ONLOAD_NAME } from "@marsidev/react-turnstile";
 import { Send } from "lucide-react";
 
 const topics = [
@@ -95,6 +96,7 @@ export function ContactForm() {
           name="email"
           className="rounded-md border border-slate-300 px-3 py-2 font-normal"
           type="email"
+          inputMode="email"
           autoComplete="email"
           required
           maxLength={160}
@@ -124,8 +126,20 @@ export function ContactForm() {
       </label>
 
       <div className="flex justify-center">
+        {/*
+          Defer the Cloudflare Turnstile script until browser idle time (after
+          FCP) via next/script "lazyOnload" instead of eager injection
+          (Requirement 6.5). injectScript is disabled; the onload callback name
+          matches the one the widget registers on window so it renders once the
+          deferred script loads.
+        */}
+        <Script
+          src={`${SCRIPT_URL}?onload=${DEFAULT_ONLOAD_NAME}&render=explicit`}
+          strategy="lazyOnload"
+        />
         <Turnstile
           siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+          injectScript={false}
           onSuccess={(token) => setTurnstileToken(token)}
           onExpire={() => setTurnstileToken("")}
           onError={() => setTurnstileToken("")}

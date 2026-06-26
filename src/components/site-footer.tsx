@@ -35,6 +35,20 @@ const popularLocations = [
   { label: "Gold Coast", href: "/search?city=Gold%20Coast" },
 ];
 
+// Footer nav columns. Rendered with a shared layout so every link keeps a
+// 44x44px touch target on all viewports, including tablet (Req 1.4).
+const footerColumns: { title: string; links: { label: string; href: string }[] }[] = [
+  { title: "Product", links: footerLinks.product },
+  { title: "Company", links: footerLinks.company },
+  { title: "Legal", links: footerLinks.legal },
+  { title: "Support", links: footerLinks.support },
+];
+
+// Touch-target friendly link styles for footer nav. min-h-[44px] + flex keeps
+// the tappable area >= 44px tall at every breakpoint (no md:inline collapse).
+const footerLinkClass =
+  "flex items-center min-h-[44px] py-1.5 text-sm text-slate-400 hover:text-white transition-colors";
+
 /* Social media SVG icons (lucide-react no longer ships brand icons) */
 function XIcon({ className }: { className?: string }) {
   return (
@@ -113,7 +127,7 @@ export function SiteFooter() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="block py-2 text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 md:py-0"
+                      className="flex items-center gap-1.5 min-h-[44px] py-1.5 text-sm text-slate-400 hover:text-white transition-colors"
                     >
                       <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
                       {link.label}
@@ -125,77 +139,22 @@ export function SiteFooter() {
           </div>
 
           {/* Link Columns */}
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
-              Product
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.product.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="block py-2 text-sm text-slate-400 hover:text-white transition-colors md:inline md:py-0"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
-              Company
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="block py-2 text-sm text-slate-400 hover:text-white transition-colors md:inline md:py-0"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
-              Legal
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.legal.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="block py-2 text-sm text-slate-400 hover:text-white transition-colors md:inline md:py-0"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
-              Support
-            </h3>
-            <ul className="space-y-3">
-              {footerLinks.support.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="block py-2 text-sm text-slate-400 hover:text-white transition-colors md:inline md:py-0"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {footerColumns.map((column) => (
+            <div key={column.title}>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
+                {column.title}
+              </h3>
+              <ul className="space-y-1">
+                {column.links.map((link) => (
+                  <li key={link.label}>
+                    <Link href={link.href} className={footerLinkClass}>
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
 

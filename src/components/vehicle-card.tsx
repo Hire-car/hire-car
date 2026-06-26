@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import Image from "next/image";
+import { ImageWithFallback } from "@/components/image-with-fallback";
 import { MapPin, ArrowRight, BadgeCheck, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,11 +19,12 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     return (
       <Card variant="interactive" className="flex-row p-0 gap-0 card-lift border-slate-200/60 shadow-sm overflow-hidden bg-white/95">
         <div className="relative w-28 h-28 shrink-0 overflow-hidden rounded-none bg-slate-100">
-          <Image
+          <ImageWithFallback
             src={vehicle.imageUrl}
             alt={`${vehicle.title} available from ${vehicle.vendorName}`}
             fill
-            priority={priority}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
             sizes="112px"
             className="object-cover"
           />
@@ -58,12 +59,13 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     return (
       <Card variant="interactive" className="p-0 gap-0 card-lift border-slate-200/60 shadow-md overflow-hidden bg-white/95 group/card">
         <div className="relative h-56 overflow-hidden bg-slate-100">
-          <Image
+          <ImageWithFallback
             src={vehicle.imageUrl}
             alt={`${vehicle.title} available from ${vehicle.vendorName}`}
             fill
-            priority={priority}
-            sizes="(max-width: 768px) 100vw, 33vw"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover group-hover/card:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
@@ -96,7 +98,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
           </div>
           <Link
             href={`/cars/${vehicle.slug}`}
-            className="flex items-center justify-center gap-2 w-full rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors mt-1"
+            className="flex items-center justify-center gap-2 w-full min-h-[44px] rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors mt-1"
           >
             View details
             <ArrowRight className="h-4 w-4" />
@@ -112,12 +114,13 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       <div className="bg-white border border-slate-100 rounded-[1.5rem] overflow-hidden hover:shadow-lg hover:border-[#ea580c]/30 transition-all duration-300">
         {/* Vehicle Image */}
         <div className="relative h-[200px] bg-slate-50 overflow-hidden">
-          <Image
+          <ImageWithFallback
             src={vehicle.imageUrl}
             alt={`${vehicle.title} available from ${vehicle.vendorName}`}
             fill
-            priority={priority}
-            sizes="(max-width: 768px) 100vw, 25vw"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {/* Year Badge */}

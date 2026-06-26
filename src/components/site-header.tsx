@@ -121,7 +121,7 @@ export function SiteHeader() {
       {/* Invisible spacer to push page content down, fixing overlap on all pages */}
       <div style={{ height: "var(--header-height, 116px)" }} className="w-full shrink-0" aria-hidden="true" />
       
-      <header ref={headerRef} className="fixed top-0 left-0 right-0 z-[var(--z-header,40)] flex flex-col pt-[env(safe-area-inset-top)]">
+      <header ref={headerRef} className="site-header-root fixed top-0 left-0 right-0 z-[var(--z-header,40)] flex flex-col pt-[env(safe-area-inset-top)]">
         {/* Vibrant Top Info Bar - Hides on scroll */}
         <AnimatePresence>
           {!isScrolled && (
@@ -141,7 +141,7 @@ export function SiteHeader() {
 
         {/* Main Navbar */}
         <div
-          className={`transition-all duration-300 w-full ${
+          className={`transition-all duration-300 w-full site-header-navbar ${
             isScrolled
               ? "bg-white/95 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.05)] border-b border-slate-100 py-1.5"
               : "bg-white border-b border-slate-100 py-2.5"

@@ -130,7 +130,8 @@ export default async function BlogArticlePage({ params }: Props) {
                 alt={article.featured_image_alt ?? article.title}
                 fill
                 className="object-cover"
-                priority
+                loading="eager"
+                fetchPriority="high"
                 sizes="(max-width: 768px) 100vw, 768px"
               />
             </div>

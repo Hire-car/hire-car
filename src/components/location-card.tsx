@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { ImageWithFallback } from "@/components/image-with-fallback";
 import { MapPin, Car, ArrowRight } from "lucide-react";
 
 interface LocationCardProps {
@@ -20,7 +20,7 @@ export function LocationCard({ name, imageUrl, vehicleCount, startingPrice, href
     >
       {/* Image Container */}
       <div className="relative h-44 overflow-hidden">
-        <Image
+        <ImageWithFallback
           src={imageUrl}
           alt={`Car rentals in ${name}`}
           fill

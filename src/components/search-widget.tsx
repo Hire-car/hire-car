@@ -138,7 +138,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
   return (
     <div className={`${className}`}>
       <div className={`
-        ${isCompact ? "bg-white p-4 shadow-xl rounded-2xl flex flex-col sm:flex-row gap-4 items-center" : ""}
+        ${isCompact ? "bg-white p-4 shadow-xl rounded-2xl flex flex-col md:flex-row gap-4 items-stretch md:items-center" : ""}
         ${variant === "sidebar" ? "bg-white p-6 shadow-xl rounded-2xl flex flex-col gap-4" : ""}
       `}>
         <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">

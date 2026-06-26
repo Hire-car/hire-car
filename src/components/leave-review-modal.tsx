@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { submitReview } from "@/app/actions/reviews";
 import { Star, X, Loader2, MessageSquareHeart } from "lucide-react";
+import { useMobileState } from "@/components/mobile-state-provider";
 
 export function LeaveReviewModal({ leadId, vendorName }: { leadId: string; vendorName: string }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,14 @@ export function LeaveReviewModal({ leadId, vendorName }: { leadId: string; vendo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setIsModalOpen } = useMobileState();
+
+  // Report modal open state to the shared mobile-state context so floating
+  // elements (e.g. the WhatsApp button) hide while the modal is open.
+  useEffect(() => {
+    setIsModalOpen(isOpen);
+    return () => setIsModalOpen(false);
+  }, [isOpen, setIsModalOpen]);
 
   if (!isOpen) {
     return (
@@ -46,7 +55,7 @@ export function LeaveReviewModal({ leadId, vendorName }: { leadId: string; vendo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[var(--z-modal,70)] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl relative">
         <button 
           onClick={() => setIsOpen(false)}

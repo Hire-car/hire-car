@@ -265,7 +265,7 @@ export default async function VehicleDetailPage({
 
         {/* Image Gallery */}
         <Card variant="elevated" className="mb-8 overflow-hidden">
-          <div className="aspect-[16/7] md:aspect-[24/9] w-full relative">
+          <div className="vehicle-gallery-frame aspect-[16/7] md:aspect-[24/9] w-full relative">
             <ImageGallery images={images} />
           </div>
         </Card>

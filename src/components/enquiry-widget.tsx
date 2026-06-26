@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Send, MessageCircle, Zap, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Turnstile } from "@marsidev/react-turnstile";
+import Script from "next/script";
+import { Turnstile, SCRIPT_URL, DEFAULT_ONLOAD_NAME } from "@marsidev/react-turnstile";
+import { scrollIntoViewAndFocus } from "@/lib/form-utils";
 
 interface EnquiryWidgetProps {
   vehicleId: string;
@@ -34,6 +36,8 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
   const [message, setMessage] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [licenseConfirmed, setLicenseConfirmed] = useState(false);
+
+  const endDateRef = useRef<HTMLInputElement>(null);
 
   function handleEnquirySuccess(id: string) {
     setLeadId(id);
@@ -85,6 +89,8 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     if (startDate && endDate && endDate < startDate) {
       setError("Return date must be on or after the pickup date.");
       setIsSubmitting(false);
+      // Guide the user to the invalid field on mobile (Req 4.5).
+      scrollIntoViewAndFocus(endDateRef.current);
       return;
     }
 
@@ -243,6 +249,8 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
         <input
           className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Full name"
+          name="name"
+          autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -251,6 +259,9 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Email"
           type="email"
+          name="email"
+          inputMode="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -259,6 +270,9 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Phone number"
           type="tel"
+          name="phone"
+          inputMode="tel"
+          autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           required
@@ -266,6 +280,8 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
         <input
           className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Pickup city"
+          name="pickupCity"
+          autoComplete="address-level2"
           value={pickupCity}
           onChange={(e) => setPickupCity(e.target.value)}
           required
@@ -287,6 +303,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
             <input
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all text-slate-700"
               type="date"
+              ref={endDateRef}
               value={endDate}
               min={startDate || new Date().toISOString().split("T")[0]}
               onChange={(e) => setEndDate(e.target.value)}
@@ -319,8 +336,20 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
         </label>
 
         <div className="flex justify-center">
+          {/*
+            Defer the Cloudflare Turnstile script until browser idle time (after
+            FCP) instead of letting the widget inject it eagerly. injectScript is
+            disabled and the script is loaded via next/script "lazyOnload"; the
+            onload callback name matches what the widget registers on window, so
+            it renders once the deferred script finishes loading (Requirement 6.5).
+          */}
+          <Script
+            src={`${SCRIPT_URL}?onload=${DEFAULT_ONLOAD_NAME}&render=explicit`}
+            strategy="lazyOnload"
+          />
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+            injectScript={false}
             onSuccess={(token) => setTurnstileToken(token)}
           />
         </div>

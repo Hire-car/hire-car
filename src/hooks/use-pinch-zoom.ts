@@ -3,6 +3,8 @@ import { useEffect, useState, useRef, type RefObject } from "react";
 export interface PinchZoomState {
   scale: number;
   origin: { x: number; y: number };
+  /** True while a two-finger pinch gesture is actively in progress. */
+  isPinching: boolean;
 }
 
 export interface PinchZoomOptions {
@@ -28,6 +30,7 @@ export function usePinchZoom(
   const [state, setState] = useState<PinchZoomState>({
     scale: minScale,
     origin: { x: 0, y: 0 },
+    isPinching: false,
   });
 
   const initialDistanceRef = useRef<number | null>(null);
@@ -57,6 +60,7 @@ export function usePinchZoom(
         e.preventDefault();
         initialDistanceRef.current = getDistance(e.touches);
         baseScaleRef.current = state.scale;
+        setState((prev) => ({ ...prev, isPinching: true }));
       }
     };
 
@@ -71,13 +75,14 @@ export function usePinchZoom(
         );
         const origin = getOrigin(e.touches);
 
-        setState({ scale: newScale, origin });
+        setState({ scale: newScale, origin, isPinching: true });
       }
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
       if (e.touches.length < 2) {
         initialDistanceRef.current = null;
+        setState((prev) => ({ ...prev, isPinching: false }));
       }
     };
 

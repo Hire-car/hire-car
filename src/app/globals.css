@@ -213,6 +213,28 @@ h4, h5, h6 {
 .animate-slide-in-left { animation: slide-in-left 0.2s cubic-bezier(0, 0, 0.2, 1); }
 .animate-pulse-skeleton { animation: pulse-skeleton 1.5s ease-in-out infinite; }
 
+/*
+ * Reduced motion (Req 11.2): when the user has enabled reduced-motion in their
+ * OS settings, disable all non-essential animations and transitions. Durations
+ * are collapsed to ~0 rather than removed outright so that animation/transition
+ * completion callbacks still fire and final states are applied immediately.
+ * Smooth scrolling is also disabled.
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .img-zoom { overflow: hidden; }
 .img-zoom img { transition: transform 0.4s cubic-bezier(0, 0, 0.2, 1); }
 .img-zoom:hover img { transform: scale(1.03); }
@@ -312,12 +334,31 @@ p {
   main {
     overflow-x: hidden;
   }
+
+  /*
+   * Input zoom prevention (Req 4.1): iOS Safari zooms the viewport when a
+   * focused form control has a computed font-size below 16px. Enforce a
+   * 16px minimum on all text-entry controls across every form on mobile.
+   * Excludes non-text controls (checkbox/radio/range) which never zoom.
+   */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 /* Landscape orientation adjustments */
 @media (orientation: landscape) and (max-height: 500px) {
   :root {
     --header-height: 64px;
+  }
+
+  /* Reduce the site header's rendered height in landscape so the
+     ResizeObserver-driven spacer follows automatically (Req 15.2). */
+  .site-header-root .site-header-navbar {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
   }
 
   h1, .h1 {
@@ -334,6 +375,12 @@ p {
   section {
     padding-top: 1rem;
     padding-bottom: 1rem;
+  }
+
+  /* Vehicle detail gallery: cap to 50vh in mobile landscape (Req 15.3) */
+  .vehicle-gallery-frame,
+  .vehicle-gallery-frame .gallery-main-frame {
+    max-height: 50vh;
   }
 }
 

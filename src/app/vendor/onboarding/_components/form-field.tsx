@@ -12,6 +12,7 @@ interface FormFieldProps {
   required?: boolean;
   type?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  autoComplete?: React.InputHTMLAttributes<HTMLInputElement>["autoComplete"];
 }
 
 export function FormField({
@@ -24,6 +25,7 @@ export function FormField({
   required = true,
   type,
   inputMode,
+  autoComplete,
 }: FormFieldProps) {
   const errorId = `${id}-error`;
 
@@ -41,6 +43,7 @@ export function FormField({
         aria-required={required}
         type={type}
         inputMode={inputMode}
+        autoComplete={autoComplete}
         className={cn(error && "border-destructive")}
       />
       {error && (

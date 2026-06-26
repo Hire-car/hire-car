@@ -61,11 +61,14 @@ export function WhatsAppFloat({
       onMouseLeave={() => setHovered(false)}
       aria-label="Chat with us on WhatsApp"
       className={[
-        "fixed right-6 z-[50] flex items-center gap-3 rounded-full bg-[#25D366] pl-4 pr-5 py-3.5 text-white font-bold shadow-2xl shadow-emerald-600/30 hover:bg-[#1ebe5d] hover:scale-105 transition-all",
-        // On mobile: when sticky CTA is visible, position above it (~80px + safe area)
-        // On lg+: always use standard bottom-6 (no sticky CTA on desktop)
+        "fixed right-6 z-[var(--z-whatsapp)] flex items-center gap-3 rounded-full bg-[#25D366] pl-4 pr-5 py-3.5 text-white font-bold shadow-2xl shadow-emerald-600/30 hover:bg-[#1ebe5d] hover:scale-105 transition-all",
+        // On mobile: when the sticky CTA is visible, lift the button above the bar.
+        // Bottom offset = CTA_height + 12px gap + 24px base offset (+ safe area).
+        // `--sticky-cta-height` falls back to 44px (the standard bar height),
+        // which yields the 80px offset the design property documents.
+        // On lg+: always use the 24px base offset (no sticky CTA on desktop).
         effectivelySticky
-          ? "bottom-[calc(80px+env(safe-area-inset-bottom))] lg:bottom-[calc(24px+env(safe-area-inset-bottom))]"
+          ? "bottom-[calc(var(--sticky-cta-height,44px)+12px+24px+env(safe-area-inset-bottom))] lg:bottom-[calc(24px+env(safe-area-inset-bottom))]"
           : "bottom-[calc(24px+env(safe-area-inset-bottom))]",
       ].join(" ")}
     >

@@ -526,13 +526,14 @@ function SearchContent() {
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] lg:hidden">
         <button
           onClick={() => setIsMobileFilterOpen(true)}
+          aria-label={`Open filters${activeFilterChips.length > 0 ? `, ${activeFilterChips.length} active` : ""}`}
           className="flex items-center gap-2 bg-foreground text-background font-bold px-6 py-3.5 rounded-full shadow-[var(--shadow-xl)] hover:scale-[1.02] active:scale-95 transition-transform"
         >
           <SlidersHorizontal className="h-4 w-4" />
           Filters
-          {Object.values(filters).filter(v => v !== undefined && v !== "" && v !== 0).length > 0 && (
+          {activeFilterChips.length > 0 && (
             <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-              {Object.values(filters).filter(v => v !== undefined && v !== "" && v !== 0).length}
+              {activeFilterChips.length}
             </span>
           )}
         </button>

@@ -143,6 +143,7 @@ export default function CustomerSettingsPage() {
                   <input
                     type="text"
                     required
+                    autoComplete="name"
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-orange-100 focus:border-orange-400 outline-none transition-all font-medium"
@@ -157,6 +158,8 @@ export default function CustomerSettingsPage() {
                   <Phone className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
                   <input
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-orange-100 focus:border-orange-400 outline-none transition-all font-medium"
@@ -172,6 +175,8 @@ export default function CustomerSettingsPage() {
                 <Mail className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
                 <input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   disabled
                   value={formData.email}
                   className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 font-medium cursor-not-allowed"

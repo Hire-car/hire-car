@@ -21,6 +21,7 @@ export function StepContactLocation({
         label="Contact name"
         value={formData.contactName}
         error={errors.contactName}
+        autoComplete="name"
         onChange={(v) => onChange("contactName", v)}
         onBlur={() => onBlurValidate("contactName")}
       />
@@ -31,6 +32,7 @@ export function StepContactLocation({
         error={errors.phone}
         inputMode="tel"
         type="tel"
+        autoComplete="tel"
         onChange={(v) => onChange("phone", v)}
         onBlur={() => onBlurValidate("phone")}
       />
@@ -39,6 +41,7 @@ export function StepContactLocation({
         label="City"
         value={formData.city}
         error={errors.city}
+        autoComplete="address-level2"
         onChange={(v) => onChange("city", v)}
         onBlur={() => onBlurValidate("city")}
       />
@@ -47,6 +50,7 @@ export function StepContactLocation({
         label="State"
         value={formData.state}
         error={errors.state}
+        autoComplete="address-level1"
         onChange={(v) => onChange("state", v)}
         onBlur={() => onBlurValidate("state")}
       />
@@ -56,6 +60,7 @@ export function StepContactLocation({
           label="Address"
           value={formData.address}
           error={errors.address}
+          autoComplete="street-address"
           onChange={(v) => onChange("address", v)}
           onBlur={() => onBlurValidate("address")}
         />

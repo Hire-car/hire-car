@@ -2,7 +2,7 @@ export type AuthRole = "customer" | "vendor";
 
 /** Validates that a redirect target is a safe same-origin relative path. */
 export function isSafeRedirectPath(next: string): boolean {
-  if (!next.startsWith("/") || next.startsWith("//")) return false;
+  if (!next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\")) return false;
   if (next.includes(":")) return false;
   return true;
 }
