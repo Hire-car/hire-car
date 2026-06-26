@@ -71,11 +71,14 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
                 <span className="truncate">Pickup</span>
               </label>
               <input
-                type="date"
+                type={pickupDate ? "date" : "text"}
+                placeholder="Add date"
+                onFocus={(e) => (e.target.type = "date")}
+                onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium outline-none appearance-none"
+                className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
               />
             </div>
 
@@ -86,11 +89,14 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
                 <span className="truncate">Return</span>
               </label>
               <input
-                type="date"
+                type={returnDate ? "date" : "text"}
+                placeholder="Add date"
+                onFocus={(e) => (e.target.type = "date")}
+                onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
                 min={pickupDate || new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium outline-none appearance-none"
+                className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -162,10 +168,13 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
             PICKUP
           </label>
           <input
-            type="date"
+            type={pickupDate ? "date" : "text"}
+            placeholder="Add date"
+            onFocus={(e) => (e.target.type = "date")}
+            onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             value={pickupDate}
             onChange={(e) => setPickupDate(e.target.value)}
-            className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 font-medium outline-none"
+            className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 font-medium outline-none placeholder:text-slate-400"
           />
         </div>
 
@@ -174,10 +183,13 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
             RETURN
           </label>
           <input
-            type="date"
+            type={returnDate ? "date" : "text"}
+            placeholder="Add date"
+            onFocus={(e) => (e.target.type = "date")}
+            onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
             value={returnDate}
             onChange={(e) => setReturnDate(e.target.value)}
-            className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 font-medium outline-none"
+            className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 font-medium outline-none placeholder:text-slate-400"
           />
         </div>
 
