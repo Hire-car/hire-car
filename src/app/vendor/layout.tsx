@@ -9,9 +9,12 @@ export const dynamic = "force-dynamic";
 
 export default async function VendorLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
-  const context = await getVendorContext(user.id);
+  
+  const [context, { userHasAdminAccess }] = await Promise.all([
+    getVendorContext(user.id),
+    import("@/lib/security/auth")
+  ]);
 
-  const { userHasAdminAccess } = await import("@/lib/security/auth");
   const isAdmin = await userHasAdminAccess(user);
 
   if (context.organizations.length === 0) {

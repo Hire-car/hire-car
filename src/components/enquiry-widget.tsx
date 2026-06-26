@@ -247,7 +247,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
 
       <form className="mt-6 grid gap-4.5" onSubmit={handleGuestSubmit}>
         <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Full name"
           name="name"
           autoComplete="name"
@@ -256,7 +256,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           required
         />
         <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Email"
           type="email"
           name="email"
@@ -267,7 +267,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           required
         />
         <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Phone number"
           type="tel"
           name="phone"
@@ -278,7 +278,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           required
         />
         <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
           placeholder="Pickup city"
           name="pickupCity"
           autoComplete="address-level2"
@@ -290,7 +290,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           <div>
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Pickup date</label>
             <input
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all text-slate-700"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all text-slate-700"
               type="date"
               value={startDate}
               min={new Date().toISOString().split("T")[0]}
@@ -301,7 +301,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           <div>
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Return date</label>
             <input
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all text-slate-700"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all text-slate-700"
               type="date"
               ref={endDateRef}
               value={endDate}
@@ -312,7 +312,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           </div>
         </div>
         <textarea
-          className="w-full min-h-[100px] rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all resize-none placeholder:text-slate-400"
+          className="w-full min-h-[100px] rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all resize-none placeholder:text-slate-400"
           placeholder="Optional message to the vendor..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}

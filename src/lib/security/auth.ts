@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -11,7 +12,7 @@ type SupabaseUser = {
   factors?: unknown[];
 };
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
@@ -20,7 +21,7 @@ export async function getCurrentUser() {
   }
 
   return data.user;
-}
+});
 
 export async function requireUser() {
   const user = await getCurrentUser();
@@ -60,12 +61,12 @@ async function userHasAdminRoleRecord(
   return !!data;
 }
 
-export async function userHasAdminAccess(user: SupabaseUser) {
+export const userHasAdminAccess = cache(async function userHasAdminAccess(user: SupabaseUser) {
   if (isAllowlistedAdminEmail(user.email)) return true;
   return userHasPlatformRole(user) || userHasAdminRoleRecord(user.id);
-}
+});
 
-export async function getUserAdminRole(user: SupabaseUser): Promise<string> {
+export const getUserAdminRole = cache(async function getUserAdminRole(user: SupabaseUser): Promise<string> {
   if (isAllowlistedAdminEmail(user.email)) return "super_admin";
 
   const supabase = createAdminClient();
@@ -83,7 +84,7 @@ export async function getUserAdminRole(user: SupabaseUser): Promise<string> {
   }
 
   return "viewer";
-}
+});
 
 export async function requireAdmin() {
   const user = await requireUser();

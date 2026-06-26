@@ -8,14 +8,13 @@ import { useEffect, useState } from "react";
  * @validates Requirements 11.2
  */
 export function useReducedMotion(): boolean {
-  const [prefersReduced, setPrefersReduced] = useState(() => {
-    // Default to true (reduced) if matchMedia unavailable — safe default
-    if (typeof window === "undefined" || !window.matchMedia) return true;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
+  const [prefersReduced, setPrefersReduced] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
+    if (typeof window === "undefined" || !window.matchMedia) {
+      setPrefersReduced(true);
+      return;
+    }
 
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReduced(mediaQuery.matches);

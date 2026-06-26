@@ -18,9 +18,10 @@ const categories = [
 interface SearchWidgetProps {
   variant?: "hero" | "compact" | "sidebar";
   className?: string;
+  onSubmit?: () => void;
 }
 
-export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetProps) {
+export function SearchWidget({ variant = "hero", className = "", onSubmit }: SearchWidgetProps) {
   const [location, setLocation] = useState("");
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
@@ -38,11 +39,35 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
     return `/search?${params.toString()}`;
   };
 
+  const handleSubmit = () => {
+    if (onSubmit) onSubmit();
+  };
+
+  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
+
   if (isHero) {
     return (
       <div className={`${className} relative w-full max-w-5xl mx-auto`}>
-        {/* Sleek Horizontal Pill Container */}
-        <div className="bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] rounded-[2.5rem] md:rounded-full p-2.5 flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100 border border-slate-100/50 backdrop-blur-2xl">
+        {/* Mobile View: Floating Pill that opens Modal */}
+        <div className="md:hidden w-full px-4 mt-8">
+          <button
+            onClick={() => setIsMobileModalOpen(true)}
+            className="w-full bg-white hover:bg-slate-50 transition-colors rounded-full py-3.5 px-5 flex items-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100"
+          >
+            <Search className="h-5 w-5 text-[#ea580c] shrink-0" />
+            <div className="flex flex-col items-start min-w-0 flex-1">
+              <span className="text-sm font-bold text-slate-900 truncate w-full text-left">
+                {location || "Where to?"}
+              </span>
+              <span className="text-[11px] font-medium text-slate-500 truncate w-full text-left">
+                {pickupDate && returnDate ? `${pickupDate} - ${returnDate}` : "Anywhere • Any week • Add guests"}
+              </span>
+            </div>
+          </button>
+        </div>
+
+        {/* Desktop View: Sleek Horizontal Pill Container */}
+        <div className="hidden md:flex bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] rounded-[2.5rem] md:rounded-full p-2.5 flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100 border border-slate-100/50 backdrop-blur-2xl">
           
           {/* Location Segment */}
           <div className="flex-1 w-full flex flex-col justify-center px-6 py-3 md:py-0 hover:bg-slate-50/50 focus-within:bg-orange-50/50 rounded-t-[2rem] md:rounded-l-full md:rounded-r-none transition-colors group">
@@ -58,7 +83,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
               }} 
               placeholder="City or airport"
               hideIcon={true}
-              inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium placeholder:text-slate-400 outline-none truncate"
+              inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium placeholder:text-slate-400 outline-none truncate"
             />
           </div>
 
@@ -71,6 +96,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
                 <span className="truncate">Pickup</span>
               </label>
               <input
+                suppressHydrationWarning
                 type={pickupDate ? "date" : "text"}
                 placeholder="Add date"
                 onFocus={(e) => (e.target.type = "date")}
@@ -78,7 +104,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
+                className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
               />
             </div>
 
@@ -89,6 +115,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
                 <span className="truncate">Return</span>
               </label>
               <input
+                suppressHydrationWarning
                 type={returnDate ? "date" : "text"}
                 placeholder="Add date"
                 onFocus={(e) => (e.target.type = "date")}
@@ -96,7 +123,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
                 min={pickupDate || new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
+                className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -111,7 +138,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-600 font-medium outline-none pr-8 appearance-none cursor-pointer"
+                className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium outline-none pr-8 appearance-none cursor-pointer"
               >
                 {categories.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -127,6 +154,7 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
           <div className="w-full md:w-auto p-2">
             <Link
               href={buildSearchUrl()}
+              onClick={handleSubmit}
               className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#c2410c] to-[#ea580c] hover:from-[#9a3412] hover:to-[#c2410c] text-white font-bold h-14 md:h-[68px] px-8 rounded-[1.5rem] md:rounded-full shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2 transition-all whitespace-nowrap"
             >
               <Search className="h-5 w-5" strokeWidth={2.5} />
@@ -135,7 +163,23 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
           </div>
         </div>
 
-        {/* Small accessory link below removed for now */}
+        {/* Mobile Search Modal */}
+        {isMobileModalOpen && (
+          <div className="fixed inset-0 z-[100] flex flex-col bg-slate-50 md:hidden">
+            <div className="flex items-center justify-between p-4 bg-white border-b border-slate-100">
+              <h2 className="text-lg font-bold text-slate-900">Search Vehicles</h2>
+              <button
+                onClick={() => setIsMobileModalOpen(false)}
+                className="p-2 -mr-2 text-slate-500 hover:bg-slate-100 rounded-full"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <SearchWidget variant="sidebar" onSubmit={() => setIsMobileModalOpen(false)} />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -159,42 +203,45 @@ export function SearchWidget({ variant = "hero", className = "" }: SearchWidgetP
             }} 
             placeholder={location || "City or airport"} 
             hideIcon={true}
-            inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 font-medium placeholder:text-slate-400 outline-none"
+            inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-900 font-medium placeholder:text-slate-400 outline-none"
           />
         </div>
 
-        <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">
-          <label className="block text-xs font-bold text-slate-500 mb-1">
-            PICKUP
-          </label>
-          <input
-            type={pickupDate ? "date" : "text"}
-            placeholder="Add date"
-            onFocus={(e) => (e.target.type = "date")}
-            onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
-            value={pickupDate}
-            onChange={(e) => setPickupDate(e.target.value)}
-            className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 font-medium outline-none placeholder:text-slate-400"
-          />
-        </div>
+        <div className="flex flex-row gap-4 w-full">
+          <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">
+            <label className="block text-xs font-bold text-slate-500 mb-1">
+              PICKUP
+            </label>
+            <input
+              type={pickupDate ? "date" : "text"}
+              placeholder="Add date"
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
+              value={pickupDate}
+              onChange={(e) => setPickupDate(e.target.value)}
+              className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-900 font-medium outline-none placeholder:text-slate-400"
+            />
+          </div>
 
-        <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">
-          <label className="block text-xs font-bold text-slate-500 mb-1">
-            RETURN
-          </label>
-          <input
-            type={returnDate ? "date" : "text"}
-            placeholder="Add date"
-            onFocus={(e) => (e.target.type = "date")}
-            onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
-            value={returnDate}
-            onChange={(e) => setReturnDate(e.target.value)}
-            className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 font-medium outline-none placeholder:text-slate-400"
-          />
+          <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">
+            <label className="block text-xs font-bold text-slate-500 mb-1">
+              RETURN
+            </label>
+            <input
+              type={returnDate ? "date" : "text"}
+              placeholder="Add date"
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
+              value={returnDate}
+              onChange={(e) => setReturnDate(e.target.value)}
+              className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-900 font-medium outline-none placeholder:text-slate-400"
+            />
+          </div>
         </div>
 
         <Link
           href={buildSearchUrl()}
+          onClick={handleSubmit}
           className="flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] text-white px-8 py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all w-full md:w-auto"
         >
           {variant === "sidebar" ? "Search" : <Search className="h-5 w-5" />}

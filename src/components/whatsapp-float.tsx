@@ -45,10 +45,8 @@ export function WhatsAppFloat({
   const isEffectivelyHidden = hidden || isMobileNavOpen || isModalOpen;
   if (isEffectivelyHidden) return null;
 
-  // Lift the WhatsApp button above the sticky CTA bar on vehicle details, 
-  // or above the Filters FAB on the search page.
-  const isSearchPage = pathname === "/search";
-  const effectivelySticky = stickyCtaVisible || isStickyCtaVisible || isSearchPage;
+  // Lift the WhatsApp button above the sticky CTA bar on vehicle details
+  const effectivelySticky = stickyCtaVisible || isStickyCtaVisible;
 
   const url = buildWhatsAppUrl(
     phone,
@@ -65,12 +63,9 @@ export function WhatsAppFloat({
       aria-label="Chat with us on WhatsApp"
       className={[
         "fixed right-6 z-[var(--z-whatsapp)] flex items-center gap-3 rounded-full bg-[#25D366] pl-4 pr-5 py-3.5 text-white font-bold shadow-2xl shadow-emerald-600/30 hover:bg-[#1ebe5d] hover:scale-105 transition-all",
-        // On mobile: when the sticky CTA or search Filters FAB is visible, lift the button above it.
-        // Bottom offset = CTA_height/FAB_height + 12px gap + 24px base offset (+ safe area).
-        // `--sticky-cta-height` falls back to 44px, yielding an 80px offset on mobile.
         effectivelySticky
-          ? "bottom-[calc(var(--sticky-cta-height,44px)+12px+24px+env(safe-area-inset-bottom))] lg:bottom-[calc(24px+env(safe-area-inset-bottom))]"
-          : "bottom-[calc(24px+env(safe-area-inset-bottom))]",
+          ? "bottom-28 lg:bottom-8"
+          : "bottom-6 lg:bottom-8"
       ].join(" ")}
     >
       <svg

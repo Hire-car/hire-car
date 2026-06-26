@@ -8,6 +8,8 @@ type PhotonFeature = {
     name?: string;
     state?: string;
     country?: string;
+    city?: string;
+    osm_value?: string;
   };
 };
 
@@ -83,7 +85,7 @@ export function LocationAutocomplete({ onSelect, placeholder = "City or airport"
           }}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className={inputClassName || "w-full rounded-xl border-2 border-transparent bg-white/80 hover:bg-white pl-11 pr-10 py-3.5 text-sm font-medium text-slate-900 shadow-sm focus:bg-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all outline-none"}
+          className={inputClassName || "w-full rounded-xl border-2 border-transparent bg-white/80 hover:bg-white pl-11 pr-10 py-3.5 text-base md:text-sm font-medium text-slate-900 shadow-sm focus:bg-white focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 transition-all outline-none"}
         />
         {isLoading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -96,22 +98,32 @@ export function LocationAutocomplete({ onSelect, placeholder = "City or airport"
         <ul className="absolute top-[calc(100%+8px)] left-0 right-0 max-h-64 overflow-auto rounded-xl bg-white shadow-2xl border border-slate-100 z-50 py-2 animate-in fade-in slide-in-from-top-2">
           {results.map((item, index) => {
             const props = item.properties;
-            const displayName = [props.name, props.state, props.country].filter(Boolean).join(", ");
+            // Build a descriptive sub-label. e.g. "Suburb • Sydney, New South Wales"
+            const typeLabel = props.osm_value ? props.osm_value.charAt(0).toUpperCase() + props.osm_value.slice(1) : "";
+            
+            // Avoid duplicating name in the subtext
+            const locationParts = [props.city !== props.name ? props.city : null, props.state]
+              .filter(Boolean);
+              
+            const subtext = [typeLabel, locationParts.join(", ")].filter(Boolean).join(" • ");
+            const displayName = [props.name, props.city, props.state].filter(Boolean).join(", ");
+
             return (
               <li
                 key={index}
                 onClick={() => {
                   setValue(props.name || displayName);
                   setIsOpen(false);
-                  // Emulate the Mapbox event structure so existing components don't break
                   onSelect({ features: [{ properties: { name: props.name || displayName } }] });
                 }}
                 className="cursor-pointer px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors flex flex-col gap-0.5 border-b border-slate-50 last:border-0"
               >
-                <span className="font-semibold">{props.name}</span>
-                <span className="text-[11px] text-slate-500 uppercase tracking-wider font-medium">
-                  {[props.state, props.country].filter(Boolean).join(", ")}
-                </span>
+                <span className="font-semibold text-slate-900">{props.name}</span>
+                {subtext && (
+                  <span className="text-[11px] text-slate-500 uppercase tracking-wider font-medium">
+                    {subtext}
+                  </span>
+                )}
               </li>
             );
           })}

@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type FeaturedVehicle = {
@@ -14,7 +15,8 @@ export type FeaturedVehicle = {
   imageUrl?: string;
 };
 
-export async function getActiveFeaturedVehicles(city?: string | null): Promise<FeaturedVehicle[]> {
+export const getActiveFeaturedVehicles = unstable_cache(
+  async function getActiveFeaturedVehicles(city?: string | null): Promise<FeaturedVehicle[]> {
   const supabase = createAdminClient();
   const now = new Date().toISOString();
 
@@ -78,7 +80,7 @@ export async function getActiveFeaturedVehicles(city?: string | null): Promise<F
   }
 
   return results;
-}
+}, ["featured-vehicles"], { revalidate: 3600, tags: ["featured"] });
 
 export type HomeTestimonial = {
   id: string;
@@ -94,7 +96,8 @@ export type HomeTestimonial = {
  * organizations are eligible, and only ratings of 4-5. Never fabricates data:
  * if there are no qualifying reviews the homepage simply hides the section.
  */
-export async function getApprovedTestimonials(limit = 4): Promise<HomeTestimonial[]> {
+export const getApprovedTestimonials = unstable_cache(
+  async function getApprovedTestimonials(limit = 4): Promise<HomeTestimonial[]> {
   const supabase = createAdminClient();
 
   const { data, error } = await supabase
@@ -143,7 +146,7 @@ export async function getApprovedTestimonials(limit = 4): Promise<HomeTestimonia
   }
 
   return results;
-}
+}, ["approved-testimonials"], { revalidate: 3600, tags: ["testimonials", "reviews"] });
 
 export type MarketplaceStats = {
   operatorCount: number;
@@ -156,7 +159,8 @@ export type MarketplaceStats = {
  * Used to render honest homepage stats. Returns zeros on error so the caller
  * can decide whether to show a stat or fall back to a qualitative claim.
  */
-export async function getMarketplaceStats(): Promise<MarketplaceStats> {
+export const getMarketplaceStats = unstable_cache(
+  async function getMarketplaceStats(): Promise<MarketplaceStats> {
   const supabase = createAdminClient();
 
   const [{ count: operatorCount }, vehicleResult] = await Promise.all([
@@ -183,4 +187,4 @@ export async function getMarketplaceStats(): Promise<MarketplaceStats> {
     cityCount: cities.size,
     vehicleCount: vehicleResult.count ?? 0,
   };
-}
+}, ["marketplace-stats"], { revalidate: 3600, tags: ["stats", "vehicles", "organizations"] });

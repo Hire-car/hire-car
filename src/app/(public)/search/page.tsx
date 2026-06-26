@@ -19,8 +19,15 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import type { Vehicle } from "@/lib/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type ViewMode = "grid" | "list";
 type SortOption = "price-asc" | "price-desc" | "newest" | "rating";
@@ -72,6 +79,7 @@ function SearchContent() {
   const [sortBy, setSortBy] = useState<SortOption>("price-asc");
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [isMobileSearchModalOpen, setIsMobileSearchModalOpen] = useState(false);
 
   // Read filters from URL params (single source of truth)
   const [filters, setFilters] = useState(() => ({
@@ -222,10 +230,44 @@ function SearchContent() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
 
-      {/* Sticky Search Bar */}
-      <div className="bg-foreground sticky top-[68px] z-30 shadow-[var(--shadow-xl)] border-b-4 border-primary pb-6 pt-2">
+      {/* Search Bar (Desktop) */}
+      <div className="hidden md:block bg-foreground relative z-10 shadow-[var(--shadow-xl)] border-b-4 border-primary pb-6 pt-2">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <SearchWidget variant="compact" />
+        </div>
+      </div>
+
+      {/* Mobile Search Pill */}
+      <div className="md:hidden bg-white relative z-10 shadow-[var(--shadow-sm)] border-b border-border py-3 px-4">
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setIsMobileSearchModalOpen(true)}
+            className="flex-1 bg-slate-50 hover:bg-slate-100 transition-colors rounded-full py-2.5 px-4 flex items-center gap-3 border border-slate-200 shadow-sm min-w-0"
+          >
+            <Search className="h-4 w-4 text-primary shrink-0" />
+            <div className="flex flex-col items-start min-w-0 flex-1">
+              <span className="text-sm font-bold text-slate-900 truncate w-full text-left">
+                {filters.city || "Anywhere in Australia"}
+              </span>
+              <span className="text-xs font-medium text-slate-500 truncate w-full text-left">
+                {filters.pickup && filters.returnDate 
+                  ? "Dates selected" 
+                  : "Add dates"} • {filters.category || "Any vehicle"}
+              </span>
+            </div>
+          </button>
+          <button
+            onClick={() => setIsMobileFilterOpen(true)}
+            aria-label="Open filters"
+            className="shrink-0 bg-white hover:bg-slate-50 transition-colors rounded-full p-3 border border-slate-200 shadow-[var(--shadow-sm)] flex items-center justify-center relative"
+          >
+            <SlidersHorizontal className="h-4 w-4 text-slate-600" />
+            {activeFilterChips.length > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] text-primary-foreground font-bold">
+                {activeFilterChips.length}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
@@ -522,22 +564,17 @@ function SearchContent() {
         </div>
       </main>
 
-      {/* Mobile Sticky Filter FAB */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] lg:hidden">
-        <button
-          onClick={() => setIsMobileFilterOpen(true)}
-          aria-label={`Open filters${activeFilterChips.length > 0 ? `, ${activeFilterChips.length} active` : ""}`}
-          className="flex items-center gap-2 bg-foreground text-background font-bold px-6 py-3.5 rounded-full shadow-[var(--shadow-xl)] hover:scale-[1.02] active:scale-95 transition-transform"
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-          {activeFilterChips.length > 0 && (
-            <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-              {activeFilterChips.length}
-            </span>
-          )}
-        </button>
-      </div>
+      {/* Mobile Search Modal */}
+      <Dialog open={isMobileSearchModalOpen} onOpenChange={setIsMobileSearchModalOpen}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-slate-50 border-0 rounded-2xl w-[95vw]">
+          <DialogHeader className="p-4 bg-white border-b border-slate-100">
+            <DialogTitle className="text-center font-bold text-slate-800">Edit Search</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 overflow-y-auto max-h-[70vh]">
+            <SearchWidget variant="sidebar" onSubmit={() => setIsMobileSearchModalOpen(false)} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <SiteFooter />
     </div>

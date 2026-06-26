@@ -33,8 +33,11 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // We request a larger limit and use a strict bounding box for Australia (minLon,minLat,maxLon,maxLat)
+    // to ensure we capture localized suburbs, towns, and airports rather than getting drowned out
+    // by global mega-cities before our filter applies.
     const upstream = await fetch(
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=${limit}`,
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=40&bbox=112.9,-43.6,153.6,-10.6`,
       {
         headers: {
           // Be a good citizen: identify our proxy to Photon.
@@ -59,7 +62,7 @@ export async function GET(request: NextRequest) {
       data.features = data.features.filter((f: { properties?: { countrycode?: string; country?: string } }) => 
         f.properties?.countrycode === "AU" || 
         f.properties?.country === "Australia"
-      );
+      ).slice(0, limit);
     }
     
     return NextResponse.json(data);

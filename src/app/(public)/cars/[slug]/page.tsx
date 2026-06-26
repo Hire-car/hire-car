@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SimilarVehicles } from "@/components/similar-vehicles";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/security/auth";
+import { getCachedVehicleDetails, getCachedVehicleMetadata } from "@/lib/data/public";
 import { EnquiryWidget } from "@/components/enquiry-widget";
 import { ImageGallery } from "@/components/image-gallery";
 import { WhatsAppButton } from "@/components/whatsapp-button";
@@ -39,13 +40,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("vehicles")
-    .select("title, make, model, year, category, price_per_day_aud, vehicle_images(storage_path, approved, sort_order), branches(city, state)")
-    .eq("slug", slug)
-    .eq("status", "approved")
-    .single();
+  const data = await getCachedVehicleMetadata(slug);
 
   if (!data) return {};
 
@@ -91,24 +86,16 @@ export default async function VehicleDetailPage({
 }) {
   const { slug } = await params;
   
-  const supabase = createAdminClient();
-  const { data: vehicle } = await supabase
-    .from("vehicles")
-    .select(`
-      id, slug, title, make, model, year, seats, fuel, transmission, category,
-      price_per_day_aud, daily_distance_limit_km, extra_distance_fee_aud, instant_book, status, organization_id, views_count,
-      organizations(id, name, slug, status, verified_at),
-      branches(name, city, state, status, phone, whatsapp),
-      vehicle_images(id, storage_path, alt_text, sort_order, approved),
-      vehicle_features(feature)
-    `)
-    .eq("slug", slug)
-    .eq("status", "approved")
-    .single();
-
-  if (!vehicle) {
+  const data = await getCachedVehicleDetails(slug);
+  
+  if (!data) {
     notFound();
   }
+
+  const { vehicle, vendorSub, reviews } = data;
+  const supabase = createAdminClient();
+
+
 
   // Get user for enquiry widget auth state
   const user = await getCurrentUser();
@@ -156,26 +143,11 @@ export default async function VehicleDetailPage({
   // Determine whether this vendor's plan unlocks direct contact (WhatsApp/phone).
   // Free Starter vendors rely on the on-platform enquiry form; Growth/Pro unlock
   // direct contact buttons. This matches what the pricing page sells.
-  const { data: vendorSub } = await supabase
-    .from("subscriptions")
-    .select("plan_code, status")
-    .eq("organization_id", vehicle.organization_id)
-    .in("status", ["active", "trialing"])
-    .maybeSingle();
   const directContactEnabled = planHasFeature(vendorSub?.plan_code, "directContact");
 
   // Build gallery images using the central helper.
   // getVehicleImages maps database images, custom fields, and handles fallbacks.
   const images = getVehicleImages(vehicle);
-
-  // Fetch approved reviews for this organization
-  const { data: reviews } = await supabase
-    .from("reviews")
-    .select("id, customer_name, rating, body, created_at")
-    .eq("organization_id", vehicle.organization_id)
-    .eq("status", "approved")
-    .order("created_at", { ascending: false })
-    .limit(20);
 
   const safeReviews = reviews ?? [];
   const averageRating = safeReviews.length

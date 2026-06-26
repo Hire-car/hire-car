@@ -183,7 +183,7 @@ export default async function Home() {
 
             {/* Content */}
             <div className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
-              <div className="max-w-2xl py-16 lg:py-20">
+              <div className="max-w-2xl pt-16 pb-24 lg:pt-20 lg:pb-32">
                 <h1 className="text-4xl sm:text-5xl lg:text-[3.75rem] font-black text-white tracking-tight leading-[1.05]">
                   Find the right vehicle,{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#fb923c] to-[#ea580c]">

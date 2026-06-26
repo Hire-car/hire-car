@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type VendorContext = {
@@ -32,27 +33,21 @@ export type VehicleLimitInfo = {
 export async function getVehicleLimitInfo(organizationId: string): Promise<VehicleLimitInfo> {
   const supabase = createAdminClient();
 
-  // Get current vehicle count (all vehicles, including pending)
-  const { count: currentCount, error: countError } = await supabase
-    .from("vehicles")
-    .select("id", { count: "exact", head: true })
-    .eq("organization_id", organizationId);
+  const [countResult, subResult] = await Promise.all([
+    supabase.from("vehicles").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
+    supabase.from("subscriptions").select("plan_code, status").eq("organization_id", organizationId).eq("status", "active").maybeSingle(),
+  ]);
 
-  if (countError) {
-    throw new Error(`Failed to count vehicles: ${countError.message}`);
+  if (countResult.error) {
+    throw new Error(`Failed to count vehicles: ${countResult.error.message}`);
   }
 
-  // Get subscription with plan info
-  const { data: subscription, error: subError } = await supabase
-    .from("subscriptions")
-    .select("plan_code, status")
-    .eq("organization_id", organizationId)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (subError) {
-    throw new Error(`Failed to get subscription: ${subError.message}`);
+  if (subResult.error) {
+    throw new Error(`Failed to get subscription: ${subResult.error.message}`);
   }
+
+  const currentCount = countResult.count;
+  const subscription = subResult.data;
 
   // If no active subscription, check for trialing
   let planCode = subscription?.plan_code;
@@ -104,7 +99,7 @@ export async function enforceVehicleLimit(organizationId: string): Promise<void>
   }
 }
 
-export async function getVendorContext(userId: string): Promise<VendorContext> {
+export const getVendorContext = cache(async function getVendorContext(userId: string): Promise<VendorContext> {
   const supabase = createAdminClient();
 
   const { data: memberships, error } = await supabase
@@ -170,7 +165,7 @@ export async function getVendorContext(userId: string): Promise<VendorContext> {
             })),
       })) ?? [],
   };
-}
+});
 
 export async function ensureUserCanManageOrganization(
   userId: string,
@@ -344,65 +339,37 @@ export async function getDashboardMetrics(
   await ensureUserCanManageOrganization(userId, organizationId);
 
   const supabase = createAdminClient();
-
-  // Get vehicle counts and views
-  const { data: vehicles, error: vehicleError } = await supabase
-    .from("vehicles")
-    .select("status, views_count")
-    .eq("organization_id", organizationId);
-
-  if (vehicleError) {
-    throw new Error(`Failed to fetch vehicles: ${vehicleError.message}`);
-  }
-  
-  const totalViews = vehicles?.reduce((acc, v) => acc + (v.views_count || 0), 0) ?? 0;
-
-  // Get leads count
-  const { count: newLeadsCount, error: leadsError } = await supabase
-    .from("leads")
-    .select("id", { count: "exact", head: true })
-    .eq("vendor_id", organizationId)
-    .eq("status", "new");
-
-  if (leadsError) {
-    throw new Error(`Failed to fetch leads: ${leadsError.message}`);
-  }
-
-  // Get total leads
-  const { count: totalLeadsCount, error: totalLeadsError } = await supabase
-    .from("leads")
-    .select("id", { count: "exact", head: true })
-    .eq("vendor_id", organizationId);
-
-  if (totalLeadsError) {
-    throw new Error(`Failed to fetch total leads: ${totalLeadsError.message}`);
-  }
-
-  // Get subscription info
-  const limitInfo = await getVehicleLimitInfo(organizationId);
-
-  // Get branch count
-  const { count: branchCount, error: branchError } = await supabase
-    .from("branches")
-    .select("id", { count: "exact", head: true })
-    .eq("organization_id", organizationId);
-
-  if (branchError) {
-    throw new Error(`Failed to fetch branches: ${branchError.message}`);
-  }
-
-  // Get contact click stats (last 30 days)
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { data: clicks, error: clicksError } = await supabase
-    .from("contact_clicks")
-    .select("channel")
-    .eq("vendor_id", organizationId)
-    .gte("created_at", thirtyDaysAgo);
 
-  if (clicksError) {
-    throw new Error(`Failed to fetch clicks: ${clicksError.message}`);
-  }
+  const [
+    vehiclesRes,
+    newLeadsRes,
+    totalLeadsRes,
+    limitInfo,
+    branchRes,
+    clicksRes
+  ] = await Promise.all([
+    supabase.from("vehicles").select("status, views_count").eq("organization_id", organizationId),
+    supabase.from("leads").select("id", { count: "exact", head: true }).eq("vendor_id", organizationId).eq("status", "new"),
+    supabase.from("leads").select("id", { count: "exact", head: true }).eq("vendor_id", organizationId),
+    getVehicleLimitInfo(organizationId),
+    supabase.from("branches").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
+    supabase.from("contact_clicks").select("channel").eq("vendor_id", organizationId).gte("created_at", thirtyDaysAgo)
+  ]);
 
+  if (vehiclesRes.error) throw new Error(`Failed to fetch vehicles: ${vehiclesRes.error.message}`);
+  if (newLeadsRes.error) throw new Error(`Failed to fetch leads: ${newLeadsRes.error.message}`);
+  if (totalLeadsRes.error) throw new Error(`Failed to fetch total leads: ${totalLeadsRes.error.message}`);
+  if (branchRes.error) throw new Error(`Failed to fetch branches: ${branchRes.error.message}`);
+  if (clicksRes.error) throw new Error(`Failed to fetch clicks: ${clicksRes.error.message}`);
+
+  const vehicles = vehiclesRes.data;
+  const newLeadsCount = newLeadsRes.count;
+  const totalLeadsCount = totalLeadsRes.count;
+  const branchCount = branchRes.count;
+  const clicks = clicksRes.data;
+
+  const totalViews = vehicles?.reduce((acc, v) => acc + (v.views_count || 0), 0) ?? 0;
   const phoneClicks = clicks?.filter((c) => c.channel === "phone").length ?? 0;
   const whatsappClicks = clicks?.filter((c) => c.channel === "whatsapp").length ?? 0;
 

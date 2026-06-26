@@ -96,6 +96,10 @@ export async function GET(request: NextRequest) {
         params.pickup || params.return
           ? { pickup: params.pickup, return: params.return }
           : undefined,
+    }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+      }
     });
   } catch (error) {
     console.error("Search error:", error);
