@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 // usePathname removed
-import { Menu, ChevronDown, User, Headphones } from "lucide-react";
+import { Menu, ChevronDown, User, Headphones, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createBrowserClient } from "@supabase/ssr";
 import { BrandLogo } from "@/components/brand-logo";
@@ -132,9 +132,17 @@ export function SiteHeader() {
               className="bg-gradient-to-r from-orange-600 via-[#ea580c] to-amber-500 text-white text-xs font-bold tracking-wide py-2.5 px-4 flex justify-center sm:justify-between items-center shadow-inner"
             >
               <span className="hidden sm:inline-block">Australia&apos;s trusted premium car rental marketplace</span>
-              <span className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                <Headphones className="h-3.5 w-3.5" /> <a href="tel:0434930437" className="hover:text-amber-100 transition-colors">0434 930 437</a>
-              </span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="Instagram"><Instagram className="h-4 w-4" /></a>
+                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="Facebook"><Facebook className="h-4 w-4" /></a>
+                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="Twitter"><Twitter className="h-4 w-4" /></a>
+                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="LinkedIn"><Linkedin className="h-4 w-4" /></a>
+                </div>
+                <span className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                  <Headphones className="h-3.5 w-3.5" /> <a href="tel:0434930437" className="hover:text-amber-100 transition-colors">0434 930 437</a>
+                </span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
