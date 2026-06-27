@@ -64,9 +64,14 @@ function formatDateLabel(dateString: string) {
 
 // Subtle chat background pattern
 const ChatBg = () => (
-  <div className="absolute inset-0 z-0 opacity-[0.025]" style={{
-    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23475569' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-  }} />
+  <svg className="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="chat-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+        <circle cx="12" cy="12" r="1.5" fill="#94a3b8" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#chat-dots)" />
+  </svg>
 );
 
 export function ChatInterface({ leadId, currentUserId, initialMessages, otherPartyName, backLink, headerActions }: ChatInterfaceProps) {
@@ -193,33 +198,28 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
     <div className="fixed inset-0 z-50 md:relative md:inset-auto md:z-auto flex flex-col h-[100dvh] md:h-full w-full overflow-hidden">
       
       {/* Premium Header */}
-      <div className="bg-white border-b border-slate-100 px-4 sm:px-5 py-3 flex items-center justify-between z-20 flex-shrink-0 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
+      <div className="bg-white border-b border-slate-100 px-4 sm:px-5 py-3 flex items-center justify-between z-20 flex-shrink-0">
         <div className="flex items-center gap-3">
           {backLink && (
             <Link href={backLink} className="md:hidden -ml-1 p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-all active:scale-95">
               <ChevronLeft className="h-5 w-5" />
             </Link>
           )}
-          {/* Avatar with gradient */}
+          {/* Rounded-square avatar */}
           <div className="relative shrink-0">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-white font-bold text-sm shadow-[0_4px_12px_rgba(234,88,12,0.25)]">
+            <div className="h-10 w-10 rounded-[10px] bg-gradient-to-br from-primary to-[#c2410c] flex items-center justify-center text-white font-extrabold text-sm shadow-[0_3px_10px_rgba(234,88,12,0.3)]">
               {otherInitials}
             </div>
-            {/* Online dot */}
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
           </div>
           <div>
-            <h2 className="font-heading font-bold text-slate-900 text-[15px] leading-tight">{otherPartyName}</h2>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
-              <span className="text-[11px] font-semibold text-emerald-600">Online</span>
-              <span className="text-[11px] text-slate-400">· Replies quickly</span>
-            </div>
+            <h2 className="font-heading font-bold text-slate-900 text-[15px] leading-tight tracking-tight">{otherPartyName}</h2>
+            <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">● Online · Replies quickly</p>
           </div>
         </div>
         
         {/* Right actions */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {headerActions}
         </div>
       </div>

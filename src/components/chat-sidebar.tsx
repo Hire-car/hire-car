@@ -93,7 +93,7 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
                   key={chat.id} 
                   href={`/messages/${chat.id}`}
                   className={`
-                    w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200
+                    w-full flex items-center gap-3 px-3 py-3.5 rounded-2xl transition-all duration-200
                     ${isActive 
                       ? 'bg-primary text-white shadow-[0_4px_16px_rgba(234,88,12,0.2)]' 
                       : 'hover:bg-slate-50 text-slate-800'
@@ -102,7 +102,7 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
                 >
                   {/* Avatar */}
                   <div className={`
-                    h-11 w-11 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0 transition-all
+                    h-11 w-11 rounded-2xl flex items-center justify-center font-bold text-sm shrink-0
                     ${isActive 
                       ? 'bg-white/20 text-white' 
                       : 'bg-slate-100 text-slate-600'
@@ -113,17 +113,22 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
                   
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-baseline mb-0.5">
-                      <h3 className={`font-heading text-sm font-bold truncate pr-2 ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                    <div className="flex justify-between items-baseline gap-2">
+                      <h3 className={`font-heading text-sm font-bold truncate ${isActive ? 'text-white' : 'text-slate-900'}`}>
                         {chat.name}
                       </h3>
                       <span className={`text-[10px] font-semibold whitespace-nowrap flex-shrink-0 ${isActive ? 'text-white/70' : 'text-slate-400'}`}>
                         {timeString}
                       </span>
                     </div>
-                    <p className={`text-xs truncate font-medium ${isActive ? 'text-white/80' : 'text-slate-500'}`}>
-                      {chat.vehicle} · {chat.snippet}
-                    </p>
+                    <div className="flex flex-col mt-0.5 gap-0">
+                      <span className={`text-[11px] font-semibold truncate ${isActive ? 'text-white/90' : 'text-slate-600'}`}>
+                        {chat.vehicle}
+                      </span>
+                      <span className={`text-xs truncate ${isActive ? 'text-white/60' : 'text-slate-400'}`}>
+                        {chat.snippet}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               );
