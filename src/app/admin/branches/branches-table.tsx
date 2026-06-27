@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { moderateBranch } from "../actions";
 
 interface BranchRow {
   id: string;
@@ -92,6 +94,37 @@ export function AdminBranchesTable({ data }: AdminBranchesTableProps) {
           {new Date(val as string).toLocaleDateString("en-AU")}
         </span>
       ),
+    },
+    {
+      key: "actions",
+      label: "",
+      render: (_, row) => {
+        return (
+          <div className="flex justify-end gap-2">
+            {row.status === "pending" && (
+              <form action={moderateBranch.bind(null, "approve", row.id as string, "Approved from admin dashboard")}>
+                <Button type="submit" variant="default" size="sm" className="h-8 text-xs badge-glow-success">
+                  Approve
+                </Button>
+              </form>
+            )}
+            {row.status === "approved" && (
+              <form action={moderateBranch.bind(null, "suspend", row.id as string, "Suspended from admin dashboard")}>
+                <Button type="submit" variant="destructive" size="sm" className="h-8 text-xs">
+                  Suspend
+                </Button>
+              </form>
+            )}
+            {row.status === "suspended" && (
+              <form action={moderateBranch.bind(null, "restore", row.id as string, "Restored from admin dashboard")}>
+                <Button type="submit" variant="outline" size="sm" className="h-8 text-xs">
+                  Restore
+                </Button>
+              </form>
+            )}
+          </div>
+        );
+      },
     },
   ];
 

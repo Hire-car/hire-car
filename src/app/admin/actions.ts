@@ -81,6 +81,72 @@ export async function moderateVendor(rawAction: string, rawVendorId: string, raw
   revalidatePath("/admin");
 }
 
+const ModerateBranchSchema = z.object({
+  action: z.enum(["approve", "reject", "suspend", "restore"]),
+  branchId: z.string().uuid(),
+  reason: z.string().min(1, "Reason is required").max(500),
+});
+
+export async function moderateBranch(rawAction: string, rawBranchId: string, rawReason: string) {
+  const user = await requireAdminRole(["moderator", "super_admin"]);
+  const supabase = createAdminClient();
+
+  const { action, branchId, reason } = ModerateBranchSchema.parse({
+    action: rawAction,
+    branchId: rawBranchId,
+    reason: rawReason,
+  });
+
+  const statusMap: Record<string, string> = {
+    approve: "approved",
+    reject: "rejected",
+    suspend: "suspended",
+    restore: "approved",
+  };
+
+  const newStatus = statusMap[action];
+
+  const updateData: Record<string, unknown> = {
+    status: newStatus,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (action === "suspend") {
+    updateData.suspended_at = new Date().toISOString();
+  }
+
+  if (action === "restore") {
+    updateData.suspended_at = null;
+  }
+
+  // Update branch
+  const { error } = await supabase.from("branches").update(updateData).eq("id", branchId);
+
+  if (error) {
+    throw new Error(`Failed to ${action} branch: ${error.message}`);
+  }
+
+  // Add moderation note
+  await supabase.from("moderation_notes").insert({
+    resource_type: "branch",
+    resource_id: branchId,
+    author_user_id: user.id,
+    body: `[${action.toUpperCase()}] ${reason}`,
+  });
+
+  // Log audit event
+  await supabase.from("audit_logs").insert({
+    actor_user_id: user.id,
+    action: `moderation_${action}`,
+    resource_type: "branch",
+    resource_id: branchId,
+    metadata: { reason },
+  });
+
+  revalidatePath("/admin/branches");
+  revalidatePath("/admin");
+}
+
 const ModerateListingSchema = z.object({
   action: z.enum(["approve", "reject", "suspend", "restore"]),
   listingId: z.string().uuid(),
