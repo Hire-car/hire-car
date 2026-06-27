@@ -40,6 +40,48 @@ export function WhatsAppFloat({
   const routeHidden = HIDDEN_PREFIXES.some((prefix) =>
     pathname?.startsWith(prefix)
   );
+"use client";
+
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
+import { useMobileState } from "@/components/mobile-state-provider";
+
+interface WhatsAppFloatProps {
+  /** Platform support WhatsApp number */
+  phone?: string;
+  /** Whether the sticky CTA bar is visible on the current page (mobile only) */
+  stickyCtaVisible?: boolean;
+  /** When true, hide the button entirely (e.g. modal or mobile nav is open) */
+  hidden?: boolean;
+}
+
+// Routes where the floating support button should NOT appear
+const HIDDEN_PREFIXES = ["/vendor", "/admin", "/auth", "/customer", "/messages"];
+
+/**
+ * A floating WhatsApp support button shown on public-facing pages only.
+ * Lets any visitor reach the Hire Car support team directly.
+ *
+ * Context-aware positioning:
+ * - Repositions above the sticky CTA bar on mobile when visible
+ * - Hides entirely when modals or mobile nav are open
+ * - Respects safe area insets on modern devices
+ */
+export function WhatsAppFloat({
+  phone = "61434930437",
+  stickyCtaVisible = false,
+  hidden = false,
+}: WhatsAppFloatProps) {
+  const pathname = usePathname();
+  const [hovered, setHovered] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const { isStickyCtaVisible, isMobileNavOpen, isModalOpen } = useMobileState();
+
+  // Hide on certain routes
+  const routeHidden = HIDDEN_PREFIXES.some((prefix) =>
+    pathname?.startsWith(prefix)
+  );
   if (routeHidden) return null;
 
   // Hide when modals or mobile nav are open or explicitly dismissed
@@ -49,15 +91,34 @@ export function WhatsAppFloat({
   // Lift the WhatsApp button above the sticky CTA bar on vehicle details
   const effectivelySticky = stickyCtaVisible || isStickyCtaVisible;
 
+  const url = buildWhatsAppUrl(
+    phone,
+    "Hi Hire Car team, I have a question about renting a vehicle."
+  );
+
   return (
     <div
       className={[
-        "fixed right-4 sm:right-6 z-[var(--z-whatsapp)] flex items-center gap-2",
+        "fixed right-4 sm:right-6 z-[var(--z-whatsapp)] relative group",
         effectivelySticky
           ? "bottom-28 lg:bottom-8"
           : "bottom-6 lg:bottom-8"
       ].join(" ")}
     >
+      {/* Dismiss Button - Absolute top right */}
+      <button 
+        onClick={(e) => {
+          e.preventDefault();
+          setIsDismissed(true);
+        }}
+        className="absolute -top-2 -right-2 z-10 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 rounded-full h-6 w-6 flex items-center justify-center shadow-md border border-slate-200 transition-colors opacity-0 group-hover:opacity-100 sm:opacity-100"
+        aria-label="Close WhatsApp chat"
+      >
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+
       <a
         href={url}
         target="_blank"
@@ -81,20 +142,6 @@ export function WhatsAppFloat({
           Chat with us
         </span>
       </a>
-      
-      {/* Dismiss Button */}
-      <button 
-        onClick={(e) => {
-          e.preventDefault();
-          setIsDismissed(true);
-        }}
-        className="bg-white hover:bg-slate-50 text-slate-400 hover:text-slate-600 rounded-full h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center shadow-md border border-slate-200 transition-colors"
-        aria-label="Close WhatsApp chat"
-      >
-        <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-          <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
-      </button>
     </div>
   );
 }
