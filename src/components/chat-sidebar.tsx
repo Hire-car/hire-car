@@ -44,7 +44,7 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
       {/* Header */}
       <div className="px-5 pt-4 pb-3 flex-shrink-0 border-b border-slate-100">
         <div className="flex items-center justify-between mb-3">
-          <h1 className="font-heading text-xl font-bold text-slate-900">Messages</h1>
+          <h1 className="font-heading text-lg font-bold text-slate-900">Messages</h1>
           <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
             <MessageCircle className="h-4 w-4 text-primary" />
           </div>
@@ -114,7 +114,7 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-baseline gap-2">
-                      <h3 className={`font-heading text-sm font-bold truncate ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                      <h3 className={`text-[13px] font-semibold truncate ${isActive ? 'text-white' : 'text-slate-900'}`}>
                         {chat.name}
                       </h3>
                       <span className={`text-[10px] font-semibold whitespace-nowrap flex-shrink-0 ${isActive ? 'text-white/70' : 'text-slate-400'}`}>
