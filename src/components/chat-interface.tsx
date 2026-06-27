@@ -213,7 +213,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
             <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
           </div>
           <div>
-            <h2 className="font-semibold text-slate-900 text-[14px] leading-tight tracking-tight">{otherPartyName}</h2>
+            <div className="font-semibold text-slate-900 text-[15px] leading-tight tracking-tight">{otherPartyName}</div>
             <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">● Online · Replies quickly</p>
           </div>
         </div>
