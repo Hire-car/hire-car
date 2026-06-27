@@ -58,7 +58,7 @@ export function WhatsAppFloat({
   return (
     <div
       className={[
-        "fixed right-4 sm:right-6 z-[var(--z-whatsapp)] relative group",
+        "fixed right-4 sm:right-6 z-[var(--z-whatsapp)] group",
         effectivelySticky
           ? "bottom-28 lg:bottom-8"
           : "bottom-6 lg:bottom-8"
