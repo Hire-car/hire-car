@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage } from "@/app/actions/chat";
-import { Send, Loader2, Lock, Check, X, ChevronLeft } from "lucide-react";
+import { Send, Loader2, Lock, Check, CheckCheck, ChevronLeft, Phone, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -58,9 +58,16 @@ function formatDateLabel(dateString: string) {
   } else if (isSameDay(dateString, yesterday.toISOString())) {
     return "Yesterday";
   } else {
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
   }
 }
+
+// Subtle chat background pattern
+const ChatBg = () => (
+  <div className="absolute inset-0 z-0 opacity-[0.025]" style={{
+    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23475569' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+  }} />
+);
 
 export function ChatInterface({ leadId, currentUserId, initialMessages, otherPartyName, backLink, headerActions }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -74,7 +81,6 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
   
   const [supabase] = useState(() => createClient());
 
-  // Group messages by day and determine if consecutive
   const groupedMessages = useMemo(() => {
     const groups: { dateLabel: string; messages: (Message & { isConsecutive: boolean; isLastInGroup: boolean })[] }[] = [];
     
@@ -98,32 +104,20 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
     return groups;
   }, [messages]);
 
-  // Smart auto-scroll
   const scrollToBottom = (force = false) => {
     if (!scrollContainerRef.current || !messagesEndRef.current) return;
-    
     const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
-    if (force || scrollHeight - scrollTop - clientHeight < 150) {
+    if (force || scrollHeight - scrollTop - clientHeight < 200) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  useEffect(() => { scrollToBottom(); }, [messages]);
 
-  // Subscribe to Realtime inserts
   useEffect(() => {
     const channel = supabase
       .channel(`chat_${leadId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `lead_id=eq.${leadId}`,
-        },
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `lead_id=eq.${leadId}` },
         (payload) => {
           const newMsg = payload.new as Message;
           setMessages((prev) => {
@@ -134,9 +128,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [leadId, supabase]);
 
   const handleSend = async (e?: React.FormEvent) => {
@@ -147,11 +139,8 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
     const tempId = `temp-${Date.now()}`;
     
     setNewMessage(""); 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
     
-    // Optimistic UI update
     const optimisticMessage: Message = {
       id: tempId,
       lead_id: leadId,
@@ -195,185 +184,219 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value);
     e.target.style.height = 'auto';
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
   };
 
   const otherInitials = getInitials(otherPartyName);
 
   return (
-    <div className="fixed inset-0 z-50 md:relative md:inset-auto md:z-auto flex flex-col h-[100dvh] md:h-full w-full bg-slate-50/50 font-sans overflow-hidden">
+    <div className="fixed inset-0 z-50 md:relative md:inset-auto md:z-auto flex flex-col h-[100dvh] md:h-full w-full overflow-hidden">
       
-      {/* Background Ambience */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden flex justify-center z-0">
-        <div className="w-full max-w-2xl h-full relative opacity-[0.035]">
-          <div className="absolute top-[20%] -left-32 w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-          <div className="absolute top-[40%] -right-32 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-32 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
-        </div>
-      </div>
-
-      {/* Chat Header - Glassmorphism */}
-      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
+      {/* Premium Header */}
+      <div className="bg-white border-b border-slate-100 px-4 sm:px-5 py-3 flex items-center justify-between z-20 flex-shrink-0 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
         <div className="flex items-center gap-3">
           {backLink && (
-            <Link href={backLink} className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-100/80 text-slate-500 hover:text-slate-800 transition-all active:scale-95">
-              <ChevronLeft className="h-6 w-6" />
+            <Link href={backLink} className="md:hidden -ml-1 p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-all active:scale-95">
+              <ChevronLeft className="h-5 w-5" />
             </Link>
           )}
-          <div className="relative">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-200/80 shadow-sm flex items-center justify-center text-slate-700 font-extrabold text-sm shrink-0">
+          {/* Avatar with gradient */}
+          <div className="relative shrink-0">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-white font-bold text-sm shadow-[0_4px_12px_rgba(234,88,12,0.25)]">
               {otherInitials}
             </div>
-            <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm"></span>
+            {/* Online dot */}
+            <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
           </div>
           <div>
-            <h2 className="font-heading text-base font-bold text-slate-900 leading-tight tracking-tight">{otherPartyName}</h2>
-            <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5 flex items-center gap-1">
-              Online
-            </p>
+            <h2 className="font-heading font-bold text-slate-900 text-[15px] leading-tight">{otherPartyName}</h2>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+              <span className="text-[11px] font-semibold text-emerald-600">Online</span>
+              <span className="text-[11px] text-slate-400">· Replies quickly</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        
+        {/* Right actions */}
+        <div className="flex items-center gap-1.5">
           {headerActions}
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 z-10 flex flex-col relative scroll-smooth scrollbar-thin scrollbar-thumb-slate-200/80">
-        
-        {/* Encryption Banner */}
-        <div className="flex justify-center mb-8 mt-2">
-          <div className="bg-emerald-500/[0.04] border border-emerald-500/10 text-emerald-700/90 text-[10px] font-bold tracking-wider uppercase px-4 py-2 rounded-full text-center max-w-sm flex items-center justify-center gap-2 shadow-sm">
-            <Lock className="h-3 w-3 shrink-0" />
-            <p>End-to-end encrypted chat</p>
-          </div>
-        </div>
-
-        {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-4 mb-20">
-            <div className="h-20 w-20 rounded-full bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center relative">
-              <div className="absolute inset-0 rounded-full bg-primary/5 animate-ping opacity-20"></div>
-              <Send className="h-8 w-8 text-primary/40 translate-x-1" />
+      {/* Messages Area with subtle pattern */}
+      <div className="flex-1 overflow-hidden relative bg-slate-50">
+        <ChatBg />
+        <div 
+          ref={scrollContainerRef} 
+          className="absolute inset-0 overflow-y-auto px-4 sm:px-6 py-5 flex flex-col scroll-smooth"
+          style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}
+        >
+          {/* Encryption notice */}
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center gap-1.5 bg-white/80 border border-slate-200/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+              <Lock className="h-3 w-3 text-slate-400 shrink-0" />
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">End-to-end encrypted</span>
             </div>
-            <p className="text-sm font-bold tracking-wide text-slate-500 font-heading">Start the conversation</p>
           </div>
-        ) : (
-          <div className="flex flex-col flex-1 justify-end">
-            {groupedMessages.map((group) => (
-              <div key={group.dateLabel} className="flex flex-col w-full mb-8 last:mb-2">
-                
-                {/* Date Separator */}
-                <div className="flex justify-center mb-6 mt-2 relative">
-                  <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div className="w-full border-t border-slate-200/50"></div>
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 bg-slate-50 px-4 py-1 uppercase font-heading">
-                      {group.dateLabel}
-                    </span>
+
+          {messages.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center gap-5 py-16">
+              <div className="relative">
+                <div className="h-24 w-24 rounded-3xl bg-white shadow-[0_8px_30px_rgba(0,0,0,0.06)] flex items-center justify-center">
+                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
+                    <Send className="h-7 w-7 text-primary translate-x-0.5" />
                   </div>
                 </div>
+              </div>
+              <div className="text-center">
+                <h3 className="font-heading font-bold text-slate-800 text-lg">Start the conversation</h3>
+                <p className="text-slate-500 text-sm mt-1.5 max-w-[200px] leading-relaxed">Send a message to connect with {otherPartyName}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col flex-1 justify-end gap-0">
+              {groupedMessages.map((group) => (
+                <div key={group.dateLabel} className="flex flex-col w-full mb-6">
+                  {/* Date separator */}
+                  <div className="flex items-center justify-center mb-5">
+                    <div className="bg-white/90 border border-slate-200/60 backdrop-blur-sm shadow-sm px-4 py-1.5 rounded-full">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        {group.dateLabel}
+                      </span>
+                    </div>
+                  </div>
 
-                {/* Messages in Group */}
-                <div className="flex flex-col gap-1.5">
-                  {group.messages.map((msg) => {
-                    const isMe = msg.sender_user_id === currentUserId;
-                    const isPending = pendingMessageIds.has(msg.id);
-                    
-                    return (
-                      <div 
-                        key={msg.id} 
-                        className={`flex w-full ${isMe ? "justify-end" : "justify-start"} ${!msg.isConsecutive ? "mt-4" : ""} animate-in fade-in slide-in-from-bottom-2 duration-300`}
-                      >
-                        
-                        {!isMe && msg.isLastInGroup ? (
-                          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-200/50 flex items-center justify-center text-slate-600 font-bold text-[10px] shrink-0 mr-2.5 self-end mb-1">
-                            {otherInitials}
-                          </div>
-                        ) : (
-                          !isMe && <div className="w-[38px] shrink-0" />
-                        )}
+                  {/* Messages */}
+                  <div className="flex flex-col gap-0.5">
+                    {group.messages.map((msg) => {
+                      const isMe = msg.sender_user_id === currentUserId;
+                      const isPending = pendingMessageIds.has(msg.id);
+                      
+                      return (
+                        <div 
+                          key={msg.id} 
+                          className={`
+                            flex w-full items-end gap-2
+                            ${isMe ? "justify-end" : "justify-start"}
+                            ${!msg.isConsecutive ? "mt-5" : "mt-0.5"}
+                          `}
+                        >
+                          {/* Other person's avatar */}
+                          {!isMe && (
+                            <div className="shrink-0 self-end mb-1">
+                              {msg.isLastInGroup ? (
+                                <div className="h-7 w-7 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 border border-white shadow-sm flex items-center justify-center text-slate-600 font-bold text-[10px]">
+                                  {otherInitials}
+                                </div>
+                              ) : (
+                                <div className="w-7" />
+                              )}
+                            </div>
+                          )}
 
-                        <div className={`flex flex-col max-w-[80%] sm:max-w-[70%] group/msg ${isMe ? "items-end" : "items-start"}`}>
-                          <div
-                            className={`px-5 py-3 text-[14px] leading-relaxed break-words whitespace-pre-wrap transition-all ${
-                              isPending ? "opacity-60 scale-[0.98]" : "opacity-100 scale-100"
-                            } ${
-                              isMe
-                                ? "bg-gradient-to-br from-primary to-[#c2410c] text-white shadow-[0_4px_12px_rgba(234,88,12,0.18)]"
-                                : "bg-white border border-slate-200/60 text-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
-                            } ${
-                              msg.isConsecutive && msg.isLastInGroup
-                                ? isMe ? "rounded-l-2xl rounded-tr-md rounded-br-2xl" : "rounded-r-2xl rounded-tl-md rounded-bl-2xl"
-                                : !msg.isConsecutive && !msg.isLastInGroup
-                                ? isMe ? "rounded-l-2xl rounded-tr-2xl rounded-br-md" : "rounded-r-2xl rounded-tl-2xl rounded-bl-md"
-                                : msg.isConsecutive && !msg.isLastInGroup
-                                ? isMe ? "rounded-l-2xl rounded-r-md" : "rounded-r-2xl rounded-l-md"
-                                : "rounded-2xl"
-                            }`}
-                          >
-                            {msg.body}
-                          </div>
-                          
-                          {/* Time & Status */}
-                          <div className={`flex items-center gap-1.5 mt-1.5 px-1.5 transition-all duration-300 ${msg.isLastInGroup ? "opacity-100 max-h-6" : "opacity-0 max-h-0 overflow-hidden group-hover/msg:opacity-100 group-hover/msg:max-h-6"}`}>
-                            <span className="text-[10px] text-slate-400 font-bold tracking-wide">
-                              {formatTime(msg.created_at)}
-                            </span>
-                            {isMe && !isPending && (
-                              <Check className="h-3.5 w-3.5 text-primary opacity-90 drop-shadow-sm" />
-                            )}
-                            {isMe && isPending && (
-                              <Loader2 className="h-3 w-3 text-slate-400 animate-spin" />
+                          {/* Message bubble */}
+                          <div className={`
+                            flex flex-col max-w-[78%] sm:max-w-[65%]
+                            ${isMe ? "items-end" : "items-start"}
+                          `}>
+                            <div className={`
+                              px-4 py-2.5 text-[14px] leading-[1.5] break-words whitespace-pre-wrap
+                              transition-all duration-200
+                              ${isPending ? "opacity-60" : "opacity-100"}
+                              ${isMe 
+                                ? `bg-primary text-white font-medium
+                                   ${msg.isConsecutive && msg.isLastInGroup ? "rounded-l-2xl rounded-tr-md rounded-br-2xl"
+                                     : !msg.isConsecutive && !msg.isLastInGroup ? "rounded-l-2xl rounded-t-2xl rounded-br-md"
+                                     : msg.isConsecutive && !msg.isLastInGroup ? "rounded-l-2xl rounded-r-md"
+                                     : "rounded-2xl rounded-br-md"
+                                   }
+                                   shadow-[0_2px_8px_rgba(234,88,12,0.2)]`
+                                : `bg-white text-slate-800
+                                   ${msg.isConsecutive && msg.isLastInGroup ? "rounded-r-2xl rounded-tl-md rounded-bl-2xl"
+                                     : !msg.isConsecutive && !msg.isLastInGroup ? "rounded-r-2xl rounded-t-2xl rounded-bl-md"
+                                     : msg.isConsecutive && !msg.isLastInGroup ? "rounded-r-2xl rounded-l-md"
+                                     : "rounded-2xl rounded-bl-md"
+                                   }
+                                   border border-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.04)]`
+                              }
+                            `}>
+                              {msg.body}
+                            </div>
+                            
+                            {/* Time + status */}
+                            {msg.isLastInGroup && (
+                              <div className={`flex items-center gap-1 mt-1.5 px-1 ${isMe ? 'flex-row-reverse' : ''}`}>
+                                <span className="text-[10px] text-slate-400 font-semibold">
+                                  {formatTime(msg.created_at)}
+                                </span>
+                                {isMe && (
+                                  isPending 
+                                    ? <Loader2 className="h-3 w-3 text-slate-400 animate-spin" />
+                                    : <CheckCheck className="h-3.5 w-3.5 text-primary" />
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-        <div ref={messagesEndRef} className="h-4 w-full shrink-0" />
+              ))}
+            </div>
+          )}
+          <div ref={messagesEndRef} className="h-2 shrink-0" />
+        </div>
       </div>
 
-      {/* Input Area - Floating Island Style */}
-      <div className="bg-gradient-to-t from-white via-white to-transparent pt-6 pb-4 px-4 sm:px-6 z-20 flex-shrink-0">
-        <form onSubmit={handleSend} className="flex items-end gap-3 max-w-4xl mx-auto bg-white rounded-[24px] border border-slate-200 p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] focus-within:shadow-[0_8px_40px_rgba(234,88,12,0.08)] focus-within:border-primary/30 transition-all duration-300">
-          <div className="relative flex-1">
+      {/* Input Area */}
+      <div className="bg-white border-t border-slate-100 px-4 sm:px-5 py-3.5 z-20 flex-shrink-0">
+        <form onSubmit={handleSend} className="flex items-end gap-3 max-w-4xl mx-auto">
+          {/* Textarea wrapper */}
+          <div className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl focus-within:bg-white focus-within:border-primary/40 focus-within:ring-4 focus-within:ring-primary/[0.08] transition-all duration-200">
             <textarea
               ref={textareaRef}
               value={newMessage}
               onChange={handleInput}
               onKeyDown={handleKeyDown}
-              placeholder="Type your message..."
+              placeholder="Message..."
               rows={1}
-              className="w-full resize-none bg-transparent px-4 py-3.5 text-[14px] font-medium text-slate-800 max-h-[140px] focus:outline-none leading-relaxed scrollbar-thin scrollbar-thumb-slate-300 placeholder:text-slate-400"
+              className="w-full resize-none bg-transparent px-4 py-3 text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none leading-relaxed max-h-[160px] font-medium"
               disabled={isSending}
-              style={{ minHeight: '52px' }}
+              style={{ minHeight: '46px' }}
             />
           </div>
+
+          {/* Send button */}
           <button
             type="submit"
             disabled={!newMessage.trim() || isSending}
-            className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-[#c2410c] hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-primary transition-all duration-200 mb-0.5 mr-0.5"
+            className="
+              flex h-[46px] w-[46px] shrink-0 items-center justify-center
+              rounded-2xl bg-primary text-white
+              hover:bg-[#c2410c] hover:shadow-[0_4px_16px_rgba(234,88,12,0.35)]
+              active:scale-95
+              disabled:opacity-40 disabled:hover:shadow-none disabled:hover:bg-primary disabled:active:scale-100
+              transition-all duration-200 shadow-[0_2px_8px_rgba(234,88,12,0.2)]
+            "
             aria-label="Send message"
           >
             {isSending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4.5 w-4.5 animate-spin" />
             ) : (
-              <Send className="h-5 w-5 ml-0.5" />
+              <Send className="h-4 w-4 translate-x-0.5" />
             )}
           </button>
         </form>
-        <div className="text-center mt-3 hidden sm:block">
-          <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-            <kbd className="font-sans bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md mx-1 shadow-sm normal-case font-normal text-[11px]">Enter</kbd> to send, 
-            <kbd className="font-sans bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md mx-1 shadow-sm normal-case font-normal text-[11px]">Shift + Enter</kbd> for new line
-          </span>
-        </div>
+
+        {/* Keyboard hint - desktop only */}
+        <p className="text-center mt-2.5 hidden md:block text-[10px] text-slate-400 font-medium">
+          <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-sans">Enter</kbd>
+          {" to send · "}
+          <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-sans">Shift + Enter</kbd>
+          {" for new line"}
+        </p>
       </div>
     </div>
   );
