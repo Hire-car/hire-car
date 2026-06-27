@@ -112,10 +112,7 @@ export default async function MessagesLayout({
   return (
     <div
       className="flex flex-col bg-white overflow-hidden"
-      style={{
-        height: '100dvh',
-        paddingTop: 'var(--header-height, 116px)',
-      }}
+      style={{ height: '100dvh' }}
     >
       <SiteHeader />
       
