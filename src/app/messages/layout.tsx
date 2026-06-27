@@ -110,19 +110,17 @@ export default async function MessagesLayout({
   });
 
   return (
-    <div className="flex flex-col h-screen bg-slate-100 overflow-hidden pt-[88px]">
+    <div className="flex flex-col h-[100dvh] bg-white overflow-hidden" style={{ paddingTop: '88px' }}>
       <SiteHeader />
       
-      {/* Dual Pane Chat Layout */}
-      <div className="flex flex-1 overflow-hidden w-full max-w-[1440px] mx-auto my-0 md:my-2 md:px-4 lg:px-6 gap-0 md:gap-3">
+      {/* Full-screen dual pane layout */}
+      <div className="flex flex-1 overflow-hidden w-full">
         
         {/* Left Pane: Sidebar */}
-        <div className="md:rounded-2xl md:overflow-hidden md:shadow-[0_4px_24px_rgba(0,0,0,0.04)] flex-shrink-0 w-full md:w-auto">
-          <ChatSidebar chats={sidebarChats} />
-        </div>
+        <ChatSidebar chats={sidebarChats} />
 
-        {/* Right Pane: Active Chat Room */}
-        <div className="flex-1 flex flex-col overflow-hidden md:rounded-2xl md:overflow-hidden md:shadow-[0_4px_24px_rgba(0,0,0,0.04)] bg-white relative min-w-0">
+        {/* Right Pane: Active Chat */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-slate-50 relative min-w-0 border-l border-slate-100">
           {children}
         </div>
       </div>
