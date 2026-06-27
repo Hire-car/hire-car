@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage } from "@/app/actions/chat";
-import { Send, Loader2, Lock, Check, X } from "lucide-react";
+import { Send, Loader2, Lock, Check, X, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -215,6 +215,11 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
       {/* Chat Header - Glassmorphism */}
       <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
         <div className="flex items-center gap-3">
+          {backLink && (
+            <Link href={backLink} className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-100/80 text-slate-500 hover:text-slate-800 transition-all active:scale-95">
+              <ChevronLeft className="h-6 w-6" />
+            </Link>
+          )}
           <div className="relative">
             <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-slate-100 to-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 font-extrabold text-sm shrink-0 ring-4 ring-white">
               {otherInitials}
@@ -230,11 +235,6 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
         </div>
         <div className="flex items-center gap-2">
           {headerActions}
-          {backLink && (
-            <Link href={backLink} className="md:hidden p-2 -mr-2 rounded-full hover:bg-slate-100/80 text-slate-400 hover:text-slate-800 transition-all active:scale-95">
-              <X className="h-6 w-6" />
-            </Link>
-          )}
         </div>
       </div>
 
