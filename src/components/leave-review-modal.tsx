@@ -25,10 +25,10 @@ export function LeaveReviewModal({ leadId, vendorName }: { leadId: string; vendo
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 rounded-md border border-[#FF5F00] px-4 py-2 text-sm font-medium text-[#FF5F00] hover:bg-orange-50 transition-colors"
+        className="inline-flex items-center justify-center gap-2 rounded-md border border-[#FF5F00] p-2 sm:px-4 sm:py-2 text-sm font-medium text-[#FF5F00] hover:bg-orange-50 transition-colors"
       >
         <Star className="h-4 w-4" />
-        Leave a Review
+        <span className="hidden sm:inline">Leave a Review</span>
       </button>
     );
   }

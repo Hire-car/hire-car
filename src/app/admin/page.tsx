@@ -27,9 +27,11 @@ export const metadata = {
   title: "Admin Control Room",
 };
 
-export default async function AdminOverviewPage() {
-  await requireAdmin();
+import { Suspense } from "react";
 
+// ... existing imports ...
+
+async function AdminDashboardContent() {
   const [metrics, pendingVendors, pendingListings, fraudFlags, pendingReviews, analytics] = await Promise.all(
     [
       getAdminDashboardMetrics(),
@@ -294,6 +296,38 @@ export default async function AdminOverviewPage() {
 
       </div>
     </div>
+  );
+}
+
+function AdminDashboardSkeleton() {
+  return (
+    <div className="space-y-8 animate-pulse">
+      <div className="h-32 bg-slate-200 rounded-2xl" />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="h-64 bg-slate-200 rounded-3xl" />
+        <div className="h-64 bg-slate-200 rounded-3xl" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-32 bg-slate-200 rounded-3xl" />
+        ))}
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-64 bg-slate-200 rounded-3xl" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default async function AdminOverviewPage() {
+  await requireAdmin();
+
+  return (
+    <Suspense fallback={<AdminDashboardSkeleton />}>
+      <AdminDashboardContent />
+    </Suspense>
   );
 }
 

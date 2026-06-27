@@ -133,9 +133,27 @@ function NotificationDropdown({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<DashboardNotification[]>(initialNotifications);
+  const [hasFetched, setHasFetched] = useState(initialNotifications.length > 0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-
+  const fetchNotifications = async () => {
+    if (!orgId || hasFetched) return;
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    );
+    const { data } = await supabase
+      .from("notifications")
+      .select("id, title, message, type, read, created_at, link")
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    
+    if (data) {
+      setNotifications(data);
+    }
+    setHasFetched(true);
+  };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -159,12 +177,20 @@ function NotificationDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleOpen = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen) {
+      fetchNotifications();
+      markAllRead();
+    }
+  };
+
   const typeIcon: Record<string, string> = { info: "🔔", success: "✅", warning: "⚠️", error: "🚨" };
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => { setIsOpen(!isOpen); if (!isOpen) markAllRead(); }}
+        onClick={handleOpen}
         className="relative p-2.5 text-slate-500 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-full transition-colors border border-transparent hover:border-slate-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
         aria-label="View notifications"
       >

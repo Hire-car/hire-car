@@ -13,28 +13,13 @@ export const metadata = {
   title: "Dashboard",
 };
 
-export default async function VendorDashboardPage() {
-  const user = await requireUser();
-  const context = await getVendorContext(user.id);
+import { Suspense } from "react";
 
-  if (context.setupError) {
-    return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 mb-4">
-          <XCircle className="h-7 w-7 text-red-500" />
-        </div>
-        <h1 className="text-lg font-semibold text-red-800">Setup Required</h1>
-        <p className="mt-2 text-red-700 text-sm">{context.setupError}</p>
-      </div>
-    );
-  }
+// ... existing imports ...
 
-  if (context.organizations.length === 0) {
-    redirect("/vendor/upgrade");
-  }
-
-  const organization = context.organizations[0];
-  const metrics = await getDashboardMetrics(organization.id, user.id);
+// New Component for the async data
+async function DashboardContent({ organization, userId }: { organization: any, userId: string }) {
+  const metrics = await getDashboardMetrics(organization.id, userId);
 
   const isApproved = organization.status === "approved";
   const hasActiveSubscription = metrics.planCode !== null;
@@ -257,5 +242,48 @@ export default async function VendorDashboardPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-[100px] rounded-2xl bg-slate-200"></div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-[120px] rounded-2xl bg-slate-200"></div>
+        ))}
+      </div>
+      <div className="h-[200px] rounded-2xl bg-slate-200"></div>
+    </div>
+  );
+}
+
+export default async function VendorDashboardPage() {
+  const user = await requireUser();
+  const context = await getVendorContext(user.id);
+
+  if (context.setupError) {
+    return (
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-100 mb-4">
+          <XCircle className="h-7 w-7 text-red-500" />
+        </div>
+        <h1 className="text-lg font-semibold text-red-800">Setup Required</h1>
+        <p className="mt-2 text-red-700 text-sm">{context.setupError}</p>
+      </div>
+    );
+  }
+
+  if (context.organizations.length === 0) {
+    redirect("/vendor/upgrade");
+  }
+
+  const organization = context.organizations[0];
+
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardContent organization={organization} userId={user.id} />
+    </Suspense>
   );
 }

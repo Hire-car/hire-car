@@ -47,17 +47,23 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute =
     path.startsWith("/admin") && !path.startsWith("/admin-login");
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   const isProtectedRoute =
     path.startsWith("/customer") ||
     path.startsWith("/vendor") ||
     path.startsWith("/messages") ||
     isAdminRoute;
 
-  if (isProtectedRoute && !user) {
+  // OPTIMIZATION: Skip expensive auth checks on public pages
+  // This drastically improves TTFB for static marketing and SEO pages
+  if (!isProtectedRoute) {
+    return response;
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth/sign-in";
     redirectUrl.searchParams.set(

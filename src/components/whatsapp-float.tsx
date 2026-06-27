@@ -8,14 +8,14 @@ import { useMobileState } from "@/components/mobile-state-provider";
 interface WhatsAppFloatProps {
   /** Platform support WhatsApp number */
   phone?: string;
-  /** Whether the sticky CTA bar is visible on the current page (mobile only) */
+
   stickyCtaVisible?: boolean;
   /** When true, hide the button entirely (e.g. modal or mobile nav is open) */
   hidden?: boolean;
 }
 
 // Routes where the floating support button should NOT appear
-const HIDDEN_PREFIXES = ["/vendor", "/admin", "/auth", "/customer", "/messages"];
+const HIDDEN_PREFIXES = ["/vendor", "/admin", "/auth", "/customer"];
 
 /**
  * A floating WhatsApp support button shown on public-facing pages only.
@@ -41,7 +41,10 @@ export function WhatsAppFloat({
     pathname?.startsWith(prefix)
   );
 
-  if (routeHidden) return null;
+  // Hide inside specific chat rooms to prevent covering the input box
+  const isChatRoom = pathname?.startsWith("/messages/") && pathname.length > 10;
+
+  if (routeHidden || isChatRoom) return null;
 
   // Hide when modals or mobile nav are open or explicitly dismissed
   const isEffectivelyHidden = hidden || isMobileNavOpen || isModalOpen || isDismissed;
