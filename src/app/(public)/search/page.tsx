@@ -231,8 +231,8 @@ function SearchContent() {
       <SiteHeader />
 
       {/* Search Bar (Desktop) */}
-      <div className="hidden md:block bg-foreground relative z-10 shadow-[var(--shadow-xl)] border-b-4 border-primary pb-6 pt-2">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="hidden md:block bg-white border-b border-slate-200 shadow-sm py-4 relative z-20">
+        <div className="mx-auto flex justify-center px-4 sm:px-6 lg:px-8">
           <SearchWidget variant="compact" />
         </div>
       </div>
