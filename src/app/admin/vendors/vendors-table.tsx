@@ -6,6 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { ActionButton } from "@/components/admin/action-button";
 
 interface VendorRow {
   id: string;
@@ -106,31 +107,37 @@ export function AdminVendorsTable({ data, statusFilter, moderateVendor }: AdminV
         <div className="flex items-center gap-2">
           {row.status === "pending" && (
             <>
-              <form action={moderateVendor.bind(null, "approve", row.id as string, "Approved from admin dashboard")}>
-                <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4">
-                  Approve
-                </Button>
-              </form>
-              <form action={moderateVendor.bind(null, "reject", row.id as string, "Rejected from admin dashboard")}>
-                <Button type="submit" size="sm" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300 rounded-xl px-4">
-                  Reject
-                </Button>
-              </form>
+              <ActionButton 
+                action={moderateVendor.bind(null, "approve", row.id as string, "Approved from admin dashboard")}
+                label="Approve"
+                loadingLabel="Approving"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4"
+              />
+              <ActionButton 
+                action={moderateVendor.bind(null, "reject", row.id as string, "Rejected from admin dashboard")}
+                label="Reject"
+                loadingLabel="Rejecting"
+                variant="outline"
+                className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300 rounded-xl px-4"
+              />
             </>
           )}
           {row.status === "approved" && (
-            <form action={moderateVendor.bind(null, "suspend", row.id as string, "Suspended from admin dashboard")}>
-              <Button type="submit" size="sm" variant="outline" className="text-amber-600 border-amber-200 hover:bg-amber-50 rounded-xl px-4">
-                Suspend
-              </Button>
-            </form>
+            <ActionButton 
+              action={moderateVendor.bind(null, "suspend", row.id as string, "Suspended from admin dashboard")}
+              label="Suspend"
+              loadingLabel="Suspending"
+              variant="outline"
+              className="text-amber-600 border-amber-200 hover:bg-amber-50 rounded-xl px-4"
+            />
           )}
           {(row.status === "suspended" || row.status === "rejected") && (
-            <form action={moderateVendor.bind(null, "restore", row.id as string, "Restored from admin dashboard")}>
-              <Button type="submit" size="sm" className="bg-slate-800 hover:bg-slate-900 text-white shadow-sm rounded-xl px-4">
-                Restore
-              </Button>
-            </form>
+            <ActionButton 
+              action={moderateVendor.bind(null, "restore", row.id as string, "Restored from admin dashboard")}
+              label="Restore"
+              loadingLabel="Restoring"
+              className="bg-slate-800 hover:bg-slate-900 text-white shadow-sm rounded-xl px-4"
+            />
           )}
           <Link href={`/admin/audit?type=vendor&id=${row.id}`}>
             <Button variant="ghost" size="sm">Audit</Button>

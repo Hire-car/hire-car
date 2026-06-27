@@ -6,6 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { ActionButton } from "@/components/admin/action-button";
 
 interface FraudRow {
   id: string;
@@ -124,11 +125,12 @@ export function AdminFraudTable({ data, updateFraudFlagStatus }: AdminFraudTable
         <div className="flex items-center gap-2">
           {row.status === "open" && (
             <>
-              <form action={updateFraudFlagStatus.bind(null, "close", row.id as string)}>
-                <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4">
-                  Close
-                </Button>
-              </form>
+              <ActionButton 
+                action={updateFraudFlagStatus.bind(null, "close", row.id as string)}
+                label="Close"
+                loadingLabel="Closing"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4"
+              />
               <Link href={`/admin/audit?type=${row.resource_type}&id=${row.resource_id}`}>
                 <Button variant="ghost" size="sm" className="rounded-xl">Audit</Button>
               </Link>
@@ -136,16 +138,19 @@ export function AdminFraudTable({ data, updateFraudFlagStatus }: AdminFraudTable
           )}
           {row.status === "reviewing" && (
             <>
-              <form action={updateFraudFlagStatus.bind(null, "close", row.id as string)}>
-                <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4">
-                  Close
-                </Button>
-              </form>
-              <form action={updateFraudFlagStatus.bind(null, "reopen", row.id as string)}>
-                <Button type="submit" size="sm" variant="outline" className="rounded-xl">
-                  Reopen
-                </Button>
-              </form>
+              <ActionButton 
+                action={updateFraudFlagStatus.bind(null, "close", row.id as string)}
+                label="Close"
+                loadingLabel="Closing"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4"
+              />
+              <ActionButton 
+                action={updateFraudFlagStatus.bind(null, "reopen", row.id as string)}
+                label="Reopen"
+                loadingLabel="Reopening"
+                variant="outline"
+                className="rounded-xl"
+              />
             </>
           )}
           {row.status === "closed" && (

@@ -5,6 +5,7 @@ import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/admin/action-button";
 import { moderateBranch, aiAutoApproveBranch } from "../actions";
 
 interface BranchRow {
@@ -103,32 +104,40 @@ export function AdminBranchesTable({ data }: AdminBranchesTableProps) {
           <div className="flex justify-end gap-2">
             {row.status === "pending" && (
               <>
-                <form action={aiAutoApproveBranch.bind(null, row.id as string)}>
-                  <Button type="submit" variant="secondary" size="sm" className="h-8 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200">
-                    <Sparkles className="h-3.5 w-3.5 mr-1" />
-                    AI Auto-Approve
-                  </Button>
-                </form>
-                <form action={moderateBranch.bind(null, "approve", row.id as string, "Approved from admin dashboard")}>
-                  <Button type="submit" variant="default" size="sm" className="h-8 text-xs badge-glow-success">
-                    Approve
-                  </Button>
-                </form>
+                <ActionButton 
+                  action={aiAutoApproveBranch.bind(null, row.id as string)}
+                  label="AI Auto-Approve"
+                  loadingLabel="Auto-Approving"
+                  variant="secondary"
+                  className="h-8 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
+                  icon={<Sparkles className="h-3.5 w-3.5" />}
+                />
+                <ActionButton 
+                  action={moderateBranch.bind(null, "approve", row.id as string, "Approved from admin dashboard")}
+                  label="Approve"
+                  loadingLabel="Approving"
+                  variant="default"
+                  className="h-8 text-xs badge-glow-success"
+                />
               </>
             )}
             {row.status === "approved" && (
-              <form action={moderateBranch.bind(null, "suspend", row.id as string, "Suspended from admin dashboard")}>
-                <Button type="submit" variant="destructive" size="sm" className="h-8 text-xs">
-                  Suspend
-                </Button>
-              </form>
+              <ActionButton 
+                action={moderateBranch.bind(null, "suspend", row.id as string, "Suspended from admin dashboard")}
+                label="Suspend"
+                loadingLabel="Suspending"
+                variant="destructive"
+                className="h-8 text-xs"
+              />
             )}
             {row.status === "suspended" && (
-              <form action={moderateBranch.bind(null, "restore", row.id as string, "Restored from admin dashboard")}>
-                <Button type="submit" variant="outline" size="sm" className="h-8 text-xs">
-                  Restore
-                </Button>
-              </form>
+              <ActionButton 
+                action={moderateBranch.bind(null, "restore", row.id as string, "Restored from admin dashboard")}
+                label="Restore"
+                loadingLabel="Restoring"
+                variant="outline"
+                className="h-8 text-xs"
+              />
             )}
           </div>
         );

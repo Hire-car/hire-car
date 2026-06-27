@@ -6,6 +6,7 @@ import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Star } from "lucide-react";
+import { ActionButton } from "@/components/admin/action-button";
 
 interface ReviewRow {
   id: string;
@@ -105,16 +106,19 @@ export function AdminReviewsTable({ data, statusFilter, moderateReview }: AdminR
         <div className="flex items-center gap-2">
           {row.status === "pending" && (
             <>
-              <form action={moderateReview.bind(null, "approve", row.id as string, "Approved from admin dashboard")}>
-                <Button type="submit" size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4">
-                  Approve
-                </Button>
-              </form>
-              <form action={moderateReview.bind(null, "reject", row.id as string, "Rejected from admin dashboard")}>
-                <Button type="submit" size="sm" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300 rounded-xl px-4">
-                  Reject
-                </Button>
-              </form>
+              <ActionButton 
+                action={moderateReview.bind(null, "approve", row.id as string, "Approved from admin dashboard")}
+                label="Approve"
+                loadingLabel="Approving"
+                className="bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm shadow-emerald-500/20 rounded-xl px-4"
+              />
+              <ActionButton 
+                action={moderateReview.bind(null, "reject", row.id as string, "Rejected from admin dashboard")}
+                label="Reject"
+                loadingLabel="Rejecting"
+                variant="outline"
+                className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300 rounded-xl px-4"
+              />
             </>
           )}
           {row.status !== "pending" && (

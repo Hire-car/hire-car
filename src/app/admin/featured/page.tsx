@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createFeaturedPlacement, endFeaturedPlacement } from "./actions";
 import { Star } from "lucide-react";
+import { ActionButton } from "@/components/admin/action-button";
 
 export const metadata = { title: "Featured Placements" };
 
@@ -99,11 +100,13 @@ export default async function AdminFeaturedPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     {active && (
-                      <form action={endFeaturedPlacement.bind(null, p.id)}>
-                        <button type="submit" className="text-xs font-semibold text-red-600 hover:underline">
-                          End now
-                        </button>
-                      </form>
+                      <ActionButton
+                        action={endFeaturedPlacement.bind(null, p.id)}
+                        label="End now"
+                        loadingLabel="Ending..."
+                        variant="link"
+                        className="text-xs font-semibold text-red-600 hover:underline h-auto p-0"
+                      />
                     )}
                   </td>
                 </tr>
