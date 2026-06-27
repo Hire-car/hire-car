@@ -136,9 +136,9 @@ export function SiteHeader() {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
                   <a href={process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="Instagram"><InstagramIcon className="h-4 w-4" /></a>
-                  <a href={process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="Facebook"><FacebookIcon className="h-4 w-4" /></a>
+                  <a href={process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL || "https://www.facebook.com/profile.php?id=61590659316054"} className="hover:text-amber-200 transition-colors" aria-label="Facebook"><FacebookIcon className="h-4 w-4" /></a>
                   <a href={process.env.NEXT_PUBLIC_SOCIAL_X_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="Twitter"><XIcon className="h-4 w-4" /></a>
-                  <a href={process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="LinkedIn"><LinkedinIcon className="h-4 w-4" /></a>
+                  <a href={process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL || "https://www.linkedin.com/company/hirecar-marketplace/"} className="hover:text-amber-200 transition-colors" aria-label="LinkedIn"><LinkedinIcon className="h-4 w-4" /></a>
                 </div>
                 <span className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
                   <Headphones className="h-3.5 w-3.5" /> <a href="tel:0434930437" className="hover:text-amber-100 transition-colors">0434 930 437</a>
