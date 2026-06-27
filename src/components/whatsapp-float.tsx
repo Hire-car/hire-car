@@ -40,48 +40,7 @@ export function WhatsAppFloat({
   const routeHidden = HIDDEN_PREFIXES.some((prefix) =>
     pathname?.startsWith(prefix)
   );
-"use client";
 
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { buildWhatsAppUrl } from "@/lib/whatsapp";
-import { useMobileState } from "@/components/mobile-state-provider";
-
-interface WhatsAppFloatProps {
-  /** Platform support WhatsApp number */
-  phone?: string;
-  /** Whether the sticky CTA bar is visible on the current page (mobile only) */
-  stickyCtaVisible?: boolean;
-  /** When true, hide the button entirely (e.g. modal or mobile nav is open) */
-  hidden?: boolean;
-}
-
-// Routes where the floating support button should NOT appear
-const HIDDEN_PREFIXES = ["/vendor", "/admin", "/auth", "/customer", "/messages"];
-
-/**
- * A floating WhatsApp support button shown on public-facing pages only.
- * Lets any visitor reach the Hire Car support team directly.
- *
- * Context-aware positioning:
- * - Repositions above the sticky CTA bar on mobile when visible
- * - Hides entirely when modals or mobile nav are open
- * - Respects safe area insets on modern devices
- */
-export function WhatsAppFloat({
-  phone = "61434930437",
-  stickyCtaVisible = false,
-  hidden = false,
-}: WhatsAppFloatProps) {
-  const pathname = usePathname();
-  const [hovered, setHovered] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
-  const { isStickyCtaVisible, isMobileNavOpen, isModalOpen } = useMobileState();
-
-  // Hide on certain routes
-  const routeHidden = HIDDEN_PREFIXES.some((prefix) =>
-    pathname?.startsWith(prefix)
-  );
   if (routeHidden) return null;
 
   // Hide when modals or mobile nav are open or explicitly dismissed
