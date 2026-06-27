@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 // usePathname removed
-import { Menu, ChevronDown, User, Headphones, Instagram, Facebook, Twitter, Linkedin } from "lucide-react";
+import { Menu, ChevronDown, User, Headphones } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createBrowserClient } from "@supabase/ssr";
 import { BrandLogo } from "@/components/brand-logo";
@@ -11,6 +11,7 @@ import { useHeaderHeight } from "@/hooks/use-header-height";
 import { MobileDrawerNav, DrawerSection } from "./mobile-drawer-nav";
 import { useMobileState } from "@/components/mobile-state-provider";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from "@/components/icons";
 
 export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -134,10 +135,10 @@ export function SiteHeader() {
               <span className="hidden sm:inline-block">Australia&apos;s trusted premium car rental marketplace</span>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
-                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="Instagram"><Instagram className="h-4 w-4" /></a>
-                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="Facebook"><Facebook className="h-4 w-4" /></a>
-                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="Twitter"><Twitter className="h-4 w-4" /></a>
-                  <a href="#" className="hover:text-amber-200 transition-colors" aria-label="LinkedIn"><Linkedin className="h-4 w-4" /></a>
+                  <a href={process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="Instagram"><InstagramIcon className="h-4 w-4" /></a>
+                  <a href={process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="Facebook"><FacebookIcon className="h-4 w-4" /></a>
+                  <a href={process.env.NEXT_PUBLIC_SOCIAL_X_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="Twitter"><XIcon className="h-4 w-4" /></a>
+                  <a href={process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL || "#"} className="hover:text-amber-200 transition-colors" aria-label="LinkedIn"><LinkedinIcon className="h-4 w-4" /></a>
                 </div>
                 <span className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
                   <Headphones className="h-3.5 w-3.5" /> <a href="tel:0434930437" className="hover:text-amber-100 transition-colors">0434 930 437</a>
