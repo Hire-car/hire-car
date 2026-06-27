@@ -110,11 +110,17 @@ export default async function MessagesLayout({
   });
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-white overflow-hidden" style={{ paddingTop: '88px' }}>
+    <div
+      className="flex flex-col bg-white overflow-hidden"
+      style={{
+        height: '100dvh',
+        paddingTop: 'var(--header-height, 116px)',
+      }}
+    >
       <SiteHeader />
       
       {/* Full-screen dual pane layout */}
-      <div className="flex flex-1 overflow-hidden w-full">
+      <div className="flex flex-1 overflow-hidden w-full min-h-0">
         
         {/* Left Pane: Sidebar */}
         <ChatSidebar chats={sidebarChats} />

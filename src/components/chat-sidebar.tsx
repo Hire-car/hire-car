@@ -42,9 +42,9 @@ export function ChatSidebar({ chats }: ChatSidebarProps) {
       flex-col w-full md:w-[320px] lg:w-[360px] flex-shrink-0 bg-white border-r border-slate-100 h-full
     `}>
       {/* Header */}
-      <div className="px-5 pt-6 pb-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="font-heading text-2xl font-bold text-slate-900">Messages</h1>
+      <div className="px-5 pt-4 pb-3 flex-shrink-0 border-b border-slate-100">
+        <div className="flex items-center justify-between mb-3">
+          <h1 className="font-heading text-xl font-bold text-slate-900">Messages</h1>
           <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
             <MessageCircle className="h-4 w-4 text-primary" />
           </div>
