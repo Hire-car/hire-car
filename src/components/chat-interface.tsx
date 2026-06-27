@@ -201,19 +201,19 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
   const otherInitials = getInitials(otherPartyName);
 
   return (
-    <div className="fixed inset-0 z-50 md:relative md:inset-auto md:z-auto flex flex-col h-[100dvh] md:h-full w-full bg-[#f8fafc] font-sans overflow-hidden">
+    <div className="fixed inset-0 z-50 md:relative md:inset-auto md:z-auto flex flex-col h-[100dvh] md:h-full w-full bg-slate-50/50 font-sans overflow-hidden">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden flex justify-center z-0">
-        <div className="w-full max-w-2xl h-full relative opacity-[0.03]">
-          <div className="absolute top-[20%] -left-32 w-96 h-96 bg-[#FF5F00] rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+        <div className="w-full max-w-2xl h-full relative opacity-[0.035]">
+          <div className="absolute top-[20%] -left-32 w-96 h-96 bg-primary rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
           <div className="absolute top-[40%] -right-32 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
           <div className="absolute -bottom-32 left-20 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
         </div>
       </div>
 
       {/* Chat Header - Glassmorphism */}
-      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
+      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] z-20 flex-shrink-0">
         <div className="flex items-center gap-3">
           {backLink && (
             <Link href={backLink} className="md:hidden p-2 -ml-2 rounded-full hover:bg-slate-100/80 text-slate-500 hover:text-slate-800 transition-all active:scale-95">
@@ -221,15 +221,15 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
             </Link>
           )}
           <div className="relative">
-            <div className="h-11 w-11 rounded-full bg-gradient-to-tr from-slate-100 to-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-700 font-extrabold text-sm shrink-0 ring-4 ring-white">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-200/80 shadow-sm flex items-center justify-center text-slate-700 font-extrabold text-sm shrink-0">
               {otherInitials}
             </div>
-            <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm"></span>
+            <span className="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white shadow-sm"></span>
           </div>
           <div>
-            <h2 className="text-base font-bold text-slate-900 leading-tight">{otherPartyName}</h2>
-            <p className="text-[11px] text-slate-500 font-semibold tracking-wide uppercase mt-0.5">
-              Online • Replies quickly
+            <h2 className="font-heading text-base font-bold text-slate-900 leading-tight tracking-tight">{otherPartyName}</h2>
+            <p className="text-[10px] text-slate-500 font-bold tracking-widest uppercase mt-0.5 flex items-center gap-1">
+              Online
             </p>
           </div>
         </div>
@@ -239,11 +239,11 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
       </div>
 
       {/* Messages Area */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 z-10 flex flex-col relative scroll-smooth scrollbar-thin scrollbar-thumb-slate-200/60">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 z-10 flex flex-col relative scroll-smooth scrollbar-thin scrollbar-thumb-slate-200/80">
         
         {/* Encryption Banner */}
         <div className="flex justify-center mb-8 mt-2">
-          <div className="bg-emerald-50/60 backdrop-blur-md border border-emerald-100/50 text-emerald-600/80 text-[11px] px-4 py-2 rounded-full text-center max-w-sm flex items-center justify-center gap-2 font-bold shadow-sm">
+          <div className="bg-emerald-500/[0.04] border border-emerald-500/10 text-emerald-700/90 text-[10px] font-bold tracking-wider uppercase px-4 py-2 rounded-full text-center max-w-sm flex items-center justify-center gap-2 shadow-sm">
             <Lock className="h-3 w-3 shrink-0" />
             <p>End-to-end encrypted chat</p>
           </div>
@@ -252,10 +252,10 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
         {messages.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-4 mb-20">
             <div className="h-20 w-20 rounded-full bg-white border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex items-center justify-center relative">
-              <div className="absolute inset-0 rounded-full bg-[#FF5F00]/5 animate-ping opacity-20"></div>
-              <Send className="h-8 w-8 text-[#FF5F00]/40 translate-x-1" />
+              <div className="absolute inset-0 rounded-full bg-primary/5 animate-ping opacity-20"></div>
+              <Send className="h-8 w-8 text-primary/40 translate-x-1" />
             </div>
-            <p className="text-sm font-semibold tracking-wide text-slate-500">Start the conversation</p>
+            <p className="text-sm font-bold tracking-wide text-slate-500 font-heading">Start the conversation</p>
           </div>
         ) : (
           <div className="flex flex-col flex-1 justify-end">
@@ -268,7 +268,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
                     <div className="w-full border-t border-slate-200/50"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 bg-[#f8fafc] px-4 py-1 uppercase">
+                    <span className="text-[10px] font-bold tracking-widest text-slate-400 bg-slate-50 px-4 py-1 uppercase font-heading">
                       {group.dateLabel}
                     </span>
                   </div>
@@ -287,7 +287,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
                       >
                         
                         {!isMe && msg.isLastInGroup ? (
-                          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-slate-200 to-slate-100 border border-white shadow-sm flex items-center justify-center text-slate-600 font-bold text-[10px] shrink-0 mr-2.5 self-end mb-1">
+                          <div className="h-7 w-7 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-200/50 flex items-center justify-center text-slate-600 font-bold text-[10px] shrink-0 mr-2.5 self-end mb-1">
                             {otherInitials}
                           </div>
                         ) : (
@@ -296,12 +296,12 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
 
                         <div className={`flex flex-col max-w-[80%] sm:max-w-[70%] group/msg ${isMe ? "items-end" : "items-start"}`}>
                           <div
-                            className={`px-5 py-3 text-[15px] leading-relaxed break-words whitespace-pre-wrap transition-all shadow-sm ${
+                            className={`px-5 py-3 text-[14px] leading-relaxed break-words whitespace-pre-wrap transition-all ${
                               isPending ? "opacity-60 scale-[0.98]" : "opacity-100 scale-100"
                             } ${
                               isMe
-                                ? "bg-gradient-to-br from-[#FF5F00] to-[#e05300] text-white shadow-[#FF5F00]/20"
-                                : "bg-white border border-slate-100 text-slate-800 shadow-slate-200/40"
+                                ? "bg-gradient-to-br from-primary to-[#c2410c] text-white shadow-[0_4px_12px_rgba(234,88,12,0.18)]"
+                                : "bg-white border border-slate-200/60 text-slate-800 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
                             } ${
                               msg.isConsecutive && msg.isLastInGroup
                                 ? isMe ? "rounded-l-2xl rounded-tr-md rounded-br-2xl" : "rounded-r-2xl rounded-tl-md rounded-bl-2xl"
@@ -321,7 +321,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
                               {formatTime(msg.created_at)}
                             </span>
                             {isMe && !isPending && (
-                              <Check className="h-3.5 w-3.5 text-[#FF5F00] opacity-90 drop-shadow-sm" />
+                              <Check className="h-3.5 w-3.5 text-primary opacity-90 drop-shadow-sm" />
                             )}
                             {isMe && isPending && (
                               <Loader2 className="h-3 w-3 text-slate-400 animate-spin" />
@@ -341,7 +341,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
 
       {/* Input Area - Floating Island Style */}
       <div className="bg-gradient-to-t from-white via-white to-transparent pt-6 pb-4 px-4 sm:px-6 z-20 flex-shrink-0">
-        <form onSubmit={handleSend} className="flex items-end gap-3 max-w-4xl mx-auto bg-white rounded-[28px] border border-slate-200/80 p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] focus-within:shadow-[0_8px_40px_rgba(255,95,0,0.12)] focus-within:border-[#FF5F00]/30 transition-all duration-300">
+        <form onSubmit={handleSend} className="flex items-end gap-3 max-w-4xl mx-auto bg-white rounded-[24px] border border-slate-200 p-1.5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] focus-within:shadow-[0_8px_40px_rgba(234,88,12,0.08)] focus-within:border-primary/30 transition-all duration-300">
           <div className="relative flex-1">
             <textarea
               ref={textareaRef}
@@ -350,7 +350,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
               onKeyDown={handleKeyDown}
               placeholder="Type your message..."
               rows={1}
-              className="w-full resize-none bg-transparent px-4 py-3.5 text-[15px] font-medium text-slate-800 max-h-[140px] focus:outline-none leading-relaxed scrollbar-thin scrollbar-thumb-slate-300 placeholder:text-slate-400"
+              className="w-full resize-none bg-transparent px-4 py-3.5 text-[14px] font-medium text-slate-800 max-h-[140px] focus:outline-none leading-relaxed scrollbar-thin scrollbar-thumb-slate-300 placeholder:text-slate-400"
               disabled={isSending}
               style={{ minHeight: '52px' }}
             />
@@ -358,7 +358,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
           <button
             type="submit"
             disabled={!newMessage.trim() || isSending}
-            className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full bg-[#FF5F00] text-white hover:bg-[#e05300] hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-[#FF5F00] transition-all duration-200 mb-0.5 mr-0.5"
+            className="flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-[#c2410c] hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:hover:bg-primary transition-all duration-200 mb-0.5 mr-0.5"
             aria-label="Send message"
           >
             {isSending ? (
@@ -369,9 +369,9 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
           </button>
         </form>
         <div className="text-center mt-3 hidden sm:block">
-          <span className="text-[10px] font-semibold tracking-wide text-slate-400">
-            <kbd className="font-sans bg-slate-100 border border-slate-200/60 px-1.5 py-0.5 rounded-md mx-1 shadow-sm">Enter</kbd> to send, 
-            <kbd className="font-sans bg-slate-100 border border-slate-200/60 px-1.5 py-0.5 rounded-md mx-1 shadow-sm">Shift + Enter</kbd> for new line
+          <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+            <kbd className="font-sans bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md mx-1 shadow-sm normal-case font-normal text-[11px]">Enter</kbd> to send, 
+            <kbd className="font-sans bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-md mx-1 shadow-sm normal-case font-normal text-[11px]">Shift + Enter</kbd> for new line
           </span>
         </div>
       </div>
