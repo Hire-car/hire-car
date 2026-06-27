@@ -187,8 +187,66 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
   // Compact or Sidebar Variant
   return (
     <div className={`${className}`}>
+      {/* COMPACT DESKTOP (Professional Seamless Pill) */}
+      {isCompact && (
+        <div className="hidden md:flex bg-white shadow-sm border border-slate-300 rounded-full h-[60px] w-full max-w-4xl flex-row items-center divide-x divide-slate-200 hover:shadow-md transition-shadow">
+          <div className="flex-1 px-6 h-full flex flex-col justify-center focus-within:bg-slate-50/80 hover:bg-slate-50/50 rounded-l-full group transition-colors cursor-text">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Where</label>
+            <LocationAutocomplete 
+              onSelect={(res) => {
+                if (res?.features?.[0]?.properties?.name) {
+                  setLocation(res.features[0].properties.name);
+                }
+              }} 
+              placeholder={location || "City or airport"} 
+              hideIcon={true}
+              inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold placeholder:text-slate-400 outline-none truncate"
+            />
+          </div>
+          
+          <div className="flex-[0.7] px-6 h-full flex flex-col justify-center focus-within:bg-slate-50/80 hover:bg-slate-50/50 transition-colors cursor-text">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Pickup</label>
+            <input
+              type={pickupDate ? "date" : "text"}
+              placeholder="Add date"
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
+              value={pickupDate}
+              onChange={(e) => setPickupDate(e.target.value)}
+              min={new Date().toISOString().split("T")[0]}
+              className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+            />
+          </div>
+
+          <div className="flex-[0.7] px-6 h-full flex flex-col justify-center focus-within:bg-slate-50/80 hover:bg-slate-50/50 transition-colors cursor-text">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Return</label>
+            <input
+              type={returnDate ? "date" : "text"}
+              placeholder="Add date"
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
+              value={returnDate}
+              onChange={(e) => setReturnDate(e.target.value)}
+              min={pickupDate || new Date().toISOString().split("T")[0]}
+              className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+            />
+          </div>
+
+          <div className="pr-2 pl-4 h-full flex items-center justify-center">
+            <Link
+              href={buildSearchUrl()}
+              onClick={handleSubmit}
+              className="flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] text-white h-11 w-11 rounded-full transition-colors"
+            >
+              <Search className="h-4 w-4" strokeWidth={2.5} />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* COMPACT MOBILE & SIDEBAR (Stacked View) */}
       <div className={`
-        ${isCompact ? "bg-white p-4 shadow-xl rounded-2xl flex flex-col md:flex-row gap-4 items-stretch md:items-center" : ""}
+        ${isCompact ? "md:hidden bg-white p-4 shadow-xl rounded-2xl flex flex-col gap-4" : ""}
         ${variant === "sidebar" ? "bg-white p-6 shadow-xl rounded-2xl flex flex-col gap-4" : ""}
       `}>
         <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">
@@ -242,7 +300,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
         <Link
           href={buildSearchUrl()}
           onClick={handleSubmit}
-          className="flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] text-white px-8 py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all w-full md:w-auto"
+          className="flex items-center justify-center bg-[#ea580c] hover:bg-[#c2410c] text-white px-8 py-4 rounded-xl font-bold shadow-md hover:shadow-lg transition-all w-full"
         >
           {variant === "sidebar" ? "Search" : <Search className="h-5 w-5" />}
         </Link>
