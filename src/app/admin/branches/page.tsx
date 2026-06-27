@@ -6,6 +6,8 @@ export const metadata = {
   title: "Branches Overview",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminBranchesPage() {
   await requireAdmin();
   const supabase = createAdminClient();

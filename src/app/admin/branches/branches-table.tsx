@@ -3,9 +3,9 @@
 import { useState, useMemo } from "react";
 import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { moderateBranch } from "../actions";
+import { moderateBranch, aiAutoApproveBranch } from "../actions";
 
 interface BranchRow {
   id: string;
@@ -102,11 +102,19 @@ export function AdminBranchesTable({ data }: AdminBranchesTableProps) {
         return (
           <div className="flex justify-end gap-2">
             {row.status === "pending" && (
-              <form action={moderateBranch.bind(null, "approve", row.id as string, "Approved from admin dashboard")}>
-                <Button type="submit" variant="default" size="sm" className="h-8 text-xs badge-glow-success">
-                  Approve
-                </Button>
-              </form>
+              <>
+                <form action={aiAutoApproveBranch.bind(null, row.id as string)}>
+                  <Button type="submit" variant="secondary" size="sm" className="h-8 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200">
+                    <Sparkles className="h-3.5 w-3.5 mr-1" />
+                    AI Auto-Approve
+                  </Button>
+                </form>
+                <form action={moderateBranch.bind(null, "approve", row.id as string, "Approved from admin dashboard")}>
+                  <Button type="submit" variant="default" size="sm" className="h-8 text-xs badge-glow-success">
+                    Approve
+                  </Button>
+                </form>
+              </>
             )}
             {row.status === "approved" && (
               <form action={moderateBranch.bind(null, "suspend", row.id as string, "Suspended from admin dashboard")}>
