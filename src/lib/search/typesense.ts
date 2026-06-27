@@ -156,10 +156,10 @@ export async function searchVehicles(
   const filterParts: string[] = ["status:=approved"]; // Only show approved vehicles
 
   if (filters.city) {
-    filterParts.push(`city:=${escapeFilterValue(filters.city)}`);
+    filterParts.push(`city:${escapeFilterValue(filters.city)}`);
   }
   if (filters.state) {
-    filterParts.push(`state:=${escapeFilterValue(filters.state)}`);
+    filterParts.push(`state:${escapeFilterValue(filters.state)}`);
   }
   if (filters.category) {
     filterParts.push(`category:=${escapeFilterValue(filters.category)}`);
@@ -312,10 +312,10 @@ async function fallbackDatabaseSearch(
 
   // Apply filters
   if (filters.city) {
-    dbQuery = dbQuery.eq("branches.city", filters.city);
+    dbQuery = dbQuery.ilike("branches.city", `%${filters.city}%`);
   }
   if (filters.state) {
-    dbQuery = dbQuery.eq("branches.state", filters.state);
+    dbQuery = dbQuery.ilike("branches.state", `%${filters.state}%`);
   }
   if (filters.category) {
     dbQuery = dbQuery.eq("category", filters.category);

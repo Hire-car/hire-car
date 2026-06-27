@@ -66,14 +66,13 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
           </button>
         </div>
 
-        {/* Desktop View: Sleek Horizontal Pill Container */}
-        <div className="hidden md:flex bg-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] rounded-[2.5rem] md:rounded-full p-2.5 flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-slate-100 border border-slate-100/50 backdrop-blur-2xl">
+        {/* Desktop View: Premium Seamless Glass Pill */}
+        <div className="hidden md:flex bg-white/90 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] rounded-full h-[76px] flex-row items-center divide-x divide-slate-200/60 border border-white backdrop-blur-3xl transition-shadow hover:shadow-[0_25px_65px_-15px_rgba(0,0,0,0.2)]">
           
           {/* Location Segment */}
-          <div className="flex-1 w-full flex flex-col justify-center px-6 py-3 md:py-0 hover:bg-slate-50/50 focus-within:bg-orange-50/50 rounded-t-[2rem] md:rounded-l-full md:rounded-r-none transition-colors group">
-            <label className="text-[11px] font-black tracking-widest text-slate-800 uppercase mb-1 flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-[#ea580c]" />
-              Pickup Location
+          <div className="flex-[1.2] h-full flex flex-col justify-center px-8 hover:bg-slate-100/50 focus-within:bg-slate-100/80 rounded-l-full transition-colors cursor-text group relative">
+            <label className="text-[10px] font-black tracking-[0.15em] text-slate-800 uppercase mb-0.5 group-focus-within:text-orange-600 transition-colors">
+              Where
             </label>
             <LocationAutocomplete 
               onSelect={(res) => {
@@ -83,17 +82,16 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               }} 
               placeholder="City or airport"
               hideIcon={true}
-              inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium placeholder:text-slate-400 outline-none truncate"
+              inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none truncate"
             />
           </div>
 
-          {/* Date Segment Wrapper for Mobile side-by-side */}
-          <div className="w-full flex flex-row divide-x divide-slate-100 md:contents md:divide-x-0">
+          {/* Date Segment Wrapper */}
+          <div className="flex-[1.5] h-full flex flex-row divide-x divide-slate-200/60">
             {/* Pickup Date Segment */}
-            <div className="flex-[0.8] w-full flex flex-col justify-center px-4 py-3 md:px-6 md:py-0 hover:bg-slate-50/50 focus-within:bg-orange-50/50 transition-colors">
-              <label className="text-[11px] font-black tracking-widest text-slate-800 uppercase mb-1 flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-[#ea580c]" />
-                <span className="truncate">Pickup</span>
+            <div className="flex-1 h-full flex flex-col justify-center px-6 hover:bg-slate-100/50 focus-within:bg-slate-100/80 transition-colors cursor-text group">
+              <label className="text-[10px] font-black tracking-[0.15em] text-slate-800 uppercase mb-0.5 group-focus-within:text-orange-600 transition-colors">
+                Pickup
               </label>
               <input
                 suppressHydrationWarning
@@ -104,15 +102,14 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
+                className="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none appearance-none"
               />
             </div>
 
             {/* Return Date Segment */}
-            <div className="flex-[0.8] w-full flex flex-col justify-center px-4 py-3 md:px-6 md:py-0 hover:bg-slate-50/50 focus-within:bg-orange-50/50 transition-colors">
-              <label className="text-[11px] font-black tracking-widest text-slate-800 uppercase mb-1 flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 text-[#ea580c]" />
-                <span className="truncate">Return</span>
+            <div className="flex-1 h-full flex flex-col justify-center px-6 hover:bg-slate-100/50 focus-within:bg-slate-100/80 transition-colors cursor-text group">
+              <label className="text-[10px] font-black tracking-[0.15em] text-slate-800 uppercase mb-0.5 group-focus-within:text-orange-600 transition-colors">
+                Return
               </label>
               <input
                 suppressHydrationWarning
@@ -123,42 +120,41 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
                 min={pickupDate || new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium outline-none appearance-none placeholder:text-slate-400"
+                className="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none appearance-none"
               />
             </div>
           </div>
 
-          {/* Vehicle Type Segment */}
-          <div className="flex-[0.8] w-full flex flex-col justify-center px-6 py-3 md:py-0 hover:bg-slate-50/50 focus-within:bg-orange-50/50 transition-colors relative">
-            <label className="text-[11px] font-black tracking-widest text-slate-800 uppercase mb-1 flex items-center gap-1.5">
-              <Car className="h-3.5 w-3.5 text-[#ea580c]" />
-              Vehicle
-            </label>
-            <div className="relative">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-600 font-medium outline-none pr-8 appearance-none cursor-pointer"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          {/* Vehicle Type Segment & Search Button Wrapper */}
+          <div className="flex-[1.2] h-full flex flex-row items-center justify-between pl-6 pr-2 hover:bg-slate-100/50 focus-within:bg-slate-100/80 rounded-r-full transition-colors group">
+            <div className="flex-1 flex flex-col justify-center cursor-pointer relative pr-4">
+              <label className="text-[10px] font-black tracking-[0.15em] text-slate-800 uppercase mb-0.5 group-focus-within:text-orange-600 transition-colors">
+                Vehicle
+              </label>
+              <div className="relative">
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none pr-6 appearance-none cursor-pointer"
+                >
+                  {categories.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label || "Any type"}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              </div>
             </div>
-          </div>
 
-          {/* Search Button */}
-          <div className="w-full md:w-auto p-2">
+            {/* Search Button */}
             <Link
               href={buildSearchUrl()}
               onClick={handleSubmit}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#c2410c] to-[#ea580c] hover:from-[#9a3412] hover:to-[#c2410c] text-white font-bold h-14 md:h-[68px] px-8 rounded-[1.5rem] md:rounded-full shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2 transition-all whitespace-nowrap"
+              className="shrink-0 flex items-center justify-center gap-2 bg-gradient-to-br from-[#ea580c] to-[#c2410c] hover:from-[#f97316] hover:to-[#ea580c] text-white font-bold h-14 px-7 rounded-full shadow-[0_8px_20px_-6px_rgba(234,88,12,0.6)] hover:shadow-[0_12px_25px_-6px_rgba(234,88,12,0.7)] hover:-translate-y-[1px] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all"
             >
-              <Search className="h-5 w-5" strokeWidth={2.5} />
-              <span className="md:hidden lg:inline">Search</span>
+              <Search className="h-5 w-5" strokeWidth={3} />
+              <span className="hidden lg:inline text-[15px]">Search</span>
             </Link>
           </div>
         </div>
