@@ -38,8 +38,6 @@ export function useSwipeGesture(
 
     const handlePointerMove = (e: PointerEvent) => {
       if (!tracking) return;
-      // Prevent default to avoid text selection during swipe
-      e.preventDefault();
     };
 
     const handlePointerUp = (e: PointerEvent) => {

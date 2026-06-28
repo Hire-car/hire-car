@@ -52,7 +52,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="gallery-main-frame group relative h-[420px] w-full overflow-hidden bg-slate-100 touch-none"
+        className="gallery-main-frame group relative h-[420px] w-full overflow-hidden bg-slate-100 touch-pan-y select-none"
       >
         <div
           style={{
