@@ -95,6 +95,23 @@ function SearchContent() {
     returnDate: searchParams.get("return") || undefined,
   }));
 
+  // Sync filters from URL when searchParams change (e.g. SearchWidget navigation)
+  useEffect(() => {
+    setFilters({
+      city: searchParams.get("city") || undefined,
+      category: searchParams.get("category") || undefined,
+      minPrice: searchParams.get("minPrice") ? parseInt(searchParams.get("minPrice")!) : undefined,
+      maxPrice: searchParams.get("maxPrice") ? parseInt(searchParams.get("maxPrice")!) : undefined,
+      seats: searchParams.get("seats") ? parseInt(searchParams.get("seats")!) : undefined,
+      transmission: searchParams.get("transmission") || undefined,
+      fuel: searchParams.get("fuel") || undefined,
+      make: searchParams.get("make") || undefined,
+      pickup: searchParams.get("pickup") || undefined,
+      returnDate: searchParams.get("return") || undefined,
+    });
+    setPage(parseInt(searchParams.get("page") || "1") || 1);
+  }, [searchParams]);
+
   const [facetCounts, setFacetCounts] = useState<Record<string, Record<string, number>>>({});
 
   const [page, setPage] = useState(() => {
