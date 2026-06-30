@@ -41,7 +41,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             </div>
           </div>
           <div className="flex items-center justify-between mt-2 gap-2">
-            <span className="text-lg font-extrabold text-foreground">${vehicle.pricePerDayAud}<span className="text-xs font-medium text-muted-foreground">/day</span></span>
+            <span className="text-lg font-extrabold text-foreground shrink-0 whitespace-nowrap">${vehicle.pricePerDayAud}<span className="text-xs font-medium text-muted-foreground">/day</span></span>
             <Link
               href={`/cars/${vehicle.slug}`}
               className="touch-target inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
@@ -135,8 +135,8 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         {/* Content */}
         <div className="p-4 sm:p-5">
           <div className="flex justify-between items-start mb-2">
-            <div>
-              <h3 className="font-bold text-slate-900 text-lg line-clamp-1">{vehicle.title}</h3>
+            <div className="min-w-0 overflow-hidden">
+              <h3 className="font-bold text-slate-900 text-lg truncate">{vehicle.title}</h3>
               <div className="flex items-center gap-1 mt-1 text-slate-500 text-sm font-medium">
                 <MapPin className="h-3.5 w-3.5 text-[#ea580c]" />
                 {vehicle.city}
