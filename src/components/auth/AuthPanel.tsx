@@ -23,7 +23,6 @@ import {
 } from "@/lib/routing";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import { EmailAuthForm } from "@/components/auth/EmailAuthForm";
-import { PhoneAuthForm } from "@/components/auth/PhoneAuthForm";
 
 interface AuthPanelProps {
   /** Candidate redirect target from the `redirectedFrom` query param. */
@@ -34,7 +33,7 @@ interface AuthPanelProps {
   mfaRequired?: boolean;
 }
 
-type AuthMethod = "google" | "email" | "phone";
+type AuthMethod = "google" | "email";
 
 const METHOD_TABS: ReadonlyArray<{
   id: AuthMethod;
@@ -43,7 +42,6 @@ const METHOD_TABS: ReadonlyArray<{
 }> = [
   { id: "google", label: "Google", icon: Globe },
   { id: "email", label: "Email", icon: Mail },
-  { id: "phone", label: "Phone", icon: Phone },
 ];
 
 const ROLE_OPTIONS: ReadonlyArray<{
@@ -250,15 +248,6 @@ export function AuthPanel({
 
               {activeMethod === "email" && (
                 <EmailAuthForm
-                  role={selectedRole}
-                  nextRoute={nextRoute}
-                  plan={plan}
-                  onError={setError}
-                />
-              )}
-
-              {activeMethod === "phone" && (
-                <PhoneAuthForm
                   role={selectedRole}
                   nextRoute={nextRoute}
                   plan={plan}

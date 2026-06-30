@@ -1,8 +1,8 @@
-"use server";
+﻿"use server";
 
 import { requireAdmin } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendMarketingEmail } from "@/lib/email/resend";
+import { sendMarketingEmail } from "@/lib/email/ses";
 
 export type MarketingEmailState = {
   status: "idle" | "success" | "error";
@@ -219,7 +219,7 @@ export async function sendMarketingCampaign(
       return {
         status: "error",
         message:
-          "Campaign was not sent — the RESEND_API_KEY is missing at runtime. Verify the environment variable is loaded correctly.",
+          "Campaign was not sent â€” the RESEND_API_KEY is missing at runtime. Verify the environment variable is loaded correctly.",
         details: { sent, failed, skipped, recipientCount: recipients.length },
       };
     }

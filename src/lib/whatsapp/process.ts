@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Inbound WhatsApp message processing orchestration.
  *
  * This module is the seam between the webhook Route Handler
@@ -8,10 +8,10 @@
  *
  * Orchestration order (see design.md "Request Lifecycle"):
  *   1. Load the auto-responder config (hot-read per event).
- *   2. ALWAYS persist the lead first (Property 6 — lead capture is independent
+ *   2. ALWAYS persist the lead first (Property 6 â€” lead capture is independent
  *      of reply/notify success). A persistence failure is the only thing that
  *      fails the whole process.
- *   3. Short-circuit duplicate deliveries (idempotency) — the lead already
+ *   3. Short-circuit duplicate deliveries (idempotency) â€” the lead already
  *      exists, so re-sending the acknowledgement / re-notifying is suppressed.
  *   4. Acknowledgement: only when enabled AND the cooldown window allows it.
  *      A send failure is recorded but never fails the process.
@@ -23,7 +23,7 @@
  * the webhook can still return HTTP 200 to Meta and avoid retry storms. The
  * inbound message opens the 24h customer service window (captured by
  * `whatsapp_conversations.last_inbound_at` during persistence), so the
- * free-form acknowledgement is always within that window — no extra outbound
+ * free-form acknowledgement is always within that window â€” no extra outbound
  * window logic is needed for the MVP.
  *
  * Untrusted content: message bodies are treated as untrusted and are never
@@ -31,7 +31,7 @@
  * email (handled by `sendWhatsAppLeadAlert`). Secrets are never logged.
  */
 import { getAppUrl } from "@/lib/config";
-import { sendWhatsAppLeadAlert } from "@/lib/email/resend";
+import { sendWhatsAppLeadAlert } from "@/lib/email/ses";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { selectReplyVariant, describeNextOpen } from "@/lib/whatsapp/business-hours";
 import { sendCloudApiText } from "@/lib/whatsapp/cloud-api";
@@ -150,7 +150,7 @@ export async function processInboundMessage(
 
   const supabase = createAdminClient();
 
-  // 4. Acknowledgement — only when enabled AND the cooldown window allows it.
+  // 4. Acknowledgement â€” only when enabled AND the cooldown window allows it.
   if (config.enabled) {
     let ackAllowed = false;
     try {
@@ -254,7 +254,7 @@ export async function processInboundMessage(
     });
   }
 
-  // 6. Structured outcome — processing completed (lead saved, ack attempted,
+  // 6. Structured outcome â€” processing completed (lead saved, ack attempted,
   //    notification attempted and its status recorded). Emit exactly one
   //    structured log line per processed message (Requirement 9.5).
   logProcessedMessage({

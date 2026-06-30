@@ -1,6 +1,6 @@
-"use server";
+﻿"use server";
 
-import { sendNewMessageNotification } from "@/lib/email/resend";
+import { sendNewMessageNotification } from "@/lib/email/ses";
 import { requireUser } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
@@ -90,7 +90,7 @@ export async function sendMessage(leadId: string, body: string) {
   // Use the admin client so we can perform authorization manually without
   // relying on RLS sub-selects. The RLS INSERT policy uses:
   //   l.customer_email = (SELECT email FROM profiles WHERE id = auth.uid())
-  // which silently returns NULL — and therefore denies the insert — whenever
+  // which silently returns NULL â€” and therefore denies the insert â€” whenever
   // profiles.email is NULL or when the user client session is not fully
   // hydrated. We replicate the same security semantics in application code.
   const supabase = createAdminClient();
@@ -144,7 +144,7 @@ export async function sendMessage(leadId: string, body: string) {
 
   const isAuthorized = isCustomer || isVendorMember;
 
-  // Structured server-side log — visible in Vercel / server logs for every send attempt.
+  // Structured server-side log â€” visible in Vercel / server logs for every send attempt.
   console.info("[chat:sendMessage] auth check", {
     userId: user.id,
     leadId: payload.data.leadId,
@@ -159,7 +159,7 @@ export async function sendMessage(leadId: string, body: string) {
     leadExists: !!lead,
   });
 
-  // Step 5: Guard — reject unauthorized senders before touching the DB.
+  // Step 5: Guard â€” reject unauthorized senders before touching the DB.
   if (!lead) {
     console.warn("[chat:sendMessage] lead not found", {
       userId: user.id,

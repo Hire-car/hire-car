@@ -1,7 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 import { readJsonBody } from "@/lib/api/request";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/resend";
+import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/ses";
 import { requireApiUser } from "@/lib/security/auth";
 import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
 

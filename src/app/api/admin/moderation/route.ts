@@ -11,6 +11,7 @@ import {
   moderationTableMap,
   type ModerationResourceType,
 } from "@/lib/moderation";
+import { sendVendorApprovalEmail, sendVehicleApprovalEmail } from "@/lib/email/ses";
 
 export async function POST(request: NextRequest) {
   const { user, response } = await requireApiAdmin();
@@ -72,6 +73,24 @@ export async function POST(request: NextRequest) {
         if (action === "approve" || action === "restore") {
           await invalidatePseoForVehicle(supabase, resourceId);
         }
+        if (action === "approve") {
+          // Fetch vehicle details and vendor email
+          const { data: v } = await supabase
+            .from("vehicles")
+            .select("title, organization_id")
+            .eq("id", resourceId)
+            .single();
+          if (v) {
+            const { data: org } = await supabase
+              .from("organizations")
+              .select("billing_email")
+              .eq("id", v.organization_id)
+              .single();
+            if (org?.billing_email) {
+              await sendVehicleApprovalEmail({ to: org.billing_email, vehicleTitle: v.title });
+            }
+          }
+        }
       }
 
       // For vendors (organizations), if approving, also approve their branches
@@ -79,7 +98,7 @@ export async function POST(request: NextRequest) {
         // Enforce that vendors must have a billing email before approval
         const { data: org } = await supabase
           .from("organizations")
-          .select("billing_email")
+          .select("billing_email, name")
           .eq("id", resourceId)
           .single();
           
@@ -95,6 +114,8 @@ export async function POST(request: NextRequest) {
           .update({ status: "approved", updated_at: new Date().toISOString() })
           .eq("organization_id", resourceId)
           .eq("status", "pending");
+
+        await sendVendorApprovalEmail({ to: org.billing_email, vendorName: org.name });
       }
       break;
     }

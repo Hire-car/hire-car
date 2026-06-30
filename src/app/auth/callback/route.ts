@@ -1,11 +1,11 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
   type AuthRole,
   resolvePostAuthDestination,
 } from "@/lib/routing";
-import { sendWelcomeEmail } from "@/lib/email/resend";
+import { sendWelcomeEmail } from "@/lib/email/ses";
 import { deriveProfileFromUser } from "@/lib/auth/profile";
 
 export async function GET(request: NextRequest) {

@@ -1,6 +1,6 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/resend";
+import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/ses";
 import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
 import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
 import { verifyTurnstile } from "@/lib/security/turnstile";

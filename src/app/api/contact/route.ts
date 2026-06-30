@@ -1,5 +1,5 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { sendContactMessage } from "@/lib/email/resend";
+﻿import { NextResponse, type NextRequest } from "next/server";
+import { sendContactMessage } from "@/lib/email/ses";
 import { clientIp } from "@/lib/security/rate-limit";
 import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
 import { verifyTurnstile } from "@/lib/security/turnstile";
