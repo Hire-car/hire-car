@@ -133,7 +133,7 @@ export function MarketingForm() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="ctaUrl">CTA button URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
-              <Input id="ctaUrl" name="ctaUrl" type="url" placeholder="https://www.hirecar.com.au/search" />
+              <Input id="ctaUrl" name="ctaUrl" type="url" placeholder="https://www.hirecarmarketplace.com.au/search" />
             </div>
           </div>
 

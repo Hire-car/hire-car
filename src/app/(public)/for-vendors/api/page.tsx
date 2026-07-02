@@ -41,7 +41,7 @@ export default function VendorApiDocsPage() {
             </pre>
 
             <h2>Base URL</h2>
-            <pre className="rounded-xl bg-slate-100 p-4 text-sm">https://www.hirecar.com.au/api/v1</pre>
+            <pre className="rounded-xl bg-slate-100 p-4 text-sm">https://www.hirecarmarketplace.com.au/api/v1</pre>
 
             <h2>Endpoints</h2>
             <ul>

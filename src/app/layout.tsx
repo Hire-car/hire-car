@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   description:
     "Premium car rental. Without the premium price. Australia's trusted marketplace for verified car rental operators. Compare vehicles from independent fleet owners for your next journey.",
   keywords: ["car rental", "car hire", "Australia", "Sydney", "Melbourne", "Brisbane", "Perth", "rental marketplace"],
-  metadataBase: new URL("https://www.hirecar.com.au"),
+  metadataBase: new URL("https://www.hirecarmarketplace.com.au"),
   alternates: {
     canonical: "/",
   },
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_AU",
-    url: "https://www.hirecar.com.au",
+    url: "https://www.hirecarmarketplace.com.au",
     siteName: "HireCar Marketplace",
     title: "HireCar Marketplace — Premium car rental.",
     description:

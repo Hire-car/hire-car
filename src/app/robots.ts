@@ -15,9 +15,10 @@ export default function robots(): MetadataRoute.Robots {
           "/auth/",
           "/api/",
           "/messages/",
+          "/customer/",
         ],
       },
     ],
-    sitemap: "https://www.hirecar.com.au/sitemap.xml",
+    sitemap: "https://www.hirecarmarketplace.com.au/sitemap.xml",
   };
 }

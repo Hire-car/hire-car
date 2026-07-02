@@ -4,7 +4,7 @@ import { getAllPublishedArticleSlugs } from "@/lib/blog/queries";
 import { getIndexableSitemapUrls } from "@/lib/seo/discovery";
 
 const PAGE_SIZE = 5000;
-const base = "https://www.hirecar.com.au";
+const base = "https://www.hirecarmarketplace.com.au";
 
 export async function generateSitemaps() {
   try {
@@ -34,20 +34,38 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
   const chunkId = typeof id === "number" ? id : 0;
 
   if (chunkId === 0) {
+    // Use a stable date for static pages so Google doesn't think they changed on every build
+    const staticDate = new Date("2025-06-01T00:00:00Z");
+
     const staticRoutes: MetadataRoute.Sitemap = [
+      // Core pages — highest priority
       { url: base, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
+      { url: `${base}/search`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
       { url: `${base}/locations`, lastModified: new Date(), changeFrequency: "daily", priority: 0.85 },
-      { url: `${base}/search`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.5 },
-      { url: `${base}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-      { url: `${base}/faq`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
-      { url: `${base}/for-vendors`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-      { url: `${base}/for-vendors/api`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-      { url: `${base}/pricing`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-      { url: `${base}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-      { url: `${base}/vendors`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
-      { url: `${base}/legal/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
-      { url: `${base}/legal/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
+      { url: `${base}/vendors`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
+      { url: `${base}/categories`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
+
+      // Conversion pages
+      { url: `${base}/for-vendors`, lastModified: staticDate, changeFrequency: "weekly", priority: 0.8 },
+      { url: `${base}/for-vendors/api`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.5 },
+      { url: `${base}/pricing`, lastModified: staticDate, changeFrequency: "weekly", priority: 0.75 },
+
+      // Trust / content pages
+      { url: `${base}/about`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.6 },
+      { url: `${base}/how-it-works`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.65 },
+      { url: `${base}/faq`, lastModified: staticDate, changeFrequency: "weekly", priority: 0.6 },
+      { url: `${base}/contact`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.5 },
+      { url: `${base}/success-stories`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.5 },
+      { url: `${base}/press`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.4 },
+      { url: `${base}/careers`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.4 },
+
+      // Blog index
       { url: `${base}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.75 },
+
+      // Legal
+      { url: `${base}/legal/privacy`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.3 },
+      { url: `${base}/legal/terms`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.3 },
+      { url: `${base}/legal/rules`, lastModified: staticDate, changeFrequency: "monthly", priority: 0.3 },
     ];
 
     let blogRoutes: MetadataRoute.Sitemap = [];
@@ -103,7 +121,7 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
         .from("organizations")
         .select("slug, updated_at")
         .eq("status", "approved")
-        .limit(45000); // Increased limit but protected by dedicated chunk
+        .limit(45000);
 
       if (vendors) {
         return vendors.map((v) => ({
