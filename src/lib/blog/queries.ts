@@ -200,4 +200,54 @@ export async function getAdminBlogArticles(): Promise<
   return data ?? [];
 }
 
+export type AdminBlogArticleDetail = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  body: string;
+  status: string;
+  source: string;
+  category_id: string | null;
+  featured_image_url: string | null;
+  featured_image_alt: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  reading_time_minutes: number;
+  published_at: string | null;
+  updated_at: string;
+  tags: string[];
+};
+
+/** Admin-scoped single-article fetch by id, status-agnostic (drafts included). */
+export async function getAdminBlogArticleById(
+  id: string,
+): Promise<AdminBlogArticleDetail | null> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("blog_articles")
+    .select(
+      "id, title, slug, excerpt, body, status, source, category_id, featured_image_url, featured_image_alt, meta_title, meta_description, reading_time_minutes, published_at, updated_at, tags",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return { ...data, tags: data.tags ?? [] };
+}
+
+export async function getBlogCategories(): Promise<
+  { id: string; name: string; slug: string }[]
+> {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("blog_categories")
+    .select("id, name, slug")
+    .order("name", { ascending: true });
+
+  return data ?? [];
+}
+
 export { PAGE_SIZE as BLOG_PAGE_SIZE };

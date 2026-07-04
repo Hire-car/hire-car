@@ -1,15 +1,58 @@
 import Link from "next/link";
 import { format } from "date-fns";
 import { requireAdminRole } from "@/lib/security/auth";
-import { getAdminBlogArticles } from "@/lib/blog/queries";
+import {
+  getAdminBlogArticles,
+  getAdminBlogArticleById,
+  getBlogCategories,
+} from "@/lib/blog/queries";
 import { GenerateBlogButton } from "./generate-blog-button";
 import { BlogSetupChecklist } from "./blog-setup-checklist";
+import { BlogEditForm } from "./blog-edit-form";
 
 export const metadata = { title: "Blog | Admin" };
 
-export default async function AdminBlogPage() {
+interface AdminBlogPageProps {
+  searchParams: Promise<{ edit?: string }>;
+}
+
+export default async function AdminBlogPage({ searchParams }: AdminBlogPageProps) {
   await requireAdminRole(["owner", "admin"]);
+  const { edit } = await searchParams;
   const articles = await getAdminBlogArticles();
+
+  if (edit) {
+    const [article, categories] = await Promise.all([
+      getAdminBlogArticleById(edit),
+      getBlogCategories(),
+    ]);
+
+    if (article) {
+      return (
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <section className="flex flex-col gap-3 border-b border-border pb-6">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              Edit Article
+            </h1>
+            <p className="max-w-2xl text-sm text-muted-foreground">
+              Auto-posting keeps running on its own schedule. Edits made here
+              apply to this article only.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Source: <span className="font-medium capitalize">{article.source.replace("_", " ")}</span>
+              {article.published_at && (
+                <>
+                  {" "}· Published{" "}
+                  {format(new Date(article.published_at), "d MMM yyyy HH:mm")}
+                </>
+              )}
+            </p>
+          </section>
+          <BlogEditForm article={article} categories={categories} cancelHref="/admin/blog" />
+        </div>
+      );
+    }
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -35,7 +78,7 @@ export default async function AdminBlogPage() {
               <th className="text-left px-4 py-3 font-semibold">Status</th>
               <th className="text-left px-4 py-3 font-semibold">Source</th>
               <th className="text-left px-4 py-3 font-semibold">Published</th>
-              <th className="text-left px-4 py-3 font-semibold">Link</th>
+              <th className="text-left px-4 py-3 font-semibold">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -57,17 +100,23 @@ export default async function AdminBlogPage() {
                       : "—"}
                   </td>
                   <td className="px-4 py-3">
-                    {article.status === "published" ? (
+                    <div className="flex items-center gap-3">
                       <Link
-                        href={`/blog/${article.slug}`}
+                        href={`/admin/blog?edit=${article.id}`}
                         className="text-primary hover:underline"
-                        target="_blank"
                       >
-                        View
+                        Edit
                       </Link>
-                    ) : (
-                      "—"
-                    )}
+                      {article.status === "published" ? (
+                        <Link
+                          href={`/blog/${article.slug}`}
+                          className="text-primary hover:underline"
+                          target="_blank"
+                        >
+                          View
+                        </Link>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))
