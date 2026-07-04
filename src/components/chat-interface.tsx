@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage } from "@/app/actions/chat";
-import { Send, Loader2, Lock, Check, CheckCheck, ChevronLeft, Phone, MoreVertical } from "lucide-react";
+import { Send, Loader2, Lock, CheckCheck, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -362,7 +362,7 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
               onKeyDown={handleKeyDown}
               placeholder="Message..."
               rows={1}
-              className="w-full resize-none bg-transparent px-4 py-3 text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none leading-relaxed max-h-[160px] font-medium"
+              className="w-full resize-none bg-transparent px-4 py-3 text-base md:text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none leading-relaxed max-h-[160px] font-medium"
               disabled={isSending}
               style={{ minHeight: '46px' }}
             />

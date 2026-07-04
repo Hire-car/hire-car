@@ -70,12 +70,13 @@ export function buildProductSchema(input: {
   vendorName: string;
   city?: string;
   state?: string;
+  /** Optional review aggregate for star rich snippets. */
+  rating?: { value: number; count: number };
 }) {
-  return {
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: input.name,
-    image: input.imageUrl ?? "",
     description: input.description,
     sku: input.slug,
     offers: {
@@ -90,13 +91,32 @@ export function buildProductSchema(input: {
       },
     },
   };
+
+  // Only emit `image` when we actually have one (an empty string is invalid).
+  if (input.imageUrl) {
+    schema.image = [input.imageUrl];
+  }
+
+  // Only emit `aggregateRating` when at least one review exists — Google flags
+  // rating markup with a zero count as invalid.
+  if (input.rating && input.rating.count > 0) {
+    schema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: input.rating.value,
+      reviewCount: input.rating.count,
+      bestRating: 5,
+      worstRating: 1,
+    };
+  }
+
+  return schema;
 }
 
 export function buildWebSiteSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Hire Car",
+    name: "HireCar Marketplace",
     url: SEO_BASE_URL,
     potentialAction: {
       "@type": "SearchAction",
@@ -106,6 +126,40 @@ export function buildWebSiteSchema() {
       },
       "query-input": "required name=search_term_string",
     },
+  };
+}
+
+/**
+ * Site-wide brand Organization entity for the homepage — powers the Google
+ * knowledge panel and links verified social profiles via `sameAs`.
+ */
+export function buildBrandOrganizationSchema() {
+  const sameAs = [
+    process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL || "https://www.facebook.com/profile.php?id=61590659316054",
+    process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL || "https://www.linkedin.com/company/hirecar-marketplace/",
+    process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL,
+    process.env.NEXT_PUBLIC_SOCIAL_X_URL,
+  ].filter((url): url is string => typeof url === "string" && url.length > 0 && url !== "#");
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "HireCar Marketplace",
+    alternateName: "HireCar",
+    url: SEO_BASE_URL,
+    logo: `${SEO_BASE_URL}/icons/icon-512.png`,
+    image: `${SEO_BASE_URL}/og-image.jpg`,
+    description:
+      "Australia's marketplace for verified car rental operators — compare cars, vans, utes and luxury vehicles from independent local fleets.",
+    areaServed: { "@type": "Country", name: "Australia" },
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: "+61434930437",
+      contactType: "customer support",
+      areaServed: "AU",
+      availableLanguage: ["en"],
+    },
+    sameAs,
   };
 }
 

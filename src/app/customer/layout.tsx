@@ -23,36 +23,38 @@ export default async function CustomerLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pt-[88px]">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <SiteHeader />
-      
-      <div className="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Sidebar */}
+
+      <div className="flex-1 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+          {/* Sidebar — horizontal scrollable tab strip on mobile, vertical rail on desktop */}
           <aside className="md:w-64 shrink-0">
-            <nav className="space-y-1">
+            <nav
+              className="flex md:flex-col gap-1 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-1 md:mx-0 md:px-0 md:pb-0 md:overflow-visible"
+              aria-label="Account navigation"
+            >
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-white hover:text-amber-600 hover:shadow-sm transition-all"
+                    className="flex shrink-0 items-center gap-2 md:gap-3 rounded-xl px-4 py-2.5 md:py-3 text-sm font-medium text-slate-700 whitespace-nowrap bg-white md:bg-transparent border border-slate-200 md:border-0 shadow-sm md:shadow-none hover:bg-white hover:text-amber-600 hover:shadow-sm transition-all"
                   >
-                    <Icon className="h-4.5 w-4.5" />
+                    <Icon className="h-4.5 w-4.5 shrink-0" />
                     {item.name}
                   </Link>
                 );
               })}
-              
-              <div className="mt-8 pt-6 border-t border-slate-200">
-                <form action="/auth/sign-out" method="post">
-                  <button type="submit" className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-all">
-                    <LogOut className="h-4.5 w-4.5" />
-                    Sign Out
-                  </button>
-                </form>
-              </div>
+
+              {/* Sign out — inline pill on mobile, divided block on desktop */}
+              <form action="/auth/sign-out" method="post" className="shrink-0 md:mt-8 md:pt-6 md:border-t md:border-slate-200 md:w-full">
+                <button type="submit" className="flex w-full items-center gap-2 md:gap-3 rounded-xl px-4 py-2.5 md:py-3 text-sm font-medium text-slate-500 whitespace-nowrap border border-slate-200 md:border-0 hover:bg-slate-100 hover:text-slate-900 transition-all">
+                  <LogOut className="h-4.5 w-4.5 shrink-0" />
+                  Sign Out
+                </button>
+              </form>
             </nav>
           </aside>
 

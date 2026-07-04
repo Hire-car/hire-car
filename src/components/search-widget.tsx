@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Search, ChevronDown, MapPin, Calendar, Car } from "lucide-react";
+import { Search, ChevronDown } from "lucide-react";
 import { LocationAutocomplete } from "./LocationAutocomplete";
 
 const categories = [
@@ -43,27 +43,73 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
     if (onSubmit) onSubmit();
   };
 
-  const [isMobileModalOpen, setIsMobileModalOpen] = useState(false);
-
   if (isHero) {
     return (
       <div className={`${className} relative w-full max-w-5xl mx-auto`}>
-        {/* Mobile View: Floating Pill that opens Modal */}
-        <div className="md:hidden w-full px-4 mt-8">
-          <button
-            onClick={() => setIsMobileModalOpen(true)}
-            className="w-full bg-white hover:bg-slate-50 transition-colors rounded-full py-3.5 px-5 flex items-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100"
-          >
-            <Search className="h-5 w-5 text-[#ea580c] shrink-0" />
-            <div className="flex flex-col items-start min-w-0 flex-1">
-              <span className="text-sm font-bold text-slate-900 truncate w-full text-left">
-                {location || "Where to?"}
-              </span>
-              <span className="text-[11px] font-medium text-slate-500 truncate w-full text-left">
-                {pickupDate && returnDate ? `${pickupDate} - ${returnDate}` : "Anywhere • Any week • Add guests"}
-              </span>
+        {/* Mobile View: Inline stacked search card (standard car-rental pattern) */}
+        <div className="md:hidden w-full px-4">
+          <div className="bg-white p-4 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.25)] rounded-2xl flex flex-col gap-3 border border-slate-100">
+            {/* Where */}
+            <div className="w-full bg-slate-50 relative px-4 py-2.5 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors">
+              <label className="block text-[11px] font-bold text-slate-500 mb-0.5 uppercase tracking-wide">
+                Where
+              </label>
+              <LocationAutocomplete
+                onSelect={(res) => {
+                  if (res?.features?.[0]?.properties?.name) {
+                    setLocation(res.features[0].properties.name);
+                  }
+                }}
+                placeholder={location || "City or airport"}
+                hideIcon={true}
+                inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-slate-900 font-semibold placeholder:text-slate-400 outline-none truncate"
+              />
             </div>
-          </button>
+
+            {/* Dates */}
+            <div className="flex flex-row gap-3 w-full">
+              <div className="flex-1 min-w-0 bg-slate-50 relative px-4 py-2.5 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors">
+                <label className="block text-[11px] font-bold text-slate-500 mb-0.5 uppercase tracking-wide">
+                  Pickup
+                </label>
+                <input
+                  type={pickupDate ? "date" : "text"}
+                  placeholder="Add date"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
+                  value={pickupDate}
+                  onChange={(e) => setPickupDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+                />
+              </div>
+              <div className="flex-1 min-w-0 bg-slate-50 relative px-4 py-2.5 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors">
+                <label className="block text-[11px] font-bold text-slate-500 mb-0.5 uppercase tracking-wide">
+                  Return
+                </label>
+                <input
+                  type={returnDate ? "date" : "text"}
+                  placeholder="Add date"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
+                  value={returnDate}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                  min={pickupDate || new Date().toISOString().split("T")[0]}
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            {/* Search button */}
+            <Link
+              href={buildSearchUrl()}
+              onClick={handleSubmit}
+              className="flex items-center justify-center gap-2 bg-gradient-to-br from-[#ea580c] to-[#c2410c] hover:from-[#f97316] hover:to-[#ea580c] text-white px-8 py-3.5 rounded-xl font-bold shadow-md hover:shadow-lg transition-all w-full"
+            >
+              <Search className="h-5 w-5" strokeWidth={2.5} />
+              Search
+            </Link>
+          </div>
         </div>
 
         {/* Desktop View: Premium Seamless Glass Pill */}
@@ -158,24 +204,6 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
             </Link>
           </div>
         </div>
-
-        {/* Mobile Search Modal */}
-        {isMobileModalOpen && (
-          <div className="fixed inset-0 z-[100] flex flex-col bg-slate-50 md:hidden">
-            <div className="flex items-center justify-between p-4 bg-white border-b border-slate-100">
-              <h2 className="text-lg font-bold text-slate-900">Search Vehicles</h2>
-              <button
-                onClick={() => setIsMobileModalOpen(false)}
-                className="p-2 -mr-2 text-slate-500 hover:bg-slate-100 rounded-full"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              <SearchWidget variant="sidebar" onSubmit={() => setIsMobileModalOpen(false)} />
-            </div>
-          </div>
-        )}
       </div>
     );
   }

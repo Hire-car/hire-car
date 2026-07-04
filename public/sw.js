@@ -11,7 +11,9 @@
  * Validates: Requirements 10.1, 10.2, 10.3, 10.4
  */
 
-const VERSION = 'v2';
+// Bump on asset changes to invalidate stale caches (e.g. the old placeholder
+// PWA icons) — the activate handler deletes caches that don't match.
+const VERSION = 'v3';
 const STATIC_CACHE = `hirecar-static-${VERSION}`;
 const PAGE_CACHE = `hirecar-pages-${VERSION}`;
 const IMAGE_CACHE = `hirecar-images-${VERSION}`;

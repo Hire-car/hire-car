@@ -9,6 +9,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { BrandLogo } from "@/components/brand-logo";
 import { useHeaderHeight } from "@/hooks/use-header-height";
 import { MobileDrawerNav, DrawerSection } from "./mobile-drawer-nav";
+import { PwaInstallMenuItem } from "@/components/pwa/pwa-install-menu-item";
 import { useMobileState } from "@/components/mobile-state-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from "@/components/icons";
@@ -363,6 +364,9 @@ export function SiteHeader() {
               )
             )}
           </div>
+
+          {/* Install app (PWA) — adapts to platform / installed state */}
+          <PwaInstallMenuItem />
         </div>
       </MobileDrawerNav>
     </>

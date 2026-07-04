@@ -9,6 +9,8 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { MobileStateProvider } from "@/components/mobile-state-provider";
 import { MobileAnimationProvider } from "@/components/mobile-animation-provider";
 import { ScrollToTop } from "@/components/scroll-to-top";
+import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
+import { appleStartupImages } from "@/lib/pwa-splash";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,14 +44,27 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   manifest: "/manifest.json",
+  applicationName: "HireCar",
   icons: {
-    icon: "/favicon.ico",
-    apple: "/LOGO.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icons/favicon-16.png", type: "image/png", sizes: "16x16" },
+      { url: "/icons/favicon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icons/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "HireCar",
+    startupImage: appleStartupImages,
+  },
+  // Legacy iOS (< 16.4) reads the apple-prefixed flag for standalone launch;
+  // Next emits the modern `mobile-web-app-capable`, so add the legacy one too.
+  other: {
+    "apple-mobile-web-app-capable": "yes",
   },
   formatDetection: {
     telephone: false,
@@ -102,7 +117,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="en-AU"
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -130,6 +145,7 @@ export default function RootLayout({
             {children}
             <WhatsAppFloat phone="61434930437" />
             <ScrollToTop />
+            <PwaInstallBanner />
           </MobileAnimationProvider>
         </MobileStateProvider>
         <Toaster richColors position="top-right" />

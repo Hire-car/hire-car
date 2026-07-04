@@ -187,6 +187,9 @@ export default async function VehicleDetailPage({
       vendorName: org?.name ?? "Hire Car Vendor",
       city: branch?.city,
       state: branch?.state,
+      rating: averageRating
+        ? { value: Number(averageRating), count: safeReviews.length }
+        : undefined,
     }),
     buildFaqSchema([
       {

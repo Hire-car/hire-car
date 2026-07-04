@@ -13,7 +13,7 @@ import { searchVehicles } from "@/lib/search/typesense";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MotionScroll } from "@/components/motion-scroll";
 import { Section } from "@/components/ui/section";
-import { buildWebSiteSchema, serializeSchemas } from "@/lib/seo";
+import { buildWebSiteSchema, buildBrandOrganizationSchema, serializeSchemas } from "@/lib/seo";
 import {
   ArrowRight,
   ChevronDown,
@@ -159,7 +159,7 @@ export default async function Home() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeSchemas([buildWebSiteSchema()]) }}
+        dangerouslySetInnerHTML={{ __html: serializeSchemas([buildWebSiteSchema(), buildBrandOrganizationSchema()]) }}
       />
       <SiteHeader />
 
