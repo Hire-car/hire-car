@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 const INSTALLED_KEY = "hirecar_pwa_installed";
+const INSTALLABLE_KEY = "hirecar_pwa_installable";
 const VISIT_COUNT_KEY = "hirecar_visit_count";
 const DISMISSED_KEY = "hirecar_a2hs_dismissed";
 const MIN_VISITS = 2;
@@ -10,15 +11,19 @@ const MIN_VISITS = 2;
 /**
  * Install states, in priority order:
  * - `standalone`   → running inside the installed app; hide all install UI.
- * - `installed`    → installed before but currently viewed in a browser tab.
- * - `installable`  → Android/Chromium `beforeinstallprompt` is available.
- * - `ios`          → iOS Safari (no install API) — show manual instructions.
- * - `unavailable`  → desktop/unsupported, or prompt not (yet) available.
+ * - `installable`  → live `beforeinstallprompt` available → one-tap native install.
+ * - `installed`    → installed before, currently in a browser tab.
+ * - `manual`       → the browser supports install but has no live prompt right
+ *                    now (prompt already dismissed, or Chrome is throttling it)
+ *                    → offer manual instructions instead of a dead button.
+ * - `ios`          → iOS Safari (no install API) — manual instructions.
+ * - `unavailable`  → desktop/unsupported.
  */
 export type PwaInstallMode =
   | "standalone"
-  | "installed"
   | "installable"
+  | "installed"
+  | "manual"
   | "ios"
   | "unavailable";
 
@@ -54,6 +59,11 @@ function safeSet(key: string, value: string) {
     localStorage.setItem(key, value);
   } catch {}
 }
+function safeRemove(key: string) {
+  try {
+    localStorage.removeItem(key);
+  } catch {}
+}
 
 function detectStandalone(): boolean {
   const mm = (q: string) => window.matchMedia(q).matches;
@@ -76,8 +86,14 @@ function detectIos(): boolean {
 
 function computeMode(): PwaInstallMode {
   if (detectStandalone()) return "standalone";
-  if (safeGet(INSTALLED_KEY) === "1") return "installed";
+  // A live prompt is ground truth that the app is installable and NOT installed —
+  // it must win over the persisted `installed` flag (there is no web "uninstall"
+  // event, so that flag can be stale after the user removes the app).
   if (deferredPrompt) return "installable";
+  if (safeGet(INSTALLED_KEY) === "1") return "installed";
+  // Seen installable before but no live prompt now (dismissed / throttled) →
+  // keep offering install via manual instructions rather than removing it.
+  if (safeGet(INSTALLABLE_KEY) === "1") return "manual";
   if (detectIos()) return "ios";
   return "unavailable";
 }
@@ -110,11 +126,16 @@ function ensureInitialized() {
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e as BeforeInstallPromptEvent;
+    // The browser says it's installable → remember that, and clear any stale
+    // "installed" flag left over from a previous install that was uninstalled.
+    safeSet(INSTALLABLE_KEY, "1");
+    safeRemove(INSTALLED_KEY);
     commit({ mode: computeMode() });
   });
   window.addEventListener("appinstalled", () => {
     deferredPrompt = null;
     safeSet(INSTALLED_KEY, "1");
+    safeRemove(INSTALLABLE_KEY);
     commit({ mode: computeMode() });
   });
   const mql = window.matchMedia("(display-mode: standalone)");
@@ -127,16 +148,23 @@ function subscribe(cb: () => void): () => void {
   return () => listeners.delete(cb);
 }
 
-/** Fire the native Android/Chromium install prompt. */
+/**
+ * Fire the native install prompt. Returns "unavailable" when there is no live
+ * prompt (the caller should then show manual instructions).
+ */
 export async function promptInstall(): Promise<"accepted" | "dismissed" | "unavailable"> {
   if (!deferredPrompt) return "unavailable";
   await deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
+  // The event is single-use; once prompted it can't be reused.
   deferredPrompt = null;
   if (outcome === "accepted") {
     safeSet(INSTALLED_KEY, "1");
-    commit({ mode: computeMode() });
+    safeRemove(INSTALLABLE_KEY);
   }
+  // Recompute either way: on "dismissed" this drops to `manual` (INSTALLABLE_KEY
+  // is still set) so the install option stays available instead of dying.
+  commit({ mode: computeMode() });
   return outcome;
 }
 

@@ -7,14 +7,15 @@ import { IosInstallSheet } from "./ios-install-sheet";
 
 /**
  * Install entry for the mobile navigation drawer. Adapts to the current state:
- * - installable → one-tap "Install app"
- * - ios         → "Add to Home Screen" (opens instructions)
+ * - installable → one-tap "Install app" (native prompt)
+ * - manual      → "Install app" (native prompt unavailable → instructions)
+ * - ios         → "Add to Home Screen" (instructions)
  * - installed   → subtle "App installed" confirmation
  * - standalone / unavailable → renders nothing
  */
 export function PwaInstallMenuItem() {
   const { mode } = usePwaInstall();
-  const [iosSheetOpen, setIosSheetOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   if (mode === "standalone" || mode === "unavailable") return null;
 
@@ -32,11 +33,22 @@ export function PwaInstallMenuItem() {
 
   const isIos = mode === "ios";
 
+  const handleClick = async () => {
+    if (isIos) {
+      setSheetOpen(true);
+      return;
+    }
+    // installable / manual: try the native prompt; if it isn't available
+    // (already used or throttled), fall back to manual instructions.
+    const outcome = await promptInstall();
+    if (outcome === "unavailable") setSheetOpen(true);
+  };
+
   return (
     <>
       <button
         type="button"
-        onClick={() => (isIos ? setIosSheetOpen(true) : promptInstall())}
+        onClick={handleClick}
         className="mt-4 flex w-full items-center gap-3 rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-white px-4 py-3 text-left shadow-sm transition-all hover:border-orange-300 hover:shadow-md min-h-[56px] touch-target"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -56,7 +68,11 @@ export function PwaInstallMenuItem() {
         )}
       </button>
 
-      <IosInstallSheet open={iosSheetOpen} onClose={() => setIosSheetOpen(false)} />
+      <IosInstallSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        variant={isIos ? "ios" : "generic"}
+      />
     </>
   );
 }

@@ -48,7 +48,13 @@ export function PwaInstallBanner() {
       return;
     }
     const outcome = await promptInstall();
-    if (outcome === "accepted" || outcome === "dismissed") setShown(false);
+    // No live prompt (already used / throttled) → show manual instructions
+    // instead of doing nothing; otherwise close the banner.
+    if (outcome === "unavailable") {
+      setIosSheetOpen(true);
+    } else {
+      setShown(false);
+    }
   };
 
   // Lift above the vehicle-detail sticky CTA when it's visible.
@@ -107,7 +113,11 @@ export function PwaInstallBanner() {
         </div>
       </div>
 
-      <IosInstallSheet open={iosSheetOpen} onClose={() => setIosSheetOpen(false)} />
+      <IosInstallSheet
+        open={iosSheetOpen}
+        onClose={() => setIosSheetOpen(false)}
+        variant={mode === "ios" ? "ios" : "generic"}
+      />
     </>
   );
 }
