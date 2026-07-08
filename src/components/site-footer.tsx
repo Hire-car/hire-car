@@ -58,7 +58,7 @@ const footerLinkClass =
 const socialLinks = [
   { icon: XIcon, href: process.env.NEXT_PUBLIC_SOCIAL_X_URL, label: "Twitter / X" },
   { icon: FacebookIcon, href: process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL || "https://www.facebook.com/profile.php?id=61590659316054", label: "Facebook" },
-  { icon: InstagramIcon, href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL, label: "Instagram" },
+  { icon: InstagramIcon, href: process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL || "https://www.instagram.com/hire.carmarketplace", label: "Instagram" },
   { icon: LinkedinIcon, href: process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL || "https://www.linkedin.com/company/hirecar-marketplace/", label: "LinkedIn" },
 ].filter((s): s is { icon: typeof XIcon; href: string; label: string } =>
   typeof s.href === "string" && s.href.trim().length > 0,

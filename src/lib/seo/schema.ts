@@ -137,7 +137,7 @@ export function buildBrandOrganizationSchema() {
   const sameAs = [
     process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL || "https://www.facebook.com/profile.php?id=61590659316054",
     process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL || "https://www.linkedin.com/company/hirecar-marketplace/",
-    process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL,
+    process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL || "https://www.instagram.com/hire.carmarketplace",
     process.env.NEXT_PUBLIC_SOCIAL_X_URL,
   ].filter((url): url is string => typeof url === "string" && url.length > 0 && url !== "#");
 
