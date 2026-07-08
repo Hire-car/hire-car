@@ -134,12 +134,18 @@ export function buildWebSiteSchema() {
  * knowledge panel and links verified social profiles via `sameAs`.
  */
 export function buildBrandOrganizationSchema() {
+  // Treat empty/whitespace/"#" env values as unset so a placeholder can't
+  // shadow (or drop) the real brand profile URL.
+  const socialUrl = (envValue: string | undefined, fallback?: string): string | undefined => {
+    const trimmed = envValue?.trim();
+    return trimmed && trimmed !== "#" ? trimmed : fallback;
+  };
   const sameAs = [
-    process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL || "https://www.facebook.com/profile.php?id=61590659316054",
-    process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL || "https://www.linkedin.com/company/hirecar-marketplace/",
-    process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL || "https://www.instagram.com/hire.carmarketplace",
-    process.env.NEXT_PUBLIC_SOCIAL_X_URL,
-  ].filter((url): url is string => typeof url === "string" && url.length > 0 && url !== "#");
+    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL, "https://www.facebook.com/profile.php?id=61590659316054"),
+    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL, "https://www.linkedin.com/company/hirecar-marketplace/"),
+    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL, "https://www.instagram.com/hire.carmarketplace"),
+    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_X_URL),
+  ].filter((url): url is string => typeof url === "string" && url.length > 0);
 
   return {
     "@context": "https://schema.org",
