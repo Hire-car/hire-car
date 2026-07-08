@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { WEEKDAYS } from "@/lib/whatsapp/business-hours";
+import { VEHICLE_FEATURES } from "@/lib/vehicle-badges";
 
 /**
  * Validates an Australian Business Number (ABN) using the ATO checksum algorithm.
@@ -68,6 +69,13 @@ export const vehicleSchema = z.object({
   monthlyRateAud: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().int().min(0).max(30000).nullable().optional()),
   weekendRateAud: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().int().min(0).max(5000).nullable().optional()),
   notes: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : String(val)), z.string().trim().max(1000).nullable().optional()),
+  features: z.preprocess(
+    (val) => (Array.isArray(val) ? val : val === undefined || val === null ? [] : [val]),
+    z.array(z.enum(VEHICLE_FEATURES)).max(20).transform((arr) => Array.from(new Set(arr))),
+  ).optional(),
+  freeDelivery: z.boolean().default(false),
+  freeCancellation: z.boolean().default(false),
+  noHiddenFees: z.boolean().default(false),
 });
 
 export const branchSchema = z.object({
@@ -78,6 +86,23 @@ export const branchSchema = z.object({
   address: z.string().trim().min(6).max(240),
   phone: z.string().trim().min(8).max(30).optional().or(z.literal("")),
   whatsapp: z.string().trim().min(8).max(30).optional().or(z.literal("")),
+});
+
+/**
+ * Admin "spin-off" form: transfer an existing branch out of its current
+ * (holding) organization and into a brand-new independent vendor owned by
+ * `email`. `businessName`/`abn` describe the new legal entity; `phone`/
+ * `address` fall back to the branch's own details when omitted.
+ */
+export const transferBranchSchema = z.object({
+  branchId: z.string().uuid(),
+  email: z.string().trim().toLowerCase().email().max(160),
+  businessName: z.string().trim().min(2).max(160),
+  abn: abnSchema,
+  phone: z.string().trim().min(8).max(30).optional().or(z.literal("")),
+  address: z.string().trim().min(6).max(240).optional().or(z.literal("")),
+  website: z.string().url().optional().or(z.literal("")),
+  approveImmediately: z.boolean().optional().default(false),
 });
 
 export const leadSchema = z

@@ -74,6 +74,75 @@ function toComponentVehicle(arb: ArbVehicle): Vehicle {
   };
 }
 
+const baseVehicle: Vehicle = {
+  id: "11111111-1111-1111-1111-111111111111",
+  slug: "test-car",
+  title: "2023 Test Car",
+  make: "Test",
+  model: "Car",
+  year: 2023,
+  city: "Sydney",
+  state: "NSW",
+  pricePerDayAud: 45,
+  seats: 5,
+  fuel: "Petrol",
+  transmission: "Automatic",
+  category: "Sedan",
+  imageUrl: "/vehicle-placeholder.jpg",
+  vendorName: "Acme Rentals",
+  vendorSlug: "acme",
+  branchName: "Sydney CBD",
+  verified: true,
+};
+
+describe("VehicleCard enrichment field gating", () => {
+  it("hides rating, weekly/monthly, logo, Super Host and chips when their data is absent", () => {
+    const { container, unmount } = render(<VehicleCard vehicle={{ ...baseVehicle, dailyDistanceLimitKm: 200 }} />);
+    const text = container.textContent || "";
+    expect(text).not.toContain("Reviews");
+    expect(text).not.toContain("Weekly from");
+    expect(text).not.toContain("Super Host");
+    expect(text).not.toContain("Free cancellation");
+    expect(text).not.toContain("No hidden fees");
+    expect(text).not.toContain("Free delivery");
+    expect(text).not.toContain("Unlimited km"); // KM limit set => not unlimited
+    expect(container.querySelector("img[alt='Acme Rentals']")).toBeNull(); // no logo
+    unmount();
+  });
+
+  it("shows rating, weekly/monthly, logo, Super Host, delivery and chips when present", () => {
+    const vehicle: Vehicle = {
+      ...baseVehicle,
+      avgRating: 4.9,
+      reviewCount: 38,
+      weeklyRateAud: 210,
+      monthlyRateAud: 800,
+      vendorLogoUrl: "https://example.supabase.co/logo.png",
+      superHost: true,
+      features: ["Air Conditioning"],
+      freeDelivery: true,
+      freeCancellation: true,
+      noHiddenFees: true,
+      dailyDistanceLimitKm: null, // unlimited
+    };
+    const { container, unmount } = render(<VehicleCard vehicle={vehicle} variant="featured" />);
+    const text = container.textContent || "";
+    expect(text).toContain("(38 Reviews)");
+    expect(text).toContain("Weekly from");
+    expect(text).toContain("210");
+    expect(text).toContain("Monthly from");
+    expect(text).toContain("Super Host");
+    expect(text).toContain("Air Conditioning");
+    expect(text).toContain("Free delivery available");
+    expect(text).toContain("Free cancellation");
+    expect(text).toContain("No hidden fees");
+    expect(text).toContain("Unlimited km");
+    expect(text).toContain("Featured");
+    expect(container.querySelector("img[alt='Acme Rentals']")).not.toBeNull();
+    unmount();
+  });
+});
+
 describe("Property 3: VehicleCard Field Completeness", () => {
   it("rendered VehicleCard contains vehicle name, category, price, vendor name, location city, and CTA link for any valid Vehicle", () => {
     fc.assert(

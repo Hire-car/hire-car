@@ -22,12 +22,19 @@ interface Vehicle {
   transmission: string;
   category: string;
   price_per_day_aud: number;
+  weekly_rate_aud: number | null;
+  monthly_rate_aud: number | null;
+  free_delivery: boolean;
+  free_cancellation: boolean;
+  no_hidden_fees: boolean;
   status: string;
   organization_id: string;
   organizations: {
     name: string;
     slug: string;
     status: string;
+    logo_url: string | null;
+    verified_at: string | null;
   };
   branches: {
     name: string;
@@ -35,6 +42,7 @@ interface Vehicle {
     state: string;
     status: string;
   };
+  vehicle_features: { feature: string }[] | null;
 }
 
 async function processTypesenseOperation(job: SearchIndexJob, vehicle: Vehicle | null) {
@@ -98,13 +106,21 @@ async function processTypesenseOperation(job: SearchIndexJob, vehicle: Vehicle |
     transmission: vehicle.transmission,
     category: vehicle.category,
     price_per_day_aud: vehicle.price_per_day_aud,
+    weekly_rate_aud: vehicle.weekly_rate_aud,
+    monthly_rate_aud: vehicle.monthly_rate_aud,
+    free_delivery: vehicle.free_delivery,
+    free_cancellation: vehicle.free_cancellation,
+    no_hidden_fees: vehicle.no_hidden_fees,
     city: branch.city,
     state: branch.state,
     vendor_name: org.name,
     vendor_slug: org.slug,
+    vendor_logo_url: org.logo_url,
+    verified: org.verified_at != null,
     branch_name: branch.name,
     status: vehicle.status,
     organization_id: vehicle.organization_id,
+    features: (vehicle.vehicle_features ?? []).map((f) => f.feature),
   };
 
   const response = await fetch(`${url}?action=upsert`, {
@@ -199,9 +215,11 @@ serve(async (req) => {
             .select(
               `
               id, slug, title, make, model, year, seats, fuel, transmission, category,
-              price_per_day_aud, status, organization_id,
-              organizations(name, slug, status),
-              branches(name, city, state, status)
+              price_per_day_aud, weekly_rate_aud, monthly_rate_aud,
+              free_delivery, free_cancellation, no_hidden_fees, status, organization_id,
+              organizations(name, slug, status, logo_url, verified_at),
+              branches(name, city, state, status),
+              vehicle_features(feature)
             `,
             )
             .eq("id", job.vehicle_id)

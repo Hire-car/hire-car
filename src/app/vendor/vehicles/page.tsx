@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext, getVehicleLimitInfo } from "@/lib/data/vendor";
-import { getOrganizationVehicles, deleteVehicle } from "./actions";
+import { getOrganizationVehicles, deleteVehicle, getVehicleFeatures } from "./actions";
 import { getVehicleImages } from "./image-actions";
 import VehicleForm from "./vehicle-form";
 import { DeleteVehicleButton } from "./delete-button";
@@ -50,11 +50,13 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
   const canUseAi = await organizationHasFeature(selectedOrgId, "aiSeoContent");
   const { vehicles, totalCount, pageSize } = await getOrganizationVehicles(selectedOrgId, page);
 
-  let editVehicle: (typeof vehicles)[number] | null = null;
+  let editVehicle: ((typeof vehicles)[number] & { features?: string[] }) | null = null;
   let editImages: Awaited<ReturnType<typeof getVehicleImages>> = [];
   if (params.edit) {
-    editVehicle = vehicles.find((v) => v.id === params.edit) ?? null;
-    if (editVehicle) {
+    const found = vehicles.find((v) => v.id === params.edit) ?? null;
+    if (found) {
+      const features = await getVehicleFeatures(params.edit, selectedOrgId);
+      editVehicle = { ...found, features };
       editImages = await getVehicleImages(params.edit, selectedOrgId);
     }
   }

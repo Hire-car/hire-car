@@ -8,6 +8,7 @@ import { Sparkles, UploadCloud, X, AlertCircle, Loader2 } from "lucide-react";
 import { createVehicle, updateVehicle } from "./actions";
 import { getVehicleAutofill } from "./ai-actions";
 import { uploadTempVehicleImage, deleteTempVehicleImage, deleteVehicleImage } from "./image-actions";
+import { VEHICLE_FEATURES } from "@/lib/vehicle-badges";
 
 interface VehicleFormProps {
   organizationId: string;
@@ -40,6 +41,10 @@ interface VehicleFormProps {
     monthly_rate_aud?: number | null;
     weekend_rate_aud?: number | null;
     notes?: string | null;
+    features?: string[];
+    free_delivery?: boolean;
+    free_cancellation?: boolean;
+    no_hidden_fees?: boolean;
     branch_id: string;
     status: string;
   } | null;
@@ -452,6 +457,45 @@ export default function VehicleForm({
                 <input name="hourlyRateAud" type="number" defaultValue={editVehicle?.hourly_rate_aud || ""} min={0} placeholder="Optional" className="w-full rounded-lg border-slate-200 bg-white pl-7 pr-3 py-2.5 font-normal text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-brand-500 shadow-sm transition-all" />
               </div>
             </label>
+          </div>
+        </section>
+
+        {/* Section 3b: Features & Inclusions */}
+        <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100">
+            <h2 className="text-base font-semibold text-slate-900">Features & Inclusions</h2>
+            <p className="text-xs text-slate-500 mt-0.5">Shown on your listing card to help renters choose.</p>
+          </div>
+          <div className="p-6 space-y-6">
+            <fieldset className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {VEHICLE_FEATURES.map((feature) => (
+                <label key={feature} className="flex items-center gap-2.5 text-sm font-medium text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="features"
+                    value={feature}
+                    defaultChecked={editVehicle?.features?.includes(feature) ?? false}
+                    className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
+                  />
+                  {feature}
+                </label>
+              ))}
+            </fieldset>
+
+            <div className="grid gap-3 sm:grid-cols-3 border-t border-slate-100 pt-6">
+              <label className="flex items-center gap-2.5 text-sm font-medium text-slate-700 cursor-pointer">
+                <input type="checkbox" name="freeDelivery" defaultChecked={editVehicle?.free_delivery || false} className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer" />
+                Free delivery available
+              </label>
+              <label className="flex items-center gap-2.5 text-sm font-medium text-slate-700 cursor-pointer">
+                <input type="checkbox" name="freeCancellation" defaultChecked={editVehicle?.free_cancellation || false} className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer" />
+                Free cancellation
+              </label>
+              <label className="flex items-center gap-2.5 text-sm font-medium text-slate-700 cursor-pointer">
+                <input type="checkbox" name="noHiddenFees" defaultChecked={editVehicle?.no_hidden_fees || false} className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer" />
+                No hidden fees
+              </label>
+            </div>
           </div>
         </section>
 

@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { Vehicle } from "@/lib/types";
 import { resolveVehicleImage } from "@/lib/image-utils";
 import type { VehicleImageRecord } from "@/lib/image-utils";
+import { computeSuperHost } from "@/lib/vehicle-badges";
 
 const VEHICLE_COLLECTION_NAME = "vehicles";
 
@@ -74,6 +75,15 @@ export async function setupVehicleCollection() {
       { name: "status", type: "string" as const, facet: true },
       { name: "organization_id", type: "string" as const, facet: false },
       { name: "avg_rating", type: "float" as const, facet: false, optional: true },
+      { name: "review_count", type: "int32" as const, facet: false, optional: true },
+      { name: "weekly_rate_aud", type: "int32" as const, facet: false, optional: true },
+      { name: "monthly_rate_aud", type: "int32" as const, facet: false, optional: true },
+      { name: "features", type: "string[]" as const, facet: true, optional: true },
+      { name: "free_delivery", type: "bool" as const, facet: true, optional: true },
+      { name: "free_cancellation", type: "bool" as const, facet: true, optional: true },
+      { name: "no_hidden_fees", type: "bool" as const, facet: true, optional: true },
+      { name: "vendor_logo_url", type: "string" as const, facet: false, optional: true },
+      { name: "verified", type: "bool" as const, facet: true, optional: true },
     ],
     default_sorting_field: "price_per_day_aud",
   };
@@ -289,13 +299,19 @@ async function fallbackDatabaseSearch(
       transmission,
       category,
       price_per_day_aud,
+      weekly_rate_aud,
+      monthly_rate_aud,
       daily_distance_limit_km,
       extra_distance_fee_aud,
       instant_book,
+      free_delivery,
+      free_cancellation,
+      no_hidden_fees,
       status,
-      organizations!inner(id, name, slug, status),
+      organizations!inner(id, name, slug, status, logo_url, verified_at),
       branches!inner(id, name, city, state, status),
-      vehicle_images(storage_path, approved, sort_order)
+      vehicle_images(storage_path, approved, sort_order),
+      vehicle_features(feature)
     `,
       { count: "exact" },
     )
@@ -363,8 +379,10 @@ async function fallbackDatabaseSearch(
     return { vehicles: [], total: 0, page };
   }
 
-  let ratingMap: Record<string, number> = {};
-  if (ratingSort && data && data.length > 0) {
+  // Aggregate approved-review rating + count per vehicle for the returned page.
+  // Used both for display (avgRating/reviewCount on the card) and rating sort.
+  const ratingInfo: Record<string, { avg: number; count: number }> = {};
+  if (data && data.length > 0) {
     const ids = data.map((v) => v.id);
     const { data: reviews } = await supabase
       .from("reviews")
@@ -378,20 +396,29 @@ async function fallbackDatabaseSearch(
       sums[r.vehicle_id].total += r.rating;
       sums[r.vehicle_id].count += 1;
     }
-    ratingMap = Object.fromEntries(
-      Object.entries(sums).map(([id, s]) => [id, s.total / s.count]),
-    );
+    for (const [id, s] of Object.entries(sums)) {
+      ratingInfo[id] = { avg: s.total / s.count, count: s.count };
+    }
   }
+  const ratingMap: Record<string, number> = Object.fromEntries(
+    Object.entries(ratingInfo).map(([id, s]) => [id, s.avg]),
+  );
 
   // Transform to Vehicle type
   let vehicles: Vehicle[] =
     data?.map((v) => {
-      const org = v.organizations as unknown as { name: string; slug: string };
+      const org = v.organizations as unknown as { name: string; slug: string; logo_url: string | null; verified_at: string | null };
       const branch = v.branches as unknown as { name: string; city: string; state: string };
-      
+
       const images = (v.vehicle_images as unknown as VehicleImageRecord[]) ?? [];
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
       const imageUrl = resolveVehicleImage(supabaseUrl, images, v.category);
+
+      const features = ((v.vehicle_features as unknown as { feature: string }[]) ?? []).map((f) => f.feature);
+      const verified = org.verified_at != null;
+      const rating = ratingInfo[v.id];
+      const avgRating = rating?.avg ?? null;
+      const reviewCount = rating?.count ?? 0;
 
       return {
         id: v.id,
@@ -405,6 +432,8 @@ async function fallbackDatabaseSearch(
         transmission: v.transmission,
         category: v.category,
         pricePerDayAud: v.price_per_day_aud,
+        weeklyRateAud: v.weekly_rate_aud,
+        monthlyRateAud: v.monthly_rate_aud,
         dailyDistanceLimitKm: v.daily_distance_limit_km,
         extraDistanceFeeAud: v.extra_distance_fee_aud,
         instantBook: v.instant_book,
@@ -414,7 +443,15 @@ async function fallbackDatabaseSearch(
         vendorName: org.name,
         vendorSlug: org.slug,
         branchName: branch.name,
-        verified: true,
+        verified,
+        vendorLogoUrl: org.logo_url,
+        avgRating,
+        reviewCount,
+        features,
+        freeDelivery: v.free_delivery,
+        freeCancellation: v.free_cancellation,
+        noHiddenFees: v.no_hidden_fees,
+        superHost: computeSuperHost({ verified, avgRating, reviewCount }),
       };
     }) ?? [];
 
@@ -431,16 +468,16 @@ async function fallbackDatabaseSearch(
   };
 }
 
-async function computeVehicleAvgRating(vehicleId: string): Promise<number> {
+async function computeVehicleRating(vehicleId: string): Promise<{ avg: number; count: number }> {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("reviews")
     .select("rating")
     .eq("vehicle_id", vehicleId)
     .eq("status", "approved");
-  if (!data?.length) return 0;
+  if (!data?.length) return { avg: 0, count: 0 };
   const sum = data.reduce((acc, r) => acc + r.rating, 0);
-  return sum / data.length;
+  return { avg: sum / data.length, count: data.length };
 }
 
 /**
@@ -485,9 +522,11 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
           .select(
             `
             id, slug, title, make, model, year, seats, fuel, transmission, category,
-            price_per_day_aud, daily_distance_limit_km, extra_distance_fee_aud, instant_book, status, organization_id,
-            organizations(name, slug, status),
-            branches(name, city, state, status)
+            price_per_day_aud, weekly_rate_aud, monthly_rate_aud, daily_distance_limit_km, extra_distance_fee_aud,
+            instant_book, free_delivery, free_cancellation, no_hidden_fees, status, organization_id,
+            organizations(name, slug, status, logo_url, verified_at),
+            branches(name, city, state, status),
+            vehicle_features(feature)
           `,
           )
           .eq("id", job.vehicle_id)
@@ -496,11 +535,12 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
 
         if (vehicle) {
           // Only index approved vehicles
-          const org = vehicle.organizations as unknown as { name: string; slug: string; status: string };
+          const org = vehicle.organizations as unknown as { name: string; slug: string; status: string; logo_url: string | null; verified_at: string | null };
           const branch = vehicle.branches as unknown as { name: string; city: string; state: string; status: string };
 
           if (org?.status === "approved" && branch?.status === "approved") {
-            const avgRating = await computeVehicleAvgRating(vehicle.id);
+            const { avg: avgRating, count: reviewCount } = await computeVehicleRating(vehicle.id);
+            const features = ((vehicle.vehicle_features as unknown as { feature: string }[]) ?? []).map((f) => f.feature);
             const document = {
               id: vehicle.id,
               slug: vehicle.slug,
@@ -513,17 +553,26 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
               transmission: vehicle.transmission,
               category: vehicle.category,
               price_per_day_aud: vehicle.price_per_day_aud,
+              weekly_rate_aud: vehicle.weekly_rate_aud,
+              monthly_rate_aud: vehicle.monthly_rate_aud,
               daily_distance_limit_km: vehicle.daily_distance_limit_km,
               extra_distance_fee_aud: vehicle.extra_distance_fee_aud,
               instant_book: vehicle.instant_book,
+              free_delivery: vehicle.free_delivery,
+              free_cancellation: vehicle.free_cancellation,
+              no_hidden_fees: vehicle.no_hidden_fees,
               city: branch.city,
               state: branch.state,
               vendor_name: org.name,
               vendor_slug: org.slug,
+              vendor_logo_url: org.logo_url,
+              verified: org.verified_at != null,
               branch_name: branch.name,
               status: vehicle.status,
               organization_id: vehicle.organization_id,
               avg_rating: avgRating,
+              review_count: reviewCount,
+              features,
             };
 
             await upsertVehicleDocument(document);

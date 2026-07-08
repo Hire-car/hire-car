@@ -62,6 +62,10 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       monthlyRateAud: formData.get("monthlyRateAud") || null,
       weekendRateAud: formData.get("weekendRateAud") || null,
       notes: formData.get("notes") || null,
+      features: formData.getAll("features"),
+      freeDelivery: formData.get("freeDelivery") === "true" || formData.get("freeDelivery") === "on",
+      freeCancellation: formData.get("freeCancellation") === "true" || formData.get("freeCancellation") === "on",
+      noHiddenFees: formData.get("noHiddenFees") === "true" || formData.get("noHiddenFees") === "on",
     });
 
     if (!parseResult.success) {
@@ -138,6 +142,9 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
         monthly_rate_aud: data.monthlyRateAud,
         weekend_rate_aud: data.weekendRateAud,
         notes: data.notes,
+        free_delivery: data.freeDelivery,
+        free_cancellation: data.freeCancellation,
+        no_hidden_fees: data.noHiddenFees,
         status: vehicleStatus,
       })
       .select("id")
@@ -162,6 +169,13 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
         reason: `AI Moderation Auto-Suspension: ${aiReason}`,
         status: "open",
       }).then(({ error: e }) => { if (e) console.warn("fraud_flags insert failed:", e.message); });
+    }
+
+    // Persist selected features (vehicle_features is a (vehicle_id, feature) join table)
+    if (data.features && data.features.length > 0) {
+      const featureRows = data.features.map((feature) => ({ vehicle_id: vehicle.id, feature }));
+      await supabase.from("vehicle_features").insert(featureRows)
+        .then(({ error: e }) => { if (e) console.warn("vehicle_features insert failed:", e.message); });
     }
 
     // Create search index job (fire and forget - don't fail on this)
@@ -248,6 +262,12 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
     monthlyRateAud: formData.get("monthlyRateAud") || undefined,
     weekendRateAud: formData.get("weekendRateAud") || undefined,
     notes: formData.get("notes") || undefined,
+    // The vehicle form always renders these controls, so an unchecked box
+    // (absent from FormData) correctly means "off"/empty, not "unchanged".
+    features: formData.getAll("features"),
+    freeDelivery: formData.get("freeDelivery") === "true" || formData.get("freeDelivery") === "on",
+    freeCancellation: formData.get("freeCancellation") === "true" || formData.get("freeCancellation") === "on",
+    noHiddenFees: formData.get("noHiddenFees") === "true" || formData.get("noHiddenFees") === "on",
   });
 
   if (!parseResult.success) {
@@ -293,6 +313,9 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
   if (data.monthlyRateAud !== undefined) updateData.monthly_rate_aud = data.monthlyRateAud;
   if (data.weekendRateAud !== undefined) updateData.weekend_rate_aud = data.weekendRateAud;
   if (data.notes !== undefined) updateData.notes = data.notes;
+  if (data.freeDelivery !== undefined) updateData.free_delivery = data.freeDelivery;
+  if (data.freeCancellation !== undefined) updateData.free_cancellation = data.freeCancellation;
+  if (data.noHiddenFees !== undefined) updateData.no_hidden_fees = data.noHiddenFees;
   if (data.branchId) {
     // Verify new branch belongs to organization
     const { data: branch } = await supabase
@@ -385,6 +408,17 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
         reason: `Vehicle reverted to pending after material update by pending vendor. Fields changed: ${Object.keys(updateData).filter(k => materialFields.includes(k)).join(", ")}`,
         status: "open",
       });
+    }
+  }
+
+  // Replace the vehicle's feature set (the form always submits the full set, so
+  // an empty array correctly clears all features).
+  if (data.features !== undefined) {
+    await supabase.from("vehicle_features").delete().eq("vehicle_id", vehicleId);
+    if (data.features.length > 0) {
+      const featureRows = data.features.map((feature) => ({ vehicle_id: vehicleId, feature }));
+      const { error: featErr } = await supabase.from("vehicle_features").insert(featureRows);
+      if (featErr) console.warn("vehicle_features update failed:", featErr.message);
     }
   }
 
@@ -519,6 +553,19 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
   revalidatePath("/vendor/dashboard");
 
   return { success: true, vehicleId };
+}
+
+export async function getVehicleFeatures(vehicleId: string, organizationId: string): Promise<string[]> {
+  const user = await requireUser();
+  await ensureUserCanManageOrganization(user.id, organizationId);
+
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicle_features")
+    .select("feature")
+    .eq("vehicle_id", vehicleId);
+
+  return (data ?? []).map((row) => row.feature as string);
 }
 
 export async function getOrganizationVehicles(organizationId: string, page: number = 1, pageSize: number = 50) {

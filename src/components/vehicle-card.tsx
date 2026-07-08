@@ -1,7 +1,25 @@
 
 import Link from "next/link";
+import Image from "next/image";
 import { ImageWithFallback } from "@/components/image-with-fallback";
-import { MapPin, ArrowRight, BadgeCheck, Zap } from "lucide-react";
+import {
+  MapPin,
+  ArrowRight,
+  BadgeCheck,
+  Zap,
+  Car,
+  Cog,
+  Fuel,
+  Users,
+  Snowflake,
+  Star,
+  ShieldCheck,
+  Crown,
+  Truck,
+  Route,
+  Tag,
+  CalendarCheck,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SavedVehicleButton } from "@/components/saved-vehicle-button";
@@ -12,6 +30,185 @@ interface VehicleCardProps {
   priority?: boolean;
   variant?: "default" | "compact" | "featured";
   saved?: boolean;
+}
+
+// A single spec cell in the icon row (body type / transmission / fuel / seats / feature).
+function Spec({ icon: Icon, label, value }: { icon: typeof Car; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2 min-w-0">
+      <Icon className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-semibold text-slate-900">{value}</span>
+        <span className="block truncate text-[11px] text-slate-400">{label}</span>
+      </span>
+    </div>
+  );
+}
+
+// A trust chip (free cancellation / no hidden fees / unlimited km).
+function Chip({ icon: Icon, label, tone }: { icon: typeof Car; label: string; tone: "emerald" | "blue" | "violet" }) {
+  const tones = {
+    emerald: "bg-emerald-50 text-emerald-700",
+    blue: "bg-blue-50 text-blue-700",
+    violet: "bg-violet-50 text-violet-700",
+  } as const;
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold ${tones[tone]}`}>
+      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+      {label}
+    </span>
+  );
+}
+
+function RichVehicleCard({ vehicle, priority = false, saved = false, showFeaturedBadge = false }: VehicleCardProps & { showFeaturedBadge?: boolean }) {
+  const href = `/cars/${vehicle.slug}`;
+  const hasRating = (vehicle.reviewCount ?? 0) > 0 && vehicle.avgRating != null;
+  const unlimitedKm = vehicle.dailyDistanceLimitKm == null;
+  // Surface Air Conditioning first if present, else the first listed feature.
+  const primaryFeature = vehicle.features?.includes("Air Conditioning")
+    ? "Air Conditioning"
+    : vehicle.features?.[0];
+
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ea580c]/30 hover:shadow-xl">
+      {/* Image */}
+      <div className="relative h-52 overflow-hidden bg-slate-100">
+        <Link href={href} className="absolute inset-0" aria-label={vehicle.title}>
+          <ImageWithFallback
+            src={vehicle.imageUrl}
+            alt={`${vehicle.title} available from ${vehicle.vendorName}`}
+            fill
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        </Link>
+
+        {showFeaturedBadge && (
+          <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-[#ea580c] px-3 py-1.5 text-xs font-bold text-white shadow-md">
+            <Star className="h-3.5 w-3.5 fill-white" aria-hidden="true" /> Featured
+          </span>
+        )}
+
+        <div className="absolute right-3 top-3 z-10">
+          <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
+        </div>
+
+        {vehicle.instantBook && (
+          <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-slate-900/90 px-3 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-sm">
+            <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" /> Instant Booking
+          </span>
+        )}
+
+        {/* Price block */}
+        <div className="absolute bottom-3 right-3 z-10 rounded-2xl bg-white/95 px-4 py-2.5 text-right shadow-lg backdrop-blur-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">From</p>
+          <p className="leading-none">
+            <span className="text-2xl font-black text-slate-900">${vehicle.pricePerDayAud}</span>
+            <span className="text-xs font-semibold text-slate-500"> /day</span>
+          </p>
+          {(vehicle.weeklyRateAud || vehicle.monthlyRateAud) && (
+            <div className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5 text-[11px] font-medium text-slate-500">
+              {vehicle.weeklyRateAud ? <p>Weekly from <span className="font-bold text-[#ea580c]">${vehicle.weeklyRateAud}</span></p> : null}
+              {vehicle.monthlyRateAud ? <p>Monthly from <span className="font-bold text-[#ea580c]">${vehicle.monthlyRateAud}</span></p> : null}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-1 flex-col gap-4 p-5">
+        {/* Title + vendor */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <Link href={href}>
+              <h3 className="truncate text-xl font-bold text-slate-900 transition-colors group-hover:text-[#ea580c]">{vehicle.title}</h3>
+            </Link>
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+              {hasRating && (
+                <span className="inline-flex items-center gap-1 font-semibold text-slate-900">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  {vehicle.avgRating!.toFixed(1)}
+                  <span className="font-normal text-slate-400">({vehicle.reviewCount} Reviews)</span>
+                </span>
+              )}
+              {hasRating && vehicle.verified && <span className="text-slate-200">|</span>}
+              {vehicle.verified && (
+                <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
+                  <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Verified Host
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Vendor identity */}
+          <Link href={vehicle.vendorSlug ? `/vendors/${vehicle.vendorSlug}` : href} className="flex shrink-0 items-center gap-2">
+            {vehicle.vendorLogoUrl ? (
+              <Image
+                src={vehicle.vendorLogoUrl}
+                alt={vehicle.vendorName}
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200"
+              />
+            ) : null}
+            <span className="max-w-[120px] text-right">
+              <span className="flex items-center justify-end gap-1 truncate text-sm font-bold text-slate-900">
+                <span className="truncate">{vehicle.vendorName}</span>
+                {vehicle.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-[#ea580c]" aria-hidden="true" />}
+              </span>
+              {vehicle.superHost && (
+                <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                  <Crown className="h-3 w-3" aria-hidden="true" /> Super Host
+                </span>
+              )}
+            </span>
+          </Link>
+        </div>
+
+        {/* Specs */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-slate-100 pt-4 sm:grid-cols-3">
+          <Spec icon={Car} label="Body Type" value={vehicle.category} />
+          <Spec icon={Cog} label="Transmission" value={vehicle.transmission} />
+          <Spec icon={Fuel} label="Fuel Type" value={vehicle.fuel} />
+          <Spec icon={Users} label="Seating" value={`${vehicle.seats} Seats`} />
+          {primaryFeature && <Spec icon={Snowflake} label="Features" value={primaryFeature} />}
+        </div>
+
+        {/* Location + delivery */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
+          <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+            <MapPin className="h-4 w-4 text-[#ea580c]" aria-hidden="true" />
+            <span className="font-medium text-slate-900">{vehicle.city}{vehicle.state ? `, ${vehicle.state}` : ""}</span>
+          </span>
+          {vehicle.freeDelivery && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
+              <Truck className="h-4 w-4" aria-hidden="true" /> Free delivery available
+            </span>
+          )}
+        </div>
+
+        {/* Trust chips */}
+        {(vehicle.freeCancellation || vehicle.noHiddenFees || unlimitedKm) && (
+          <div className="flex flex-wrap gap-2">
+            {vehicle.freeCancellation && <Chip icon={CalendarCheck} label="Free cancellation" tone="emerald" />}
+            {vehicle.noHiddenFees && <Chip icon={Tag} label="No hidden fees" tone="blue" />}
+            {unlimitedKm && <Chip icon={Route} label="Unlimited km" tone="violet" />}
+          </div>
+        )}
+
+        {/* CTA */}
+        <Link
+          href={href}
+          className="mt-auto flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#ea580c] px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-[#c2410c]"
+        >
+          Check Availability
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      </div>
+    </div>
+  );
 }
 
 export function VehicleCard({ vehicle, priority = false, variant = "default", saved = false }: VehicleCardProps) {
@@ -55,107 +252,12 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     );
   }
 
-  if (variant === "featured") {
-    return (
-      <Card variant="interactive" className="p-0 gap-0 card-lift border-slate-200/60 shadow-md overflow-hidden bg-white/95 group/card">
-        <div className="relative h-56 overflow-hidden bg-slate-100">
-          <ImageWithFallback
-            src={vehicle.imageUrl}
-            alt={`${vehicle.title} available from ${vehicle.vendorName}`}
-            fill
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover/card:scale-105 transition-transform duration-500"
-          />
-          <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-slate-950/90 backdrop-blur-md px-2.5 py-1 text-xs font-bold text-white shadow-sm border border-white/10">
-              Featured
-            </span>
-            <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
-          </div>
-          <div className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-sm border border-white/50">
-            <p className="text-lg font-black text-slate-900">${vehicle.pricePerDayAud}</p>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">AUD/day</p>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent pointer-events-none" />
-        </div>
-        <CardContent className="p-5 flex flex-col gap-3">
-          <div>
-            <h3 className="text-xl font-bold text-foreground line-clamp-1 flex items-center gap-1.5">
-              {vehicle.title}
-              {vehicle.instantBook && <span title="Instant Book"><Zap className="h-4 w-4 text-amber-500 fill-amber-500" /></span>}
-            </h3>
-            <div className="flex items-center gap-2 mt-1.5">
-              <Badge variant="info">{vehicle.category}</Badge>
-              <span className="text-sm text-muted-foreground">{vehicle.vendorName}</span>
-              {vehicle.verified && <BadgeCheck className="h-4 w-4 text-primary" />}
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span>{vehicle.city}, {vehicle.state}</span>
-          </div>
-          <Link
-            href={`/cars/${vehicle.slug}`}
-            className="flex items-center justify-center gap-2 w-full min-h-[44px] rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 transition-colors mt-1"
-          >
-            View details
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Default variant (Clean Marketplace Design)
   return (
-    <Link href={`/cars/${vehicle.slug}`} className="block group">
-      <div className="bg-white border border-slate-100 rounded-[1.5rem] overflow-hidden hover:shadow-lg hover:border-[#ea580c]/30 transition-all duration-300">
-        {/* Vehicle Image */}
-        <div className="relative h-[200px] bg-slate-50 overflow-hidden">
-          <ImageWithFallback
-            src={vehicle.imageUrl}
-            alt={`${vehicle.title} available from ${vehicle.vendorName}`}
-            fill
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-          {/* Year Badge */}
-          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-bold px-2 py-1 rounded">
-            {vehicle.year || "2023"}
-          </div>
-          <div className="absolute top-3 right-3 z-10">
-            <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 sm:p-5">
-          <div className="flex justify-between items-start mb-2">
-            <div className="min-w-0 overflow-hidden">
-              <h3 className="font-bold text-slate-900 text-lg truncate">{vehicle.title}</h3>
-              <div className="flex items-center gap-1 mt-1 text-slate-500 text-sm font-medium">
-                <MapPin className="h-3.5 w-3.5 text-[#ea580c]" />
-                {vehicle.city}
-              </div>
-            </div>
-            <div className="text-right shrink-0">
-              <div className="flex items-baseline text-[#ea580c]">
-                <span className="font-black text-xl">${vehicle.pricePerDayAud}</span>
-                <span className="text-xs font-bold ml-1">/day</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-1.5 text-sm font-bold text-slate-700">
-            {vehicle.vendorName}
-            {vehicle.verified && <BadgeCheck className="h-4 w-4 text-blue-500" />}
-          </div>
-        </div>
-      </div>
-    </Link>
+    <RichVehicleCard
+      vehicle={vehicle}
+      priority={priority}
+      saved={saved}
+      showFeaturedBadge={variant === "featured"}
+    />
   );
 }

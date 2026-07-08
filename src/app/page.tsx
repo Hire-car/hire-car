@@ -64,29 +64,7 @@ export default async function Home() {
   const stats = await getMarketplaceStats();
   const { vehicles: searchFallback } = await searchVehicles("", {}, { page: 1, perPage: 6 });
   const featuredVehicles = (
-    featuredFromDb.length > 0
-      ? featuredFromDb.map((v) => ({
-          id: v.id,
-          slug: v.slug,
-          title: v.title,
-          make: v.make,
-          model: v.model,
-          year: v.year,
-          city: v.city,
-          state: "",
-          pricePerDayAud: v.pricePerDay,
-          seats: 5,
-          fuel: "Petrol",
-          transmission: "Automatic",
-          category: v.category,
-          imageUrl: v.imageUrl ?? "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80",
-          vendorName: v.organizationName,
-          vendorSlug: "",
-          branchName: v.city,
-          verified: true,
-          instantBook: false,
-        }))
-      : searchFallback
+    featuredFromDb.length > 0 ? featuredFromDb : searchFallback
   ).slice(0, 6);
 
   // Fetch live vehicle counts and min prices per city

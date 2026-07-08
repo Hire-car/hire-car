@@ -1,22 +1,16 @@
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Vehicle } from "@/lib/types";
+import { resolveVehicleImage, type VehicleImageRecord } from "@/lib/image-utils";
+import { computeSuperHost } from "@/lib/vehicle-badges";
 
-export type FeaturedVehicle = {
-  id: string;
-  slug: string;
-  title: string;
-  make: string;
-  model: string;
-  year: number;
-  category: string;
-  pricePerDay: number;
-  city: string;
-  organizationName: string;
-  imageUrl?: string;
-};
-
+/**
+ * Active featured-placement vehicles as fully-populated `Vehicle` objects so
+ * the homepage renders the same rich card as search (real specs, ratings,
+ * features, vendor logo, trust flags — never fabricated).
+ */
 export const getActiveFeaturedVehicles = unstable_cache(
-  async function getActiveFeaturedVehicles(city?: string | null): Promise<FeaturedVehicle[]> {
+  async function getActiveFeaturedVehicles(city?: string | null): Promise<Vehicle[]> {
   const supabase = createAdminClient();
   const now = new Date().toISOString();
 
@@ -25,9 +19,13 @@ export const getActiveFeaturedVehicles = unstable_cache(
     .select(`
       id, city, vehicle_id,
       vehicles!inner(
-        id, slug, title, make, model, year, category, price_per_day_aud, status,
-        branches!inner(city, status),
-        organizations!inner(name, status)
+        id, slug, title, make, model, year, seats, fuel, transmission, category,
+        price_per_day_aud, weekly_rate_aud, monthly_rate_aud, daily_distance_limit_km,
+        extra_distance_fee_aud, instant_book, free_delivery, free_cancellation, no_hidden_fees, status,
+        branches!inner(name, city, state, status),
+        organizations!inner(name, slug, status, logo_url, verified_at),
+        vehicle_images(storage_path, approved, sort_order),
+        vehicle_features(feature)
       )
     `)
     .lte("starts_at", now)
@@ -46,40 +44,96 @@ export const getActiveFeaturedVehicles = unstable_cache(
     return [];
   }
 
-  const results: FeaturedVehicle[] = [];
+  type VehicleRow = {
+    id: string;
+    slug: string;
+    title: string;
+    make: string;
+    model: string;
+    year: number;
+    seats: number;
+    fuel: string;
+    transmission: string;
+    category: string;
+    price_per_day_aud: number;
+    weekly_rate_aud: number | null;
+    monthly_rate_aud: number | null;
+    daily_distance_limit_km: number | null;
+    extra_distance_fee_aud: number | null;
+    instant_book: boolean;
+    free_delivery: boolean;
+    free_cancellation: boolean;
+    no_hidden_fees: boolean;
+    branches: { name: string; city: string; state: string };
+    organizations: { name: string; slug: string; logo_url: string | null; verified_at: string | null };
+    vehicle_images?: VehicleImageRecord[] | null;
+    vehicle_features?: { feature: string }[] | null;
+  };
 
-  for (const row of data) {
-    type VehicleRow = {
-      id: string;
-      slug: string;
-      title: string;
-      make: string;
-      model: string;
-      year: number;
-      category: string;
-      price_per_day_aud: number;
-      status: string;
-      branches: { city: string; status: string };
-      organizations: { name: string; status: string };
-    };
+  const rows = data.map((row) => row.vehicles as unknown as VehicleRow);
 
-    const v = row.vehicles as unknown as VehicleRow;
+  // Batch-load approved-review aggregates for all featured vehicles.
+  const ratingInfo: Record<string, { avg: number; count: number }> = {};
+  if (rows.length > 0) {
+    const { data: reviews } = await supabase
+      .from("reviews")
+      .select("vehicle_id, rating")
+      .in("vehicle_id", rows.map((v) => v.id))
+      .eq("status", "approved");
+    const sums: Record<string, { total: number; count: number }> = {};
+    for (const r of reviews ?? []) {
+      if (!r.vehicle_id) continue;
+      if (!sums[r.vehicle_id]) sums[r.vehicle_id] = { total: 0, count: 0 };
+      sums[r.vehicle_id].total += r.rating;
+      sums[r.vehicle_id].count += 1;
+    }
+    for (const [id, s] of Object.entries(sums)) {
+      ratingInfo[id] = { avg: s.total / s.count, count: s.count };
+    }
+  }
 
-    results.push({
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+
+  return rows.map((v) => {
+    const verified = v.organizations.verified_at != null;
+    const rating = ratingInfo[v.id];
+    const avgRating = rating?.avg ?? null;
+    const reviewCount = rating?.count ?? 0;
+
+    return {
       id: v.id,
       slug: v.slug,
       title: v.title,
       make: v.make,
       model: v.model,
       year: v.year,
+      seats: v.seats,
+      fuel: v.fuel,
+      transmission: v.transmission,
       category: v.category,
-      pricePerDay: v.price_per_day_aud,
+      pricePerDayAud: v.price_per_day_aud,
+      weeklyRateAud: v.weekly_rate_aud,
+      monthlyRateAud: v.monthly_rate_aud,
+      dailyDistanceLimitKm: v.daily_distance_limit_km,
+      extraDistanceFeeAud: v.extra_distance_fee_aud,
+      instantBook: v.instant_book,
       city: v.branches.city,
-      organizationName: v.organizations.name,
-    });
-  }
-
-  return results;
+      state: v.branches.state,
+      imageUrl: resolveVehicleImage(supabaseUrl, v.vehicle_images ?? [], v.category),
+      vendorName: v.organizations.name,
+      vendorSlug: v.organizations.slug,
+      branchName: v.branches.name,
+      verified,
+      vendorLogoUrl: v.organizations.logo_url,
+      avgRating,
+      reviewCount,
+      features: (v.vehicle_features ?? []).map((f) => f.feature),
+      freeDelivery: v.free_delivery,
+      freeCancellation: v.free_cancellation,
+      noHiddenFees: v.no_hidden_fees,
+      superHost: computeSuperHost({ verified, avgRating, reviewCount }),
+    } satisfies Vehicle;
+  });
 }, ["featured-vehicles"], { revalidate: 3600, tags: ["featured"] });
 
 export type HomeTestimonial = {
