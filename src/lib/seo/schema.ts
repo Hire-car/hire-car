@@ -1,4 +1,5 @@
 import { SEO_BASE_URL } from "./constants";
+import { resolveSocialUrl, SOCIAL_URLS } from "@/lib/social-links";
 
 type BreadcrumbItem = { name: string; path: string };
 
@@ -134,17 +135,13 @@ export function buildWebSiteSchema() {
  * knowledge panel and links verified social profiles via `sameAs`.
  */
 export function buildBrandOrganizationSchema() {
-  // Treat empty/whitespace/"#" env values as unset so a placeholder can't
-  // shadow (or drop) the real brand profile URL.
-  const socialUrl = (envValue: string | undefined, fallback?: string): string | undefined => {
-    const trimmed = envValue?.trim();
-    return trimmed && trimmed !== "#" ? trimmed : fallback;
-  };
+  // resolveSocialUrl treats empty/whitespace/"#" env values as unset so a
+  // placeholder can't shadow (or drop) the real brand profile URL.
   const sameAs = [
-    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL, "https://www.facebook.com/profile.php?id=61590659316054"),
-    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL, "https://www.linkedin.com/company/hirecar-marketplace/"),
-    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL, "https://www.instagram.com/hire.carmarketplace"),
-    socialUrl(process.env.NEXT_PUBLIC_SOCIAL_X_URL),
+    resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL, SOCIAL_URLS.facebook),
+    resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL, SOCIAL_URLS.linkedin),
+    resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL, SOCIAL_URLS.instagram),
+    resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_X_URL),
   ].filter((url): url is string => typeof url === "string" && url.length > 0);
 
   return {

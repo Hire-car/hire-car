@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from "@/components/icons";
+import { resolveSocialUrl, SOCIAL_URLS } from "@/lib/social-links";
 
 const footerLinks = {
   product: [
@@ -55,21 +56,12 @@ const footerLinkClass =
 // Social links are env-driven so we never ship placeholder ("#") links.
 // Configure the optional NEXT_PUBLIC_SOCIAL_* vars to surface each icon; any
 // link left unset falls back to the known brand profile (or is hidden).
-//
-// Treat empty/whitespace/"#" env values as *unset* so a placeholder configured
-// in the deploy environment can't shadow the real profile URL with a dead link
-// (the `|| fallback` alone wouldn't catch "#" since it's truthy).
-function resolveSocialUrl(envValue: string | undefined, fallback?: string): string | undefined {
-  const trimmed = envValue?.trim();
-  if (trimmed && trimmed !== "#") return trimmed;
-  return fallback;
-}
-
+// resolveSocialUrl treats empty/whitespace/"#" env values as unset.
 const socialLinks = [
   { icon: XIcon, href: resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_X_URL), label: "Twitter / X" },
-  { icon: FacebookIcon, href: resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL, "https://www.facebook.com/profile.php?id=61590659316054"), label: "Facebook" },
-  { icon: InstagramIcon, href: resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL, "https://www.instagram.com/hire.carmarketplace"), label: "Instagram" },
-  { icon: LinkedinIcon, href: resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL, "https://www.linkedin.com/company/hirecar-marketplace/"), label: "LinkedIn" },
+  { icon: FacebookIcon, href: resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_FACEBOOK_URL, SOCIAL_URLS.facebook), label: "Facebook" },
+  { icon: InstagramIcon, href: resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_INSTAGRAM_URL, SOCIAL_URLS.instagram), label: "Instagram" },
+  { icon: LinkedinIcon, href: resolveSocialUrl(process.env.NEXT_PUBLIC_SOCIAL_LINKEDIN_URL, SOCIAL_URLS.linkedin), label: "LinkedIn" },
 ].filter((s): s is { icon: typeof XIcon; href: string; label: string } =>
   typeof s.href === "string" && s.href.trim().length > 0,
 );
