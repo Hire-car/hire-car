@@ -168,7 +168,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             <div className="flex flex-col items-start sm:items-end">
               <div className="flex items-center gap-1">
                 <span className="font-bold text-[#101828] text-sm">{vehicle.vendorName}</span>
-                {vehicle.verified && <BadgeCheck className="h-4 w-4 text-[#1D9BF0] fill-[#1D9BF0] stroke-white" />}
+                <BadgeCheck className="h-4 w-4 text-[#1D9BF0] fill-[#1D9BF0] stroke-white shrink-0" />
               </div>
               {vehicle.superHost && (
                 <div className="flex items-center gap-1 mt-0.5 bg-[#FFF5F0] px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[#FF4D00]">
