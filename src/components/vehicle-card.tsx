@@ -113,7 +113,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         <div className="absolute -bottom-5 right-3 sm:-bottom-8 sm:right-6 z-20 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-2.5 sm:p-4 flex flex-col items-center min-w-[110px] sm:min-w-[140px]">
           <span className="text-[9px] sm:text-[10px] font-semibold text-slate-500 uppercase tracking-wide">From</span>
           <div className="flex items-baseline mt-0.5 mb-1 sm:mb-1.5">
-            <span className="text-2xl sm:text-3xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
+            <span className="text-xl sm:text-2xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
             <span className="text-[9px] sm:text-[10px] font-bold text-slate-600 ml-1">/ day</span>
           </div>
           <div className="w-full h-px bg-slate-100 mb-1.5 sm:mb-2" />
@@ -134,7 +134,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         <div className="flex flex-wrap items-start justify-between gap-y-3 gap-x-5 mb-4">
           <div className="flex flex-col min-w-[200px] flex-1">
             <Link href={`/cars/${vehicle.slug}`}>
-              <h2 className="text-lg sm:text-xl font-bold text-[#101828] leading-tight hover:text-[#FF4D00] transition-colors break-words">
+              <h2 className="text-base sm:text-lg font-bold text-[#101828] leading-snug hover:text-[#FF4D00] transition-colors line-clamp-2">
                 {vehicle.title}
               </h2>
             </Link>
