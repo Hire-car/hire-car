@@ -52,6 +52,7 @@ export function EmailAuthForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
+  const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
 
   function validateEmailInput(): boolean {
     const errors: FieldErrors = {};
@@ -78,6 +79,27 @@ export function EmailAuthForm({
     if (!otp || otp.length !== 6) errors.otp = "Please enter the 6-digit code.";
     setFieldErrors((prev) => ({ ...prev, otp: errors.otp }));
     return !errors.otp;
+  }
+
+  async function handleForgotPassword() {
+    onError?.(null);
+    if (!validateEmailInput()) return;
+    setIsSubmitting(true);
+    const supabase = createClient();
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/auth/callback?next=/account/reset-password`,
+      });
+      if (error) {
+        onError?.(toFriendlyAuthError(error));
+      } else {
+        setForgotPasswordSent(true);
+      }
+    } catch (err) {
+      onError?.(toFriendlyAuthError(err));
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   async function handlePasswordAuth(event: React.FormEvent<HTMLFormElement>) {
@@ -183,7 +205,7 @@ export function EmailAuthForm({
       const { data, error } = await supabase.auth.verifyOtp({
         email: email.trim(),
         token: otp.trim(),
-        type: "email",
+        type: "magiclink",
       });
 
       if (error || !data.session) {
@@ -197,6 +219,30 @@ export function EmailAuthForm({
       onError?.(toFriendlyAuthError(err));
       setIsSubmitting(false);
     }
+  }
+
+  // Render forgot-password success message
+  if (forgotPasswordSent) {
+    return (
+      <div className="space-y-4 text-center">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-6">
+          <Mail className="mx-auto h-8 w-8 text-primary mb-3" />
+          <h3 className="font-semibold text-lg mb-2">Check your email</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            We've sent a password reset link to <span className="font-medium text-foreground">{email}</span>
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setForgotPasswordSent(false);
+              setMode("sign-in");
+            }}
+          >
+            Back to Sign In
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   // Render post-signup success message
@@ -316,8 +362,13 @@ export function EmailAuthForm({
               <div className="flex items-center justify-between">
                 <Label htmlFor="email-auth-password">Password</Label>
                 {mode === "sign-in" && (
-                  <button type="button" className="text-xs font-medium text-primary hover:underline">
-                    Forgot password?
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={handleForgotPassword}
+                    className="text-xs font-medium text-primary hover:underline disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Sending..." : "Forgot password?"}
                   </button>
                 )}
               </div>
