@@ -73,7 +73,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     <div className="w-full h-full bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col overflow-hidden">
       
       {/* 1. HERO IMAGE SECTION */}
-      <div className="relative w-full aspect-[16/10] sm:aspect-[2.2/1] bg-slate-100 z-0">
+      <div className="relative w-full aspect-[16/10] sm:aspect-[1.8/1] bg-slate-100 z-0">
         <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0" aria-label={vehicle.title}>
           <ImageWithFallback
             src={vehicle.imageUrl}
@@ -182,7 +182,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         <div className="w-full h-px bg-slate-100 mb-5" />
 
         {/* Row 2: Specs Grid - Scrollable on Mobile, Single Line on Desktop */}
-        <div className="flex items-center sm:justify-between w-full mb-4 gap-4 sm:gap-1.5 overflow-x-auto snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 sm:pb-0">
+        <div className="flex items-center sm:justify-between w-full mb-4 gap-4 sm:gap-1.5 overflow-x-auto snap-x overscroll-x-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 sm:pb-0">
           <div className="flex items-center gap-1.5 sm:gap-1 min-w-0 shrink-0 snap-start">
             <Car className="h-4 w-4 sm:h-3.5 sm:w-3.5 text-slate-500 shrink-0" />
             <div className="flex flex-col min-w-0">
@@ -256,7 +256,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         {/* NO DIVIDER HERE, just like the reference! */}
 
         {/* Row 4: Trust Chips - Scrollable on Mobile, Single Line on Desktop */}
-        <div className="flex items-center sm:justify-between w-full mb-4 border-t border-slate-100 pt-4 gap-2 sm:gap-2 overflow-x-auto snap-x [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 sm:pb-0">
+        <div className="flex items-center sm:justify-between w-full mb-4 border-t border-slate-100 pt-4 gap-2 sm:gap-2 overflow-x-auto snap-x overscroll-x-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 sm:pb-0">
           <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-[#EFFBF3] text-[#2E9D68] px-2.5 sm:px-2 py-2 sm:py-1.5 rounded-md font-bold text-[10px] sm:text-[9px] flex-1 sm:flex-1 shrink-0 snap-start min-w-[120px] sm:min-w-0">
             <ShieldCheck className="h-3.5 w-3.5 sm:h-3 sm:w-3 shrink-0" /> <span className="truncate">Free cancellation</span>
           </div>
