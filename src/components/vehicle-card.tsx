@@ -70,7 +70,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
 
   // FLUID REFERENCE DESIGN (Always renders as reference design, perfectly fluid via flex-wrap)
   return (
-    <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col overflow-hidden">
       
       {/* 1. HERO IMAGE SECTION */}
       <div className="relative w-full aspect-[16/10] sm:aspect-[2.2/1] bg-slate-100 z-0">
@@ -128,7 +128,8 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         </div>
       </div>
 
-      <div className="flex flex-col p-4 sm:p-5 lg:p-6 pt-8 sm:pt-10 z-10 bg-white relative">
+      {/* 2. BODY SECTION */}
+      <div className="flex flex-1 flex-col p-4 sm:p-5 lg:p-6 pt-8 sm:pt-10 z-10 bg-white relative">
         
         {/* Row 1: Identity & Host */}
         <div className="flex flex-wrap items-start justify-between gap-y-3 gap-x-5 mb-4">
