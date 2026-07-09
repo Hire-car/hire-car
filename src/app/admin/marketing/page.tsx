@@ -14,7 +14,7 @@ export default async function AdminMarketingPage() {
 
   const fromEmail = process.env.EMAIL_FROM ?? "Hire Car Marketplace <noreply@hirecarmarketplace.com.au>";
   const replyToEmail = process.env.REPLY_TO_EMAIL ?? process.env.CONTACT_EMAIL_TO ?? "support@hirecarmarketplace.com.au";
-  const isSandboxSender = fromEmail.includes("@resend.dev");
+  const isSmtpConfigured = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -23,8 +23,8 @@ export default async function AdminMarketingPage() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Marketing Broadcasts
           </h1>
-          <Badge variant={isSandboxSender ? "warning" : "success"}>
-            {isSandboxSender ? "Sandbox sender" : "Production sender"}
+          <Badge variant={isSmtpConfigured ? "success" : "warning"}>
+            {isSmtpConfigured ? "SMTP configured" : "SMTP not configured"}
           </Badge>
         </div>
         <p className="max-w-2xl text-sm text-muted-foreground">
@@ -32,19 +32,21 @@ export default async function AdminMarketingPage() {
         </p>
       </section>
 
-      <Card variant="default" className={isSandboxSender ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50"}>
+      <Card variant="default" className={isSmtpConfigured ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}>
         <CardContent className="flex items-start gap-3 p-4">
-          {isSandboxSender ? (
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-          ) : (
+          {isSmtpConfigured ? (
             <MailCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+          ) : (
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
           )}
           <div className="text-sm">
-            <p className={isSandboxSender ? "font-semibold text-amber-900" : "font-semibold text-emerald-900"}>
+            <p className={isSmtpConfigured ? "font-semibold text-emerald-900" : "font-semibold text-amber-900"}>
               Sending from: {fromEmail}
             </p>
-            <p className={isSandboxSender ? "mt-1 text-amber-800" : "mt-1 text-emerald-800"}>
-              Replies route to {replyToEmail}. Use a verified HireCar Marketplace domain sender before sending real customer campaigns.
+            <p className={isSmtpConfigured ? "mt-1 text-emerald-800" : "mt-1 text-amber-800"}>
+              {isSmtpConfigured
+                ? `Replies route to ${replyToEmail}.`
+                : "SMTP is not configured. Add SMTP_HOST, SMTP_USER and SMTP_PASS to your Vercel environment variables to enable email sending."}
             </p>
           </div>
         </CardContent>

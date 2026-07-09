@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { requireAdmin } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -140,14 +140,6 @@ export async function sendMarketingCampaign(
   const ctaLabel = String(formData.get("ctaLabel") ?? "").trim();
   const ctaUrl = String(formData.get("ctaUrl") ?? "").trim();
 
-  // Check for RESEND_API_KEY upfront and give a clear error
-  if (!process.env.RESEND_API_KEY) {
-    return {
-      status: "error",
-      message: "RESEND_API_KEY is not configured. Email sending is disabled. Please add it to your environment variables.",
-    };
-  }
-
   if (subject.length < 4 || subject.length > 160) {
     return { status: "error", message: "Subject must be between 4 and 160 characters." };
   }
@@ -214,12 +206,12 @@ export async function sendMarketingCampaign(
       }
     }
 
-    // All skipped means the Resend client is null (API key missing at runtime)
+    // All skipped means the SMTP transporter is not configured
     if (sent === 0 && skipped > 0 && failed === 0) {
       return {
         status: "error",
         message:
-          "Campaign was not sent â€” the RESEND_API_KEY is missing at runtime. Verify the environment variable is loaded correctly.",
+          "Campaign was not sent — SMTP is not configured. Add SMTP_HOST, SMTP_USER and SMTP_PASS to your environment variables.",
         details: { sent, failed, skipped, recipientCount: recipients.length },
       };
     }

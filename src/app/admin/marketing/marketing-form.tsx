@@ -141,7 +141,7 @@ export function MarketingForm() {
             <p className="font-semibold">⚠️ Before sending to All Accounts or Vendors:</p>
             <ul className="mt-1.5 list-disc list-inside space-y-1 text-amber-700">
               <li>Always test with <strong>Admin test inbox</strong> first</li>
-              <li>Verify your Resend domain is configured and emails land in inbox (not spam)</li>
+              <li>Verify your SMTP sender domain is configured and emails land in inbox (not spam)</li>
               <li>This sends to all contacts — there is no undo</li>
             </ul>
           </div>
