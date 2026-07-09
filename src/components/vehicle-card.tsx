@@ -30,8 +30,7 @@ interface VehicleCardProps {
   saved?: boolean;
 }
 
-export function VehicleCard({ vehicle, priority = false, variant = "grid", saved = false }: VehicleCardProps) {
-  const isTrusted = vehicle.verified;
+export function VehicleCard({ vehicle, priority = false, variant = "default", saved = false }: VehicleCardProps) {
   const hasRating = (vehicle.reviewCount ?? 0) > 0 && vehicle.avgRating != null;
   const unlimitedKm = vehicle.dailyDistanceLimitKm == null;
   const primaryFeature = vehicle.features?.includes("Air Conditioning") ? "Air Conditioning" : vehicle.features?.[0];
@@ -69,161 +68,13 @@ export function VehicleCard({ vehicle, priority = false, variant = "grid", saved
     );
   }
 
-  if (variant === "grid" || variant === "default") {
-    return (
-      <div className="group h-full flex flex-col overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#FF4D00]/20">
-        
-        {/* Top Image Section */}
-        <div className="relative h-[220px] shrink-0 bg-slate-50">
-          <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-0" aria-label={vehicle.title}>
-            <ImageWithFallback
-              src={vehicle.imageUrl}
-              alt={`${vehicle.title} available from ${vehicle.vendorName}`}
-              fill
-              loading={priority ? "eager" : "lazy"}
-              fetchPriority={priority ? "high" : "auto"}
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-          </Link>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none opacity-60 transition-opacity group-hover:opacity-40" />
-          
-          {/* Top Badges */}
-          <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
-            {isTrusted && (
-              <span className="inline-flex items-center gap-1 rounded bg-white/95 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-700 shadow-sm backdrop-blur-md">
-                <ShieldCheck className="h-3 w-3" /> Trusted
-              </span>
-            )}
-            {vehicle.instantBook && (
-              <span className="inline-flex items-center gap-1 rounded bg-slate-900/90 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-white shadow-sm backdrop-blur-md">
-                <Zap className="h-3 w-3 fill-amber-400 text-amber-400" /> Instant
-              </span>
-            )}
-          </div>
-
-          {/* Favorite Button */}
-          <div className="absolute right-3 top-3 z-10">
-            <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
-          </div>
-
-          {/* Floating Price Tag */}
-          <div className="absolute bottom-3 right-3 z-10 rounded-[14px] bg-white/95 px-3 py-1.5 shadow-lg backdrop-blur-md border border-white/50">
-            <p className="flex items-baseline gap-1">
-              <span className="text-xl font-black text-slate-900">${vehicle.pricePerDayAud}</span>
-              <span className="text-[10px] font-bold text-slate-500">/day</span>
-            </p>
-          </div>
-        </div>
-
-        {/* Body Content */}
-        <div className="flex flex-1 flex-col p-5">
-          <Link href={`/cars/${vehicle.slug}`} className="mb-2">
-            <div className="flex items-start justify-between gap-3">
-              <h3 className="line-clamp-1 text-lg font-extrabold text-slate-900 transition-colors group-hover:text-[#FF4D00]">
-                {vehicle.title}
-              </h3>
-              {hasRating && (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-xs font-bold text-slate-900 border border-slate-100">
-                  <Star className="h-3.5 w-3.5 fill-[#FFB800] text-[#FFB800]" />
-                  {vehicle.avgRating!.toFixed(1)}
-                </span>
-              )}
-            </div>
-          </Link>
-
-          {/* Host Identity Row */}
-          <div className="flex items-center gap-2 mb-4">
-            {vehicle.vendorLogoUrl ? (
-              <Image
-                src={vehicle.vendorLogoUrl}
-                alt={vehicle.vendorName}
-                width={24}
-                height={24}
-                className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
-              />
-            ) : (
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[10px] font-bold uppercase text-slate-500">
-                {vehicle.vendorName.substring(0, 2)}
-              </div>
-            )}
-            <span className="truncate text-sm font-bold text-slate-900">{vehicle.vendorName}</span>
-            {vehicle.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-[#249AA0] fill-[#249AA0] stroke-white" />}
-            {vehicle.superHost && (
-              <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded bg-[#FFF5F0] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#FF4D00]">
-                <Crown className="h-3 w-3" /> Super Host
-              </span>
-            )}
-          </div>
-
-          {/* Minimal Specs Row (Icons + Values only) */}
-          <div className="mb-4 flex items-center justify-between gap-2 rounded-xl bg-[#F7F8FA] px-3 py-2 border border-[#E8EAED]">
-            <div className="flex items-center gap-1.5 truncate text-[11px] font-bold text-slate-700">
-              <Users className="h-3.5 w-3.5 shrink-0 text-slate-400" /> <span className="truncate">{vehicle.seats} Seats</span>
-            </div>
-            <div className="h-3 w-px bg-slate-300" />
-            <div className="flex items-center gap-1.5 truncate text-[11px] font-bold text-slate-700">
-              <Settings2 className="h-3.5 w-3.5 shrink-0 text-slate-400" /> <span className="truncate">{vehicle.transmission}</span>
-            </div>
-            <div className="h-3 w-px bg-slate-300" />
-            <div className="flex items-center gap-1.5 truncate text-[11px] font-bold text-slate-700">
-              <Fuel className="h-3.5 w-3.5 shrink-0 text-slate-400" /> <span className="truncate">{vehicle.fuel}</span>
-            </div>
-          </div>
-
-          {/* Location & Delivery */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
-            <span className="inline-flex items-center gap-1 text-slate-600">
-              <MapPin className="h-3.5 w-3.5 text-slate-400" />
-              <span className="truncate max-w-[120px]">{vehicle.city}</span>
-            </span>
-            {vehicle.freeDelivery && (
-              <span className="inline-flex items-center gap-1 text-[#2E9D68]">
-                <Truck className="h-3.5 w-3.5" /> Free delivery
-              </span>
-            )}
-          </div>
-
-          {/* Trust Chips (Wrapping) */}
-          {(vehicle.freeCancellation || vehicle.noHiddenFees || unlimitedKm) && (
-            <div className="mb-4 flex flex-wrap gap-1.5">
-              {vehicle.freeCancellation && (
-                <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
-                  <CalendarCheck className="h-3 w-3" /> Free cancellation
-                </span>
-              )}
-              {vehicle.noHiddenFees && (
-                <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">
-                  <Tag className="h-3 w-3" /> No hidden fees
-                </span>
-              )}
-              {unlimitedKm && (
-                <span className="inline-flex items-center gap-1 rounded bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700">
-                  <Route className="h-3 w-3" /> Unlimited km
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Bottom CTA Button */}
-          <Link
-            href={`/cars/${vehicle.slug}`}
-            className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#FF4D00] to-[#FF6200] px-4 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(255,77,0,0.3)] group-hover:from-[#E64500] group-hover:to-[#E65800]"
-          >
-            Check Availability
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  // LIST / FEATURED VARIANT (Massive Reference Design)
+  // FLUID REFERENCE DESIGN (Always renders as reference design, perfectly fluid via flex-wrap)
   return (
-    <div className="w-full max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col">
+    <div className="w-full bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col overflow-hidden">
+      
       {/* 1. HERO IMAGE SECTION */}
-      <div className="relative w-full aspect-[16/9] md:aspect-[2.2/1] bg-slate-100 rounded-t-3xl rounded-b-none z-0">
-        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 overflow-hidden rounded-t-3xl" aria-label={vehicle.title}>
+      <div className="relative w-full aspect-[16/10] sm:aspect-[2.2/1] bg-slate-100 z-0">
+        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0" aria-label={vehicle.title}>
           <ImageWithFallback
             src={vehicle.imageUrl}
             alt={vehicle.title}
@@ -234,74 +85,74 @@ export function VehicleCard({ vehicle, priority = false, variant = "grid", saved
             className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
           />
         </Link>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent pointer-events-none rounded-t-3xl opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none opacity-80" />
         
         {/* Top Left: Featured Badge */}
         {(variant === "featured" || priority) && (
-          <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 bg-[#FF4D00] text-white px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5">
+          <div className="absolute top-3 left-3 sm:top-5 sm:left-5 z-10 bg-[#FF4D00] text-white px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5">
             <Star className="h-4 w-4 fill-white text-white" />
             <span className="text-xs font-bold tracking-wide">Featured</span>
           </div>
         )}
 
         {/* Top Right: Favourite Button */}
-        <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+        <div className="absolute top-3 right-3 sm:top-5 sm:right-5 z-10">
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
             <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
           </div>
         </div>
 
         {/* Bottom Left: Instant Booking */}
         {vehicle.instantBook && (
-          <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 z-10 bg-[#101828] text-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow-md flex items-center gap-1.5">
+          <div className="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 z-10 bg-[#101828] text-white px-3 py-1.5 rounded-xl shadow-md flex items-center gap-1.5">
             <Zap className="h-4 w-4 text-[#00E5FF] fill-[#00E5FF]" />
-            <span className="text-xs md:text-sm font-semibold">Instant Booking</span>
+            <span className="text-xs sm:text-sm font-semibold">Instant Booking</span>
           </div>
         )}
 
-        {/* Bottom Right: Floating Pricing Panel (Overlaps the image bottom edge on desktop) */}
-        <div className="absolute -bottom-4 right-4 md:-bottom-12 md:right-8 z-20 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-4 md:p-5 flex flex-col items-center min-w-[140px] md:min-w-[180px]">
-          <span className="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wide">From</span>
-          <div className="flex items-baseline mt-1 mb-2">
-            <span className="text-3xl md:text-5xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
-            <span className="text-[10px] md:text-xs font-bold text-slate-600 ml-1">/ day</span>
+        {/* Bottom Right: Floating Pricing Panel */}
+        <div className="absolute -bottom-6 right-3 sm:-bottom-10 sm:right-6 z-20 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-3 sm:p-5 flex flex-col items-center min-w-[130px] sm:min-w-[160px]">
+          <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">From</span>
+          <div className="flex items-baseline mt-0.5 mb-1.5 sm:mb-2">
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-600 ml-1">/ day</span>
           </div>
-          <div className="w-full h-px bg-slate-100 mb-2" />
+          <div className="w-full h-px bg-slate-100 mb-1.5 sm:mb-2" />
           <div className="w-full flex flex-col gap-0.5 text-center">
             {vehicle.weeklyRateAud && (
-              <span className="text-[10px] md:text-xs font-medium text-slate-500">Weekly from <strong className="text-[#FF4D00]">${vehicle.weeklyRateAud}</strong></span>
+              <span className="text-[9px] sm:text-xs font-medium text-slate-500">Weekly from <strong className="text-[#FF4D00]">${vehicle.weeklyRateAud}</strong></span>
             )}
             {vehicle.monthlyRateAud && (
-              <span className="text-[10px] md:text-xs font-medium text-slate-500">Monthly from <strong className="text-[#FF4D00]">${vehicle.monthlyRateAud}</strong></span>
+              <span className="text-[9px] sm:text-xs font-medium text-slate-500">Monthly from <strong className="text-[#FF4D00]">${vehicle.monthlyRateAud}</strong></span>
             )}
           </div>
         </div>
       </div>
 
       {/* 2. BODY SECTION */}
-      <div className="flex flex-col p-4 md:p-8 pt-8 md:pt-10 z-10 bg-white rounded-b-3xl relative">
+      <div className="flex flex-col p-4 sm:p-6 lg:p-8 pt-10 sm:pt-14 z-10 bg-white relative">
         
         {/* Row 1: Identity & Host */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <div className="flex-1 min-w-0 pr-0 md:pr-48">
+        <div className="flex flex-wrap items-start justify-between gap-y-4 gap-x-6 mb-5">
+          <div className="flex flex-col min-w-[200px] flex-1">
             <Link href={`/cars/${vehicle.slug}`}>
-              <h2 className="text-2xl md:text-[32px] font-extrabold text-[#101828] leading-tight truncate hover:text-[#FF4D00] transition-colors">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#101828] leading-tight hover:text-[#FF4D00] transition-colors break-words">
                 {vehicle.title}
               </h2>
             </Link>
-            <div className="flex flex-wrap items-center gap-3 mt-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
               {hasRating && (
                 <div className="flex items-center gap-1.5">
                   <Star className="h-5 w-5 fill-[#FFB800] text-[#FFB800]" />
-                  <span className="font-bold text-[#101828] text-base md:text-lg">{vehicle.avgRating!.toFixed(1)}</span>
-                  <span className="text-slate-500 font-medium text-sm">({vehicle.reviewCount} Reviews)</span>
+                  <span className="font-bold text-[#101828] text-base sm:text-lg">{vehicle.avgRating!.toFixed(1)}</span>
+                  <span className="text-slate-500 font-medium text-xs sm:text-sm">({vehicle.reviewCount} Reviews)</span>
                 </div>
               )}
-              {hasRating && vehicle.verified && <span className="text-slate-300 hidden md:block">|</span>}
+              {hasRating && vehicle.verified && <span className="text-slate-300">|</span>}
               {vehicle.verified && (
                 <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-5 w-5 text-[#249AA0]" />
-                  <span className="text-sm font-semibold text-slate-600">Verified Host</span>
+                  <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-[#249AA0]" />
+                  <span className="text-xs sm:text-sm font-semibold text-slate-600">Verified Host</span>
                 </div>
               )}
             </div>
@@ -309,19 +160,19 @@ export function VehicleCard({ vehicle, priority = false, variant = "grid", saved
           
           <Link href={vehicle.vendorSlug ? `/vendors/${vehicle.vendorSlug}` : `/cars/${vehicle.slug}`} className="flex items-center gap-3 shrink-0">
             {vehicle.vendorLogoUrl ? (
-              <Image src={vehicle.vendorLogoUrl} alt={vehicle.vendorName} width={48} height={48} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover ring-1 ring-slate-200" />
+              <Image src={vehicle.vendorLogoUrl} alt={vehicle.vendorName} width={48} height={48} className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover ring-1 ring-slate-200" />
             ) : (
-              <div className="flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold uppercase text-slate-500">
+              <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold uppercase text-slate-500">
                 {vehicle.vendorName.substring(0, 2)}
               </div>
             )}
-            <div className="flex flex-col items-start md:items-end">
+            <div className="flex flex-col items-start sm:items-end">
               <div className="flex items-center gap-1">
-                <span className="font-bold text-[#101828] text-sm md:text-base">{vehicle.vendorName}</span>
-                {vehicle.verified && <BadgeCheck className="h-4 w-4 md:h-5 md:w-5 text-[#FF4D00] fill-[#FF4D00] stroke-white" />}
+                <span className="font-bold text-[#101828] text-sm sm:text-base">{vehicle.vendorName}</span>
+                {vehicle.verified && <BadgeCheck className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF4D00] fill-[#FF4D00] stroke-white" />}
               </div>
               {vehicle.superHost && (
-                <div className="flex items-center gap-1 mt-0.5 bg-[#FFF5F0] px-2 py-0.5 rounded text-[10px] md:text-xs font-bold uppercase tracking-wider text-[#FF4D00]">
+                <div className="flex items-center gap-1 mt-0.5 bg-[#FFF5F0] px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#FF4D00]">
                   <Crown className="h-3 w-3" /> Super Host
                 </div>
               )}
@@ -329,97 +180,102 @@ export function VehicleCard({ vehicle, priority = false, variant = "grid", saved
           </Link>
         </div>
 
-        <div className="w-full h-px bg-slate-100 mb-6" />
+        <div className="w-full h-px bg-slate-100 mb-5" />
 
-        {/* Row 2: Specs Grid */}
-        <div className="grid grid-cols-2 md:flex md:flex-row md:items-center md:justify-between gap-4 md:gap-2 mb-6">
-          <div className="flex items-center gap-3">
-            <Car className="h-6 w-6 text-slate-600 shrink-0" />
+        {/* Row 2: Specs Grid - Fluid wrapping */}
+        <div className="flex flex-wrap gap-4 sm:gap-6 mb-5 items-center">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Car className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.category}</span>
-              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Body Type</span>
+              <span className="text-[#101828] font-bold text-xs sm:text-sm truncate">{vehicle.category}</span>
+              <span className="text-slate-500 text-[10px] sm:text-[11px] font-medium capitalize tracking-wide">Body Type</span>
             </div>
           </div>
-          <div className="hidden md:block w-px h-8 bg-slate-200" />
+          <div className="w-px h-6 sm:h-8 bg-slate-200 hidden min-[400px]:block" />
           
-          <div className="flex items-center gap-3">
-            <Settings2 className="h-6 w-6 text-slate-600 shrink-0" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Settings2 className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.transmission}</span>
-              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Transmission</span>
+              <span className="text-[#101828] font-bold text-xs sm:text-sm truncate">{vehicle.transmission}</span>
+              <span className="text-slate-500 text-[10px] sm:text-[11px] font-medium capitalize tracking-wide">Transmission</span>
             </div>
           </div>
-          <div className="hidden md:block w-px h-8 bg-slate-200" />
+          <div className="w-px h-6 sm:h-8 bg-slate-200 hidden min-[500px]:block" />
 
-          <div className="flex items-center gap-3">
-            <Fuel className="h-6 w-6 text-slate-600 shrink-0" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Fuel className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.fuel}</span>
-              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Fuel Type</span>
+              <span className="text-[#101828] font-bold text-xs sm:text-sm truncate">{vehicle.fuel}</span>
+              <span className="text-slate-500 text-[10px] sm:text-[11px] font-medium capitalize tracking-wide">Fuel Type</span>
             </div>
           </div>
-          <div className="hidden md:block w-px h-8 bg-slate-200" />
+          <div className="w-px h-6 sm:h-8 bg-slate-200 hidden min-[650px]:block" />
 
-          <div className="flex items-center gap-3">
-            <Users className="h-6 w-6 text-slate-600 shrink-0" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Users className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.seats} Seats</span>
-              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Seating</span>
+              <span className="text-[#101828] font-bold text-xs sm:text-sm truncate">{vehicle.seats} Seats</span>
+              <span className="text-slate-500 text-[10px] sm:text-[11px] font-medium capitalize tracking-wide">Seating</span>
             </div>
           </div>
           
           {primaryFeature && (
             <>
-              <div className="hidden md:block w-px h-8 bg-slate-200" />
-              <div className="flex items-center gap-3">
-                <Snowflake className="h-6 w-6 text-slate-600 shrink-0" />
+              <div className="w-px h-6 sm:h-8 bg-slate-200 hidden min-[800px]:block" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Snowflake className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 shrink-0" />
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[#101828] font-bold text-sm truncate">{primaryFeature}</span>
-                  <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Features</span>
+                  <span className="text-[#101828] font-bold text-xs sm:text-sm truncate">{primaryFeature}</span>
+                  <span className="text-slate-500 text-[10px] sm:text-[11px] font-medium capitalize tracking-wide">Features</span>
                 </div>
               </div>
             </>
           )}
         </div>
 
-        <div className="w-full h-px bg-slate-100 mb-6" />
+        <div className="w-full h-px bg-slate-100 mb-5" />
 
         {/* Row 3: Location & Delivery */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-              <MapPin className="h-5 w-5 text-slate-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+              <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-bold text-sm md:text-base truncate">{vehicle.city}{vehicle.state ? `, ${vehicle.state}` : ""}</span>
-              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Pickup location</span>
+              <span className="text-[#101828] font-bold text-sm sm:text-base truncate">{vehicle.city}{vehicle.state ? `, ${vehicle.state}` : ""}</span>
+              <span className="text-slate-500 text-[10px] sm:text-[11px] font-medium capitalize tracking-wide">Pickup location</span>
             </div>
           </div>
           {vehicle.freeDelivery && (
-            <div className="flex items-center gap-2 text-[#2E9D68] font-bold text-sm bg-[#EFFBF3] px-3 py-1.5 rounded-lg border border-[#2E9D68]/20">
-              <Truck className="h-4 w-4" /> Free delivery available
+            <div className="flex items-center gap-2 text-[#2E9D68] font-bold text-xs sm:text-sm bg-transparent px-0 py-0 rounded-none border-0">
+              Free delivery available
+              <Truck className="h-4 w-4 sm:h-5 sm:w-5 ml-1" />
             </div>
           )}
         </div>
 
-        <div className="w-full h-px bg-slate-100 mb-6" />
+        {/* NO DIVIDER HERE, just like the reference! */}
 
-        {/* Row 4: Trust Chips */}
+        {/* Row 4: Trust Chips (Wrap beautifully) */}
         {(vehicle.freeCancellation || vehicle.noHiddenFees || unlimitedKm) && (
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5 border-t border-slate-100 pt-5">
             {vehicle.freeCancellation && (
-              <div className="flex-1 flex items-center justify-center gap-2 bg-[#EFFBF3] text-[#2E9D68] border border-[#2E9D68]/20 px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm">
-                <ShieldCheck className="h-4 w-4 md:h-5 md:w-5" /> Free cancellation
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#EFFBF3] text-[#2E9D68] px-3 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex-1 min-w-[140px]">
+                <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5" /> Free cancellation
               </div>
             )}
+            {vehicle.freeCancellation && (vehicle.noHiddenFees || unlimitedKm) && <div className="w-px h-6 bg-slate-200 hidden sm:block" />}
+            
             {vehicle.noHiddenFees && (
-              <div className="flex-1 flex items-center justify-center gap-2 bg-[#EDF5FF] text-[#2072EA] border border-[#2072EA]/20 px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm">
-                <Tag className="h-4 w-4 md:h-5 md:w-5" /> No hidden fees
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#EDF5FF] text-[#2072EA] px-3 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex-1 min-w-[140px]">
+                <Tag className="h-4 w-4 sm:h-5 sm:w-5" /> No hidden fees
               </div>
             )}
+            {vehicle.noHiddenFees && unlimitedKm && <div className="w-px h-6 bg-slate-200 hidden sm:block" />}
+            
             {unlimitedKm && (
-              <div className="flex-1 flex items-center justify-center gap-2 bg-[#F7F0FF] text-[#7B42F6] border border-[#7B42F6]/20 px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm">
-                <Route className="h-4 w-4 md:h-5 md:w-5" /> Unlimited km
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 bg-[#F7F0FF] text-[#7B42F6] px-3 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex-1 min-w-[140px]">
+                <Route className="h-4 w-4 sm:h-5 sm:w-5" /> Unlimited km
               </div>
             )}
           </div>
@@ -428,10 +284,10 @@ export function VehicleCard({ vehicle, priority = false, variant = "grid", saved
         {/* Row 5: Primary CTA */}
         <Link
           href={`/cars/${vehicle.slug}`}
-          className="w-full flex items-center justify-center gap-2 bg-[#FF4D00] hover:bg-[#E64500] text-white py-4 rounded-xl font-bold text-base shadow-[0_4px_14px_rgba(255,77,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,77,0,0.4)] hover:-translate-y-0.5 transition-all group/btn mt-auto"
+          className="w-full flex items-center justify-center gap-2 bg-[#FF4D00] hover:bg-[#E64500] text-white py-3.5 sm:py-4 rounded-xl font-bold text-sm sm:text-base shadow-[0_4px_14px_rgba(255,77,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,77,0,0.4)] hover:-translate-y-0.5 transition-all group/btn mt-auto"
         >
           Check Availability
-          <ArrowRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
+          <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover/btn:translate-x-1" />
         </Link>
 
       </div>
