@@ -49,7 +49,7 @@ const footerColumns: { title: string; links: { label: string; href: string }[] }
 // Touch-target friendly link styles for footer nav. min-h-[44px] + flex keeps
 // the tappable area >= 44px tall at every breakpoint (no md:inline collapse).
 const footerLinkClass =
-  "flex items-center min-h-[44px] py-1.5 text-sm text-slate-400 hover:text-white transition-colors";
+  "flex items-center py-1 text-sm text-slate-400 hover:text-white transition-colors";
 
 
 
@@ -70,13 +70,13 @@ export function SiteFooter() {
   return (
     <footer className="bg-[#0f172a] text-white">
       {/* Main Footer Content */}
-      <div className="mx-auto max-w-[1280px] px-4 md:px-6 lg:px-8 py-16 md:py-20">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6">
+      <div className="mx-auto max-w-[1280px] px-4 md:px-6 lg:px-8 py-10 md:py-12">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6">
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <Link
               href="/"
-              className="inline-flex items-center rounded-lg bg-white p-1.5 shadow-sm transition-opacity hover:opacity-95"
+              className="inline-flex items-center rounded-md bg-white px-2 py-1 shadow-sm transition-opacity hover:opacity-95 w-fit"
             >
               <BrandLogo
                 className="h-[40px] w-[130px]"
@@ -99,7 +99,7 @@ export function SiteFooter() {
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="flex items-center gap-1.5 min-h-[44px] py-1.5 text-sm text-slate-400 hover:text-white transition-colors"
+                      className="flex items-center gap-1.5 py-1 text-sm text-slate-400 hover:text-white transition-colors"
                     >
                       <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
                       {link.label}
