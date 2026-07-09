@@ -492,14 +492,11 @@ function SearchContent() {
                   }
                 >
                   {vehicles.map((vehicle, index) => (
-                    <div
-                      key={vehicle.id}
-                      className="bg-white rounded-lg shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow"
-                    >
+                    <div key={vehicle.id}>
                       <VehicleCard
                         vehicle={vehicle}
                         priority={index < 3}
-                        variant={viewMode === "list" ? "compact" : "default"}
+                        variant={viewMode}
                       />
                     </div>
                   ))}
