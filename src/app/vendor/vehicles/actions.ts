@@ -142,9 +142,6 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
         monthly_rate_aud: data.monthlyRateAud,
         weekend_rate_aud: data.weekendRateAud,
         notes: data.notes,
-        free_delivery: data.freeDelivery,
-        free_cancellation: data.freeCancellation,
-        no_hidden_fees: data.noHiddenFees,
         status: vehicleStatus,
       })
       .select("id")
@@ -313,9 +310,6 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
   if (data.monthlyRateAud !== undefined) updateData.monthly_rate_aud = data.monthlyRateAud;
   if (data.weekendRateAud !== undefined) updateData.weekend_rate_aud = data.weekendRateAud;
   if (data.notes !== undefined) updateData.notes = data.notes;
-  if (data.freeDelivery !== undefined) updateData.free_delivery = data.freeDelivery;
-  if (data.freeCancellation !== undefined) updateData.free_cancellation = data.freeCancellation;
-  if (data.noHiddenFees !== undefined) updateData.no_hidden_fees = data.noHiddenFees;
   if (data.branchId) {
     // Verify new branch belongs to organization
     const { data: branch } = await supabase

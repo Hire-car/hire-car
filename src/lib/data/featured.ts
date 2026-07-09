@@ -21,7 +21,7 @@ export const getActiveFeaturedVehicles = unstable_cache(
       vehicles!inner(
         id, slug, title, make, model, year, seats, fuel, transmission, category,
         price_per_day_aud, weekly_rate_aud, monthly_rate_aud, daily_distance_limit_km,
-        extra_distance_fee_aud, instant_book, free_delivery, free_cancellation, no_hidden_fees, status,
+        extra_distance_fee_aud, instant_book, status,
         branches!inner(name, city, state, status),
         organizations!inner(name, slug, status, logo_url, verified_at),
         vehicle_images(storage_path, approved, sort_order),
@@ -61,9 +61,6 @@ export const getActiveFeaturedVehicles = unstable_cache(
     daily_distance_limit_km: number | null;
     extra_distance_fee_aud: number | null;
     instant_book: boolean;
-    free_delivery: boolean;
-    free_cancellation: boolean;
-    no_hidden_fees: boolean;
     branches: { name: string; city: string; state: string };
     organizations: { name: string; slug: string; logo_url: string | null; verified_at: string | null };
     vehicle_images?: VehicleImageRecord[] | null;
@@ -128,9 +125,9 @@ export const getActiveFeaturedVehicles = unstable_cache(
       avgRating,
       reviewCount,
       features: (v.vehicle_features ?? []).map((f) => f.feature),
-      freeDelivery: v.free_delivery,
-      freeCancellation: v.free_cancellation,
-      noHiddenFees: v.no_hidden_fees,
+      freeDelivery: false,
+      freeCancellation: false,
+      noHiddenFees: false,
       superHost: computeSuperHost({ verified, avgRating, reviewCount }),
     } satisfies Vehicle;
   });
