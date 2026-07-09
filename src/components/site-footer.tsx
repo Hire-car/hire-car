@@ -79,21 +79,21 @@ export function SiteFooter() {
               className="inline-flex items-center rounded-lg bg-white p-1.5 shadow-sm transition-opacity hover:opacity-95"
             >
               <BrandLogo
-                className="h-[90px] w-[180px]"
-                imageClassName="rounded-md"
+                className="h-[40px] w-[130px]"
+                imageClassName="rounded-sm"
               />
             </Link>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-400">
-              Australia&apos;s trusted premium marketplace for verified car
+            <p className="mt-6 max-w-xs text-sm leading-relaxed text-slate-400">
+              Australia's trusted premium marketplace for verified car
               rental operators. Connect with local fleet owners for your next
               journey.
             </p>
 
             {/* Popular Locations */}
-            <div className="mt-6">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-3">
+            <div className="mt-8">
+              <h4 className="!text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
                 Popular Locations
-              </h3>
+              </h4>
               <ul className="grid grid-cols-2 gap-2">
                 {popularLocations.map((link) => (
                   <li key={link.label}>
@@ -113,9 +113,9 @@ export function SiteFooter() {
           {/* Link Columns */}
           {footerColumns.map((column) => (
             <div key={column.title}>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
+              <h4 className="!text-xs font-bold uppercase tracking-widest text-slate-300 mb-4">
                 {column.title}
-              </h3>
+              </h4>
               <ul className="space-y-1">
                 {column.links.map((link) => (
                   <li key={link.label}>
