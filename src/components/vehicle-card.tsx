@@ -114,7 +114,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         <div className="absolute -bottom-6 right-3 sm:-bottom-10 sm:right-6 z-20 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-3 sm:p-5 flex flex-col items-center min-w-[130px] sm:min-w-[160px]">
           <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wide">From</span>
           <div className="flex items-baseline mt-0.5 mb-1.5 sm:mb-2">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
+            <span className="text-3xl sm:text-4xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
             <span className="text-[10px] sm:text-xs font-bold text-slate-600 ml-1">/ day</span>
           </div>
           <div className="w-full h-px bg-slate-100 mb-1.5 sm:mb-2" />
@@ -130,22 +130,22 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       </div>
 
       {/* 2. BODY SECTION */}
-      <div className="flex flex-col p-4 sm:p-6 lg:p-8 pt-10 sm:pt-14 z-10 bg-white relative">
+      <div className="flex flex-col p-4 sm:p-5 lg:p-6 pt-10 sm:pt-12 z-10 bg-white relative">
         
         {/* Row 1: Identity & Host */}
         <div className="flex flex-wrap items-start justify-between gap-y-4 gap-x-6 mb-5">
           <div className="flex flex-col min-w-[200px] flex-1">
             <Link href={`/cars/${vehicle.slug}`}>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#101828] leading-tight hover:text-[#FF4D00] transition-colors break-words">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-[#101828] leading-tight hover:text-[#FF4D00] transition-colors break-words">
                 {vehicle.title}
               </h2>
             </Link>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
               {hasRating && (
                 <div className="flex items-center gap-1.5">
-                  <Star className="h-5 w-5 fill-[#FFB800] text-[#FFB800]" />
-                  <span className="font-bold text-[#101828] text-base sm:text-lg">{vehicle.avgRating!.toFixed(1)}</span>
-                  <span className="text-slate-500 font-medium text-xs sm:text-sm">({vehicle.reviewCount} Reviews)</span>
+                  <Star className="h-4 w-4 fill-[#FFB800] text-[#FFB800]" />
+                  <span className="font-bold text-[#101828] text-sm sm:text-base">{vehicle.avgRating!.toFixed(1)}</span>
+                  <span className="text-slate-500 font-medium text-xs">({vehicle.reviewCount} Reviews)</span>
                 </div>
               )}
               {hasRating && vehicle.verified && <span className="text-slate-300">|</span>}
@@ -284,10 +284,10 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         {/* Row 5: Primary CTA */}
         <Link
           href={`/cars/${vehicle.slug}`}
-          className="w-full flex items-center justify-center gap-2 bg-[#FF4D00] hover:bg-[#E64500] text-white py-3.5 sm:py-4 rounded-xl font-bold text-sm sm:text-base shadow-[0_4px_14px_rgba(255,77,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,77,0,0.4)] hover:-translate-y-0.5 transition-all group/btn mt-auto"
+          className="w-full flex items-center justify-center gap-2 bg-[#FF4D00] hover:bg-[#E64500] text-white py-3 sm:py-3.5 rounded-xl font-bold text-sm shadow-[0_4px_14px_rgba(255,77,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,77,0,0.4)] hover:-translate-y-0.5 transition-all group/btn mt-auto"
         >
           Check Availability
-          <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover/btn:translate-x-1" />
+          <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
         </Link>
 
       </div>
