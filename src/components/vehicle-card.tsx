@@ -181,51 +181,51 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
 
         <div className="w-full h-px bg-slate-100 mb-5" />
 
-        {/* Row 2: Specs Grid - Fluid wrapping */}
-        <div className="flex flex-wrap gap-3 sm:gap-4 mb-4 items-center">
-          <div className="flex items-center gap-2">
-            <Car className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 shrink-0" />
+        {/* Row 2: Specs Grid - Single Line Forced */}
+        <div className="flex items-center justify-between w-full mb-4 gap-1 sm:gap-2 overflow-hidden">
+          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+            <Car className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-semibold text-xs truncate">{vehicle.category}</span>
-              <span className="text-slate-500 text-[10px] font-medium capitalize tracking-wide">Body Type</span>
+              <span className="text-[#101828] font-bold text-[10px] sm:text-[11px] truncate leading-tight">{vehicle.category}</span>
+              <span className="text-slate-500 text-[8px] sm:text-[9px] font-medium capitalize tracking-wide truncate">Body Type</span>
             </div>
           </div>
-          <div className="w-px h-6 bg-slate-200 hidden min-[400px]:block" />
+          <div className="w-px h-5 bg-slate-200 shrink-0" />
           
-          <div className="flex items-center gap-2">
-            <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 shrink-0" />
+          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+            <Settings2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-semibold text-xs truncate">{vehicle.transmission}</span>
-              <span className="text-slate-500 text-[10px] font-medium capitalize tracking-wide">Transmission</span>
+              <span className="text-[#101828] font-bold text-[10px] sm:text-[11px] truncate leading-tight">{vehicle.transmission}</span>
+              <span className="text-slate-500 text-[8px] sm:text-[9px] font-medium capitalize tracking-wide truncate">Transmission</span>
             </div>
           </div>
-          <div className="w-px h-6 bg-slate-200 hidden min-[500px]:block" />
+          <div className="w-px h-5 bg-slate-200 shrink-0" />
 
-          <div className="flex items-center gap-2">
-            <Fuel className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 shrink-0" />
+          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+            <Fuel className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-semibold text-xs truncate">{vehicle.fuel}</span>
-              <span className="text-slate-500 text-[10px] font-medium capitalize tracking-wide">Fuel Type</span>
+              <span className="text-[#101828] font-bold text-[10px] sm:text-[11px] truncate leading-tight">{vehicle.fuel}</span>
+              <span className="text-slate-500 text-[8px] sm:text-[9px] font-medium capitalize tracking-wide truncate">Fuel Type</span>
             </div>
           </div>
-          <div className="w-px h-6 bg-slate-200 hidden min-[650px]:block" />
+          <div className="w-px h-5 bg-slate-200 shrink-0" />
 
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 shrink-0" />
+          <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 shrink-0" />
             <div className="flex flex-col min-w-0">
-              <span className="text-[#101828] font-semibold text-xs truncate">{vehicle.seats} Seats</span>
-              <span className="text-slate-500 text-[10px] font-medium capitalize tracking-wide">Seating</span>
+              <span className="text-[#101828] font-bold text-[10px] sm:text-[11px] truncate leading-tight">{vehicle.seats} Seats</span>
+              <span className="text-slate-500 text-[8px] sm:text-[9px] font-medium capitalize tracking-wide truncate">Seating</span>
             </div>
           </div>
           
           {primaryFeature && (
             <>
-              <div className="w-px h-6 bg-slate-200 hidden min-[800px]:block" />
-              <div className="flex items-center gap-2">
-                <Snowflake className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 shrink-0" />
+              <div className="w-px h-5 bg-slate-200 shrink-0" />
+              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                <Snowflake className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500 shrink-0" />
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[#101828] font-semibold text-xs truncate">{primaryFeature}</span>
-                  <span className="text-slate-500 text-[10px] font-medium capitalize tracking-wide">Features</span>
+                  <span className="text-[#101828] font-bold text-[10px] sm:text-[11px] truncate leading-tight">{primaryFeature}</span>
+                  <span className="text-slate-500 text-[8px] sm:text-[9px] font-medium capitalize tracking-wide truncate">Features</span>
                 </div>
               </div>
             </>
