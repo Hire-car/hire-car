@@ -255,20 +255,20 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
 
         {/* NO DIVIDER HERE, just like the reference! */}
 
-        {/* Row 4: Trust Chips (Wrap beautifully) */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-4 border-t border-slate-100 pt-4">
-          <div className="flex items-center justify-center gap-1.5 bg-[#EFFBF3] text-[#2E9D68] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
-            <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Free cancellation
+        {/* Row 4: Trust Chips - Single Line Forced */}
+        <div className="flex items-center justify-between w-full mb-4 border-t border-slate-100 pt-4 gap-1 sm:gap-2 overflow-hidden">
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-[#EFFBF3] text-[#2E9D68] px-1.5 sm:px-2 py-1.5 rounded-md font-bold text-[9px] sm:text-[10px] flex-1 min-w-0">
+            <ShieldCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" /> <span className="truncate">Free cancellation</span>
           </div>
-          <div className="w-px h-5 bg-slate-200 hidden sm:block" />
+          <div className="w-px h-5 bg-slate-200 shrink-0" />
           
-          <div className="flex items-center justify-center gap-1.5 bg-[#EDF5FF] text-[#2072EA] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
-            <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> No hidden fees
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-[#EDF5FF] text-[#2072EA] px-1.5 sm:px-2 py-1.5 rounded-md font-bold text-[9px] sm:text-[10px] flex-1 min-w-0">
+            <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" /> <span className="truncate">No hidden fees</span>
           </div>
-          <div className="w-px h-5 bg-slate-200 hidden sm:block" />
+          <div className="w-px h-5 bg-slate-200 shrink-0" />
           
-          <div className="flex items-center justify-center gap-1.5 bg-[#F7F0FF] text-[#7B42F6] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
-            <Route className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Unlimited km
+          <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-[#F7F0FF] text-[#7B42F6] px-1.5 sm:px-2 py-1.5 rounded-md font-bold text-[9px] sm:text-[10px] flex-1 min-w-0">
+            <Route className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" /> <span className="truncate">Unlimited km</span>
           </div>
         </div>
 
