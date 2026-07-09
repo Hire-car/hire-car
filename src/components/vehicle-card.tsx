@@ -256,29 +256,21 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         {/* NO DIVIDER HERE, just like the reference! */}
 
         {/* Row 4: Trust Chips (Wrap beautifully) */}
-        {(vehicle.freeCancellation || vehicle.noHiddenFees || unlimitedKm) && (
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-4 border-t border-slate-100 pt-4">
-            {vehicle.freeCancellation && (
-              <div className="flex items-center justify-center gap-1.5 bg-[#EFFBF3] text-[#2E9D68] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
-                <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Free cancellation
-              </div>
-            )}
-            {vehicle.freeCancellation && (vehicle.noHiddenFees || unlimitedKm) && <div className="w-px h-5 bg-slate-200 hidden sm:block" />}
-            
-            {vehicle.noHiddenFees && (
-              <div className="flex items-center justify-center gap-1.5 bg-[#EDF5FF] text-[#2072EA] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
-                <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> No hidden fees
-              </div>
-            )}
-            {vehicle.noHiddenFees && unlimitedKm && <div className="w-px h-5 bg-slate-200 hidden sm:block" />}
-            
-            {unlimitedKm && (
-              <div className="flex items-center justify-center gap-1.5 bg-[#F7F0FF] text-[#7B42F6] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
-                <Route className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Unlimited km
-              </div>
-            )}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-4 border-t border-slate-100 pt-4">
+          <div className="flex items-center justify-center gap-1.5 bg-[#EFFBF3] text-[#2E9D68] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
+            <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Free cancellation
           </div>
-        )}
+          <div className="w-px h-5 bg-slate-200 hidden sm:block" />
+          
+          <div className="flex items-center justify-center gap-1.5 bg-[#EDF5FF] text-[#2072EA] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
+            <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> No hidden fees
+          </div>
+          <div className="w-px h-5 bg-slate-200 hidden sm:block" />
+          
+          <div className="flex items-center justify-center gap-1.5 bg-[#F7F0FF] text-[#7B42F6] px-2.5 py-1.5 sm:py-2 rounded-lg font-semibold text-[11px] sm:text-xs flex-1 min-w-[120px]">
+            <Route className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Unlimited km
+          </div>
+        </div>
 
         {/* Row 5: Primary CTA */}
         <Link
