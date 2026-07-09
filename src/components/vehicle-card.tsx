@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import Image from "next/image";
 import { ImageWithFallback } from "@/components/image-with-fallback";
@@ -8,7 +7,7 @@ import {
   BadgeCheck,
   Zap,
   Car,
-  Cog,
+  Settings2,
   Fuel,
   Users,
   Snowflake,
@@ -19,6 +18,7 @@ import {
   Route,
   Tag,
   CalendarCheck,
+  Heart
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,386 +32,261 @@ interface VehicleCardProps {
   saved?: boolean;
 }
 
-// A single spec cell in the icon row (body type / transmission / fuel / seats / feature).
-function Spec({ icon: Icon, label, value }: { icon: typeof Car; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-2 min-w-0">
-      <Icon className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-      <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold text-slate-900">{value}</span>
-        <span className="block truncate text-[11px] text-slate-400">{label}</span>
-      </span>
-    </div>
-  );
-}
-
-// A trust chip (free cancellation / no hidden fees / unlimited km).
-function Chip({ icon: Icon, label, tone }: { icon: typeof Car; label: string; tone: "emerald" | "blue" | "violet" }) {
-  const tones = {
-    emerald: "bg-emerald-50 text-emerald-700",
-    blue: "bg-blue-50 text-blue-700",
-    violet: "bg-violet-50 text-violet-700",
-  } as const;
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold ${tones[tone]}`}>
-      <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-      {label}
-    </span>
-  );
-}
-
-function RichVehicleCard({ vehicle, priority = false, saved = false, showFeaturedBadge = false }: VehicleCardProps & { showFeaturedBadge?: boolean }) {
-  const href = `/cars/${vehicle.slug}`;
-  const hasRating = (vehicle.reviewCount ?? 0) > 0 && vehicle.avgRating != null;
-  const unlimitedKm = vehicle.dailyDistanceLimitKm == null;
-  // Surface Air Conditioning first if present, else the first listed feature.
-  const primaryFeature = vehicle.features?.includes("Air Conditioning")
-    ? "Air Conditioning"
-    : vehicle.features?.[0];
-
-  return (
-    <div className="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ea580c]/30 hover:shadow-xl">
-      {/* Image */}
-      <div className="relative h-52 overflow-hidden bg-slate-100">
-        <Link href={href} className="absolute inset-0" aria-label={vehicle.title}>
-          <ImageWithFallback
-            src={vehicle.imageUrl}
-            alt={`${vehicle.title} available from ${vehicle.vendorName}`}
-            fill
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        </Link>
-
-        {showFeaturedBadge && (
-          <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-[#ea580c] px-3 py-1.5 text-xs font-bold text-white shadow-md">
-            <Star className="h-3.5 w-3.5 fill-white" aria-hidden="true" /> Featured
-          </span>
-        )}
-
-        <div className="absolute right-3 top-3 z-10">
-          <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
-        </div>
-
-        {vehicle.instantBook && (
-          <span className="absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-slate-900/90 px-3 py-1.5 text-xs font-bold text-white shadow-md backdrop-blur-sm">
-            <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" /> Instant Booking
-          </span>
-        )}
-
-        {/* Price block */}
-        <div className="absolute bottom-3 right-3 z-10 rounded-2xl bg-white/95 px-4 py-2.5 text-right shadow-lg backdrop-blur-sm">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">From</p>
-          <p className="leading-none">
-            <span className="text-2xl font-black text-slate-900">${vehicle.pricePerDayAud}</span>
-            <span className="text-xs font-semibold text-slate-500"> /day</span>
-          </p>
-          {(vehicle.weeklyRateAud || vehicle.monthlyRateAud) && (
-            <div className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5 text-[11px] font-medium text-slate-500">
-              {vehicle.weeklyRateAud ? <p>Weekly from <span className="font-bold text-[#ea580c]">${vehicle.weeklyRateAud}</span></p> : null}
-              {vehicle.monthlyRateAud ? <p>Monthly from <span className="font-bold text-[#ea580c]">${vehicle.monthlyRateAud}</span></p> : null}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex flex-1 flex-col gap-4 p-5">
-        {/* Title + vendor */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <Link href={href}>
-              <h3 className="truncate text-xl font-bold text-slate-900 transition-colors group-hover:text-[#ea580c]">{vehicle.title}</h3>
-            </Link>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-              {hasRating && (
-                <span className="inline-flex items-center gap-1 font-semibold text-slate-900 whitespace-nowrap">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
-                  {vehicle.avgRating!.toFixed(1)}
-                  <span className="font-normal text-slate-400">({vehicle.reviewCount} Reviews)</span>
-                </span>
-              )}
-              {hasRating && vehicle.verified && <span className="text-slate-200 hidden sm:inline">|</span>}
-              {vehicle.verified && (
-                <span className="inline-flex items-center gap-1 font-medium text-emerald-600 whitespace-nowrap">
-                  <ShieldCheck className="h-4 w-4" aria-hidden="true" /> Verified Host
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Vendor identity */}
-          <Link href={vehicle.vendorSlug ? `/vendors/${vehicle.vendorSlug}` : href} className="flex shrink-0 items-center gap-2">
-            {vehicle.vendorLogoUrl ? (
-              <Image
-                src={vehicle.vendorLogoUrl}
-                alt={vehicle.vendorName}
-                width={32}
-                height={32}
-                className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200"
-              />
-            ) : null}
-            <span className="max-w-[120px] text-right">
-              <span className="flex items-center justify-end gap-1 truncate text-sm font-bold text-slate-900">
-                <span className="truncate">{vehicle.vendorName}</span>
-                {vehicle.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-[#ea580c]" aria-hidden="true" />}
-              </span>
-              {vehicle.superHost && (
-                <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
-                  <Crown className="h-3 w-3" aria-hidden="true" /> Super Host
-                </span>
-              )}
-            </span>
-          </Link>
-        </div>
-
-        {/* Specs */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-slate-100 pt-4 sm:grid-cols-3 md:grid-cols-5">
-          <Spec icon={Car} label="Body Type" value={vehicle.category} />
-          <Spec icon={Cog} label="Transmission" value={vehicle.transmission} />
-          <Spec icon={Fuel} label="Fuel Type" value={vehicle.fuel} />
-          <Spec icon={Users} label="Seating" value={`${vehicle.seats} Seats`} />
-          {primaryFeature && <Spec icon={Snowflake} label="Features" value={primaryFeature} />}
-        </div>
-
-        {/* Location + delivery */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
-          <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
-            <MapPin className="h-4 w-4 text-[#ea580c]" aria-hidden="true" />
-            <span className="font-medium text-slate-900">{vehicle.city}{vehicle.state ? `, ${vehicle.state}` : ""}</span>
-          </span>
-          {vehicle.freeDelivery && (
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
-              <Truck className="h-4 w-4" aria-hidden="true" /> Free delivery available
-            </span>
-          )}
-        </div>
-
-        {/* Trust chips */}
-        {(vehicle.freeCancellation || vehicle.noHiddenFees || unlimitedKm) && (
-          <div className="flex flex-wrap gap-2">
-            {vehicle.freeCancellation && <Chip icon={CalendarCheck} label="Free cancellation" tone="emerald" />}
-            {vehicle.noHiddenFees && <Chip icon={Tag} label="No hidden fees" tone="blue" />}
-            {unlimitedKm && <Chip icon={Route} label="Unlimited km" tone="violet" />}
-          </div>
-        )}
-
-        {/* CTA */}
-        <Link
-          href={href}
-          className="mt-auto flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#ea580c] px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-[#c2410c]"
-        >
-          Check Availability
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 export function VehicleCard({ vehicle, priority = false, variant = "default", saved = false }: VehicleCardProps) {
   if (variant === "compact") {
     return (
-      <Card variant="interactive" className="flex-row p-0 gap-0 card-lift border-slate-200/60 shadow-sm overflow-hidden bg-white/95">
-        <div className="relative w-28 h-28 shrink-0 overflow-hidden rounded-none bg-slate-100">
+      <Card variant="interactive" className="flex-row p-0 gap-0 card-lift border-slate-200/60 shadow-sm overflow-hidden bg-white/95 relative group">
+        <div className="relative w-32 h-32 shrink-0 overflow-hidden rounded-none bg-slate-100">
           <ImageWithFallback
             src={vehicle.imageUrl}
-            alt={`${vehicle.title} available from ${vehicle.vendorName}`}
+            alt={`${vehicle.title}`}
             fill
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            sizes="112px"
-            className="object-cover"
+            priority={priority}
+            sizes="128px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>
         <CardContent className="flex-1 min-w-0 py-3 px-4 flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-foreground truncate text-base flex items-center gap-1.5">
+            <h3 className="font-extrabold text-slate-900 tracking-tight truncate text-base">
               {vehicle.title}
-              {vehicle.instantBook && <span title="Instant Book"><Zap className="h-3.5 w-3.5 text-amber-500 fill-amber-500" /></span>}
             </h3>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="info">{vehicle.category}</Badge>
-              <span className="text-sm text-muted-foreground truncate">{vehicle.vendorName}</span>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="truncate text-sm font-medium text-slate-600">{vehicle.vendorName}</span>
             </div>
           </div>
-          <div className="flex items-center justify-between mt-2 gap-2">
-            <span className="text-lg font-extrabold text-foreground shrink-0 whitespace-nowrap">${vehicle.pricePerDayAud}<span className="text-xs font-medium text-muted-foreground">/day</span></span>
-            <Link
-              href={`/cars/${vehicle.slug}`}
-              className="touch-target inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary/80 transition-colors"
-            >
-              View
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+          <div className="flex items-center justify-between mt-3 gap-2">
+            <div className="flex items-baseline text-slate-900">
+              <span className="text-lg font-black">${vehicle.pricePerDayAud}</span>
+              <span className="text-xs font-bold text-slate-500 ml-1">/day</span>
+            </div>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (variant === "featured") {
-    return (
-      <RichVehicleCard
-        vehicle={vehicle}
-        priority={priority}
-        saved={saved}
-        showFeaturedBadge={true}
-      />
-    );
-  }
-
-  // DEFAULT VARIANT (Pro Designer Rich Grid Card)
+  // EXACT REFERENCE DESIGN (Applies to both default and featured to ensure it always looks perfect)
   const isTrusted = vehicle.verified;
   const hasRating = (vehicle.reviewCount ?? 0) > 0 && vehicle.avgRating != null;
   const unlimitedKm = vehicle.dailyDistanceLimitKm == null;
   const primaryFeature = vehicle.features?.includes("Air Conditioning") ? "Air Conditioning" : vehicle.features?.[0];
 
   return (
-    <div className="group h-full flex flex-col overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#FF4D00]/20">
-      
-      {/* Top Image Section */}
-      <div className="relative h-[220px] shrink-0 bg-slate-50">
-        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-0" aria-label={vehicle.title}>
+    <div className="w-full max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col">
+      {/* 1. HERO IMAGE SECTION */}
+      <div className="relative w-full aspect-[16/9] md:aspect-[2.2/1] bg-slate-100 rounded-t-3xl rounded-b-none z-0">
+        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 overflow-hidden rounded-t-3xl">
           <ImageWithFallback
             src={vehicle.imageUrl}
-            alt={`${vehicle.title} available from ${vehicle.vendorName}`}
+            alt={vehicle.title}
             fill
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
           />
         </Link>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none opacity-60 transition-opacity group-hover:opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/30 via-transparent to-transparent pointer-events-none rounded-t-3xl opacity-80" />
         
-        {/* Top Badges */}
-        <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
-          {isTrusted && (
-            <span className="inline-flex items-center gap-1 rounded bg-white/95 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-emerald-700 shadow-sm backdrop-blur-md">
-              <ShieldCheck className="h-3 w-3" /> Trusted
-            </span>
-          )}
-          {vehicle.instantBook && (
-            <span className="inline-flex items-center gap-1 rounded bg-slate-900/90 px-2 py-1 text-[9px] font-black uppercase tracking-widest text-white shadow-sm backdrop-blur-md">
-              <Zap className="h-3 w-3 fill-amber-400 text-amber-400" /> Instant
-            </span>
-          )}
+        {/* Top Left: Featured Badge */}
+        {(variant === "featured" || priority) && (
+          <div className="absolute top-4 left-4 md:top-6 md:left-6 z-10 bg-[#FF4D00] text-white px-3 py-1.5 rounded-lg shadow-md flex items-center gap-1.5">
+            <Star className="h-4 w-4 fill-white text-white" />
+            <span className="text-xs font-bold tracking-wide">Featured</span>
+          </div>
+        )}
+
+        {/* Top Right: Favourite Button */}
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
+            <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
+          </div>
         </div>
 
-        {/* Favorite Button */}
-        <div className="absolute right-3 top-3 z-10">
-          <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
-        </div>
+        {/* Bottom Left: Instant Booking */}
+        {vehicle.instantBook && (
+          <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 z-10 bg-[#101828] text-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow-md flex items-center gap-1.5">
+            <Zap className="h-4 w-4 text-[#00E5FF] fill-[#00E5FF]" />
+            <span className="text-xs md:text-sm font-semibold">Instant Booking</span>
+          </div>
+        )}
 
-        {/* Floating Price Tag */}
-        <div className="absolute bottom-3 right-3 z-10 rounded-[14px] bg-white/95 px-3 py-1.5 shadow-lg backdrop-blur-md border border-white/50">
-          <p className="flex items-baseline gap-1">
-            <span className="text-xl font-black text-slate-900">${vehicle.pricePerDayAud}</span>
-            <span className="text-[10px] font-bold text-slate-500">/day</span>
-          </p>
+        {/* Bottom Right: Floating Pricing Panel (Overlaps the image bottom edge on desktop) */}
+        <div className="absolute -bottom-4 right-4 md:-bottom-12 md:right-8 z-20 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-4 md:p-5 flex flex-col items-center min-w-[140px] md:min-w-[180px]">
+          <span className="text-[10px] md:text-xs font-semibold text-slate-500 uppercase tracking-wide">From</span>
+          <div className="flex items-baseline mt-1 mb-2">
+            <span className="text-3xl md:text-5xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
+            <span className="text-[10px] md:text-xs font-bold text-slate-600 ml-1">/ day</span>
+          </div>
+          <div className="w-full h-px bg-slate-100 mb-2" />
+          <div className="w-full flex flex-col gap-0.5 text-center">
+            {vehicle.weeklyRateAud && (
+              <span className="text-[10px] md:text-xs font-medium text-slate-500">Weekly from <strong className="text-[#FF4D00]">${vehicle.weeklyRateAud}</strong></span>
+            )}
+            {vehicle.monthlyRateAud && (
+              <span className="text-[10px] md:text-xs font-medium text-slate-500">Monthly from <strong className="text-[#FF4D00]">${vehicle.monthlyRateAud}</strong></span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Body Content */}
-      <div className="flex flex-1 flex-col p-5">
-        <Link href={`/cars/${vehicle.slug}`} className="mb-2">
-          <div className="flex items-start justify-between gap-3">
-            <h3 className="line-clamp-1 text-lg font-extrabold text-slate-900 transition-colors group-hover:text-[#FF4D00]">
-              {vehicle.year ? `${vehicle.year} ` : ""}{vehicle.title}
-            </h3>
-            {hasRating && (
-              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-50 px-2 py-1 text-xs font-bold text-slate-900 border border-slate-100">
-                <Star className="h-3.5 w-3.5 fill-[#FFB800] text-[#FFB800]" />
-                {vehicle.avgRating!.toFixed(1)}
-              </span>
-            )}
+      {/* 2. BODY SECTION */}
+      <div className="flex flex-col p-4 md:p-8 pt-8 md:pt-10 z-10 bg-white rounded-b-3xl relative">
+        
+        {/* Row 1: Identity & Host */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex-1 min-w-0 pr-0 md:pr-48">
+            <Link href={`/cars/${vehicle.slug}`}>
+              <h2 className="text-2xl md:text-[32px] font-extrabold text-[#101828] leading-tight truncate hover:text-[#FF4D00] transition-colors">
+                {vehicle.title}
+              </h2>
+            </Link>
+            <div className="flex flex-wrap items-center gap-3 mt-2">
+              {hasRating && (
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-5 w-5 fill-[#FFB800] text-[#FFB800]" />
+                  <span className="font-bold text-[#101828] text-base md:text-lg">{vehicle.avgRating!.toFixed(1)}</span>
+                  <span className="text-slate-500 font-medium text-sm">({vehicle.reviewCount} Reviews)</span>
+                </div>
+              )}
+              {hasRating && vehicle.verified && <span className="text-slate-300 hidden md:block">|</span>}
+              {vehicle.verified && (
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-5 w-5 text-[#249AA0]" />
+                  <span className="text-sm font-semibold text-slate-600">Verified Host</span>
+                </div>
+              )}
+            </div>
           </div>
-        </Link>
+          
+          <Link href={vehicle.vendorSlug ? `/vendors/${vehicle.vendorSlug}` : `/cars/${vehicle.slug}`} className="flex items-center gap-3 shrink-0">
+            {vehicle.vendorLogoUrl ? (
+              <Image src={vehicle.vendorLogoUrl} alt={vehicle.vendorName} width={48} height={48} className="h-10 w-10 md:h-12 md:w-12 rounded-full object-cover ring-1 ring-slate-200" />
+            ) : (
+              <div className="flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-sm font-bold uppercase text-slate-500">
+                {vehicle.vendorName.substring(0, 2)}
+              </div>
+            )}
+            <div className="flex flex-col items-start md:items-end">
+              <div className="flex items-center gap-1">
+                <span className="font-bold text-[#101828] text-sm md:text-base">{vehicle.vendorName}</span>
+                {vehicle.verified && <BadgeCheck className="h-4 w-4 md:h-5 md:w-5 text-[#FF4D00] fill-[#FF4D00] stroke-white" />}
+              </div>
+              {vehicle.superHost && (
+                <div className="flex items-center gap-1 mt-0.5 bg-[#FFF5F0] px-2 py-0.5 rounded text-[10px] md:text-xs font-bold uppercase tracking-wider text-[#FF4D00]">
+                  <Crown className="h-3 w-3" /> Super Host
+                </div>
+              )}
+            </div>
+          </Link>
+        </div>
 
-        {/* Host Identity Row */}
-        <div className="flex items-center gap-2 mb-4">
-          {vehicle.vendorLogoUrl ? (
-            <Image
-              src={vehicle.vendorLogoUrl}
-              alt={vehicle.vendorName}
-              width={24}
-              height={24}
-              className="h-6 w-6 shrink-0 rounded-full object-cover ring-1 ring-slate-200"
-            />
-          ) : (
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[10px] font-bold uppercase text-slate-500">
-              {vehicle.vendorName.substring(0, 2)}
+        <div className="w-full h-px bg-slate-100 mb-6" />
+
+        {/* Row 2: Specs Grid */}
+        <div className="grid grid-cols-2 md:flex md:flex-row md:items-center md:justify-between gap-4 md:gap-2 mb-6">
+          <div className="flex items-center gap-3">
+            <Car className="h-6 w-6 text-slate-600 shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.category}</span>
+              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Body Type</span>
+            </div>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-slate-200" />
+          
+          <div className="flex items-center gap-3">
+            <Settings2 className="h-6 w-6 text-slate-600 shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.transmission}</span>
+              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Transmission</span>
+            </div>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-slate-200" />
+
+          <div className="flex items-center gap-3">
+            <Fuel className="h-6 w-6 text-slate-600 shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.fuel}</span>
+              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Fuel Type</span>
+            </div>
+          </div>
+          <div className="hidden md:block w-px h-8 bg-slate-200" />
+
+          <div className="flex items-center gap-3">
+            <Users className="h-6 w-6 text-slate-600 shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[#101828] font-bold text-sm truncate">{vehicle.seats} Seats</span>
+              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Seating</span>
+            </div>
+          </div>
+          
+          {primaryFeature && (
+            <>
+              <div className="hidden md:block w-px h-8 bg-slate-200" />
+              <div className="flex items-center gap-3">
+                <Snowflake className="h-6 w-6 text-slate-600 shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[#101828] font-bold text-sm truncate">{primaryFeature}</span>
+                  <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Features</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="w-full h-px bg-slate-100 mb-6" />
+
+        {/* Row 3: Location & Delivery */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+              <MapPin className="h-5 w-5 text-slate-600" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[#101828] font-bold text-sm md:text-base truncate">{vehicle.city}{vehicle.state ? `, ${vehicle.state}` : ""}</span>
+              <span className="text-slate-500 text-[11px] font-medium uppercase tracking-wide">Pickup location</span>
+            </div>
+          </div>
+          {vehicle.freeDelivery && (
+            <div className="flex items-center gap-2 text-[#2E9D68] font-bold text-sm bg-[#EFFBF3] px-3 py-1.5 rounded-lg border border-[#2E9D68]/20">
+              <Truck className="h-4 w-4" /> Free delivery available
             </div>
           )}
-          <span className="truncate text-sm font-bold text-slate-900">{vehicle.vendorName}</span>
-          {vehicle.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-[#249AA0] fill-[#249AA0] stroke-white" />}
-          {vehicle.superHost && (
-            <span className="ml-auto inline-flex shrink-0 items-center gap-1 rounded bg-[#FFF5F0] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#FF4D00]">
-              <Crown className="h-3 w-3" /> Super Host
-            </span>
-          )}
         </div>
 
-        {/* Minimal Specs Row (Icons + Values only) */}
-        <div className="mb-4 flex items-center justify-between gap-2 rounded-xl bg-[#F7F8FA] px-3 py-2 border border-[#E8EAED]">
-          <div className="flex items-center gap-1.5 truncate text-[11px] font-bold text-slate-700">
-            <Users className="h-3.5 w-3.5 shrink-0 text-slate-400" /> <span className="truncate">{vehicle.seats} Seats</span>
-          </div>
-          <div className="h-3 w-px bg-slate-300" />
-          <div className="flex items-center gap-1.5 truncate text-[11px] font-bold text-slate-700">
-            <Cog className="h-3.5 w-3.5 shrink-0 text-slate-400" /> <span className="truncate">{vehicle.transmission}</span>
-          </div>
-          <div className="h-3 w-px bg-slate-300" />
-          <div className="flex items-center gap-1.5 truncate text-[11px] font-bold text-slate-700">
-            <Fuel className="h-3.5 w-3.5 shrink-0 text-slate-400" /> <span className="truncate">{vehicle.fuel}</span>
-          </div>
-        </div>
+        <div className="w-full h-px bg-slate-100 mb-6" />
 
-        {/* Location & Delivery */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
-          <span className="inline-flex items-center gap-1 text-slate-600">
-            <MapPin className="h-3.5 w-3.5 text-[#ea580c]" />
-            <span className="truncate max-w-[120px]">{vehicle.city}</span>
-          </span>
-          {vehicle.freeDelivery && (
-            <span className="inline-flex items-center gap-1 text-[#2E9D68]">
-              <Truck className="h-3.5 w-3.5" /> Free delivery
-            </span>
-          )}
-        </div>
-
-        {/* Trust Chips (Wrapping) */}
+        {/* Row 4: Trust Chips */}
         {(vehicle.freeCancellation || vehicle.noHiddenFees || unlimitedKm) && (
-          <div className="mb-4 flex flex-wrap gap-1.5">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             {vehicle.freeCancellation && (
-              <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">
-                <CalendarCheck className="h-3 w-3" /> Free cancellation
-              </span>
+              <div className="flex-1 flex items-center justify-center gap-2 bg-[#EFFBF3] text-[#2E9D68] border border-[#2E9D68]/20 px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm">
+                <ShieldCheck className="h-4 w-4 md:h-5 md:w-5" /> Free cancellation
+              </div>
             )}
             {vehicle.noHiddenFees && (
-              <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700">
-                <Tag className="h-3 w-3" /> No hidden fees
-              </span>
+              <div className="flex-1 flex items-center justify-center gap-2 bg-[#EDF5FF] text-[#2072EA] border border-[#2072EA]/20 px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm">
+                <Tag className="h-4 w-4 md:h-5 md:w-5" /> No hidden fees
+              </div>
             )}
             {unlimitedKm && (
-              <span className="inline-flex items-center gap-1 rounded bg-violet-50 px-2 py-1 text-[10px] font-bold text-violet-700">
-                <Route className="h-3 w-3" /> Unlimited km
-              </span>
+              <div className="flex-1 flex items-center justify-center gap-2 bg-[#F7F0FF] text-[#7B42F6] border border-[#7B42F6]/20 px-3 py-2.5 rounded-xl font-bold text-xs md:text-sm">
+                <Route className="h-4 w-4 md:h-5 md:w-5" /> Unlimited km
+              </div>
             )}
           </div>
         )}
 
-        {/* Bottom CTA Button */}
+        {/* Row 5: Primary CTA */}
         <Link
           href={`/cars/${vehicle.slug}`}
-          className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#FF4D00] to-[#FF6200] px-4 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(255,77,0,0.3)] group-hover:from-[#E64500] group-hover:to-[#E65800]"
+          className="w-full flex items-center justify-center gap-2 bg-[#FF4D00] hover:bg-[#E64500] text-white py-4 rounded-xl font-bold text-base shadow-[0_4px_14px_rgba(255,77,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,77,0,0.4)] hover:-translate-y-0.5 transition-all group/btn mt-auto"
         >
           Check Availability
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <ArrowRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
         </Link>
+
       </div>
     </div>
   );
