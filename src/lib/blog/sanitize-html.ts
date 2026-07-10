@@ -1,6 +1,6 @@
 /** Allowed tags in AI-generated blog HTML. */
 const ALLOWED_TAGS = new Set([
-  "h2", "h3", "p", "ul", "ol", "li", "blockquote", "a", "strong", "em", "br",
+  "h1", "h2", "h3", "h4", "h5", "h6", "p", "ul", "ol", "li", "blockquote", "a", "strong", "b", "em", "i", "br",
 ]);
 
 /** Strip dangerous content from AI-generated HTML before persistence/render. */

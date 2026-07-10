@@ -1,13 +1,17 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { updateBlogArticle, type UpdateBlogArticleState } from "./actions";
+import { updateBlogArticle, uploadBlogImage, type UpdateBlogArticleState } from "./actions";
 import type { AdminBlogArticleDetail } from "@/lib/blog/queries";
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor"), { ssr: false });
+
 
 const initialState: UpdateBlogArticleState = { success: false };
 
@@ -21,6 +25,9 @@ export function BlogEditForm({ article, categories, cancelHref }: BlogEditFormPr
   const updateWithId = updateBlogArticle.bind(null, article.id);
   const [state, formAction, pending] = useActionState(updateWithId, initialState);
   const prevSuccessRef = useRef(false);
+  const [featuredImageUrl, setFeaturedImageUrl] = useState(article.featured_image_url ?? "");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [bodyContent, setBodyContent] = useState(article.body ?? "");
 
   useEffect(() => {
     if (state.success && !prevSuccessRef.current) {
@@ -106,16 +113,12 @@ export function BlogEditForm({ article, categories, cancelHref }: BlogEditFormPr
 
           <div>
             <Label htmlFor="body">Body (HTML)</Label>
-            <Textarea
-              id="body"
-              name="body"
-              rows={18}
-              defaultValue={article.body}
-              className="mt-1 font-mono text-xs"
-            />
+            <div className="mt-1">
+              <RichTextEditor value={bodyContent} onChange={setBodyContent} />
+              <input type="hidden" name="body" value={bodyContent} />
+            </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Allowed tags: h2, h3, p, ul, ol, li, blockquote, a (relative links
-              only), strong, em, br. Anything else is stripped on save.
+              Rich text editor enabled. Custom styles, images, and embedded media are supported.
             </p>
             <FieldError errors={state.fieldErrors} field="body" />
           </div>
@@ -129,13 +132,63 @@ export function BlogEditForm({ article, categories, cancelHref }: BlogEditFormPr
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="featuredImageUrl">Featured Image URL</Label>
-              <Input
-                id="featuredImageUrl"
-                name="featuredImageUrl"
-                defaultValue={article.featured_image_url ?? ""}
-                className="mt-1"
-              />
+              <Label htmlFor="featuredImageUrl">Featured Image</Label>
+              <div className="mt-1 flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Input
+                    id="featuredImageUrl"
+                    name="featuredImageUrl"
+                    value={featuredImageUrl}
+                    onChange={(e) => setFeaturedImageUrl(e.target.value)}
+                    className="flex-1"
+                    placeholder="https://..."
+                  />
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      title="Upload custom image"
+                      disabled={isUploadingImage}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setIsUploadingImage(true);
+                        try {
+                          const formData = new FormData();
+                          formData.append("file", file);
+                          formData.append("slug", article.slug);
+                          const res = await uploadBlogImage(formData);
+                          if (res.success) {
+                            setFeaturedImageUrl(res.url);
+                            toast.success("Image uploaded!");
+                          } else {
+                            toast.error(res.error);
+                          }
+                        } catch (err) {
+                          toast.error("Failed to upload image");
+                        } finally {
+                          setIsUploadingImage(false);
+                          e.target.value = "";
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      disabled={isUploadingImage}
+                      className="whitespace-nowrap rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
+                    >
+                      {isUploadingImage ? "Uploading..." : "Upload File"}
+                    </button>
+                  </div>
+                </div>
+                {featuredImageUrl && (
+                  <div className="relative aspect-video w-full max-w-xs overflow-hidden rounded-lg border border-border mt-2 bg-slate-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={featuredImageUrl} alt="Preview" className="object-cover w-full h-full" />
+                  </div>
+                )}
+              </div>
               <FieldError errors={state.fieldErrors} field="featuredImageUrl" />
             </div>
             <div>

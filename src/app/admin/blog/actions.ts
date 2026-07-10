@@ -180,3 +180,32 @@ export async function updateBlogArticle(
 
   return { success: true };
 }
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+export async function uploadBlogImage(formData: FormData): Promise<{ success: true; url: string } | { success: false; error: string }> {
+  await requireAdminRole(["owner", "admin"]);
+
+  const file = formData.get("file") as File | null;
+  const slug = formData.get("slug") as string || "general";
+
+  if (!file) return { success: false, error: "No file provided" };
+  if (file.size > MAX_FILE_SIZE) return { success: false, error: "File too large. Maximum size is 10MB." };
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) return { success: false, error: "Invalid file type. Only JPEG, PNG, and WebP are allowed." };
+
+  const supabase = createAdminClient();
+  const timestamp = Date.now();
+  const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+  const path = `${slug}/${timestamp}-${sanitizedFilename}`;
+
+  const { error } = await supabase.storage.from("blog-images").upload(path, file, {
+    contentType: file.type,
+    cacheControl: "31536000",
+  });
+
+  if (error) return { success: false, error: `Upload failed: ${error.message}` };
+
+  const { data } = supabase.storage.from("blog-images").getPublicUrl(path);
+  return { success: true, url: data.publicUrl };
+}
