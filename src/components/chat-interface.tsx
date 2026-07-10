@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { sendMessage } from "@/app/actions/chat";
+import { sendMessage, getMessages } from "@/app/actions/chat";
 import { Send, Loader2, Lock, CheckCheck, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ type Message = {
 interface ChatInterfaceProps {
   leadId: string;
   currentUserId: string;
+  vendorUserIds?: string[];
   initialMessages: Message[];
   otherPartyName: string;
   backLink?: string;
@@ -74,7 +75,7 @@ const ChatBg = () => (
   </svg>
 );
 
-export function ChatInterface({ leadId, currentUserId, initialMessages, otherPartyName, backLink, headerActions }: ChatInterfaceProps) {
+export function ChatInterface({ leadId, currentUserId, vendorUserIds, initialMessages, otherPartyName, backLink, headerActions }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -85,6 +86,8 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const [supabase] = useState(() => createClient());
+
+  const isVendorMember = useMemo(() => vendorUserIds?.includes(currentUserId) ?? false, [vendorUserIds, currentUserId]);
 
   const groupedMessages = useMemo(() => {
     const groups: { dateLabel: string; messages: (Message & { isConsecutive: boolean; isLastInGroup: boolean })[] }[] = [];
@@ -133,7 +136,28 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await getMessages(leadId);
+        if (data && Array.isArray(data)) {
+          setMessages((prev) => {
+            const realPrevMessages = prev.filter(m => !m.id.startsWith('temp-'));
+            const tempMessages = prev.filter(m => m.id.startsWith('temp-'));
+            if (realPrevMessages.length !== data.length) {
+              return [...data, ...tempMessages];
+            }
+            return prev;
+          });
+        }
+      } catch (err) {
+        // ignore polling errors
+      }
+    }, 4000);
+
+    return () => { 
+      supabase.removeChannel(channel); 
+      clearInterval(interval);
+    };
   }, [leadId, supabase]);
 
   const handleSend = async (e?: React.FormEvent) => {
@@ -270,7 +294,9 @@ export function ChatInterface({ leadId, currentUserId, initialMessages, otherPar
                   {/* Messages */}
                   <div className="flex flex-col gap-0.5">
                     {group.messages.map((msg) => {
-                      const isMe = msg.sender_user_id === currentUserId;
+                      const isMe = isVendorMember 
+                        ? vendorUserIds!.includes(msg.sender_user_id) 
+                        : msg.sender_user_id === currentUserId;
                       const isPending = pendingMessageIds.has(msg.id);
                       
                       return (

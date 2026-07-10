@@ -62,6 +62,12 @@ export default async function CustomerChatRoomPage({
     .eq("lead_id", lead.id)
     .order("created_at", { ascending: true });
 
+  const { data: vendorMembers } = await supabase
+    .from("organization_members")
+    .select("user_id")
+    .eq("organization_id", lead.vendor_id);
+  const vendorUserIds = vendorMembers?.map(m => m.user_id) || [];
+
   const org = lead.organizations as unknown as { name: string } | null;
 
   return (
@@ -71,6 +77,7 @@ export default async function CustomerChatRoomPage({
         <ChatInterface
           leadId={lead.id}
           currentUserId={user.id}
+          vendorUserIds={vendorUserIds}
           initialMessages={messages || []}
           otherPartyName={org?.name || "Vendor"}
           backLink="/messages"

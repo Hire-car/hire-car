@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { sendNewMessageNotification } from "@/lib/email/ses";
 import { requireUser } from "@/lib/security/auth";
@@ -207,4 +207,55 @@ export async function sendMessage(leadId: string, body: string) {
   void notifyMessageRecipient(payload.data.leadId, user.id, payload.data.body);
 
   return { data };
+}
+
+export async function getMessages(leadId: string) {
+  const user = await requireUser();
+  const supabase = createAdminClient();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("id, customer_email, customer_user_id, vendor_id")
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (!lead) return { error: "Conversation not found." };
+
+  const isCustomerById = !!lead.customer_user_id && lead.customer_user_id === user.id;
+  const isCustomerByEmail =
+    !!profile?.email &&
+    lead.customer_email.toLowerCase() === profile.email.toLowerCase();
+  const isCustomer = isCustomerById || isCustomerByEmail;
+
+  const { data: membership } = await supabase
+    .from("organization_members")
+    .select("user_id")
+    .eq("organization_id", lead.vendor_id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const isVendorMember = !!membership;
+
+  if (!isCustomer && !isVendorMember) {
+    return { error: "Unauthorized" };
+  }
+
+  const { data: messages, error } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("lead_id", lead.id)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("[chat:getMessages] fetch failed", error);
+    return { error: "Failed to fetch messages" };
+  }
+
+  return { data: messages };
 }

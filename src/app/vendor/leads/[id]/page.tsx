@@ -42,6 +42,12 @@ export default async function VendorChatRoomPage({
     .eq("lead_id", lead.id)
     .order("created_at", { ascending: true });
 
+  const { data: vendorMembers } = await supabase
+    .from("organization_members")
+    .select("user_id")
+    .eq("organization_id", lead.vendor_id);
+  const vendorUserIds = vendorMembers?.map(m => m.user_id) || [];
+
   const vehicle = lead.vehicles as unknown as { title: string; price_per_day_aud: number } | null;
 
   return (
@@ -116,11 +122,11 @@ export default async function VendorChatRoomPage({
           </div>
         </div>
 
-        {/* Chat Panel */}
         <div className="lg:col-span-2">
           <ChatInterface 
             leadId={lead.id} 
             currentUserId={user.id} 
+            vendorUserIds={vendorUserIds}
             initialMessages={messages || []} 
             otherPartyName={lead.customer_name}
           />
