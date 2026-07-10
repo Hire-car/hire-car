@@ -1,7 +1,7 @@
 "use client";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { ClassicEditor, Bold, Italic, Essentials, Paragraph, Heading, List, Link as CKLink } from "ckeditor5";
+import { ClassicEditor, Bold, Italic, Essentials, Paragraph, Heading, List, Link as CKLink, Image, ImageInsert, ImageToolbar, ImageCaption, ImageStyle, ImageResize, LinkImage, Table, TableToolbar } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 
 interface RichTextEditorProps {
@@ -16,7 +16,11 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         editor={ClassicEditor}
         data={value}
         config={{
-          plugins: [Essentials, Bold, Italic, Paragraph, Heading, List, CKLink],
+          plugins: [
+            Essentials, Bold, Italic, Paragraph, Heading, List, CKLink,
+            Image, ImageInsert, ImageToolbar, ImageCaption, ImageStyle, ImageResize, LinkImage,
+            Table, TableToolbar
+          ],
           toolbar: [
             "heading",
             "|",
@@ -25,10 +29,29 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
             "link",
             "bulletedList",
             "numberedList",
+            "insertImage",
+            "insertTable",
             "|",
             "undo",
             "redo",
           ],
+          image: {
+            toolbar: [
+              "imageStyle:inline",
+              "imageStyle:block",
+              "imageStyle:side",
+              "|",
+              "toggleImageCaption",
+              "imageTextAlternative"
+            ]
+          },
+          table: {
+            contentToolbar: [
+              "tableColumn",
+              "tableRow",
+              "mergeTableCells"
+            ]
+          }
         }}
         onChange={(event, editor) => {
           const data = editor.getData();
