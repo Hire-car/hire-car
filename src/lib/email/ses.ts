@@ -1,10 +1,10 @@
 import nodemailer from "nodemailer";
 import { getAppUrl, optionalEnv } from "@/lib/config";
 
-const smtpHost = optionalEnv("SMTP_HOST");
+const smtpHost = optionalEnv("SMTP_HOST") || "email-smtp.ap-southeast-2.amazonaws.com";
 const smtpPort = parseInt(optionalEnv("SMTP_PORT") || "465", 10);
-const smtpUser = optionalEnv("SMTP_USER");
-const smtpPass = optionalEnv("SMTP_PASS");
+const smtpUser = optionalEnv("SMTP_USER") || "AKIAT3STWTTRRYLGNUFV";
+const smtpPass = optionalEnv("SMTP_PASS") || "BJAbtXLb/IGLJXuvaD6+gCPG9GWGgUUfhFgW1ZqzAkvs";
 
 export const transporter = (smtpHost && smtpUser && smtpPass)
   ? nodemailer.createTransport({
@@ -276,7 +276,7 @@ export async function sendContactMessage(input: {
   if (!transporter) return { skipped: true };
   const to = process.env.CONTACT_EMAIL_TO ?? process.env.EMAIL_FROM ?? "support@hirecarmarketplace.com.au";
   await transporter.sendMail({
-    from: process.env.EMAIL_FROM ?? "Hire Car Support <support@hirecarmarketplace.com.au>",
+    from: FROM,
     to,
     replyTo: input.email,
     subject: `Hire Car contact: ${input.topic}`,
