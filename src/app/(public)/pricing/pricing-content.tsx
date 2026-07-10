@@ -216,15 +216,15 @@ export function PricingContent() {
 
                   <ul className="space-y-4 mb-10 flex-1">
                     {[
-                      { text: `${plan.features.listings}`, included: true },
-                      { text: `${plan.features.branches} branch${plan.features.branches === "1 branch" ? "" : "es"}`, included: true },
+                      { text: plan.features.listings, included: true },
+                      { text: plan.features.branches === "Unlimited" ? "Unlimited branches" : plan.features.branches, included: true },
                       { text: "Lead email notifications", included: true },
                       { text: "Real-time lead alerts", included: plan.features.realtime },
-                      { text: `${plan.features.analytics} analytics`, included: true },
+                      { text: plan.features.analytics === "Full + exports" ? "Full analytics + exports" : `${plan.features.analytics} analytics`, included: true },
                       { text: "Featured placement eligibility", included: plan.features.featured },
                       { text: "Bulk vehicle upload", included: plan.features.bulk },
                       { text: "API access", included: plan.features.api },
-                      { text: `${plan.features.support} support`, included: true },
+                      { text: plan.code === "pro" ? plan.features.support : `${plan.features.support} support`, included: true },
                     ].map((feat, i) => (
                       <li key={i} className={`flex items-center gap-3 text-sm font-medium ${feat.included ? "text-slate-700" : "text-slate-400"}`}>
                         <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
