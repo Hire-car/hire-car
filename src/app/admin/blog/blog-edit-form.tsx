@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { updateBlogArticle, uploadBlogImage, type UpdateBlogArticleState } from "./actions";
 import type { AdminBlogArticleDetail } from "@/lib/blog/queries";
 import dynamic from "next/dynamic";
+import "ckeditor5/ckeditor5.css";
 
 const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor"), { ssr: false });
 

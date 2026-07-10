@@ -2,8 +2,6 @@
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { ClassicEditor, Bold, Italic, Essentials, Paragraph, Heading, List, Link as CKLink, Image, ImageInsert, ImageToolbar, ImageCaption, ImageStyle, ImageResize, LinkImage, Table, TableToolbar } from "ckeditor5";
-import "ckeditor5/ckeditor5.css";
-
 import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface RichTextEditorProps {
