@@ -122,6 +122,9 @@ export function toFriendlyAuthError(error: unknown): string {
     return FRIENDLY_AUTH_MESSAGES.phoneUnavailable;
   }
 
-  // Anything we cannot classify falls back to a safe generic message.
-  return FRIENDLY_AUTH_MESSAGES.generic;
+  // Anything we cannot classify falls back to the actual error message or generic message.
+  if (process.env.NODE_ENV === "development") {
+    console.error("[Auth Error Unhandled]:", error);
+  }
+  return message || (typeof shape.message === "string" ? shape.message : FRIENDLY_AUTH_MESSAGES.generic);
 }
