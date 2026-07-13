@@ -82,7 +82,7 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
               ]
             }
           }}
-          onChange={(event, editor) => {
+          onChange={(event: any, editor: any) => {
             const data = editor.getData();
             onChange(data);
           }}

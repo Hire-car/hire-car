@@ -13,22 +13,21 @@ export default async function CustomerChatRoomPage({
   const user = await requireUser();
   const supabase = createAdminClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("email")
-    .eq("id", user.id)
-    .single();
-
-  // Fetch lead without customer_email filter so both customers and vendor
-  // org members can reach this page. Ownership is verified below.
-  const { data: lead } = await supabase
-    .from("leads")
-    .select(`
-      id, customer_email, customer_user_id, vendor_id,
-      organizations(name)
-    `)
-    .eq("id", id)
-    .single();
+  const [{ data: profile }, { data: lead }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("leads")
+      .select(`
+        id, customer_email, customer_user_id, vendor_id,
+        organizations(name)
+      `)
+      .eq("id", id)
+      .single()
+  ]);
 
   if (!lead) {
     notFound();
@@ -43,29 +42,34 @@ export default async function CustomerChatRoomPage({
     !!profile?.email &&
     lead.customer_email.toLowerCase() === profile.email.toLowerCase();
 
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("user_id")
-    .eq("organization_id", lead.vendor_id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [
+    { data: membership },
+    { data: messages },
+    { data: vendorMembers }
+  ] = await Promise.all([
+    supabase
+      .from("organization_members")
+      .select("user_id")
+      .eq("organization_id", lead.vendor_id)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("messages")
+      .select("*")
+      .eq("lead_id", lead.id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("organization_members")
+      .select("user_id")
+      .eq("organization_id", lead.vendor_id)
+  ]);
+  
   const isVendorMember = !!membership;
 
   if (!isCustomerById && !isCustomerByEmail && !isVendorMember) {
     notFound();
   }
-
-  // Fetch existing messages
-  const { data: messages } = await supabase
-    .from("messages")
-    .select("*")
-    .eq("lead_id", lead.id)
-    .order("created_at", { ascending: true });
-
-  const { data: vendorMembers } = await supabase
-    .from("organization_members")
-    .select("user_id")
-    .eq("organization_id", lead.vendor_id);
+  
   const vendorUserIds = vendorMembers?.map(m => m.user_id) || [];
 
   const org = lead.organizations as unknown as { name: string } | null;

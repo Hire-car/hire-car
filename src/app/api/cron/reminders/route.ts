@@ -69,5 +69,35 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ success: true, results });
+  // 3. Check for recently 'converted' leads (e.g. 3 days ago) to send Review Requests
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+  const fourDaysAgo = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
+  
+  const { data: convertedLeads } = await supabase
+    .from("leads")
+    .select("id, customer_email, customer_name, vehicles(title), organizations(name)")
+    .eq("status", "converted")
+    .lt("updated_at", threeDaysAgo)
+    .gte("updated_at", fourDaysAgo); // only within this 1-day window so we don't spam old ones
+
+  let reviewRequestsSent = 0;
+  if (convertedLeads && convertedLeads.length > 0) {
+    const { sendReviewRequestEmail } = await import("@/lib/email/ses");
+    for (const lead of convertedLeads) {
+      if (!lead.customer_email) continue;
+      const vTitle = lead.vehicles ? (lead.vehicles as any).title : "vehicle";
+      const oName = lead.organizations ? (lead.organizations as any).name : "Vendor";
+      
+      await sendReviewRequestEmail({
+        to: lead.customer_email,
+        customerName: lead.customer_name || "there",
+        vehicleTitle: vTitle,
+        vendorName: oName,
+        leadId: lead.id,
+      }).catch(e => console.error("Failed to send review request email", e));
+      reviewRequestsSent++;
+    }
+  }
+
+  return NextResponse.json({ success: true, results: { ...results, reviewRequestsSent } });
 }

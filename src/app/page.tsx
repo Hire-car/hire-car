@@ -57,25 +57,32 @@ const browseCategories = [
 ];
 
 export default async function Home() {
-  const featuredFromDb = await getActiveFeaturedVehicles();
-  // Real, moderation-approved customer reviews only. No fabricated testimonials.
-  const testimonials = await getApprovedTestimonials(4);
-  // Live, provable marketplace counts derived from approved records only.
-  const stats = await getMarketplaceStats();
-  const { vehicles: searchFallback } = await searchVehicles("", {}, { page: 1, perPage: 6 });
+  const supabase = createAdminClient();
+  
+  const [
+    featuredFromDb,
+    testimonials,
+    stats,
+    { vehicles: searchFallback },
+    { data: cityStats }
+  ] = await Promise.all([
+    getActiveFeaturedVehicles(),
+    getApprovedTestimonials(4),
+    getMarketplaceStats(),
+    searchVehicles("", {}, { page: 1, perPage: 6 }),
+    supabase
+      .from("vehicles")
+      .select("price_per_day_aud, branches!inner(city, status)")
+      .eq("status", "approved")
+      .eq("branches.status", "approved")
+  ]);
+
+  const cityDataMap: Record<string, { count: number; minPrice: number }> = {};
+  
   const featuredVehicles = (
     featuredFromDb.length > 0 ? featuredFromDb : searchFallback
   ).slice(0, 6);
-
-  // Fetch live vehicle counts and min prices per city
-  const supabase = createAdminClient();
-  const { data: cityStats } = await supabase
-    .from("vehicles")
-    .select("price_per_day_aud, branches!inner(city, status)")
-    .eq("status", "approved")
-    .eq("branches.status", "approved");
-
-  const cityDataMap: Record<string, { count: number; minPrice: number }> = {};
+  
   cityStats?.forEach((v) => {
     type BranchRecord = { city: string; status: string };
     const branch = v.branches as unknown as BranchRecord;
@@ -150,8 +157,7 @@ export default async function Home() {
               src={HERO_IMAGE_SRC}
               alt="Premium rental car"
               fill
-              loading="eager"
-              fetchPriority="high"
+              priority={true}
               sizes="100vw"
               className="object-cover object-right opacity-90"
             />

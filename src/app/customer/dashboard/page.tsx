@@ -21,24 +21,27 @@ export default async function CustomerDashboardPage() {
   const email = profile?.email;
   const firstName = profile?.full_name?.split(" ")[0] || "Customer";
 
-  // Get active enquiries count
-  const { count: enquiriesCount } = await supabase
-    .from("leads")
-    .select("id", { count: "exact", head: true })
-    .eq("customer_email", email)
-    .in("status", ["new", "contacted"]);
-
-  // Get recent enquiries
-  const { data: recentEnquiries } = await supabase
-    .from("leads")
-    .select(`
-      id, status, created_at, start_date, end_date,
-      vehicles(title, price_per_day_aud),
-      organizations(name)
-    `)
-    .eq("customer_email", email)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  // Fetch leads in parallel using the customer email
+  const [
+    { count: enquiriesCount },
+    { data: recentEnquiries }
+  ] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("customer_email", email)
+      .in("status", ["new", "contacted"]),
+    supabase
+      .from("leads")
+      .select(`
+        id, status, created_at, start_date, end_date,
+        vehicles(title, price_per_day_aud),
+        organizations(name)
+      `)
+      .eq("customer_email", email)
+      .order("created_at", { ascending: false })
+      .limit(5)
+  ]);
 
   return (
     <div className="p-6 sm:p-8 lg:p-10 bg-slate-50/50 min-h-full">

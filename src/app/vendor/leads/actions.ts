@@ -37,7 +37,7 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
   // Verify lead belongs to organization
   const { data: lead, error: leadError } = await supabase
     .from("leads")
-    .select("id, status")
+    .select("id, status, customer_email, customer_name, vehicles(title), organizations(name)")
     .eq("id", leadId)
     .eq("vendor_id", organizationId)
     .single();
@@ -59,6 +59,21 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
 
   if (updateError) {
     throw new Error(`Failed to update lead: ${updateError.message}`);
+  }
+
+  // Etiquette: Send confirmation email if newly converted
+  if (oldStatus !== "converted" && status === "converted" && lead.customer_email) {
+    const { sendLeadConvertedEmail } = await import("@/lib/email/ses");
+    const vTitle = lead.vehicles ? (lead.vehicles as any).title : "vehicle";
+    const oName = lead.organizations ? (lead.organizations as any).name : "Vendor";
+    
+    await sendLeadConvertedEmail({
+      to: lead.customer_email,
+      customerName: lead.customer_name || "there",
+      vehicleTitle: vTitle,
+      vendorName: oName,
+      leadId: lead.id,
+    }).catch(e => console.error("Failed to send conversion email", e));
   }
 
   // Add lead event

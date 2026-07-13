@@ -33,7 +33,18 @@ export default async function VendorUpgradePage({
   searchParams: Promise<{ plan?: string; from?: string }>;
 }) {
   const user = await requireUser();
-  const context = await getVendorContext(user.id);
+  const supabase = createAdminClient();
+  const [context, { data: profile }] = await Promise.all([
+    getVendorContext(user.id),
+    supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .maybeSingle()
+  ]);
+
+  const firstName = profile?.full_name?.split(" ")[0] ?? "there";
+  
   const params = await searchParams;
   const plan = params.plan ?? null;
   const from = params.from && isSafeRedirectPath(params.from) ? params.from : null;
@@ -42,14 +53,6 @@ export default async function VendorUpgradePage({
     redirect(from ?? "/vendor/dashboard");
   }
 
-  const supabase = createAdminClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const firstName = profile?.full_name?.split(" ")[0] ?? "there";
   const onboardingHref = buildVendorOnboardingHref({ plan, from });
 
   return (

@@ -11,14 +11,14 @@ describe("deriveProfileFromUser (Property 5)", () => {
     name: fc.option(fc.string(), { nil: undefined }),
     avatar_url: fc.option(fc.webUrl(), { nil: undefined }),
     picture: fc.option(fc.webUrl(), { nil: undefined }),
-  }, { withDeletedKeys: true });
+  });
 
   const userArb = fc.record({
     id: fc.uuid(),
     email: fc.option(fc.emailAddress(), { nil: undefined }),
     phone: fc.option(fc.string(), { nil: undefined }),
     user_metadata: fc.option(userMetadataArb, { nil: undefined }),
-  }, { withDeletedKeys: true }).map(u => u as User);
+  }).map(u => u as unknown as User);
 
   it("derives a valid ProfileUpsert payload without throwing for any user shape", () => {
     fc.assert(

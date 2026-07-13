@@ -17,7 +17,6 @@ const FEATURES_BY_PLAN: Record<PlanCode, PlanFeature[]> = {
     "directContact",
     "contactAnalytics",
     "realtimeLeads",
-    "featuredPlacement",
   ],
   pro: [
     "directContact",
@@ -34,7 +33,7 @@ const FEATURES_BY_PLAN: Record<PlanCode, PlanFeature[]> = {
 const BRANCH_LIMITS: Record<PlanCode, number | null> = {
   starter: 1,
   growth: 3,
-  pro: null,
+  pro: 10,
 };
 
 export function planHasFeature(
@@ -42,14 +41,20 @@ export function planHasFeature(
   feature: PlanFeature,
 ): boolean {
   if (!planCode) return false;
-  const features = FEATURES_BY_PLAN[planCode as PlanCode];
+  const normalized = planCode.trim().toLowerCase() as PlanCode;
+  const features = FEATURES_BY_PLAN[normalized];
   if (!features) return false;
   return features.includes(feature);
 }
 
 export function getBranchLimit(planCode: string | null | undefined): number | null {
   if (!planCode) return 1;
-  return BRANCH_LIMITS[planCode as PlanCode] ?? 1;
+  const normalized = planCode.trim().toLowerCase() as PlanCode;
+  // If the plan is recognized but its limit is explicitly null (unlimited), ?? 1 will override it to 1!
+  // Since we don't have nulls right now, ?? 1 is fine for unknown plans, but let's be explicit:
+  const limit = BRANCH_LIMITS[normalized];
+  if (limit === undefined) return 1; // Unknown plans default to 1
+  return limit;
 }
 
 export async function getOrganizationPlanCode(

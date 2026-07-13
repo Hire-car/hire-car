@@ -79,6 +79,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             src={vehicle.imageUrl}
             alt={vehicle.title}
             fill
+            priority={priority}
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
             sizes="(max-width: 1024px) 100vw, 1024px"
