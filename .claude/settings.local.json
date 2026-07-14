@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx eslint *)",
+      "Bash(npx tsc *)",
+      "Bash(rm -f src/app/sitemap.xml/route.ts)",
+      "Bash(rmdir src/app/sitemap.xml)",
+      "Bash(git add *)",
+      "Bash(git push *)",
+      "Bash(npm run *)"
+    ]
+  }
+}
