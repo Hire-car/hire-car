@@ -33,38 +33,55 @@ export function sanitizeBlogHtml(raw: string): string {
     }
 
     if (lower === "img") {
-      const srcMatch = attrs.match(/\ssrc\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i);
-      const altMatch = attrs.match(/\salt\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i);
-      const src = srcMatch?.[2] ?? srcMatch?.[3] ?? srcMatch?.[4] ?? "";
-      const alt = altMatch?.[2] ?? altMatch?.[3] ?? altMatch?.[4] ?? "";
-      if (!src.startsWith("/") && !src.startsWith("http://") && !src.startsWith("https://")) {
-        return "";
+      let res = "<img";
+      const safeAttrs = ["src", "alt", "width", "height", "class", "style", "srcset", "sizes"];
+      let hasValidSrc = false;
+      for (const attr of safeAttrs) {
+        const matchStr = attrs.match(new RegExp(`\\s${attr}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
+        const val = matchStr?.[2] ?? matchStr?.[3] ?? matchStr?.[4];
+        if (val) {
+          if (attr === "src") {
+             if (!val.startsWith("/") && !val.startsWith("http://") && !val.startsWith("https://")) {
+               continue;
+             }
+             hasValidSrc = true;
+          }
+          res += ` ${attr}="${val.replace(/"/g, "&quot;")}"`;
+        }
       }
-      const safeSrc = src.replace(/"/g, "&quot;");
-      const safeAlt = alt.replace(/"/g, "&quot;");
-      return `<img src="${safeSrc}" alt="${safeAlt}">`;
+      if (!hasValidSrc) return "";
+      res += ">";
+      return res;
     }
 
-    if (lower === "td" || lower === "th") {
-      const colMatch = attrs.match(/\scolspan\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i);
-      const rowMatch = attrs.match(/\srowspan\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i);
-      const colspan = colMatch?.[2] ?? colMatch?.[3] ?? colMatch?.[4] ?? "";
-      const rowspan = rowMatch?.[2] ?? rowMatch?.[3] ?? rowMatch?.[4] ?? "";
+    if (["table", "thead", "tbody", "tfoot", "tr", "td", "th"].includes(lower)) {
       let res = `<${lower}`;
-      if (colspan && /^\d+$/.test(colspan)) res += ` colspan="${colspan}"`;
-      if (rowspan && /^\d+$/.test(rowspan)) res += ` rowspan="${rowspan}"`;
+      const safeAttrs = ["colspan", "rowspan", "class", "style", "border", "cellpadding", "cellspacing", "width", "height"];
+      for (const attr of safeAttrs) {
+        const matchStr = attrs.match(new RegExp(`\\s${attr}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
+        const val = matchStr?.[2] ?? matchStr?.[3] ?? matchStr?.[4];
+        if (val) {
+          res += ` ${attr}="${val.replace(/"/g, "&quot;")}"`;
+        }
+      }
       res += ">";
       return match.startsWith("</") ? `</${lower}>` : res;
     }
 
-    // Optional: Keep classes for figure to support CKEditor image alignment
+    // Keep classes for figure to support CKEditor image alignment
     if (lower === "figure") {
-      const classMatch = attrs.match(/\sclass\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i);
-      const cls = classMatch?.[2] ?? classMatch?.[3] ?? classMatch?.[4] ?? "";
-      if (cls && (cls.includes("image") || cls.includes("table"))) {
-        const safeCls = cls.replace(/"/g, "&quot;").replace(/[^\w\s-]/g, "");
-        return match.startsWith("</") ? `</${lower}>` : `<${lower} class="${safeCls}">`;
+      let res = `<${lower}`;
+      const safeAttrs = ["class", "style"];
+      for (const attr of safeAttrs) {
+        const matchStr = attrs.match(new RegExp(`\\s${attr}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, "i"));
+        const val = matchStr?.[2] ?? matchStr?.[3] ?? matchStr?.[4];
+        if (val) {
+          const safeVal = val.replace(/"/g, "&quot;").replace(/[^\w\s-]/g, "");
+          res += ` ${attr}="${safeVal}"`;
+        }
       }
+      res += ">";
+      return match.startsWith("</") ? `</${lower}>` : res;
     }
 
     return match.startsWith("</") ? `</${lower}>` : `<${lower}>`;
