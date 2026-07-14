@@ -2,12 +2,41 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { ClassicEditor, Bold, Italic, Essentials, Paragraph, Heading, List, Link as CKLink, Image, ImageInsert, ImageToolbar, ImageCaption, ImageStyle, ImageResize, LinkImage, Table, TableToolbar } from "ckeditor5";
+import { ClassicEditor, Bold, Italic, Essentials, Paragraph, Heading, List, Link as CKLink, Image, ImageInsert, ImageToolbar, ImageCaption, ImageStyle, ImageResize, LinkImage, ImageUpload, Table, TableToolbar } from "ckeditor5";
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import { uploadBlogImage } from "@/app/admin/blog/actions";
 
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
+}
+
+class MyUploadAdapter {
+  loader: any;
+  constructor(loader: any) {
+    this.loader = loader;
+  }
+  upload() {
+    return this.loader.file.then((file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("slug", "blog-assets");
+      return uploadBlogImage(formData).then(res => {
+        if (res.success) {
+          return { default: res.url };
+        } else {
+          return Promise.reject(res.error);
+        }
+      });
+    });
+  }
+  abort() {}
+}
+
+function MyCustomUploadAdapterPlugin(editor: any) {
+  editor.plugins.get("FileRepository").createUploadAdapter = (loader: any) => {
+    return new MyUploadAdapter(loader);
+  };
 }
 
 class CKEditorErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
@@ -46,9 +75,10 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
           data={value}
           config={{
             licenseKey: "GPL",
+            extraPlugins: [MyCustomUploadAdapterPlugin],
             plugins: [
               Essentials, Bold, Italic, Paragraph, Heading, List, CKLink,
-              Image, ImageInsert, ImageToolbar, ImageCaption, ImageStyle, ImageResize, LinkImage,
+              Image, ImageInsert, ImageUpload, ImageToolbar, ImageCaption, ImageStyle, ImageResize, LinkImage,
               Table, TableToolbar
             ],
             toolbar: [
