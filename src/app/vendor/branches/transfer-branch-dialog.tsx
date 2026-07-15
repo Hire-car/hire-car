@@ -39,19 +39,22 @@ export function VendorTransferBranchDialog({ organizationId, branchId, branchNam
       
       const email = formData.get("email") as string;
       const businessName = formData.get("businessName") as string;
-      const abn = formData.get("abn") as string;
+      const rawAbn = formData.get("abn") as string;
+      const cleanAbn = rawAbn.replace(/\s/g, '');
       
-      if (!email || !businessName || !abn) {
+      if (!email || !businessName || !rawAbn) {
         toast.error("Please fill in all required fields.");
         setLoading(false);
         return;
       }
 
-      if (abn.replace(/\s/g, '').length !== 11) {
+      if (cleanAbn.length !== 11) {
         toast.error("ABN must be exactly 11 digits.");
         setLoading(false);
         return;
       }
+      
+      formData.set("abn", cleanAbn);
 
       const result = await transferBranch(formData);
 

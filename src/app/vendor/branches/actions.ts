@@ -208,7 +208,8 @@ export async function transferBranch(formData: FormData) {
   });
 
   if (!parsed.success) {
-    return { error: "Invalid form data." };
+    const errorMessages = parsed.error.issues.map(i => i.message).join(", ");
+    return { error: `Invalid form data: ${errorMessages}` };
   }
 
   const payload = parsed.data;
