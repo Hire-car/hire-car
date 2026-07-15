@@ -34,9 +34,13 @@ export function ActionButton({
 
     startTransition(async () => {
       try {
-        await action();
-        toast.success("Action completed successfully");
-        router.refresh();
+        const result = await action() as any;
+        if (result && typeof result === "object" && "error" in result) {
+          toast.error(result.error);
+        } else {
+          toast.success("Action completed successfully");
+          router.refresh();
+        }
       } catch (err: unknown) {
         const errorMsg = err instanceof Error ? err.message : "An unexpected error occurred";
         toast.error(errorMsg);

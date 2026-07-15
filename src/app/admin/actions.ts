@@ -52,7 +52,7 @@ export async function moderateVendor(rawAction: string, rawVendorId: string, raw
   const { error } = await supabase.from("organizations").update(updateData).eq("id", vendorId);
 
   if (error) {
-    throw new Error(`Failed to ${action} vendor: ${error.message}`);
+    return { error: `Failed to ${action} vendor: ${error.message}` };
   }
 
   // Approve all branches if approving vendor
@@ -119,7 +119,7 @@ export async function moderateBranch(rawAction: string, rawBranchId: string, raw
   const { error } = await supabase.from("branches").update(updateData).eq("id", branchId);
 
   if (error) {
-    throw new Error(`Failed to ${action} branch: ${error.message}`);
+    return { error: `Failed to ${action} branch: ${error.message}` };
   }
 
   // Add moderation note
@@ -161,7 +161,7 @@ export async function aiAutoApproveBranch(rawBranchId: string) {
     .single();
 
   if (fetchErr || !branch) {
-    throw new Error("Could not fetch branch for AI review.");
+    return { error: "Could not fetch branch for AI review." };
   }
 
   // Simulate AI evaluation of documents/data
@@ -169,7 +169,7 @@ export async function aiAutoApproveBranch(rawBranchId: string) {
 
   const hasSufficientData = branch.name && branch.city && branch.state && branch.phone;
   if (!hasSufficientData) {
-    throw new Error("AI Review Failed: Branch is missing critical information (city, state, or phone).");
+    return { error: "AI Review Failed: Branch is missing critical information (city, state, or phone)." };
   }
 
   // Approve
@@ -182,7 +182,7 @@ export async function aiAutoApproveBranch(rawBranchId: string) {
     .eq("id", branchId);
 
   if (error) {
-    throw new Error(`AI Approval failed: ${error.message}`);
+    return { error: `AI Approval failed: ${error.message}` };
   }
 
   // Add moderation note
@@ -255,7 +255,7 @@ export async function moderateListing(
   const { error } = await supabase.from("vehicles").update(updateData).eq("id", listingId);
 
   if (error) {
-    throw new Error(`Failed to ${action} listing: ${error.message}`);
+    return { error: `Failed to ${action} listing: ${error.message}` };
   }
 
   // Add to search index queue if approved
