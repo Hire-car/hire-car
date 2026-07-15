@@ -205,7 +205,7 @@ export function EmailAuthForm({
       const { data, error } = await supabase.auth.verifyOtp({
         email: email.trim(),
         token: otp.trim(),
-        type: "magiclink",
+        type: "email",
       });
 
       if (error || !data.session) {
