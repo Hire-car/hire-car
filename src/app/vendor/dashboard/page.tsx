@@ -281,9 +281,5 @@ export default async function VendorDashboardPage() {
 
   const organization = context.organizations[0];
 
-  return (
-    <Suspense fallback={<DashboardSkeleton />}>
-      <DashboardContent organization={organization} userId={user.id} />
-    </Suspense>
-  );
+  return <DashboardContent organization={organization} userId={user.id} />;
 }
