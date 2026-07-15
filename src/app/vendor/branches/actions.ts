@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/security/auth";
 import { uniqueSlug } from "@/lib/slug";
 import { branchSchema, transferBranchSchema } from "@/lib/validation/schemas";
 import { invalidatePseo } from "@/lib/seo/invalidate";
+import { sendBranchTransferInitiatedEmail, sendBranchTransferReceivedEmail } from "@/lib/email/ses";
 
 export async function createBranch(prevState: any, formData: FormData) {
   const user = await requireUser();
@@ -218,7 +219,7 @@ export async function transferBranch(formData: FormData) {
     // 1. Check if the branch actually belongs to the user's organization
     const { data: branchCheck, error: branchCheckError } = await supabase
       .from("branches")
-      .select("id")
+      .select("id, name, organizations!inner(name)")
       .eq("id", payload.branchId)
       .eq("organization_id", organizationId)
       .single();
@@ -333,6 +334,25 @@ export async function transferBranch(formData: FormData) {
         vehicles_transferred: transferredVehicles?.length || 0
       },
     });
+
+    // 9. Send Email Notifications
+    const branchName = branchCheck.name;
+    const vendorName = (branchCheck.organizations as unknown as { name: string }).name;
+
+    await Promise.allSettled([
+      sendBranchTransferInitiatedEmail({
+        to: user.email!,
+        vendorName: vendorName,
+        branchName: branchName,
+        newOwnerEmail: payload.email,
+        newBusinessName: payload.businessName,
+      }),
+      sendBranchTransferReceivedEmail({
+        to: payload.email,
+        newBusinessName: payload.businessName,
+        branchName: branchName,
+      }),
+    ]);
 
     revalidatePath("/vendor/branches");
     

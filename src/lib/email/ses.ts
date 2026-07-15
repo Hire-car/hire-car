@@ -523,3 +523,54 @@ export async function sendReviewRequestEmail(input: {
   });
   return { skipped: false };
 }
+
+// ─── Branch Transfer Emails ──────────────────────────────────────────────────
+export async function sendBranchTransferInitiatedEmail(input: {
+  to: string;
+  vendorName: string;
+  branchName: string;
+  newOwnerEmail: string;
+  newBusinessName: string;
+}) {
+  if (!transporter) return { skipped: true };
+  const dashboardUrl = `${getAppUrl()}/vendor/branches`;
+  
+  await transporter.sendMail({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: input.to,
+    subject: `Branch transfer initiated for ${input.branchName}`,
+    html: buildEmailTemplate({
+      title: "Transfer Initiated 🏢",
+      name: input.vendorName,
+      bodyHtml: `<p>You have successfully initiated the transfer of <strong>${input.branchName}</strong> to <strong>${input.newBusinessName}</strong> (${input.newOwnerEmail}).</p><p>This branch is now owned by the new vendor and they have been notified to claim their account.</p>`,
+      ctaText: "View Your Branches",
+      ctaUrl: dashboardUrl
+    })
+  });
+  return { skipped: false };
+}
+
+export async function sendBranchTransferReceivedEmail(input: {
+  to: string;
+  newBusinessName: string;
+  branchName: string;
+}) {
+  if (!transporter) return { skipped: true };
+  const loginUrl = `${getAppUrl()}/login`;
+  
+  await transporter.sendMail({
+    from: FROM,
+    replyTo: REPLY_TO,
+    to: input.to,
+    subject: `You have received a new branch: ${input.branchName}`,
+    html: buildEmailTemplate({
+      title: "Branch Transferred 🏢",
+      name: input.newBusinessName,
+      bodyHtml: `<p>A vendor has transferred the branch <strong>${input.branchName}</strong> to you on the Hire Car Marketplace.</p><p>Your vendor account has been automatically created. Please log in (or sign up using this email address) to manage your new branch and vehicles.</p><p>Note: Your new vendor account will require admin approval before your listings are public.</p>`,
+      ctaText: "Log in to Dashboard",
+      ctaUrl: loginUrl
+    })
+  });
+  return { skipped: false };
+}
