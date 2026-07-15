@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { invalidatePseo } from "@/lib/seo/invalidate";
+import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
 import { sendBranchTransferInitiatedEmail, sendBranchTransferReceivedEmail } from "@/lib/email/ses";
 import { uniqueSlug } from "@/lib/slug";
 import { transferBranchSchema } from "@/lib/validation/schemas";
