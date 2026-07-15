@@ -342,46 +342,37 @@ export async function getDashboardMetrics(
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const [
-    vehiclesRes,
-    newLeadsRes,
-    totalLeadsRes,
+    metricsRes,
     limitInfo,
     branchRes,
-    clicksRes
   ] = await Promise.all([
-    supabase.from("vehicles").select("status, views_count").eq("organization_id", organizationId),
-    supabase.from("leads").select("id", { count: "exact", head: true }).eq("vendor_id", organizationId).eq("status", "new"),
-    supabase.from("leads").select("id", { count: "exact", head: true }).eq("vendor_id", organizationId),
+    supabase.rpc("get_vendor_dashboard_metrics", { org_id: organizationId }).single(),
     getVehicleLimitInfo(organizationId),
     supabase.from("branches").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
-    supabase.from("contact_clicks").select("channel").eq("vendor_id", organizationId).gte("created_at", thirtyDaysAgo)
   ]);
 
-  if (vehiclesRes.error) throw new Error(`Failed to fetch vehicles: ${vehiclesRes.error.message}`);
-  if (newLeadsRes.error) throw new Error(`Failed to fetch leads: ${newLeadsRes.error.message}`);
-  if (totalLeadsRes.error) throw new Error(`Failed to fetch total leads: ${totalLeadsRes.error.message}`);
+  if (metricsRes.error) throw new Error(`Failed to fetch metrics: ${metricsRes.error.message}`);
   if (branchRes.error) throw new Error(`Failed to fetch branches: ${branchRes.error.message}`);
-  if (clicksRes.error) throw new Error(`Failed to fetch clicks: ${clicksRes.error.message}`);
 
-  const vehicles = vehiclesRes.data;
-  const newLeadsCount = newLeadsRes.count;
-  const totalLeadsCount = totalLeadsRes.count;
+  const metrics = metricsRes.data as {
+    total_views: number;
+    active_listings: number;
+    pending_listings: number;
+    total_vehicles: number;
+    new_leads: number;
+    total_leads: number;
+    phone_clicks_30d: number;
+    whatsapp_clicks_30d: number;
+    total_clicks_30d: number;
+  };
   const branchCount = branchRes.count;
-  const clicks = clicksRes.data;
-
-  const totalViews = vehicles?.reduce((acc, v) => acc + (v.views_count || 0), 0) ?? 0;
-  const phoneClicks = clicks?.filter((c) => c.channel === "phone").length ?? 0;
-  const whatsappClicks = clicks?.filter((c) => c.channel === "whatsapp").length ?? 0;
-
-  const activeListings = vehicles?.filter((v) => v.status === "approved").length ?? 0;
-  const pendingListings = vehicles?.filter((v) => v.status === "pending").length ?? 0;
 
   return {
-    vehicleCount: vehicles?.length ?? 0,
-    activeListings,
-    pendingListings,
-    newLeads: newLeadsCount ?? 0,
-    totalLeads: totalLeadsCount ?? 0,
+    vehicleCount: metrics.total_vehicles,
+    activeListings: metrics.active_listings,
+    pendingListings: metrics.pending_listings,
+    newLeads: metrics.new_leads,
+    totalLeads: metrics.total_leads,
     planLimit: limitInfo.limit,
     planCode: limitInfo.planCode,
     planUsage: limitInfo.hasLimit
@@ -389,10 +380,10 @@ export async function getDashboardMetrics(
       : `${limitInfo.currentCount} / ∞`,
     branchCount: branchCount ?? 0,
     clickStats: {
-      phone: phoneClicks,
-      whatsapp: whatsappClicks,
-      total: (clicks?.length ?? 0),
+      phone: metrics.phone_clicks_30d,
+      whatsapp: metrics.whatsapp_clicks_30d,
+      total: metrics.total_clicks_30d,
     },
-    totalViews,
+    totalViews: metrics.total_views,
   };
 }

@@ -184,7 +184,7 @@ export default async function VendorBillingPage(props: {
           <Zap className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
           <p className="text-sm text-emerald-800">
             <span className="font-semibold">Get started free:</span> activate the $0 Starter plan to list up to 5 vehicles.
-            Growth and Pro include a 14-day free trial with no credit card required.
+            Growth and Pro are our premium plans for expanding fleets.
           </p>
         </div>
       )}
@@ -362,7 +362,7 @@ export default async function VendorBillingPage(props: {
             <h2 className="text-lg font-bold text-slate-900">
               {hasActiveSub ? "Upgrade Your Plan" : "Choose a Plan"}
             </h2>
-            <p className="text-sm text-slate-500 mt-0.5">All plans include a 14-day free trial</p>
+
           </div>
           <div className="flex items-center gap-3 bg-slate-100 p-1 rounded-xl">
             <Link 

@@ -41,7 +41,7 @@ const PLANS = [
     vehicles: 20,
     highlight: true,
     badge: "Most Popular",
-    cta: "Start free trial",
+    cta: "Start listing",
     description: "For growing rental shops expanding to multiple locations.",
     features: {
       listings: "20 vehicles",
@@ -63,7 +63,7 @@ const PLANS = [
     vehicles: 50,
     highlight: false,
     badge: "Best Value",
-    cta: "Start free trial",
+    cta: "Start listing",
     description: "For established fleets needing full platform access.",
     features: {
       listings: "50 vehicles",
@@ -93,8 +93,7 @@ const FEATURE_ROWS = [
 
 const FAQS = [
   {
-    q: "Is there a free trial?",
-    a: "Yes — all plans come with a 14-day free trial, no credit card required. You can cancel anytime before the trial ends.",
+    a: "Yes — you can start with the Starter plan which is completely free for up to 5 vehicles. You can upgrade or cancel anytime.",
   },
   {
     q: "Can I change plans later?",
@@ -120,7 +119,7 @@ const FAQS = [
 
 const TRUST_ITEMS = [
   { icon: Shield, label: "Secure payments via Stripe" },
-  { icon: Zap, label: "14-day free trial" },
+
   { icon: Headphones, label: "Australian support team" },
   { icon: Globe, label: "Cancel anytime" },
 ];
@@ -139,7 +138,7 @@ export function PricingContent() {
           <MotionScroll variant="fade-up" className="relative mx-auto max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full bg-orange-50 border border-orange-100 px-4 py-1.5 mb-6">
               <Sparkles className="h-4 w-4 text-[#ea580c]" />
-              <span className="text-sm font-bold text-[#ea580c]">14-day free trial on all plans</span>
+              <span className="text-sm font-bold text-[#ea580c]">Cancel anytime</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tight">
               Simple, transparent <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-amber-500">pricing</span>
@@ -388,7 +387,7 @@ export function PricingContent() {
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">Start listing your fleet today</h2>
             <p className="mt-6 text-lg text-slate-300 font-medium">
-              Join hundreds of rental operators across Australia. Free 14-day trial — no credit card needed.
+              Join hundreds of rental operators across Australia. No credit card needed to start.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -396,7 +395,7 @@ export function PricingContent() {
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#ea580c] to-amber-500 px-8 py-4 text-base font-bold text-white hover:scale-105 transition-transform shadow-xl shadow-orange-500/20"
               >
                 <Zap className="h-5 w-5" />
-                Start free trial
+                Start listing
               </Link>
               <Link
                 href="/contact?plan=enterprise"

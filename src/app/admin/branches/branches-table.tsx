@@ -7,6 +7,7 @@ import { Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionButton } from "@/components/admin/action-button";
 import { moderateBranch, aiAutoApproveBranch } from "../actions";
+import { TransferBranchDialog } from "./transfer-branch-dialog";
 
 interface BranchRow {
   id: string;
@@ -139,6 +140,7 @@ export function AdminBranchesTable({ data }: AdminBranchesTableProps) {
                 className="h-8 text-xs"
               />
             )}
+            <TransferBranchDialog branchId={row.id as string} branchName={row.name as string} />
           </div>
         );
       },

@@ -36,9 +36,6 @@ export default function PricingLoading() {
                 <Skeleton variant="text" className="h-4 w-16 mx-auto" />
               </div>
 
-              {/* Trial badge */}
-              <Skeleton className="h-5 w-28 rounded-full mx-auto" />
-
               {/* Feature list */}
               <div className="space-y-3 pt-4 border-t border-border">
                 {Array.from({ length: 6 }).map((_, j) => (

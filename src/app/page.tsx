@@ -64,17 +64,13 @@ export default async function Home() {
     testimonials,
     stats,
     { vehicles: searchFallback },
-    { data: cityStats }
+    cityStatsRes
   ] = await Promise.all([
     getActiveFeaturedVehicles(),
     getApprovedTestimonials(4),
     getMarketplaceStats(),
     searchVehicles("", {}, { page: 1, perPage: 6 }),
-    supabase
-      .from("vehicles")
-      .select("price_per_day_aud, branches!inner(city, status)")
-      .eq("status", "approved")
-      .eq("branches.status", "approved")
+    supabase.rpc("get_homepage_city_stats")
   ]);
 
   const cityDataMap: Record<string, { count: number; minPrice: number }> = {};
@@ -83,17 +79,10 @@ export default async function Home() {
     featuredFromDb.length > 0 ? featuredFromDb : searchFallback
   ).slice(0, 6);
   
-  cityStats?.forEach((v) => {
-    type BranchRecord = { city: string; status: string };
-    const branch = v.branches as unknown as BranchRecord;
-    if (branch?.city) {
-      if (!cityDataMap[branch.city]) {
-        cityDataMap[branch.city] = { count: 0, minPrice: v.price_per_day_aud };
-      }
-      cityDataMap[branch.city].count += 1;
-      if (v.price_per_day_aud < cityDataMap[branch.city].minPrice) {
-        cityDataMap[branch.city].minPrice = v.price_per_day_aud;
-      }
+  type CityStatRow = { city: string; vehicle_count: number; min_price: number };
+  (cityStatsRes.data as CityStatRow[] | null)?.forEach((row) => {
+    if (row.city) {
+      cityDataMap[row.city] = { count: row.vehicle_count, minPrice: row.min_price };
     }
   });
 

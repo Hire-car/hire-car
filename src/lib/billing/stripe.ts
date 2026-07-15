@@ -46,7 +46,6 @@ export function getPlanFromStripePrice(priceId: string): { plan: PlanCode; inter
 }
 
 const PAID_PLANS: PlanCode[] = ["growth", "pro"];
-const TRIAL_DAYS = 14;
 
 export async function createCheckoutSession(input: {
   plan: PlanCode;
@@ -65,7 +64,6 @@ export async function createCheckoutSession(input: {
       plan: input.plan,
       interval,
     },
-    ...(isPaidPlan ? { trial_period_days: TRIAL_DAYS } : {}),
   };
 
   const params: Parameters<Stripe["checkout"]["sessions"]["create"]>[0] = {

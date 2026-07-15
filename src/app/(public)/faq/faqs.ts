@@ -30,7 +30,7 @@ export const faqs = [
     questions: [
       {
         q: "How much does it cost to list my fleet?",
-        a: "We offer tiered subscription plans based on fleet size. The Starter plan is free ($0/month) for up to 10 vehicles. Growth and Pro plans include a 14-day free trial. We do not charge commissions on your bookings — you keep 100% of your rental revenue. See our Pricing page for details.",
+        a: "We offer tiered subscription plans based on fleet size. The Starter plan is free ($0/month) for up to 5 vehicles. We do not charge commissions on your bookings — you keep 100% of your rental revenue. See our Pricing page for details.",
       },
       {
         q: "How do I receive leads?",

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { BranchForm, type BranchData } from "./branch-form";
 import { MapPin, Phone, Edit, Trash2 } from "lucide-react";
 import { deleteBranch } from "./actions";
+import { VendorTransferBranchDialog } from "./transfer-branch-dialog";
 
 export function BranchCard({ branch, organizationId }: { branch: BranchData & { status: string }, organizationId: string }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -48,6 +49,11 @@ export function BranchCard({ branch, organizationId }: { branch: BranchData & { 
             >
               <Edit className="h-4 w-4" />
             </button>
+            <VendorTransferBranchDialog 
+              organizationId={organizationId} 
+              branchId={branch.id} 
+              branchName={branch.name} 
+            />
             <button 
               disabled={isPending}
               onClick={() => {

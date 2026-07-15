@@ -5,6 +5,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
+import { uniqueSlug } from "@/lib/slug";
+import { transferBranchSchema } from "@/lib/validation/schemas";
 
 const ModerateVendorSchema = z.object({
   action: z.enum(["approve", "reject", "suspend", "restore"]),
@@ -413,4 +415,143 @@ export async function updateFraudFlagStatus(rawAction: string, rawFlagId: string
 
   revalidatePath("/admin/fraud");
   revalidatePath("/admin");
+}
+
+export async function transferBranchAction(formData: FormData) {
+  const user = await requireAdminRole(["super_admin", "moderator"]);
+  const supabase = createAdminClient();
+
+  const parsed = transferBranchSchema.safeParse({
+    branchId: formData.get("branchId"),
+    email: formData.get("email"),
+    businessName: formData.get("businessName"),
+    abn: formData.get("abn"),
+    phone: formData.get("phone") || "",
+    address: formData.get("address") || "",
+    website: formData.get("website") || "",
+    approveImmediately: formData.get("approveImmediately") === "on" || formData.get("approveImmediately") === "true",
+  });
+
+  if (!parsed.success) {
+    return { error: "Invalid form data" };
+  }
+
+  const payload = parsed.data;
+
+  try {
+    // Check if profile exists by email
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", payload.email)
+      .single();
+
+    let targetUserId = existingProfile?.id;
+
+    if (!targetUserId) {
+      // Invite new user
+      const { data: authData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(payload.email, {
+        data: { full_name: payload.businessName },
+      });
+
+      if (inviteError || !authData.user) {
+        return { error: inviteError?.message || "Failed to invite user" };
+      }
+      
+      targetUserId = authData.user.id;
+      
+      // Create their profile
+      await supabase.from("profiles").upsert({
+        id: targetUserId,
+        email: payload.email,
+        full_name: payload.businessName,
+        phone: payload.phone || null,
+      });
+    }
+
+    // Create new organization
+    const orgSlug = uniqueSlug(payload.businessName);
+    
+    const { data: organization, error: orgError } = await supabase
+      .from("organizations")
+      .insert({
+        name: payload.businessName,
+        slug: orgSlug,
+        abn: payload.abn,
+        billing_email: payload.email,
+        website: payload.website || null,
+        phone: payload.phone || null,
+        address: payload.address || null,
+        status: payload.approveImmediately ? "approved" : "pending",
+      })
+      .select("id")
+      .single();
+
+    if (orgError || !organization) {
+      return { error: orgError?.message || "Failed to create organization" };
+    }
+
+    // Add owner to organization
+    await supabase.from("organization_members").insert({
+      organization_id: organization.id,
+      user_id: targetUserId,
+      role: "owner",
+    });
+
+    // Re-assign branch
+    const { error: branchError } = await supabase
+      .from("branches")
+      .update({ 
+        organization_id: organization.id,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", payload.branchId);
+
+    if (branchError) {
+      return { error: branchError.message };
+    }
+
+    // Transfer associated vehicles to the new organization
+    const { data: transferredVehicles, error: vehiclesError } = await supabase
+      .from("vehicles")
+      .update({ organization_id: organization.id })
+      .eq("branch_id", payload.branchId)
+      .select("id");
+
+    if (vehiclesError) {
+      return { error: "Branch was transferred, but failed to re-assign associated vehicles: " + vehiclesError.message };
+    }
+
+    // Enqueue search index jobs for the transferred vehicles so they show up under the new vendor
+    if (transferredVehicles && transferredVehicles.length > 0) {
+      const jobs = transferredVehicles.map(v => ({
+        vehicle_id: v.id,
+        operation: "upsert",
+        status: "pending"
+      }));
+      await supabase.from("search_index_jobs").insert(jobs);
+    }
+
+    // Log audit event
+    await supabase.from("audit_logs").insert({
+      actor_user_id: user.id,
+      action: "branch_transferred",
+      resource_type: "branch",
+      resource_id: payload.branchId,
+      metadata: { 
+        previous_org_transferred_from: true,
+        new_org_id: organization.id,
+        new_owner: payload.email,
+        vehicles_transferred: transferredVehicles?.length || 0
+      },
+    });
+
+    revalidatePath("/admin/branches");
+    revalidatePath("/admin/vendors");
+    
+    return { success: true };
+  } catch (err: any) {
+    console.error("Transfer branch error:", err);
+    return { error: err.message || "An unexpected error occurred during transfer." };
+  }
 }

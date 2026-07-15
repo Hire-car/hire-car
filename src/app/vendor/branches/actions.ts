@@ -6,7 +6,7 @@ import { getVendorContext, ensureUserCanManageOrganization } from "@/lib/data/ve
 import { getBranchLimit, getOrganizationPlanCode } from "@/lib/plan-features";
 import { requireUser } from "@/lib/security/auth";
 import { uniqueSlug } from "@/lib/slug";
-import { branchSchema } from "@/lib/validation/schemas";
+import { branchSchema, transferBranchSchema } from "@/lib/validation/schemas";
 import { invalidatePseo } from "@/lib/seo/invalidate";
 
 export async function createBranch(prevState: any, formData: FormData) {
@@ -175,5 +175,169 @@ export async function deleteBranch(branchId: string, organizationId: string) {
     return { success: true };
   } catch (err) {
     throw new Error(err instanceof Error ? err.message : "Failed to delete branch.");
+  }
+}
+
+export async function transferBranch(formData: FormData) {
+  const user = await requireUser();
+  const supabase = createAdminClient();
+
+  const organizationId = formData.get("organizationId") as string;
+  
+  if (!organizationId) {
+    return { error: "Organization ID is required." };
+  }
+
+  // Verify the vendor owns the branch they are transferring
+  try {
+    await ensureUserCanManageOrganization(user.id, organizationId);
+  } catch (err) {
+    return { error: "Unauthorized to manage this organization." };
+  }
+
+  const parsed = transferBranchSchema.safeParse({
+    branchId: formData.get("branchId"),
+    email: formData.get("email"),
+    businessName: formData.get("businessName"),
+    abn: formData.get("abn"),
+    phone: formData.get("phone") || "",
+    address: formData.get("address") || "",
+    website: formData.get("website") || "",
+    // Vendors cannot auto-approve.
+    approveImmediately: false,
+  });
+
+  if (!parsed.success) {
+    return { error: "Invalid form data." };
+  }
+
+  const payload = parsed.data;
+
+  try {
+    // 1. Check if the branch actually belongs to the user's organization
+    const { data: branchCheck, error: branchCheckError } = await supabase
+      .from("branches")
+      .select("id")
+      .eq("id", payload.branchId)
+      .eq("organization_id", organizationId)
+      .single();
+
+    if (branchCheckError || !branchCheck) {
+      return { error: "Branch not found or does not belong to your organization." };
+    }
+
+    // 2. Check if profile exists by email
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", payload.email)
+      .single();
+
+    let targetUserId = existingProfile?.id;
+
+    if (!targetUserId) {
+      // Invite new user
+      const { data: authData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(payload.email, {
+        data: { full_name: payload.businessName },
+      });
+
+      if (inviteError || !authData.user) {
+        return { error: inviteError?.message || "Failed to invite user." };
+      }
+      
+      targetUserId = authData.user.id;
+      
+      // Create their profile
+      await supabase.from("profiles").upsert({
+        id: targetUserId,
+        email: payload.email,
+        full_name: payload.businessName,
+        phone: payload.phone || null,
+      });
+    }
+
+    // 3. Create new organization
+    const orgSlug = uniqueSlug(payload.businessName);
+    
+    const { data: newOrganization, error: orgError } = await supabase
+      .from("organizations")
+      .insert({
+        name: payload.businessName,
+        slug: orgSlug,
+        abn: payload.abn,
+        billing_email: payload.email,
+        website: payload.website || null,
+        phone: payload.phone || null,
+        address: payload.address || null,
+        status: "pending", // Always pending for vendor-initiated transfers
+      })
+      .select("id")
+      .single();
+
+    if (orgError || !newOrganization) {
+      return { error: orgError?.message || "Failed to create new organization." };
+    }
+
+    // 4. Add new owner to organization
+    await supabase.from("organization_members").insert({
+      organization_id: newOrganization.id,
+      user_id: targetUserId,
+      role: "owner",
+    });
+
+    // 5. Re-assign branch
+    const { error: branchError } = await supabase
+      .from("branches")
+      .update({ 
+        organization_id: newOrganization.id,
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", payload.branchId);
+
+    if (branchError) {
+      return { error: branchError.message };
+    }
+
+    // 6. Transfer associated vehicles to the new organization
+    const { data: transferredVehicles, error: vehiclesError } = await supabase
+      .from("vehicles")
+      .update({ organization_id: newOrganization.id })
+      .eq("branch_id", payload.branchId)
+      .select("id");
+
+    if (vehiclesError) {
+      return { error: "Branch was transferred, but failed to re-assign associated vehicles: " + vehiclesError.message };
+    }
+
+    // 7. Enqueue search index jobs for the transferred vehicles
+    if (transferredVehicles && transferredVehicles.length > 0) {
+      const jobs = transferredVehicles.map(v => ({
+        vehicle_id: v.id,
+        operation: "upsert",
+        status: "pending"
+      }));
+      await supabase.from("search_index_jobs").insert(jobs);
+    }
+
+    // 8. Log audit event
+    await supabase.from("audit_logs").insert({
+      actor_user_id: user.id,
+      action: "branch_transferred_by_vendor",
+      resource_type: "branch",
+      resource_id: payload.branchId,
+      metadata: { 
+        previous_org_id: organizationId,
+        new_org_id: newOrganization.id,
+        new_owner: payload.email,
+        vehicles_transferred: transferredVehicles?.length || 0
+      },
+    });
+
+    revalidatePath("/vendor/branches");
+    
+    return { success: true };
+  } catch (err: any) {
+    console.error("Transfer branch error:", err);
+    return { error: err.message || "An unexpected error occurred during transfer." };
   }
 }

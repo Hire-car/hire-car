@@ -184,11 +184,6 @@ export function PricingTable() {
                   {plan.name}
                 </CardTitle>
 
-                {/* "14-day free trial" badge */}
-                <Badge variant="success" className="mt-2 w-fit">
-                  14-day free trial
-                </Badge>
-
                 {/* Price */}
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold tracking-tight text-foreground">
@@ -247,7 +242,7 @@ export function PricingTable() {
 
                 {/* Microcopy within 48px below CTA */}
                 <p className="mt-3 text-center text-xs text-muted-foreground leading-relaxed">
-                  14-day trial · No credit card required · Cancel anytime
+                  Cancel anytime
                 </p>
               </CardContent>
             </Card>

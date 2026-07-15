@@ -214,28 +214,21 @@ export const getMarketplaceStats = unstable_cache(
   async function getMarketplaceStats(): Promise<MarketplaceStats> {
   const supabase = createAdminClient();
 
-  const [{ count: operatorCount }, vehicleResult] = await Promise.all([
-    supabase
-      .from("organizations")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "approved"),
-    supabase
-      .from("vehicles")
-      .select("id, branches!inner(city, status)", { count: "exact" })
-      .eq("status", "approved")
-      .eq("branches.status", "approved"),
-  ]);
+  const { data, error } = await supabase.rpc("get_marketplace_stats_optimized").single();
 
-  const cities = new Set<string>();
-  type CityRow = { branches?: { city: string | null } | null };
-  (vehicleResult.data as unknown as CityRow[] | null)?.forEach((row) => {
-    const city = row.branches?.city;
-    if (city) cities.add(city.toLowerCase());
-  });
+  if (error || !data) {
+    return {
+      operatorCount: 0,
+      cityCount: 0,
+      vehicleCount: 0,
+    };
+  }
+
+  const stats = data as { operator_count: number; city_count: number; vehicle_count: number };
 
   return {
-    operatorCount: operatorCount ?? 0,
-    cityCount: cities.size,
-    vehicleCount: vehicleResult.count ?? 0,
+    operatorCount: stats.operator_count,
+    cityCount: stats.city_count,
+    vehicleCount: stats.vehicle_count,
   };
 }, ["marketplace-stats"], { revalidate: 3600, tags: ["stats", "vehicles", "organizations"] });

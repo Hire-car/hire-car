@@ -42,7 +42,7 @@ async function DashboardContent({ organization, userId }: { organization: any, u
             <div className="max-w-2xl text-white">
               <h2 className="text-2xl font-black tracking-tight sm:text-3xl">Ready to start receiving leads?</h2>
               <p className="mt-2 text-orange-50 font-medium text-lg">
-                Start your 14-day free trial today to list your fleet and get connected with verified customers across Australia.
+                Start your subscription today to list your fleet and get connected with verified customers across Australia.
               </p>
             </div>
             <Link
@@ -50,7 +50,7 @@ async function DashboardContent({ organization, userId }: { organization: any, u
               className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-orange-600 shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl hover:bg-orange-50"
             >
               <Zap className="h-5 w-5 text-amber-500 transition-transform group-hover:scale-110" fill="currentColor" />
-              Start Free Trial
+              Select Plan
             </Link>
           </div>
         </div>
