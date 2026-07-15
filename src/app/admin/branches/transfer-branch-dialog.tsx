@@ -36,12 +36,31 @@ export function TransferBranchDialog({ branchId, branchName }: TransferBranchDia
       const formData = new FormData(e.currentTarget);
       formData.append("branchId", branchId);
       
+      const email = formData.get("email") as string;
+      const businessName = formData.get("businessName") as string;
+      const rawAbn = formData.get("abn") as string;
+      const cleanAbn = rawAbn.replace(/\s/g, '');
+      
+      if (!email || !businessName || !rawAbn) {
+        toast.error("Please fill in all required fields.");
+        setLoading(false);
+        return;
+      }
+
+      if (cleanAbn.length !== 11) {
+        toast.error("ABN must be exactly 11 digits.");
+        setLoading(false);
+        return;
+      }
+      
+      formData.set("abn", cleanAbn);
+      
       // Client side validation check
       const parsed = transferBranchSchema.safeParse({
         branchId: branchId,
-        email: formData.get("email"),
-        businessName: formData.get("businessName"),
-        abn: formData.get("abn"),
+        email: email,
+        businessName: businessName,
+        abn: cleanAbn,
         phone: formData.get("phone") || "",
         address: formData.get("address") || "",
         website: formData.get("website") || "",

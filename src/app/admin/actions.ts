@@ -4,7 +4,8 @@ import { requireAdminRole } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
+import { invalidatePseo } from "@/lib/seo/invalidate";
+import { sendBranchTransferInitiatedEmail, sendBranchTransferReceivedEmail } from "@/lib/email/ses";
 import { uniqueSlug } from "@/lib/slug";
 import { transferBranchSchema } from "@/lib/validation/schemas";
 
@@ -112,14 +113,6 @@ export async function moderateBranch(rawAction: string, rawBranchId: string, raw
     status: newStatus,
     updated_at: new Date().toISOString(),
   };
-
-  if (action === "suspend") {
-    updateData.suspended_at = new Date().toISOString();
-  }
-
-  if (action === "restore") {
-    updateData.suspended_at = null;
-  }
 
   // Update branch
   const { error } = await supabase.from("branches").update(updateData).eq("id", branchId);
@@ -433,12 +426,24 @@ export async function transferBranchAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    return { error: "Invalid form data" };
+    const errorMessages = parsed.error.issues.map((i) => i.message).join(", ");
+    return { error: `Invalid form data: ${errorMessages}` };
   }
 
   const payload = parsed.data;
 
   try {
+    // Get branch details for email
+    const { data: branchCheck, error: branchCheckError } = await supabase
+      .from("branches")
+      .select("id, name, organizations!inner(name)")
+      .eq("id", payload.branchId)
+      .single();
+
+    if (branchCheckError || !branchCheck) {
+      return { error: "Branch not found." };
+    }
+
     // Check if profile exists by email
     const { data: existingProfile } = await supabase
       .from("profiles")
@@ -545,6 +550,25 @@ export async function transferBranchAction(formData: FormData) {
         vehicles_transferred: transferredVehicles?.length || 0
       },
     });
+
+    // Send Email Notifications
+    const branchName = branchCheck.name;
+    const vendorName = (branchCheck.organizations as unknown as { name: string }).name;
+
+    await Promise.allSettled([
+      sendBranchTransferInitiatedEmail({
+        to: user.email!,
+        vendorName: vendorName,
+        branchName: branchName,
+        newOwnerEmail: payload.email,
+        newBusinessName: payload.businessName,
+      }),
+      sendBranchTransferReceivedEmail({
+        to: payload.email,
+        newBusinessName: payload.businessName,
+        branchName: branchName,
+      }),
+    ]);
 
     revalidatePath("/admin/branches");
     revalidatePath("/admin/vendors");
