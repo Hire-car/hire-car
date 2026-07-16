@@ -7,7 +7,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 interface ActionButtonProps {
-  action: () => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  action: () => Promise<any>;
   label: string;
   loadingLabel?: string;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
