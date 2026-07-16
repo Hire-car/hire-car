@@ -31,7 +31,8 @@ interface ListingRow {
 interface AdminListingsTableProps {
   data: ListingRow[];
   statusFilter: string;
-  moderateListing: (action: string, listingId: string, reason: string, reindex: boolean) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  moderateListing: (action: string, listingId: string, reason: string, reindex: boolean) => Promise<any>;
 }
 
 const statusBadgeVariant = (status: string) => {

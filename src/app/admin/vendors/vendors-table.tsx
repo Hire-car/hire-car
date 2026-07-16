@@ -25,7 +25,8 @@ interface VendorRow {
 interface AdminVendorsTableProps {
   data: VendorRow[];
   statusFilter: string;
-  moderateVendor: (action: string, vendorId: string, reason: string) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  moderateVendor: (action: string, vendorId: string, reason: string) => Promise<any>;
 }
 
 const statusBadgeVariant = (status: string) => {
