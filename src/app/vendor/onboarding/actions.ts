@@ -73,7 +73,7 @@ async function createVendorOnboardingRecords(
       state: input.state,
       address: input.address,
       phone: input.phone,
-      status: "pending",
+      status: "approved",
     }),
     supabase.from("legal_acceptances").insert({
       organization_id: organizationId,

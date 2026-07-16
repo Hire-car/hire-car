@@ -509,6 +509,7 @@ export async function transferBranchAction(formData: FormData) {
       .from("branches")
       .update({ 
         organization_id: organization.id,
+        status: payload.approveImmediately ? "approved" : "pending",
         updated_at: new Date().toISOString()
       })
       .eq("id", payload.branchId);

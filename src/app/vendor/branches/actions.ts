@@ -55,7 +55,7 @@ export async function createBranch(prevState: any, formData: FormData) {
       address: payload.address,
       phone: payload.phone || null,
       whatsapp: payload.whatsapp || null,
-      status: "pending",
+      status: "approved",
     });
 
     if (error) {

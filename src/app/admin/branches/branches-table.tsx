@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ActionButton } from "@/components/admin/action-button";
-import { moderateBranch, aiAutoApproveBranch } from "../actions";
+import { moderateBranch } from "../actions";
 import { TransferBranchDialog } from "./transfer-branch-dialog";
 
 interface BranchRow {
@@ -105,14 +105,6 @@ export function AdminBranchesTable({ data }: AdminBranchesTableProps) {
           <div className="flex justify-end gap-2">
             {row.status === "pending" && (
               <>
-                <ActionButton 
-                  action={aiAutoApproveBranch.bind(null, row.id as string)}
-                  label="AI Auto-Approve"
-                  loadingLabel="Auto-Approving"
-                  variant="secondary"
-                  className="h-8 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200"
-                  icon={<Sparkles className="h-3.5 w-3.5" />}
-                />
                 <ActionButton 
                   action={moderateBranch.bind(null, "approve", row.id as string, "Approved from admin dashboard")}
                   label="Approve"
