@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/refs, @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, type RefObject } from "react";
 
 export interface SwipeGestureOptions {

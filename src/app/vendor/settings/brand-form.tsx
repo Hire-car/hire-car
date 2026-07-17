@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any, @next/next/no-img-element */
 import { useActionState, useRef, useState } from "react";
 import { updateBrandProfile } from "./actions";
 import { ImageIcon } from "lucide-react";

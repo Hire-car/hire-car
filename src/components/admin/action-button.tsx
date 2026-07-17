@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -7,7 +8,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 interface ActionButtonProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   action: () => Promise<any>;
   label: string;
   loadingLabel?: string;

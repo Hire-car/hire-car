@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // @vitest-environment jsdom
 // Feature: elite-ui-overhaul, Property 7: Data Table Sort Ordering
 

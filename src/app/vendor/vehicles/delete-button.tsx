@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Trash2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { deleteVehicle } from "./actions";

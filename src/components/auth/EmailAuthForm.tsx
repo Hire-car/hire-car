@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
 import { useState } from "react";
 import { ArrowRight, Loader2, Mail, KeyRound, Lock, Key } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";

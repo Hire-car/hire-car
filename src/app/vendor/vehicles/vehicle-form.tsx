@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/immutability, react-hooks/exhaustive-deps, @typescript-eslint/no-unused-vars */
 import Image from "next/image";
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";

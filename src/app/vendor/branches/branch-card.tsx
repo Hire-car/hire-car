@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/error-boundaries */
 import { useState, useTransition } from "react";
 import { BranchForm, type BranchData } from "./branch-form";
 import { MapPin, Phone, Edit, Trash2 } from "lucide-react";

@@ -39,7 +39,7 @@ export async function getAdminRoles(): Promise<AdminRoleEntry[]> {
   if (error) throw new Error(`Failed to fetch admin roles: ${error.message}`);
 
   return (data ?? []).map((row) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const profile = row.profiles as unknown as { email: string | null; full_name: string | null } | null;
     return {
       userId: row.user_id,

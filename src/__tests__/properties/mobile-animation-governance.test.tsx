@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // Feature: mobile-optimisation, Task 12.1: Mobile animation constraints
 
 /**

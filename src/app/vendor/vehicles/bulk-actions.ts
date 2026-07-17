@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -63,7 +64,7 @@ export async function processBulkUpload(formData: FormData) {
     const worksheet = workbook.Sheets[firstSheetName];
     
     // Convert to JSON
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const rows = xlsx.utils.sheet_to_json(worksheet) as any[];
 
     if (rows.length === 0) {
@@ -78,7 +79,7 @@ export async function processBulkUpload(formData: FormData) {
     }
 
     const errors: string[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const inserts: any[] = [];
 
     // Process each row

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/security/auth";
 import { ensureUserCanManageOrganization } from "@/lib/data/vendor";
+import { syncVehicleCompletenessStatus } from "./actions";
 import { z } from "zod";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -146,6 +147,8 @@ export async function uploadVehicleImage(
       status: "open",
     });
   }
+
+  await syncVehicleCompletenessStatus(vehicleId, supabase);
 
   revalidatePath(`/vendor/vehicles`);
   revalidatePath(`/vendor/vehicles/${vehicleId}`);
@@ -318,6 +321,8 @@ export async function deleteVehicleImage(formData: FormData): Promise<ImageActio
       organization_id: organizationId,
     },
   });
+
+  await syncVehicleCompletenessStatus(image.vehicle_id, supabase);
 
   revalidatePath(`/vendor/vehicles`);
   revalidatePath(`/vendor/vehicles/${image.vehicle_id}`);

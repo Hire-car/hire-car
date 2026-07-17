@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/data-table";

@@ -207,7 +207,41 @@ export async function searchVehicles(
   try {
     const results = await client.collections<Vehicle>(VEHICLE_COLLECTION_NAME).documents().search(searchParameters);
 
-    const vehicles = results.hits?.map((hit) => hit.document) ?? [];
+    const vehicles: Vehicle[] = (results.hits?.map((hit) => {
+      const doc = hit.document as Record<string, any>;
+      return {
+        id: doc.id,
+        slug: doc.slug,
+        title: doc.title,
+        make: doc.make,
+        model: doc.model,
+        year: doc.year,
+        city: doc.city,
+        state: doc.state,
+        pricePerDayAud: doc.price_per_day_aud,
+        seats: doc.seats,
+        fuel: doc.fuel,
+        transmission: doc.transmission,
+        category: doc.category,
+        imageUrl: "", // Populated below
+        vendorName: doc.vendor_name,
+        vendorSlug: doc.vendor_slug,
+        branchName: doc.branch_name,
+        verified: doc.verified,
+        dailyDistanceLimitKm: doc.daily_distance_limit_km,
+        extraDistanceFeeAud: doc.extra_distance_fee_aud,
+        instantBook: doc.instant_book,
+        weeklyRateAud: doc.weekly_rate_aud,
+        monthlyRateAud: doc.monthly_rate_aud,
+        avgRating: doc.avg_rating,
+        reviewCount: doc.review_count,
+        features: doc.features,
+        vendorLogoUrl: doc.vendor_logo_url,
+        freeDelivery: doc.free_delivery,
+        freeCancellation: doc.free_cancellation,
+        noHiddenFees: doc.no_hidden_fees,
+      };
+    }) ?? []) as Vehicle[];
 
     if (vehicles.length > 0) {
       const supabase = createAdminClient();

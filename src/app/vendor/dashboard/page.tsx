@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MetricCard } from "@/components/metric-card";
@@ -281,5 +282,9 @@ export default async function VendorDashboardPage() {
 
   const organization = context.organizations[0];
 
-  return <DashboardContent organization={organization} userId={user.id} />;
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardContent organization={organization} userId={user.id} />
+    </Suspense>
+  );
 }

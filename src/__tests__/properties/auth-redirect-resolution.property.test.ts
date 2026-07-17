@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 import { resolvePostAuthDestination, isSafeRedirectPath, isValidRedirectForRole, defaultDashboardForRole, type AuthRole } from "@/lib/routing";

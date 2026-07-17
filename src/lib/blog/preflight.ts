@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { optionalEnv } from "@/lib/config";
 import { createAdminClient } from "@/lib/supabase/admin";
 

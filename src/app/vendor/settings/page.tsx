@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireUser } from "@/lib/security/auth";

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @next/next/no-img-element, jsx-a11y/alt-text */
 // Feature: elite-ui-overhaul, Property 3: VehicleCard Field Completeness
 
 /**

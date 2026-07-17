@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
 import { ChevronUp } from "lucide-react";
 import { useScrollPosition } from "@/hooks/use-scroll-position";

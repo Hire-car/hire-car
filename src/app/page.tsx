@@ -314,7 +314,7 @@ export default async function Home() {
               <Link
                 key={cat.name}
                 href={cat.href}
-                className="rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
+                className="block rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
               >
                 {cat.name}
               </Link>

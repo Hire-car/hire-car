@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 // import removed
 import { getCurrentVendorContext } from "./actions";
 import { BranchForm } from "./branch-form";

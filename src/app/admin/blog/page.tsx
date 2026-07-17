@@ -7,8 +7,8 @@ import {
   getBlogCategories,
 } from "@/lib/blog/queries";
 import { GenerateBlogButton } from "./generate-blog-button";
-import { BlogSetupChecklist } from "./blog-setup-checklist";
 import { BlogEditForm } from "./blog-edit-form";
+import { CreateBlogButton } from "./create-blog-button";
 
 export const metadata = { title: "Blog | Admin" };
 
@@ -66,9 +66,10 @@ export default async function AdminBlogPage({ searchParams }: AdminBlogPageProps
         </p>
       </section>
 
-      <BlogSetupChecklist />
-
-      <GenerateBlogButton />
+      <div className="flex items-start gap-4">
+        <GenerateBlogButton />
+        <CreateBlogButton />
+      </div>
 
       <div className="rounded-xl border border-border overflow-hidden">
         <table className="w-full text-sm">

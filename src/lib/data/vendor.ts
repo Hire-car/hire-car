@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { cache } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 

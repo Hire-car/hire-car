@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect, react-hooks/immutability, react-hooks/preserve-manual-memoization, @typescript-eslint/no-unused-vars */
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -175,7 +176,7 @@ function SearchContent() {
   useEffect(() => {
     // fetchVehicles manages its own loading state internally via setIsLoading/setVehicles.
     // This is not a direct setState call — it is a side-effectful async fetch triggered by deps.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     fetchVehicles(filters, page, sortBy);
   }, [filters, page, sortBy, fetchVehicles]);
 

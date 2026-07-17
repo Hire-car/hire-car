@@ -12,6 +12,33 @@ import { uniqueSlug } from "@/lib/slug";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
 import { evaluateVehicleListing } from "@/lib/ai/vehicle-moderation";
 
+export async function syncVehicleCompletenessStatus(vehicleId: string, supabase: any) {
+  const { data: vehicle } = await supabase.from("vehicles").select("*").eq("id", vehicleId).single();
+  const { count: imagesCount } = await supabase
+    .from("vehicle_images")
+    .select("id", { count: "exact", head: true })
+    .eq("vehicle_id", vehicleId);
+
+  const missing = [];
+  if (!vehicle.vin && !vehicle.license_plate) missing.push("VIN or License Plate");
+  if (!vehicle.color) missing.push("Color");
+  if (imagesCount === 0) missing.push("At least 1 Image");
+
+  if (vehicle.status !== "suspended") {
+    const newStatus = missing.length === 0 ? "approved" : "pending";
+    if (vehicle.status !== newStatus) {
+      await supabase.from("vehicles").update({ status: newStatus }).eq("id", vehicleId);
+
+      // Create search index job since status changed
+      await supabase.from("search_index_jobs").insert({
+        vehicle_id: vehicleId,
+        operation: newStatus === "approved" ? "upsert" : "delete",
+        status: "pending",
+      });
+    }
+  }
+}
+
 export type VehicleActionResult =
   | { success: true; vehicleId: string }
   | { success: false; error: string };
@@ -90,29 +117,28 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       return { success: false, error: "Invalid branch or organization" };
     }
 
-    let vehicleStatus = orgData.status === "approved" ? "approved" : "pending";
+    let vehicleStatus = "pending";
     let isAiApproved = true;
     let aiReason = "";
     let aiSeverity = "medium";
 
     // Run AI Moderation Check
-    if (orgData.status === "approved") {
-      const moderation = await evaluateVehicleListing({
-        title: data.title,
-        make: data.make,
-        model: data.model,
-        year: data.year,
-        category: data.category,
-        pricePerDayAud: Number(data.pricePerDayAud),
-        notes: data.notes || undefined,
-      });
 
-      if (!moderation.isApproved) {
-        vehicleStatus = "suspended";
-        isAiApproved = false;
-        aiReason = moderation.reason;
-        aiSeverity = moderation.flagSeverity || "medium";
-      }
+    const moderation = await evaluateVehicleListing({
+      title: data.title,
+      make: data.make,
+      model: data.model,
+      year: data.year,
+      category: data.category,
+      pricePerDayAud: Number(data.pricePerDayAud),
+      notes: data.notes || undefined,
+    });
+
+    if (!moderation.isApproved) {
+      vehicleStatus = "suspended";
+      isAiApproved = false;
+      aiReason = moderation.reason;
+      aiSeverity = moderation.flagSeverity || "medium";
     }
 
     // Create vehicle
@@ -210,6 +236,9 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
         console.warn("Failed to parse tempImagePaths", err);
       }
     }
+
+    // Sync completeness status based on details and images
+    await syncVehicleCompletenessStatus(vehicle.id, supabase);
 
     revalidatePath("/vendor/vehicles");
     revalidatePath("/vendor/dashboard");
@@ -337,7 +366,7 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
     let aiSeverity = "medium";
 
     // Re-evaluate material changes with AI
-    if (isOrgApproved && hasMaterialChanges) {
+    if (hasMaterialChanges) {
       const moderation = await evaluateVehicleListing({
         title: updateData.title as string ?? existingVehicle.title,
         make: updateData.make as string ?? existingVehicle.make,
@@ -353,15 +382,6 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
         aiRejectionReason = moderation.reason;
         aiSeverity = moderation.flagSeverity || "medium";
       } else {
-        updateData.status = "approved";
-        updateData.suspended_at = null;
-      }
-    } else if (isOrgApproved) {
-      updateData.status = "approved";
-      updateData.suspended_at = null;
-    } else {
-      if (existingVehicle.status === "approved" && hasMaterialChanges) {
-        updateData.status = "pending";
         updateData.suspended_at = null;
       }
     }
@@ -457,6 +477,9 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
       console.warn("Failed to parse tempImagePaths", err);
     }
   }
+
+  // Sync completeness status based on details and images
+  await syncVehicleCompletenessStatus(vehicleId, supabase);
 
   revalidatePath("/vendor/vehicles");
   revalidatePath(`/vendor/vehicles/${vehicleId}`);
@@ -583,4 +606,18 @@ export async function getOrganizationVehicles(organizationId: string, page: numb
   }
 
   return { vehicles: vehicles ?? [], totalCount: count ?? 0, page, pageSize };
+}
+
+export async function getVehicleImageCounts(vehicleIds: string[]): Promise<Record<string, number>> {
+  if (vehicleIds.length === 0) return {};
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("vehicle_images")
+    .select("vehicle_id")
+    .in("vehicle_id", vehicleIds);
+    
+  return (data || []).reduce((acc: Record<string, number>, img: any) => {
+    acc[img.vehicle_id] = (acc[img.vehicle_id] || 0) + 1;
+    return acc;
+  }, {});
 }

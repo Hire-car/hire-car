@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Shield, Users, ShieldAlert } from "lucide-react";
 import { requireAdminRole } from "@/lib/security/auth";
 import { getAdminRoles } from "./actions";

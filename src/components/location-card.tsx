@@ -16,7 +16,7 @@ export function LocationCard({ name, imageUrl, vehicleCount, startingPrice, href
   return (
     <Link 
       href={href}
-      className="group relative overflow-hidden rounded-xl bg-card shadow-sm border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+      className="block group relative overflow-hidden rounded-xl bg-card shadow-sm border border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
     >
       {/* Image Container */}
       <div className="relative h-44 overflow-hidden">

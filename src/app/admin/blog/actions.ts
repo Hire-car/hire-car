@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { publishDailyBlog } from "@/lib/blog/publish-daily";
 import { requireAdminRole } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -208,4 +209,53 @@ export async function uploadBlogImage(formData: FormData): Promise<{ success: tr
 
   const { data } = supabase.storage.from("blog-images").getPublicUrl(path);
   return { success: true, url: data.publicUrl };
+}
+
+export type CreateDraftBlogState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+export async function createDraftBlogArticle(
+  _prev: CreateDraftBlogState,
+  formData: FormData,
+): Promise<CreateDraftBlogState> {
+  const admin = await requireAdminRole(["owner", "admin"]);
+  const supabase = createAdminClient();
+
+  const timestamp = Date.now();
+  const slug = `untitled-article-${timestamp}`;
+
+  const { data, error } = await supabase
+    .from("blog_articles")
+    .insert({
+      title: "Untitled Article",
+      slug: slug,
+      excerpt: "Write a short summary here...",
+      body: "<p>Start writing your article here...</p>",
+      status: "draft",
+      source: "manual",
+      reading_time_minutes: 1,
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    return {
+      status: "error",
+      message: `Failed to create draft: ${error?.message || "Unknown error"}`,
+    };
+  }
+
+  await supabase.from("audit_logs").insert({
+    actor_user_id: admin.id,
+    action: "blog_article_created",
+    resource_type: "blog_article",
+    resource_id: data.id,
+  });
+
+  revalidatePath("/admin/blog");
+  
+  // Navigate directly from the server action
+  redirect(`/admin/blog?edit=${data.id}`);
 }

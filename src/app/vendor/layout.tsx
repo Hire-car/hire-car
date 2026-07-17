@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { ReactNode } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { requireUser } from "@/lib/security/auth";

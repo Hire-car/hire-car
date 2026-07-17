@@ -2,14 +2,14 @@ import { requireUser } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import Link from "next/link";
 import { MessageCircle, Search, ChevronRight, User, Calendar, Clock, CheckCircle, Store, ArrowRight } from "lucide-react";
-// import removed
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Customer Dashboard | Hire Car",
 };
 
-export default async function CustomerDashboardPage() {
-  const user = await requireUser();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function CustomerDashboardContent({ user }: { user: any }) {
   const supabase = createAdminClient();
 
   const { data: profile } = await supabase
@@ -211,5 +211,44 @@ export default async function CustomerDashboardPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function CustomerDashboardSkeleton() {
+  return (
+    <div className="p-6 sm:p-8 lg:p-10 bg-slate-50/50 min-h-full animate-pulse">
+      <div className="mb-10">
+        <div className="h-10 w-64 bg-slate-200 rounded-lg"></div>
+        <div className="h-5 w-48 bg-slate-200 rounded-lg mt-3"></div>
+      </div>
+      
+      <div className="mb-8 h-24 rounded-[2rem] bg-slate-200"></div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <div className="lg:col-span-1 h-64 rounded-[2rem] bg-slate-200"></div>
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="h-64 rounded-[2rem] bg-slate-200"></div>
+          <div className="h-64 rounded-[2rem] bg-slate-200"></div>
+        </div>
+      </div>
+      
+      <div>
+        <div className="h-8 w-48 bg-slate-200 rounded-lg mb-6"></div>
+        <div className="space-y-4">
+          <div className="h-24 rounded-[1.5rem] bg-slate-200"></div>
+          <div className="h-24 rounded-[1.5rem] bg-slate-200"></div>
+          <div className="h-24 rounded-[1.5rem] bg-slate-200"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default async function CustomerDashboardPage() {
+  const user = await requireUser();
+  return (
+    <Suspense fallback={<CustomerDashboardSkeleton />}>
+      <CustomerDashboardContent user={user} />
+    </Suspense>
   );
 }

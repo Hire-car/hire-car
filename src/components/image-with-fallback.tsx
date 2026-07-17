@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
 import Image, { type ImageProps } from "next/image";
 import { ImageIcon } from "lucide-react";

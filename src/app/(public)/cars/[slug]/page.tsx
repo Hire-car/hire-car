@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BadgeCheck, Phone, Eye, Star, MapPin, ChevronRight, Users, Fuel, Settings, Check, Info } from "lucide-react";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext, getVehicleLimitInfo } from "@/lib/data/vendor";
-import { getOrganizationVehicles, deleteVehicle, getVehicleFeatures } from "./actions";
+import { getOrganizationVehicles, deleteVehicle, getVehicleFeatures, getVehicleImageCounts } from "./actions";
 import { getVehicleImages } from "./image-actions";
 import VehicleForm from "./vehicle-form";
 import { DeleteVehicleButton } from "./delete-button";
@@ -60,6 +60,9 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
       editImages = await getVehicleImages(params.edit, selectedOrgId);
     }
   }
+
+  const vehicleIds = vehicles.map((v) => v.id);
+  const imageCounts = await getVehicleImageCounts(vehicleIds);
 
   const isAtLimit = limitInfo.hasLimit && limitInfo.currentCount >= (limitInfo.limit ?? 0);
   const usagePercent = limitInfo.limit ? Math.min((limitInfo.currentCount / limitInfo.limit) * 100, 100) : 0;
@@ -163,6 +166,20 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
                         {vehicle.status}
                       </span>
                     </div>
+
+                    {vehicle.status === "pending" && (
+                      <div className="flex flex-col gap-1 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2 border border-amber-100 w-fit">
+                        <div className="flex items-center gap-1.5 font-semibold">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                          <span>Missing details to be active:</span>
+                        </div>
+                        <ul className="flex flex-col gap-0.5 ml-5 list-disc font-medium">
+                          {(!vehicle.vin && !vehicle.license_plate) && <li>VIN or License Plate</li>}
+                          {!vehicle.color && <li>Color</li>}
+                          {!(imageCounts[vehicle.id] > 0) && <li>At least 1 Image</li>}
+                        </ul>
+                      </div>
+                    )}
 
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
                       <span className="flex items-center gap-1.5 font-medium text-slate-900">
