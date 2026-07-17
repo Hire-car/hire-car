@@ -10,6 +10,7 @@ import { uniqueSlug } from "@/lib/slug";
 import { branchSchema, transferBranchSchema } from "@/lib/validation/schemas";
 import { invalidatePseo } from "@/lib/seo/invalidate";
 import { sendBranchTransferInitiatedEmail, sendBranchTransferReceivedEmail } from "@/lib/email/ses";
+import { processSearchIndexJobs } from "@/lib/search/typesense";
 
 export async function createBranch(prevState: any, formData: FormData) {
   const user = await requireUser();
@@ -319,7 +320,9 @@ export async function transferBranch(formData: FormData) {
         operation: "upsert",
         status: "pending"
       }));
-      await supabase.from("search_index_jobs").insert(jobs);
+      await supabase.from("search_index_jobs").insert(jobs).then(() => {
+        processSearchIndexJobs().catch(console.error);
+      });
     }
 
     // 8. Log audit event

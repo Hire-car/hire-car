@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/security/auth";
 import { ensureUserCanManageOrganization, getVehicleLimitInfo } from "@/lib/data/vendor";
 import { requirePlanFeature } from "@/lib/plan-features";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
+import { processSearchIndexJobs } from "@/lib/search/typesense";
 import * as xlsx from "xlsx";
 import { uniqueSlug } from "@/lib/slug";
 
@@ -173,6 +174,7 @@ export async function processBulkUpload(formData: FormData) {
         for (let i = 0; i < jobs.length; i += CHUNK_SIZE) {
           await supabase.from("search_index_jobs").insert(jobs.slice(i, i + CHUNK_SIZE));
         }
+        processSearchIndexJobs().catch(console.error);
 
         // Run PSEO invalidation synchronously but individually to prevent enormous payloads
         for (const v of data) {

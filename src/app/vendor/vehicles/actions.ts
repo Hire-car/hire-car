@@ -11,6 +11,7 @@ import { vehicleSchema } from "@/lib/validation/schemas";
 import { uniqueSlug } from "@/lib/slug";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
 import { evaluateVehicleListing } from "@/lib/ai/vehicle-moderation";
+import { processSearchIndexJobs } from "@/lib/search/typesense";
 
 export async function syncVehicleCompletenessStatus(vehicleId: string, supabase: any) {
   const { data: vehicle } = await supabase.from("vehicles").select("*").eq("id", vehicleId).single();
@@ -34,6 +35,8 @@ export async function syncVehicleCompletenessStatus(vehicleId: string, supabase:
         vehicle_id: vehicleId,
         operation: newStatus === "approved" ? "upsert" : "delete",
         status: "pending",
+      }).then(() => {
+        processSearchIndexJobs().catch(console.error);
       });
     }
   }
@@ -206,7 +209,10 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       vehicle_id: vehicle.id,
       operation: "upsert",
       status: "pending",
-    }).then(({ error: e }) => { if (e) console.warn("search_index_jobs insert failed:", e.message); });
+    }).then(({ error: e }) => { 
+      if (e) console.warn("search_index_jobs insert failed:", e.message); 
+      else processSearchIndexJobs().catch(console.error);
+    });
 
     // Log audit event (fire and forget - don't fail on this)
     await supabase.from("audit_logs").insert({
@@ -403,6 +409,9 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
       vehicle_id: vehicleId,
       operation: existingVehicle.status === "approved" && hasMaterialChanges ? "delete" : "upsert",
       status: "pending",
+    }).then(({ error: e }) => {
+      if (e) console.warn("search_index_jobs insert failed:", e.message);
+      else processSearchIndexJobs().catch(console.error);
     });
 
     // Create fraud flag for admin attention
@@ -548,11 +557,12 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
     }
   }
 
-  // Create search index job for deletion
   await supabase.from("search_index_jobs").insert({
     vehicle_id: vehicleId,
     operation: "delete",
     status: "pending",
+  }).then(() => {
+    processSearchIndexJobs().catch(console.error);
   });
 
   await invalidatePseoForVehicle(supabase, vehicleId);

@@ -10,6 +10,7 @@ import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
 import { sendBranchTransferInitiatedEmail, sendBranchTransferReceivedEmail } from "@/lib/email/ses";
 import { uniqueSlug } from "@/lib/slug";
 import { transferBranchSchema } from "@/lib/validation/schemas";
+import { processSearchIndexJobs } from "@/lib/search/typesense";
 
 const ModerateVendorSchema = z.object({
   action: z.enum(["approve", "reject", "suspend", "restore"]),
@@ -265,14 +266,14 @@ export async function moderateListing(
       vehicle_id: listingId,
       operation: "upsert",
       status: "pending",
-    });
+    }).then(() => { processSearchIndexJobs().catch(console.error); });
     await invalidatePseoForVehicle(supabase, listingId);
   } else if (action === "suspend" || action === "reject") {
     await supabase.from("search_index_jobs").insert({
       vehicle_id: listingId,
       operation: "delete",
       status: "pending",
-    });
+    }).then(() => { processSearchIndexJobs().catch(console.error); });
   }
 
   // Approve pending images
