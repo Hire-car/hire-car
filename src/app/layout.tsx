@@ -43,6 +43,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  verification: {
+    google: "OOKY-jhSeAIbz1pfCCklLA_5MhcyZVTqitYm0ewLdJ0",
+  },
   manifest: "/manifest.json",
   applicationName: "HireCar",
   icons: {
