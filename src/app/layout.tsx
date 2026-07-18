@@ -47,7 +47,6 @@ export const metadata: Metadata = {
   applicationName: "HireCar",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
       { url: "/icons/favicon-16.png", type: "image/png", sizes: "16x16" },
       { url: "/icons/favicon-32.png", type: "image/png", sizes: "32x32" },
       { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
