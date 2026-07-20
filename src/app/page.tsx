@@ -116,21 +116,10 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-white text-foreground font-sans overflow-x-hidden">
       {/*
-        Preload the LCP hero image specifically for the Mobile_Viewport so it
-        begins downloading from the document <head>, before it is discovered in
-        the <body>. The media query scopes the preload to phones (≤767px), and
-        the responsive imageSrcSet lets the browser pick the width that matches
-        what next/image will request (Requirement 6.6).
+        The manual <link rel="preload"> was removed here because Next.js automatically
+        injects preload tags for <Image priority={true} />. The manual tag was conflicting
+        with Next.js's responsive sizes and causing double downloads, which severely hurt LCP.
       */}
-      <link
-        rel="preload"
-        as="image"
-        href={heroOptimisedUrl(1080)}
-        imageSrcSet={`${heroOptimisedUrl(640)} 640w, ${heroOptimisedUrl(828)} 828w, ${heroOptimisedUrl(1080)} 1080w`}
-        imageSizes="100vw"
-        media="(max-width: 767px)"
-        fetchPriority="high"
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: serializeSchemas([buildWebSiteSchema(), buildBrandOrganizationSchema()]) }}

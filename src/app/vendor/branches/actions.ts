@@ -320,8 +320,8 @@ export async function transferBranch(formData: FormData) {
         operation: "upsert",
         status: "pending"
       }));
-      await supabase.from("search_index_jobs").insert(jobs).then(() => {
-        processSearchIndexJobs().catch(console.error);
+      await supabase.from("search_index_jobs").insert(jobs).then(async () => {
+        await processSearchIndexJobs();
       });
     }
 

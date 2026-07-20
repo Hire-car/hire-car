@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { WEEKDAYS } from "@/lib/whatsapp/business-hours";
 import { VEHICLE_FEATURES } from "@/lib/vehicle-badges";
+import { VEHICLE_CATEGORIES } from "@/lib/seo/categories";
 
 /**
  * Validates an Australian Business Number (ABN) using the ATO checksum algorithm.
@@ -54,9 +55,9 @@ export const vehicleSchema = z.object({
   model: z.string().trim().min(1).max(80),
   year: z.coerce.number().int().min(1990).max(2030),
   seats: z.coerce.number().int().min(2).max(12),
-  fuel: z.enum(["Petrol", "Diesel", "Hybrid", "Electric"]),
+  fuel: z.enum(["Petrol", "Diesel", "Hybrid", "PHEV", "Electric", "LPG"]),
   transmission: z.enum(["Automatic", "Manual"]),
-  category: z.enum(["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury"]),
+  category: z.enum(VEHICLE_CATEGORIES),
   pricePerDayAud: z.coerce.number().int().min(20).max(2000),
   dailyDistanceLimitKm: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().int().min(50).max(1000).nullable().optional()),
   extraDistanceFeeAud: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().min(0.1).max(5.0).nullable().optional()),

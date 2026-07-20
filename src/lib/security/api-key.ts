@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export function hashApiKey(key: string): string {
+function hashApiKey(key: string): string {
   return createHash("sha256").update(key).digest("hex");
 }
 

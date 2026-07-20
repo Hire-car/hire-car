@@ -78,7 +78,7 @@ Return the data exactly matching the requested JSON schema.`;
       category: {
         type: Type.STRING,
         description: "The vehicle category",
-        enum: ["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury"],
+        enum: ["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury", "Hatchback", "Convertible", "Coupe", "Wagon", "Sports car", "Minibus", "Truck", "Campervan"],
       },
       transmission: {
         type: Type.STRING,
@@ -88,7 +88,7 @@ Return the data exactly matching the requested JSON schema.`;
       fuel: {
         type: Type.STRING,
         description: "The fuel type",
-        enum: ["Petrol", "Diesel", "Hybrid", "Electric"],
+        enum: ["Petrol", "Diesel", "Hybrid", "PHEV", "Electric", "LPG"],
       },
       seats: {
         type: Type.INTEGER,

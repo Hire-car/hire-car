@@ -12,24 +12,21 @@ export const metadata = {
 async function CustomerDashboardContent({ user }: { user: any }) {
   const supabase = createAdminClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, email, phone")
-    .eq("id", user.id)
-    .single();
-
-  const email = profile?.email;
-  const firstName = profile?.full_name?.split(" ")[0] || "Customer";
-
-  // Fetch leads in parallel using the customer email
+  // Fetch profile and leads in parallel using the user object
   const [
+    { data: profile },
     { count: enquiriesCount },
     { data: recentEnquiries }
   ] = await Promise.all([
     supabase
+      .from("profiles")
+      .select("full_name, email, phone")
+      .eq("id", user.id)
+      .single(),
+    supabase
       .from("leads")
       .select("id", { count: "exact", head: true })
-      .eq("customer_email", email)
+      .eq("customer_email", user.email)
       .in("status", ["new", "contacted"]),
     supabase
       .from("leads")
@@ -38,10 +35,13 @@ async function CustomerDashboardContent({ user }: { user: any }) {
         vehicles(title, price_per_day_aud),
         organizations(name)
       `)
-      .eq("customer_email", email)
+      .eq("customer_email", user.email)
       .order("created_at", { ascending: false })
       .limit(5)
   ]);
+
+  const email = profile?.email || user.email;
+  const firstName = profile?.full_name?.split(" ")[0] || "Customer";
 
   return (
     <div className="p-6 sm:p-8 lg:p-10 bg-slate-50/50 min-h-full">

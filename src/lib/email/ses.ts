@@ -173,39 +173,7 @@ export async function sendMarketingEmail(input: {
   return { skipped: false };
 }
 
-export async function sendMassMarketingEmail(input: {
-  recipients: { email: string; name: string }[];
-  subject: string;
-  heading: string;
-  bodyHtml: string;
-  ctaLabel?: string;
-  ctaUrl?: string;
-}) {
-  if (!transporter) return { skipped: true };
-  let sentCount = 0;
-  for (const recipient of input.recipients) {
-    try {
-      await transporter.sendMail({
-        from: FROM,
-        replyTo: REPLY_TO,
-        to: recipient.email,
-        subject: input.subject,
-        html: buildEmailTemplate({
-          title: input.heading,
-          name: recipient.name,
-          bodyHtml: input.bodyHtml,
-          ctaText: input.ctaLabel,
-          ctaUrl: input.ctaUrl,
-          footerText: "You're receiving this mass marketing email because you are subscribed to our updates."
-        })
-      });
-      sentCount++;
-    } catch (e) {
-      console.error(`Failed to send mass email to ${recipient.email}`, e);
-    }
-  }
-  return { skipped: false, sentCount };
-}
+
 
 // ─── Approval Emails ───────────────────────────────────────────────────────────
 export async function sendVendorApprovalEmail(input: {
@@ -309,37 +277,7 @@ export async function sendVendorUnreadLeadReminderEmail(input: {
   return { skipped: false };
 }
 
-export async function sendMaliciousActivityAlert(input: {
-  activityType: string;
-  description: string;
-  userId?: string;
-  ipAddress?: string;
-}) {
-  if (!transporter) return { skipped: true };
-  const adminUrl = `${getAppUrl()}/admin`;
-  
-  await transporter.sendMail({
-    from: FROM,
-    replyTo: REPLY_TO,
-    to: ADMIN_EMAIL,
-    subject: `🚨 Malicious Activity Alert: ${input.activityType}`,
-    html: buildEmailTemplate({
-      title: "Security Alert 🚨",
-      name: "Admin Team",
-      bodyHtml: `<p>We detected potentially malicious activity on the platform.</p>
-      <ul>
-        <li><strong>Type:</strong> ${input.activityType}</li>
-        <li><strong>Description:</strong> ${input.description}</li>
-        ${input.userId ? `<li><strong>User ID:</strong> ${input.userId}</li>` : ""}
-        ${input.ipAddress ? `<li><strong>IP Address:</strong> ${input.ipAddress}</li>` : ""}
-      </ul>
-      <p>Please investigate this issue immediately.</p>`,
-      ctaText: "Open Admin Dashboard",
-      ctaUrl: adminUrl
-    })
-  });
-  return { skipped: false };
-}
+
 
 // ─── Internal Utilities ────────────────────────────────────────────────────────
 export async function sendNewMessageNotification(input: {

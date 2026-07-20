@@ -5,6 +5,14 @@ export const VEHICLE_CATEGORIES = [
   "Van",
   "Ute",
   "Luxury",
+  "Hatchback",
+  "Convertible",
+  "Coupe",
+  "Wagon",
+  "Sports car",
+  "Minibus",
+  "Truck",
+  "Campervan"
 ] as const;
 
 export type VehicleCategory = (typeof VEHICLE_CATEGORIES)[number];
@@ -16,6 +24,14 @@ const CATEGORY_SLUG_MAP: Record<string, VehicleCategory> = {
   van: "Van",
   ute: "Ute",
   luxury: "Luxury",
+  hatchback: "Hatchback",
+  convertible: "Convertible",
+  coupe: "Coupe",
+  wagon: "Wagon",
+  "sports-car": "Sports car",
+  minibus: "Minibus",
+  truck: "Truck",
+  campervan: "Campervan"
 };
 
 const CATEGORY_TO_SLUG: Record<VehicleCategory, string> = {
@@ -25,6 +41,14 @@ const CATEGORY_TO_SLUG: Record<VehicleCategory, string> = {
   Van: "van",
   Ute: "ute",
   Luxury: "luxury",
+  Hatchback: "hatchback",
+  Convertible: "convertible",
+  Coupe: "coupe",
+  Wagon: "wagon",
+  "Sports car": "sports-car",
+  Minibus: "minibus",
+  Truck: "truck",
+  Campervan: "campervan"
 };
 
 export function categoryToSlug(category: string): string {

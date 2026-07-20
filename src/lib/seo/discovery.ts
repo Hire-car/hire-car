@@ -101,56 +101,50 @@ export async function getCitiesWithCounts(): Promise<CityInventory[]> {
     .sort((a, b) => b.vehicleCount - a.vehicleCount);
 }
 
-export async function getCategoryCounts(): Promise<
-  { category: VehicleCategory; slug: string; count: number }[]
-> {
+export async function getCategoryCounts(): Promise<{ category: string; slug: string; count: number }[]> {
   const vehicles = await getCachedApprovedVehiclesWithBranches();
-  const counts = new Map<VehicleCategory, number>();
-
-  for (const cat of VEHICLE_CATEGORIES) {
-    counts.set(cat, 0);
-  }
+  const counts = new Map<string, number>();
 
   for (const v of vehicles) {
-    const cat = v.category as VehicleCategory;
-    if (counts.has(cat)) {
-      counts.set(cat, (counts.get(cat) ?? 0) + 1);
-    }
+    if (!v.category) continue;
+    counts.set(v.category, (counts.get(v.category) ?? 0) + 1);
   }
 
-  return VEHICLE_CATEGORIES.map((category) => ({
-    category,
-    slug: categoryToSlug(category),
-    count: counts.get(category) ?? 0,
-  })).filter((c) => c.count > 0);
+  return Array.from(counts.entries())
+    .map(([cat, count]) => ({
+      category: cat,
+      slug: categoryToSlug(cat),
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
 }
 
 export async function getCityCategoryCombos(): Promise<
-  { city: string; citySlug: string; category: VehicleCategory; categorySlug: string; count: number }[]
+  { city: string; citySlug: string; category: string; categorySlug: string; count: number }[]
 > {
   const vehicles = await getCachedApprovedVehiclesWithBranches();
-  const comboMap = new Map<string, { city: string; category: VehicleCategory; count: number }>();
+  const comboMap = new Map<
+    string,
+    { city: string; citySlug: string; category: string; categorySlug: string; count: number }
+  >();
 
   for (const v of vehicles) {
     const branch = v.branches;
-    if (!branch?.city) continue;
-    const category = v.category as VehicleCategory;
-    const key = `${branch.city.toLowerCase()}::${category}`;
+    if (!branch?.city || !v.category) continue;
+    const key = `${branch.city.toLowerCase()}|${v.category}`;
     if (!comboMap.has(key)) {
-      comboMap.set(key, { city: branch.city, category, count: 0 });
+      comboMap.set(key, {
+        city: branch.city,
+        citySlug: cityToSlug(branch.city),
+        category: v.category,
+        categorySlug: categoryToSlug(v.category),
+        count: 0,
+      });
     }
     comboMap.get(key)!.count += 1;
   }
 
-  return Array.from(comboMap.values())
-    .map((c) => ({
-      city: c.city,
-      citySlug: cityToSlug(c.city),
-      category: c.category,
-      categorySlug: categoryToSlug(c.category),
-      count: c.count,
-    }))
-    .sort((a, b) => b.count - a.count);
+  return Array.from(comboMap.values()).sort((a, b) => b.count - a.count);
 }
 
 export async function getTopCitiesForCategory(

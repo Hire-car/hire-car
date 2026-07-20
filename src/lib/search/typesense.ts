@@ -83,6 +83,7 @@ export async function setupVehicleCollection() {
       { name: "free_cancellation", type: "bool" as const, facet: true, optional: true },
       { name: "no_hidden_fees", type: "bool" as const, facet: true, optional: true },
       { name: "vendor_logo_url", type: "string" as const, facet: false, optional: true },
+      { name: "primary_image_url", type: "string" as const, facet: false, optional: true },
       { name: "verified", type: "bool" as const, facet: true, optional: true },
     ],
     default_sorting_field: "price_per_day_aud",
@@ -166,10 +167,10 @@ export async function searchVehicles(
   const filterParts: string[] = ["status:=approved"]; // Only show approved vehicles
 
   if (filters.city) {
-    filterParts.push(`city:=${escapeFilterValue(filters.city)}`);
+    filterParts.push(`city:${escapeFilterValue(filters.city)}`);
   }
   if (filters.state) {
-    filterParts.push(`state:=${escapeFilterValue(filters.state)}`);
+    filterParts.push(`state:${escapeFilterValue(filters.state)}`);
   }
   if (filters.category) {
     filterParts.push(`category:=${escapeFilterValue(filters.category)}`);
@@ -223,7 +224,7 @@ export async function searchVehicles(
         fuel: doc.fuel,
         transmission: doc.transmission,
         category: doc.category,
-        imageUrl: "", // Populated below
+        imageUrl: doc.primary_image_url || "", // Populated below if empty
         vendorName: doc.vendor_name,
         vendorSlug: doc.vendor_slug,
         branchName: doc.branch_name,
@@ -243,9 +244,11 @@ export async function searchVehicles(
       };
     }) ?? []) as Vehicle[];
 
-    if (vehicles.length > 0) {
+    const vehiclesMissingImages = vehicles.filter(v => !v.imageUrl);
+
+    if (vehiclesMissingImages.length > 0) {
       const supabase = createAdminClient();
-      const vehicleIds = vehicles.map(v => v.id);
+      const vehicleIds = vehiclesMissingImages.map(v => v.id);
       
       const { data: imagesData } = await supabase
         .from("vehicle_images")
@@ -256,7 +259,7 @@ export async function searchVehicles(
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 
       if (imagesData && imagesData.length > 0) {
-        vehicles.forEach(v => {
+        vehiclesMissingImages.forEach(v => {
           const matchingImgs = imagesData
             .filter(i => i.vehicle_id === v.id)
             .map(i => ({
@@ -267,7 +270,7 @@ export async function searchVehicles(
           v.imageUrl = resolveVehicleImage(supabaseUrl, matchingImgs, v.category);
         });
       } else {
-        vehicles.forEach(v => { v.imageUrl = getCategoryPlaceholder(v.category); });
+        vehiclesMissingImages.forEach(v => { v.imageUrl = getCategoryPlaceholder(v.category); });
       }
     }
 
@@ -606,6 +609,20 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
               review_count: reviewCount,
               features,
             };
+
+            const { data: images } = await supabase
+              .from("vehicle_images")
+              .select("storage_path, approved, sort_order")
+              .eq("vehicle_id", vehicle.id)
+              .order("sort_order", { ascending: true })
+              .limit(1);
+
+            if (images && images.length > 0) {
+              const bestImage = images[0];
+              const bucket = bestImage.approved ? "vehicle-images" : "pending-vehicle-images";
+              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+              (document as any).primary_image_url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${bestImage.storage_path}`;
+            }
 
             await upsertVehicleDocument(document);
           }

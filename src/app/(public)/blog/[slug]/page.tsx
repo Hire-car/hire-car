@@ -132,6 +132,7 @@ export default async function BlogArticlePage({ params }: Props) {
                 className="object-cover"
                 loading="eager"
                 fetchPriority="high"
+                priority={true}
                 sizes="(max-width: 768px) 100vw, 768px"
               />
             </div>
