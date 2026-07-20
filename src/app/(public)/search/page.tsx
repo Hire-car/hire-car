@@ -9,7 +9,7 @@ export default async function SearchPage({
   const params = await searchParams;
   
   // Parse params
-  const q = typeof params.q === "string" ? params.q : undefined;
+  const q = typeof params.q === "string" ? params.q : "";
   const city = typeof params.city === "string" ? params.city : undefined;
   const state = typeof params.state === "string" ? params.state : undefined;
   const category = typeof params.category === "string" ? params.category as any : undefined;
@@ -44,7 +44,7 @@ export default async function SearchPage({
       <SearchClient
         initialVehicles={results.vehicles}
         initialTotal={results.total}
-        initialFacetCounts={results.facetCounts}
+        initialFacetCounts={results.facetCounts || {}}
       />
     );
   } catch (err) {
