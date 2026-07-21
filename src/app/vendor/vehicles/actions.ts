@@ -35,8 +35,8 @@ export async function syncVehicleCompletenessStatus(vehicleId: string, supabase:
         vehicle_id: vehicleId,
         operation: newStatus === "approved" ? "upsert" : "delete",
         status: "pending",
-      }).then(() => {
-        processSearchIndexJobs().catch(console.error);
+      }).then(async () => {
+        await processSearchIndexJobs();
       });
     }
   }
@@ -209,9 +209,9 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       vehicle_id: vehicle.id,
       operation: "upsert",
       status: "pending",
-    }).then(({ error: e }) => { 
+    }).then(async ({ error: e }) => { 
       if (e) console.warn("search_index_jobs insert failed:", e.message); 
-      else processSearchIndexJobs().catch(console.error);
+      else await processSearchIndexJobs();
     });
 
     // Log audit event (fire and forget - don't fail on this)
@@ -407,11 +407,11 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
     // Create search index job
     await supabase.from("search_index_jobs").insert({
       vehicle_id: vehicleId,
-      operation: existingVehicle.status === "approved" && hasMaterialChanges ? "delete" : "upsert",
+      operation: (updateData.status || existingVehicle.status) === "approved" ? "upsert" : "delete",
       status: "pending",
-    }).then(({ error: e }) => {
+    }).then(async ({ error: e }) => {
       if (e) console.warn("search_index_jobs insert failed:", e.message);
-      else processSearchIndexJobs().catch(console.error);
+      else await processSearchIndexJobs();
     });
 
     // Create fraud flag for admin attention
@@ -561,8 +561,8 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
     vehicle_id: vehicleId,
     operation: "delete",
     status: "pending",
-  }).then(() => {
-    processSearchIndexJobs().catch(console.error);
+  }).then(async () => {
+    await processSearchIndexJobs();
   });
 
   await invalidatePseoForVehicle(supabase, vehicleId);

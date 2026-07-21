@@ -174,7 +174,7 @@ export async function processBulkUpload(formData: FormData) {
         for (let i = 0; i < jobs.length; i += CHUNK_SIZE) {
           await supabase.from("search_index_jobs").insert(jobs.slice(i, i + CHUNK_SIZE));
         }
-        processSearchIndexJobs().catch(console.error);
+        await processSearchIndexJobs();
 
         // Run PSEO invalidation synchronously but individually to prevent enormous payloads
         for (const v of data) {

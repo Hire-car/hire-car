@@ -10,6 +10,7 @@ import { createVehicle, updateVehicle } from "./actions";
 import { getVehicleAutofill } from "./ai-actions";
 import { uploadTempVehicleImage, deleteTempVehicleImage, deleteVehicleImage } from "./image-actions";
 import { VEHICLE_FEATURES } from "@/lib/vehicle-badges";
+import { VEHICLE_CATEGORIES } from "@/lib/seo/categories";
 
 interface VehicleFormProps {
   organizationId: string;
@@ -59,8 +60,8 @@ interface VehicleFormProps {
   }>;
 }
 
-const categories = ["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury"];
-const fuelTypes = ["Petrol", "Diesel", "Hybrid", "Electric"];
+const categories = VEHICLE_CATEGORIES;
+const fuelTypes = ["Petrol", "Diesel", "Hybrid", "PHEV", "Electric", "LPG"];
 const transmissions = ["Automatic", "Manual"];
 
 type PendingImage = {
@@ -502,8 +503,12 @@ export default function VehicleForm({
 
         {/* Section 4: Details & Notes */}
         <section className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100">
+          <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <h2 className="text-base font-semibold text-slate-900">Listing Description & Internal Data</h2>
+            <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-1 rounded-md flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5" />
+              VIN, License Plate & Color are required to activate listing
+            </span>
           </div>
           <div className="p-6 grid gap-6 md:grid-cols-2">
             <label className="grid gap-2 text-sm font-medium text-slate-900 md:col-span-2">

@@ -31,13 +31,3 @@ export async function toggleSavedVehicle(vehicleId: string) {
   revalidatePath("/customer/saved");
   return { saved: true };
 }
-
-export async function getSavedVehicleIds(userId: string): Promise<Set<string>> {
-  const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("saved_vehicles")
-    .select("vehicle_id")
-    .eq("user_id", userId);
-
-  return new Set(data?.map((r) => r.vehicle_id) ?? []);
-}

@@ -8,12 +8,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createBrowserClient } from "@supabase/ssr";
 import { BrandLogo } from "@/components/brand-logo";
 import { useHeaderHeight } from "@/hooks/use-header-height";
-import { MobileDrawerNav, DrawerSection } from "./mobile-drawer-nav";
+import dynamic from "next/dynamic";
 import { PwaInstallMenuItem } from "@/components/pwa/pwa-install-menu-item";
 import { useMobileState } from "@/components/mobile-state-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FacebookIcon, InstagramIcon, LinkedinIcon, XIcon } from "@/components/icons";
 import { resolveSocialUrl, SOCIAL_URLS } from "@/lib/social-links";
+
+const MobileDrawerNav = dynamic(() => import("./mobile-drawer-nav").then(m => m.MobileDrawerNav));
+const DrawerSection = dynamic(() => import("./mobile-drawer-nav").then(m => m.DrawerSection));
 
 // Top-bar social icons. Env vars override the canonical fallback; a link that
 // resolves to undefined (e.g. no X profile) is simply not rendered — never a
@@ -30,6 +33,7 @@ const headerSocialLinks = [
 export function SiteHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { isMobileNavOpen: isMobileMenuOpen, setIsMobileNavOpen: setIsMobileMenuOpen } = useMobileState();
+  const [isMobileMenuMounted, setIsMobileMenuMounted] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const headerRef = useRef<HTMLElement>(null);
@@ -67,7 +71,10 @@ export function SiteHeader() {
     { name: "Electric & Hybrid", href: "/search?fuel=Electric" },
   ];
 
-  const openMobileMenu = () => setIsMobileMenuOpen(true);
+  const openMobileMenu = () => {
+    setIsMobileMenuMounted(true);
+    setIsMobileMenuOpen(true);
+  };
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   useEffect(() => {
@@ -314,82 +321,84 @@ export function SiteHeader() {
       </header>
 
       {/* Mobile Menu */}
-      <MobileDrawerNav isOpen={isMobileMenuOpen} onClose={closeMobileMenu}>
-        <div className="flex flex-col gap-2 pt-2">
-          <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2 pb-6 border-b border-slate-100">
-            <BrandLogo
-              priority
-              className="h-[48px] w-[180px]"
-              imageClassName="object-left mix-blend-multiply"
-            />
-          </Link>
-          
-          <Link href="/search" onClick={closeMobileMenu} className="mt-6 bg-gradient-to-r from-primary to-amber-500 text-white font-bold text-lg rounded-2xl px-6 py-4 text-center shadow-lg shadow-primary/20 flex items-center justify-center min-h-[56px] touch-target">
-            Find a Car
-          </Link>
-          
-          <div className="flex flex-col gap-2 mt-4">
-            <DrawerSection title="Locations">
-              <div className="flex flex-col gap-2">
-                {locations.map((loc) => (
-                  <Link key={loc.name} href={loc.href} onClick={closeMobileMenu} className="block py-3 px-2 text-base text-slate-600 min-h-[44px] touch-target">
-                    {loc.name}
-                  </Link>
-                ))}
-              </div>
-            </DrawerSection>
+      {isMobileMenuMounted && (
+        <MobileDrawerNav isOpen={isMobileMenuOpen} onClose={closeMobileMenu}>
+          <div className="flex flex-col gap-2 pt-2">
+            <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2 pb-6 border-b border-slate-100">
+              <BrandLogo
+                priority
+                className="h-[48px] w-[180px]"
+                imageClassName="object-left mix-blend-multiply"
+              />
+            </Link>
             
-            <DrawerSection title="Vehicles">
-              <div className="flex flex-col gap-2">
-                {vehicleCategories.map((cat) => (
-                  <Link key={cat.name} href={cat.href} onClick={closeMobileMenu} className="block py-3 px-2 text-base text-slate-600 min-h-[44px] touch-target">
-                    {cat.name}
-                  </Link>
-                ))}
-              </div>
-            </DrawerSection>
+            <Link href="/search" onClick={closeMobileMenu} className="mt-6 bg-gradient-to-r from-primary to-amber-500 text-white font-bold text-lg rounded-2xl px-6 py-4 text-center shadow-lg shadow-primary/20 flex items-center justify-center min-h-[56px] touch-target">
+              Find a Car
+            </Link>
+            
+            <div className="flex flex-col gap-2 mt-4">
+              <DrawerSection title="Locations">
+                <div className="flex flex-col gap-2">
+                  {locations.map((loc) => (
+                    <Link key={loc.name} href={loc.href} onClick={closeMobileMenu} className="block py-3 px-2 text-base text-slate-600 min-h-[44px] touch-target">
+                      {loc.name}
+                    </Link>
+                  ))}
+                </div>
+              </DrawerSection>
+              
+              <DrawerSection title="Vehicles">
+                <div className="flex flex-col gap-2">
+                  {vehicleCategories.map((cat) => (
+                    <Link key={cat.name} href={cat.href} onClick={closeMobileMenu} className="block py-3 px-2 text-base text-slate-600 min-h-[44px] touch-target">
+                      {cat.name}
+                    </Link>
+                  ))}
+                </div>
+              </DrawerSection>
 
-            <Link href="/pricing" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Pricing</Link>
-            <Link href="/for-vendors" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Vendors</Link>
-            <Link href="/about" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">About</Link>
-            <Link href="/blog" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Blog</Link>
-            <Link href="/contact" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Contact</Link>
-          </div>
-          
-          <div className="mt-6 flex flex-col pt-6 border-t border-slate-100 gap-3">
-            {isLoadingAuth ? (
-              <div className="flex flex-col gap-3">
-                <Skeleton className="h-12 w-full rounded-2xl" />
-                <Skeleton className="h-12 w-full rounded-2xl" />
-              </div>
-            ) : (
-              isLoggedIn ? (
-                <>
-                  {isVendor ? (
-                    <Link href="/customer/dashboard" onClick={closeMobileMenu} className="font-bold text-base text-center bg-white border border-slate-200 text-slate-900 rounded-2xl py-3 hover:bg-slate-50 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
-                      My Enquiries
-                    </Link>
-                  ) : (
-                    <Link href={vendorUpgradeHref} onClick={closeMobileMenu} className="font-bold text-base text-center bg-white border border-orange-200 text-orange-700 rounded-2xl py-3 hover:bg-orange-50 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
-                      {listFleetLabel}
-                    </Link>
-                  )}
-                  <Link href={profileHref} onClick={closeMobileMenu} className="font-bold text-base text-center bg-slate-100 text-slate-900 rounded-2xl py-3 hover:bg-slate-200 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
-                    <User className="h-5 w-5" /> {profileLabel}
-                  </Link>
-                </>
+              <Link href="/pricing" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Pricing</Link>
+              <Link href="/for-vendors" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Vendors</Link>
+              <Link href="/about" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">About</Link>
+              <Link href="/blog" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Blog</Link>
+              <Link href="/contact" onClick={closeMobileMenu} className="font-bold text-lg text-slate-800 hover:text-primary transition-colors py-3 min-h-[44px] touch-target">Contact</Link>
+            </div>
+            
+            <div className="mt-6 flex flex-col pt-6 border-t border-slate-100 gap-3">
+              {isLoadingAuth ? (
+                <div className="flex flex-col gap-3">
+                  <Skeleton className="h-12 w-full rounded-2xl" />
+                  <Skeleton className="h-12 w-full rounded-2xl" />
+                </div>
               ) : (
-                <Link href="/auth/sign-in" onClick={closeMobileMenu} className="font-bold text-base text-center bg-slate-900 text-white rounded-2xl py-3 hover:bg-slate-800 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
-                  Log in / Sign up
-                </Link>
-              )
-            )}
-          </div>
+                isLoggedIn ? (
+                  <>
+                    {isVendor ? (
+                      <Link href="/customer/dashboard" onClick={closeMobileMenu} className="font-bold text-base text-center bg-white border border-slate-200 text-slate-900 rounded-2xl py-3 hover:bg-slate-50 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                        My Enquiries
+                      </Link>
+                    ) : (
+                      <Link href={vendorUpgradeHref} onClick={closeMobileMenu} className="font-bold text-base text-center bg-white border border-orange-200 text-orange-700 rounded-2xl py-3 hover:bg-orange-50 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                        {listFleetLabel}
+                      </Link>
+                    )}
+                    <Link href={profileHref} onClick={closeMobileMenu} className="font-bold text-base text-center bg-slate-100 text-slate-900 rounded-2xl py-3 hover:bg-slate-200 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                      <User className="h-5 w-5" /> {profileLabel}
+                    </Link>
+                  </>
+                ) : (
+                  <Link href="/auth/sign-in" onClick={closeMobileMenu} className="font-bold text-base text-center bg-slate-900 text-white rounded-2xl py-3 hover:bg-slate-800 transition-colors flex justify-center items-center gap-2 min-h-[48px] touch-target">
+                    Log in / Sign up
+                  </Link>
+                )
+              )}
+            </div>
 
-          {/* Install app (PWA) — adapts to platform / installed state */}
-          <PwaInstallMenuItem />
-        </div>
-      </MobileDrawerNav>
+            {/* Install app (PWA) — adapts to platform / installed state */}
+            <PwaInstallMenuItem />
+          </div>
+        </MobileDrawerNav>
+      )}
     </>
   );
 }

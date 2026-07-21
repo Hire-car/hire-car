@@ -76,6 +76,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             src={images[currentIndex].url}
             alt={images[currentIndex].alt_text || "Vehicle Image"}
             fill
+            priority={currentIndex === 0}
             loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"

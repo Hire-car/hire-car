@@ -11,13 +11,7 @@ export default async function CustomerEnquiriesPage() {
   const user = await requireUser();
   const supabase = createAdminClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("email")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.email) {
+  if (!user?.email) {
     return (
       <div className="p-6 sm:p-8">
         <p>Please complete your profile to view messages.</p>
@@ -33,7 +27,7 @@ export default async function CustomerEnquiriesPage() {
       vehicles(title, price_per_day_aud),
       organizations(name)
     `)
-    .eq("customer_email", profile.email)
+    .eq("customer_email", user.email)
     .order("created_at", { ascending: false });
 
   return (

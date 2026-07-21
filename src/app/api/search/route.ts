@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+export const dynamic = "force-dynamic";
 import { searchVehicles } from "@/lib/search/typesense";
 import { clientIp } from "@/lib/security/rate-limit";
 import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";

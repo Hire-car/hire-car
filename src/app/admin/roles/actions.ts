@@ -53,45 +53,6 @@ export async function getAdminRoles(): Promise<AdminRoleEntry[]> {
   });
 }
 
-/** Search for a user by email so admin can assign a role */
-export async function searchUserByEmail(
-  email: string,
-): Promise<{ id: string; email: string; fullName: string | null } | null> {
-  await requireAdminRole(["owner", "admin", "super_admin"]);
-
-  const supabase = createAdminClient();
-
-  // Search via profiles table (which has email column)
-  const { data: profileData } = await supabase
-    .from("profiles")
-    .select("id, email, full_name")
-    .ilike("email", email.trim())
-    .maybeSingle();
-
-  if (profileData) {
-    return {
-      id: profileData.id,
-      email: profileData.email ?? email,
-      fullName: profileData.full_name,
-    };
-  }
-
-  // Fallback: search auth.users via admin API
-  const { data: listData } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const match = (listData?.users ?? []).find(
-    (u) => u.email?.toLowerCase() === email.trim().toLowerCase(),
-  );
-
-  if (match) {
-    return {
-      id: match.id,
-      email: match.email!,
-      fullName: match.user_metadata?.full_name ?? null,
-    };
-  }
-
-  return null;
-}
 
 /** Assign or update an admin role for a user */
 export async function assignAdminRole(
@@ -114,8 +75,15 @@ export async function assignAdminRole(
 
   const supabase = createAdminClient();
 
-  // Look up the user
-  const user = await searchUserByEmail(email);
+  // Look up the user by email in the profiles table
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("id, email, full_name")
+    .eq("email", email)
+    .single();
+
+  const user = profile ? { id: profile.id, email: profile.email, fullName: profile.full_name } : null;
+  
   if (!user) {
     return {
       status: "error",

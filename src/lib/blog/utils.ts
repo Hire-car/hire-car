@@ -1,5 +1,5 @@
 /** Strip HTML tags and count words for reading time. */
-export function countWordsFromHtml(html: string): number {
+function countWordsFromHtml(html: string): number {
   const text = html
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
