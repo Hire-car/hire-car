@@ -42,8 +42,8 @@ export default function ResetPasswordPage() {
       setErrorMsg("Passwords do not match.");
       return;
     }
-    if (password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      setErrorMsg("Password must be at least 8 characters.");
       return;
     }
 
@@ -59,6 +59,7 @@ export default function ResetPasswordPage() {
       setErrorMsg(error.message);
     } else {
       setSuccess(true);
+      await supabase.auth.signOut();
       setTimeout(() => {
         router.push("/auth/sign-in");
       }, 3000);
