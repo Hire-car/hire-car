@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { validatePassword } from "@/lib/auth/validation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,8 +43,9 @@ export default function ResetPasswordPage() {
       setErrorMsg("Passwords do not match.");
       return;
     }
-    if (password.length < 8) {
-      setErrorMsg("Password must be at least 8 characters.");
+    const validation = validatePassword(password);
+    if (!validation.ok) {
+      setErrorMsg(validation.message);
       return;
     }
 

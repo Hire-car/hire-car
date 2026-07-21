@@ -36,13 +36,17 @@ export type ValidationResult =
  */
 export const PASSWORD_POLICY = {
   /** Minimum number of characters required. */
-  minLength: 12,
+  minLength: 8,
   /** Maximum number of characters accepted. */
   maxLength: 72,
-  /** A valid password must contain at least one letter. */
-  requireLetter: true,
+  /** A valid password must contain at least one lowercase letter. */
+  requireLowercase: true,
+  /** A valid password must contain at least one uppercase letter. */
+  requireUppercase: true,
   /** A valid password must contain at least one digit. */
   requireDigit: true,
+  /** A valid password must contain at least one special character. */
+  requireSpecial: true,
 } as const;
 
 /**
@@ -116,16 +120,28 @@ export function validatePassword(input: string): ValidationResult {
       message: `Password must be at most ${PASSWORD_POLICY.maxLength} characters long.`,
     };
   }
-  if (PASSWORD_POLICY.requireLetter && !/[a-zA-Z]/.test(input)) {
+  if (PASSWORD_POLICY.requireLowercase && !/[a-z]/.test(input)) {
     return {
       ok: false,
-      message: "Password must include at least one letter.",
+      message: "Password must include at least one lowercase letter.",
+    };
+  }
+  if (PASSWORD_POLICY.requireUppercase && !/[A-Z]/.test(input)) {
+    return {
+      ok: false,
+      message: "Password must include at least one uppercase letter.",
     };
   }
   if (PASSWORD_POLICY.requireDigit && !/[0-9]/.test(input)) {
     return {
       ok: false,
       message: "Password must include at least one number.",
+    };
+  }
+  if (PASSWORD_POLICY.requireSpecial && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(input)) {
+    return {
+      ok: false,
+      message: "Password must include at least one special character.",
     };
   }
 

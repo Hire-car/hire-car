@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { ArrowRight, Loader2, Mail, KeyRound, Lock, Key } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { validateEmail } from "@/lib/auth/validation";
+import { validateEmail, validatePassword } from "@/lib/auth/validation";
 import { toFriendlyAuthError } from "@/lib/auth/errors";
 import { useAuthRedirect } from "@/components/auth/useAuthRedirect";
 import { Button } from "@/components/ui/button";
@@ -65,8 +65,13 @@ export function EmailAuthForm({
 
   function validatePasswordInput(): boolean {
     const errors: FieldErrors = {};
-    if (!password || password.length < 8) {
-      errors.password = "Password must be at least 8 characters.";
+    if (!password) {
+      errors.password = "Password is required.";
+    } else {
+      const validation = validatePassword(password);
+      if (!validation.ok) {
+        errors.password = validation.message;
+      }
     }
     if (mode === "sign-up" && password !== confirmPassword) {
       errors.confirmPassword = "Passwords do not match.";
