@@ -7,11 +7,16 @@ export default function customImageLoader({
   width: number;
   quality?: number;
 }) {
-  // Handle Supabase storage URLs (without forcing /render/image/public/ to avoid 400 errors if Image Transformation is disabled)
+  // If it's a Supabase storage URL, rewrite to the render (transformation) endpoint
   if (src.includes("/storage/v1/object/public/")) {
     try {
       const url = new URL(src);
+      url.pathname = url.pathname.replace(
+        "/storage/v1/object/public/",
+        "/storage/v1/render/image/public/"
+      );
       url.searchParams.set("width", width.toString());
+      url.searchParams.set("resize", "cover");
       if (quality) url.searchParams.set("quality", quality.toString());
       return url.href;
     } catch {
@@ -33,14 +38,5 @@ export default function customImageLoader({
   }
 
   // Fallback for everything else
-  try {
-    // If the src is a valid URL, append a dummy width parameter to satisfy Next.js loader validation
-    const url = new URL(src);
-    url.searchParams.set("w", width.toString());
-    return url.href;
-  } catch {
-    // If it's a relative path (e.g. /LOGO.png), we can't parse it as a full URL easily in the loader
-    // Next.js will complain if we don't append a width, so we append it as a query param
-    return src.includes("?") ? `${src}&w=${width}` : `${src}?w=${width}`;
-  }
+  return src;
 }
