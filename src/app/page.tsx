@@ -39,12 +39,12 @@ const heroOptimisedUrl = (width: number) =>
   `/_next/image?url=${encodeURIComponent(HERO_IMAGE_SRC)}&w=${width}&q=75`;
 
 const popularLocations = [
-  { name: "Sydney", imageUrl: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80", href: "/locations/sydney" },
-  { name: "Melbourne", imageUrl: "https://images.unsplash.com/photo-1514395462725-fb4566210144?auto=format&fit=crop&w=600&q=80", href: "/locations/melbourne" },
-  { name: "Brisbane", imageUrl: "https://images.unsplash.com/photo-1554939437-ecc492c67b78?auto=format&fit=crop&w=600&q=80", href: "/locations/brisbane" },
+  { name: "Sydney", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Sydney_Opera_House_and_Harbour_Bridge_Dusk_%282%29_2019-06-21.jpg/960px-Sydney_Opera_House_and_Harbour_Bridge_Dusk_%282%29_2019-06-21.jpg", href: "/locations/sydney" },
+  { name: "Melbourne", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Melbourne_skyline_sor.jpg/960px-Melbourne_skyline_sor.jpg", href: "/locations/melbourne" },
+  { name: "Brisbane", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Brisbane_CBD_seen_from_Kangaroo_Point%2C_2024%2C_01_%282%29.jpg/960px-Brisbane_CBD_seen_from_Kangaroo_Point%2C_2024%2C_01_%282%29.jpg", href: "/locations/brisbane" },
   { name: "Perth", imageUrl: "/perth.png", href: "/locations/perth" },
-  { name: "Adelaide", imageUrl: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?auto=format&fit=crop&w=600&q=80", href: "/locations/adelaide" },
-  { name: "Gold Coast", imageUrl: "https://images.unsplash.com/photo-1535961652354-923cb08225a7?auto=format&fit=crop&w=600&q=80", href: "/locations/gold-coast" },
+  { name: "Adelaide", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Adelaide_skyline%2C_December_2022_b.jpg/960px-Adelaide_skyline%2C_December_2022_b.jpg", href: "/locations/adelaide" },
+  { name: "Gold Coast", imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Gold_Coast_skyline_%28Unsplash%29.jpg/960px-Gold_Coast_skyline_%28Unsplash%29.jpg", href: "/locations/gold-coast" },
 ];
 
 const browseCategories = [
