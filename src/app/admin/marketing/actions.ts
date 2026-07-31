@@ -148,8 +148,8 @@ export async function sendMarketingCampaign(
     return { status: "error", message: "Heading must be between 4 and 120 characters." };
   }
 
-  if (body.length < 10 || body.length > 8000) {
-    return { status: "error", message: "Body must be between 10 and 8000 characters." };
+  if (body.length < 10 || body.length > 65000) {
+    return { status: "error", message: "Body must be between 10 and 65000 characters." };
   }
 
   if ((ctaLabel && !ctaUrl) || (!ctaLabel && ctaUrl)) {
@@ -178,7 +178,7 @@ export async function sendMarketingCampaign(
     let sent = 0;
     let skipped = 0;
     let failed = 0;
-    const bodyHtml = textToHtml(body);
+    const bodyHtml = body;
     const errors: string[] = [];
 
     for (const recipient of recipients) {

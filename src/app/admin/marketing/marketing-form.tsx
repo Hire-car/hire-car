@@ -1,7 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Megaphone, Send, CheckCircle, AlertCircle, Users, Mail } from "lucide-react";
+import dynamic from "next/dynamic";
+import "ckeditor5/ckeditor5.css";
+
+const RichTextEditor = dynamic(() => import("@/components/ui/rich-text-editor"), { ssr: false });
 
 import { sendMarketingCampaign } from "@/app/admin/marketing/actions";
 import type { MarketingEmailState } from "@/app/admin/marketing/actions";
@@ -18,6 +22,7 @@ const initialState: MarketingEmailState = {
 
 export function MarketingForm() {
   const [state, action, isPending] = useActionState(sendMarketingCampaign, initialState);
+  const [bodyContent, setBodyContent] = useState("");
 
   return (
     <Card variant="elevated">
@@ -116,14 +121,11 @@ export function MarketingForm() {
 
           <div className="grid gap-2">
             <Label htmlFor="body">Email body <span className="text-red-500">*</span></Label>
-            <Textarea
-              id="body"
-              name="body"
-              rows={10}
-              placeholder="Write the campaign copy here. Leave a blank line between paragraphs — they'll be formatted automatically."
-              required
-            />
-            <p className="text-xs text-muted-foreground">Blank lines become new paragraphs. No HTML required.</p>
+            <div className="mt-1">
+              <RichTextEditor value={bodyContent} onChange={setBodyContent} />
+              <input type="hidden" name="body" value={bodyContent} />
+            </div>
+            <p className="text-xs text-muted-foreground">Rich text editor enabled. Custom styles, images, and embedded media are supported.</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
