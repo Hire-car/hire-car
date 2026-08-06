@@ -153,14 +153,35 @@ export function SearchClient({
     }
   }, []);
 
-  const initialFetchDone = useRef(false);
+  // Sync filters state when URL searchParams change (e.g. search bar submission)
+  useEffect(() => {
+    const urlCity = searchParams.get("city") || undefined;
+    const urlCategory = searchParams.get("category") || undefined;
+    const urlMake = searchParams.get("make") || undefined;
+    const urlTransmission = searchParams.get("transmission") || undefined;
+    const urlFuel = searchParams.get("fuel") || undefined;
+    const urlMinPrice = searchParams.get("minPrice") ? Number(searchParams.get("minPrice")) : undefined;
+    const urlMaxPrice = searchParams.get("maxPrice") ? Number(searchParams.get("maxPrice")) : undefined;
+    const urlSeats = searchParams.get("seats") ? Number(searchParams.get("seats")) : undefined;
+    const urlPickup = searchParams.get("pickup") || undefined;
+    const urlReturnDate = searchParams.get("return") || undefined;
+
+    setFilters({
+      city: urlCity,
+      category: urlCategory,
+      make: urlMake,
+      transmission: urlTransmission,
+      fuel: urlFuel,
+      minPrice: urlMinPrice,
+      maxPrice: urlMaxPrice,
+      seats: urlSeats,
+      pickup: urlPickup,
+      returnDate: urlReturnDate,
+    });
+  }, [searchParams]);
 
   // Run search whenever filters, page, or sort change
   useEffect(() => {
-    if (!initialFetchDone.current) {
-      initialFetchDone.current = true;
-      return;
-    }
     fetchVehicles(filters, page, sortBy);
   }, [filters, page, sortBy, fetchVehicles]);
 
@@ -315,7 +336,7 @@ export function SearchClient({
         <div className="flex gap-8">
           {/* Sidebar */}
           <div className="hidden lg:block w-[280px] shrink-0">
-            <div className="sticky top-[180px]">
+            <div className="sticky top-[90px] max-h-[calc(100vh-100px)] overflow-y-auto pr-1">
               <FilterSidebar
                 currentFilters={filters}
                 onFilterChange={handleFilterChange}

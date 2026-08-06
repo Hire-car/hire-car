@@ -84,7 +84,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
             sizes="(max-width: 1024px) 100vw, 1024px"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+            className="object-contain p-2 sm:p-3 transition-transform duration-700 group-hover:scale-[1.03]"
           />
         </Link>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none opacity-80" />

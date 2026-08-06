@@ -19,18 +19,26 @@ type LocationSelectPayload = {
 
 interface LocationAutocompleteProps {
   onSelect: (location: LocationSelectPayload) => void;
+  onInputChange?: (value: string) => void;
+  defaultValue?: string;
   placeholder?: string;
   className?: string;
   inputClassName?: string;
   hideIcon?: boolean;
 }
 
-export function LocationAutocomplete({ onSelect, placeholder = "City or airport", className, inputClassName, hideIcon }: LocationAutocompleteProps) {
-  const [value, setValue] = useState("");
+export function LocationAutocomplete({ onSelect, onInputChange, defaultValue = "", placeholder = "City or airport", className, inputClassName, hideIcon }: LocationAutocompleteProps) {
+  const [value, setValue] = useState(defaultValue);
   const [results, setResults] = useState<PhotonFeature[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (defaultValue !== undefined && defaultValue !== value) {
+      setValue(defaultValue);
+    }
+  }, [defaultValue]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -80,7 +88,9 @@ export function LocationAutocomplete({ onSelect, placeholder = "City or airport"
           type="text"
           value={value}
           onChange={(e) => {
-            setValue(e.target.value);
+            const val = e.target.value;
+            setValue(val);
+            onInputChange?.(val);
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
@@ -112,9 +122,11 @@ export function LocationAutocomplete({ onSelect, placeholder = "City or airport"
               <li
                 key={index}
                 onClick={() => {
-                  setValue(props.name || displayName);
+                  const val = props.name || displayName;
+                  setValue(val);
+                  onInputChange?.(val);
                   setIsOpen(false);
-                  onSelect({ features: [{ properties: { name: props.name || displayName } }] });
+                  onSelect({ features: [{ properties: { name: val } }] });
                 }}
                 className="cursor-pointer px-4 py-2.5 text-sm text-slate-700 hover:bg-amber-50 hover:text-amber-700 transition-colors flex flex-col gap-0.5 border-b border-slate-50 last:border-0"
               >

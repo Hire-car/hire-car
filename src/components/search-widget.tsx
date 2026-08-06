@@ -55,6 +55,8 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                 Where
               </label>
               <LocationAutocomplete
+                defaultValue={location}
+                onInputChange={(val) => setLocation(val)}
                 onSelect={(res) => {
                   if (res?.features?.[0]?.properties?.name) {
                     setLocation(res.features[0].properties.name);
@@ -121,6 +123,8 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               Where
             </label>
             <LocationAutocomplete 
+              defaultValue={location}
+              onInputChange={(val) => setLocation(val)}
               onSelect={(res) => {
                 if (res?.features?.[0]?.properties?.name) {
                   setLocation(res.features[0].properties.name);
@@ -217,6 +221,8 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
           <div className="flex-1 px-6 h-full flex flex-col justify-center focus-within:bg-slate-50/80 hover:bg-slate-50/50 rounded-l-full group transition-colors cursor-text">
             <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Where</label>
             <LocationAutocomplete 
+              defaultValue={location}
+              onInputChange={(val) => setLocation(val)}
               onSelect={(res) => {
                 if (res?.features?.[0]?.properties?.name) {
                   setLocation(res.features[0].properties.name);

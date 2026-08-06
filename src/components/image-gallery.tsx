@@ -52,7 +52,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="gallery-main-frame group relative h-[420px] w-full overflow-hidden bg-slate-100 touch-pan-y select-none"
+        className="gallery-main-frame group relative h-[340px] sm:h-[420px] md:h-[480px] w-full overflow-hidden rounded-2xl bg-white border border-slate-200/80 shadow-sm touch-pan-y select-none"
       >
         <div
           style={{
@@ -80,7 +80,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-cover transition-opacity duration-300"
+            className="object-contain p-2 sm:p-4 transition-opacity duration-300"
           />
         </div>
 
@@ -117,8 +117,8 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
                 onClick={() => setCurrentIndex(index)}
                 aria-label={`View image ${index + 1} of ${images.length}`}
                 aria-current={index === currentIndex}
-                className={`relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-md border-2 transition-all ${
-                  index === currentIndex ? "border-[#FF5F00] opacity-100" : "border-transparent opacity-60 hover:opacity-100"
+                className={`relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all bg-white ${
+                  index === currentIndex ? "border-[#FF5F00] opacity-100 shadow-sm" : "border-slate-200 opacity-60 hover:opacity-100"
                 }`}
               >
                 <Image
@@ -126,7 +126,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
                   alt={img.alt_text || "Thumbnail"}
                   fill
                   sizes="128px"
-                  className="object-cover"
+                  className="object-contain p-1"
                 />
               </button>
             ))}

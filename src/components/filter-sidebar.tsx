@@ -368,9 +368,9 @@ export function FilterSidebar({
     );
   }
 
-  // Desktop render (with hidden logic handled by parent)
+  // Desktop render (with sticky/scroll container handled by parent)
   return (
-    <aside className="hidden lg:block bg-transparent sticky top-24 h-fit">
+    <aside className="hidden lg:block bg-transparent h-full">
       <div className="h-full flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm">
         {/* Header */}
         <div className="shrink-0 flex items-center justify-between p-4 border-b border-slate-100">
