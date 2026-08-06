@@ -460,12 +460,12 @@ export function DashboardShell({
       {/* Mobile drawer overlay */}
       {drawerOpen && (
         <div
-          className="fixed inset-0 z-50 md:hidden"
+          className="fixed inset-0 z-50 md:hidden flex"
           aria-hidden="true"
         >
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity"
             onClick={() => {
               setDrawerOpen(false);
               triggerRef.current?.focus();
@@ -478,14 +478,13 @@ export function DashboardShell({
             role="dialog"
             aria-modal="true"
             aria-label={`${mode === "admin" ? "Admin" : "Vendor"} navigation`}
-            className="absolute left-0 top-0 h-full w-[280px] max-w-[80vw] glass-panel bg-white/90 shadow-2xl animate-in slide-in-from-left duration-300"
+            className="relative z-10 h-full w-[285px] max-w-[85vw] bg-white border-r border-slate-200 shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col"
           >
-            <div className="flex items-center justify-between p-5 border-b border-slate-100/50 bg-slate-50/30">
+            <div className="flex items-center justify-between p-4 px-5 border-b border-slate-100 bg-slate-50 shrink-0">
               <div className="flex items-center gap-3">
                 <BrandLogo
                   priority
-                  className="h-[40px] w-[120px]"
-                  imageClassName="object-left mix-blend-multiply"
+                  className="h-[38px] w-[120px]"
                 />
                 <span className="sr-only">
                   {mode === "admin" ? "Admin Panel" : "Vendor Portal"}
@@ -496,13 +495,13 @@ export function DashboardShell({
                   setDrawerOpen(false);
                   triggerRef.current?.focus();
                 }}
-                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-200 hover:text-slate-900 transition-colors"
                 aria-label="Close navigation menu"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="p-4 h-[calc(100vh-73px)] overflow-y-auto">
+            <nav className="p-4 flex-1 overflow-y-auto bg-white">
               {navContent}
             </nav>
           </div>
