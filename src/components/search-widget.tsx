@@ -69,8 +69,8 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
             </div>
 
             {/* Dates */}
-            <div className="flex flex-row gap-3 w-full">
-              <div className="flex-1 min-w-0 bg-slate-50 relative px-4 py-2.5 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors">
+            <div className="flex flex-row gap-2.5 sm:gap-3 w-full">
+              <div className="flex-1 min-w-0 bg-slate-50 relative px-3 py-2.5 sm:px-4 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors overflow-hidden">
                 <label className="block text-[11px] font-bold text-slate-500 mb-0.5 uppercase tracking-wide">
                   Pickup
                 </label>
@@ -82,10 +82,10 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
                 />
               </div>
-              <div className="flex-1 min-w-0 bg-slate-50 relative px-4 py-2.5 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors">
+              <div className="flex-1 min-w-0 bg-slate-50 relative px-3 py-2.5 sm:px-4 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors overflow-hidden">
                 <label className="block text-[11px] font-bold text-slate-500 mb-0.5 uppercase tracking-wide">
                   Return
                 </label>
@@ -97,7 +97,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                   value={returnDate}
                   onChange={(e) => setReturnDate(e.target.value)}
                   min={pickupDate || new Date().toISOString().split("T")[0]}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
                 />
               </div>
             </div>
@@ -295,9 +295,9 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
           />
         </div>
 
-        <div className="flex flex-row gap-4 w-full">
-          <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">
-            <label className="block text-xs font-bold text-slate-500 mb-1">
+        <div className="flex flex-row gap-2.5 sm:gap-4 w-full">
+          <div className="flex-1 min-w-0 bg-slate-50 relative px-3 py-2.5 sm:px-4 rounded-xl border border-slate-200 focus-within:border-primary transition-colors overflow-hidden">
+            <label className="block text-[11px] font-bold text-slate-500 mb-0.5 uppercase tracking-wide">
               PICKUP
             </label>
             <input
@@ -307,12 +307,12 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
               value={pickupDate}
               onChange={(e) => setPickupDate(e.target.value)}
-              className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-900 font-medium outline-none placeholder:text-slate-400"
+              className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
             />
           </div>
 
-          <div className="flex-1 w-full bg-slate-50 relative px-4 py-3 rounded-xl border border-slate-200 focus-within:border-primary transition-colors">
-            <label className="block text-xs font-bold text-slate-500 mb-1">
+          <div className="flex-1 min-w-0 bg-slate-50 relative px-3 py-2.5 sm:px-4 rounded-xl border border-slate-200 focus-within:border-primary transition-colors overflow-hidden">
+            <label className="block text-[11px] font-bold text-slate-500 mb-0.5 uppercase tracking-wide">
               RETURN
             </label>
             <input
@@ -322,7 +322,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
-              className="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-900 font-medium outline-none placeholder:text-slate-400"
+              className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
             />
           </div>
         </div>
