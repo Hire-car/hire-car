@@ -333,7 +333,7 @@ export default async function VehicleDetailPage({
               <CardContent className="p-6">
                 <h3 className="font-bold text-foreground mb-2 text-base">About this vehicle</h3>
                 <p className="text-sm leading-relaxed text-muted-foreground font-normal">
-                  {vehicle.description || (
+                  {(vehicle as { description?: string }).description || (
                     `Experience exceptional drive quality and reliability with this ${vehicle.year} ${vehicle.make} ${vehicle.model}. Designed for smooth city navigation and long-distance comfort, this ${vehicle.category.toLowerCase()} features an efficient ${vehicle.fuel.toLowerCase()} engine with ${vehicle.transmission.toLowerCase()} transmission, seating for ${vehicle.seats} passengers, and full climate control for your trip in ${branch?.city || "Australia"}. Available for hire directly from ${org?.name ?? "verified operator"}.`
                   )}
                 </p>
