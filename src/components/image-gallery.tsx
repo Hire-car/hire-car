@@ -98,16 +98,18 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
         {images.length > 1 && (
           <>
             <button
+              type="button"
               onClick={handlePrev}
               aria-label="Previous image"
-              className="hidden md:flex absolute left-4 top-1/2 h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-900 opacity-0 shadow-sm backdrop-blur-sm transition-opacity hover:bg-white group-hover:opacity-100 touch-target"
+              className="z-30 flex absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-slate-900/70 text-white hover:bg-slate-900/90 backdrop-blur-md shadow-lg transition-all border border-white/20 active:scale-95 cursor-pointer"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
+              type="button"
               onClick={handleNext}
               aria-label="Next image"
-              className="hidden md:flex absolute right-4 top-1/2 h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 text-slate-900 opacity-0 shadow-sm backdrop-blur-sm transition-opacity hover:bg-white group-hover:opacity-100 touch-target"
+              className="z-30 flex absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-slate-900/70 text-white hover:bg-slate-900/90 backdrop-blur-md shadow-lg transition-all border border-white/20 active:scale-95 cursor-pointer"
             >
               <ChevronRight className="h-6 w-6" />
             </button>
