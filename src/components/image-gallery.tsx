@@ -52,8 +52,17 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="gallery-main-frame group relative h-[340px] sm:h-[420px] md:h-[480px] w-full overflow-hidden rounded-2xl bg-white border border-slate-200/80 shadow-sm touch-pan-y select-none"
+        className="gallery-main-frame group relative aspect-[16/10] sm:h-[420px] md:h-[480px] w-full overflow-hidden rounded-2xl bg-slate-950 border border-slate-800/80 shadow-md touch-pan-y select-none"
       >
+        {/* Ambient Blur Backdrop */}
+        <ImageWithFallback
+          src={images[currentIndex].url}
+          alt=""
+          fill
+          aria-hidden="true"
+          className="object-cover blur-2xl scale-110 opacity-50 brightness-75 select-none pointer-events-none"
+        />
+
         <div
           style={{
             transform: isZoomed
@@ -70,7 +79,9 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             width: "100%",
             height: "100%",
             position: "relative",
+            zIndex: 10,
           }}
+          className="p-2 sm:p-4"
         >
           <ImageWithFallback
             src={images[currentIndex].url}
@@ -80,7 +91,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-cover object-center transition-opacity duration-300"
+            className="object-contain drop-shadow-2xl transition-opacity duration-300"
           />
         </div>
 
