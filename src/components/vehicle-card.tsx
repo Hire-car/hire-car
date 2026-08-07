@@ -183,17 +183,6 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
           </Link>
         </div>
 
-        {/* Featured Vehicle Paragraph (Up to 100 words) */}
-        {(variant === "featured" || vehicle.featuredParagraph || vehicle.description) && (
-          <div className="mb-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200/60 text-xs text-slate-600 leading-relaxed font-normal">
-            <p className="line-clamp-4">
-              {vehicle.featuredParagraph || vehicle.description || (
-                `Experience exceptional drive quality with this ${vehicle.year} ${vehicle.make} ${vehicle.model}. Designed for smooth city navigation and long-distance comfort, this ${vehicle.category.toLowerCase()} offers an efficient ${vehicle.fuel.toLowerCase()} engine, ${vehicle.transmission.toLowerCase()} transmission, seating for ${vehicle.seats}, and air conditioning for your journey in ${vehicle.city}.`
-              )}
-            </p>
-          </div>
-        )}
-
         <div className="w-full h-px bg-slate-100 mb-5" />
 
         {/* Row 2: Specs Grid - Scrollable on Mobile, Single Line on Desktop */}
