@@ -80,7 +80,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-contain transition-opacity duration-300"
+            className="object-cover object-center transition-opacity duration-300"
           />
         </div>
 
