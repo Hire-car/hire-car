@@ -240,10 +240,8 @@ export default async function VehicleDetailPage({
         </ScrollIndicator>
 
         {/* Image Gallery */}
-        <Card variant="elevated" className="mb-8 overflow-hidden">
-          <div className="vehicle-gallery-frame aspect-[16/7] md:aspect-[24/9] w-full relative">
-            <ImageGallery images={images} />
-          </div>
+        <Card variant="elevated" className="mb-8 p-3 sm:p-4 bg-white overflow-hidden">
+          <ImageGallery images={images} />
         </Card>
 
         {/* Two-column layout */}

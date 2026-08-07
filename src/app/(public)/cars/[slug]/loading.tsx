@@ -14,8 +14,8 @@ export default function CarDetailLoading() {
         </div>
 
         {/* Image Gallery skeleton */}
-        <div className="rounded-xl border border-border bg-card shadow-md mb-8 overflow-hidden">
-          <Skeleton className="aspect-[16/7] md:aspect-[24/9] w-full rounded-none" />
+        <div className="rounded-xl border border-border bg-card shadow-md mb-8 overflow-hidden p-3 sm:p-4">
+          <Skeleton className="h-[340px] sm:h-[420px] md:h-[480px] w-full rounded-2xl" />
         </div>
 
         {/* Two-column layout */}

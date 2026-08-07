@@ -80,7 +80,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-contain p-2 sm:p-4 transition-opacity duration-300"
+            className="object-contain transition-opacity duration-300"
           />
         </div>
 
@@ -126,7 +126,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
                   alt={img.alt_text || "Thumbnail"}
                   fill
                   sizes="128px"
-                  className="object-contain p-1"
+                  className="object-cover object-center"
                 />
               </button>
             ))}
