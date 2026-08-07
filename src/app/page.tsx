@@ -39,12 +39,42 @@ const heroOptimisedUrl = (width: number) =>
   `/_next/image?url=${encodeURIComponent(HERO_IMAGE_SRC)}&w=${width}&q=75`;
 
 const popularLocations = [
-  { name: "Sydney", imageUrl: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80", href: "/locations/sydney" },
-  { name: "Melbourne", imageUrl: "https://images.unsplash.com/photo-1514395462725-fb4566210144?auto=format&fit=crop&w=600&q=80", href: "/locations/melbourne" },
-  { name: "Brisbane", imageUrl: "https://images.unsplash.com/photo-1554939437-ecc492c67b78?auto=format&fit=crop&w=600&q=80", href: "/locations/brisbane" },
-  { name: "Perth", imageUrl: "/perth.png", href: "/locations/perth" },
-  { name: "Adelaide", imageUrl: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?auto=format&fit=crop&w=600&q=80", href: "/locations/adelaide" },
-  { name: "Gold Coast", imageUrl: "https://images.unsplash.com/photo-1535961652354-923cb08225a7?auto=format&fit=crop&w=600&q=80", href: "/locations/gold-coast" },
+  {
+    name: "Sydney",
+    imageUrl: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80",
+    href: "/locations/sydney",
+    description: "Explore Sydney's vibrant harbor city with premium vehicle rentals. From CBD business trips to coastal road drives along Bondi and the Blue Mountains, find verified local car hires with flexible rates.",
+  },
+  {
+    name: "Melbourne",
+    imageUrl: "https://images.unsplash.com/photo-1514395462725-fb4566210144?auto=format&fit=crop&w=600&q=80",
+    href: "/locations/melbourne",
+    description: "Discover Victoria's cultural capital and scenic Great Ocean Road. Hire reliable sedans, SUVs, and commercial vehicles with instant booking, zero hidden fees, and flexible pickup locations across Melbourne.",
+  },
+  {
+    name: "Brisbane",
+    imageUrl: "https://images.unsplash.com/photo-1554939437-ecc492c67b78?auto=format&fit=crop&w=600&q=80",
+    href: "/locations/brisbane",
+    description: "Enjoy sunny Queensland with top-rated car rentals in Brisbane. Perfect for city commuting, Gold Coast weekend getaways, and Sunshine Coast explorations with direct operator support.",
+  },
+  {
+    name: "Perth",
+    imageUrl: "/perth.png",
+    href: "/locations/perth",
+    description: "Navigate Western Australia with spacious 4WDs, SUVs, and economical city cars in Perth. Explore King's Park, Margaret River wine regions, and coastal drives with verified local operators.",
+  },
+  {
+    name: "Adelaide",
+    imageUrl: "https://images.unsplash.com/photo-1589308078059-be1415eab4c3?auto=format&fit=crop&w=600&q=80",
+    href: "/locations/adelaide",
+    description: "Experience South Australia's festival city and Barossa Valley wine country. Choose from luxury, family, and budget car rentals with transparent pricing and direct vendor communication.",
+  },
+  {
+    name: "Gold Coast",
+    imageUrl: "https://images.unsplash.com/photo-1535961652354-923cb08225a7?auto=format&fit=crop&w=600&q=80",
+    href: "/locations/gold-coast",
+    description: "Cruise along famous beaches and hinterlands with premium Gold Coast car hire. Ideal for holidaymakers, surfers, and business travelers looking for reliable vehicles and instant availability.",
+  },
 ];
 
 const browseCategories = [
@@ -273,6 +303,7 @@ export default async function Home() {
                   vehicleCount={location.vehicleCount}
                   startingPrice={location.startingPrice}
                   href={location.href}
+                  description={location.description}
                 />
               </MotionScroll>
             ))}

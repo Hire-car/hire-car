@@ -95,4 +95,11 @@ describe("LocationCard", () => {
     expect(container.textContent).toContain("5 vehicles available");
     expect(container.textContent).not.toContain("/day");
   });
+
+  it("renders description paragraph when present", () => {
+    const { container } = render(
+      <LocationCard {...baseProps} description="Explore Sydney with top rated cars." />
+    );
+    expect(container.textContent).toContain("Explore Sydney with top rated cars.");
+  });
 });
