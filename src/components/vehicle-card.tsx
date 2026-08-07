@@ -34,6 +34,8 @@ interface VehicleCardProps {
 export function VehicleCard({ vehicle, priority = false, variant = "default", saved = false }: VehicleCardProps) {
   const hasRating = (vehicle.reviewCount ?? 0) > 0 && vehicle.avgRating != null;
   const unlimitedKm = vehicle.dailyDistanceLimitKm == null;
+  const freeCancellation = vehicle.freeCancellation !== false;
+  const noHiddenFees = vehicle.noHiddenFees !== false;
   const primaryFeature = vehicle.features?.includes("Air Conditioning") ? "Air Conditioning" : vehicle.features?.[0];
 
   if (variant === "compact") {
@@ -258,23 +260,23 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         {/* NO DIVIDER HERE, just like the reference! */}
 
         {/* Row 4: Trust Chips - Scrollable on Mobile, Single Line on Desktop */}
-        {(vehicle.freeCancellation || vehicle.noHiddenFees || unlimitedKm) && (
+        {(freeCancellation || noHiddenFees || unlimitedKm) && (
           <div className="flex items-center sm:justify-between w-full mb-4 border-t border-slate-100 pt-4 gap-2 sm:gap-2 overflow-x-auto snap-x overscroll-x-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1 sm:pb-0">
-            {vehicle.freeCancellation && (
+            {freeCancellation && (
               <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-[#EFFBF3] text-[#2E9D68] px-2.5 sm:px-2 py-2 sm:py-1.5 rounded-md font-bold text-[10px] sm:text-[9px] flex-1 sm:flex-1 shrink-0 snap-start min-w-[120px] sm:min-w-0">
                 <ShieldCheck className="h-3.5 w-3.5 sm:h-3 sm:w-3 shrink-0" /> <span className="truncate">Free cancellation</span>
               </div>
             )}
-            {vehicle.freeCancellation && (vehicle.noHiddenFees || unlimitedKm) && (
+            {freeCancellation && (noHiddenFees || unlimitedKm) && (
               <div className="w-px h-5 bg-slate-200 shrink-0 hidden sm:block" />
             )}
             
-            {vehicle.noHiddenFees && (
+            {noHiddenFees && (
               <div className="flex items-center justify-center gap-1 sm:gap-1.5 bg-[#EDF5FF] text-[#2072EA] px-2.5 sm:px-2 py-2 sm:py-1.5 rounded-md font-bold text-[10px] sm:text-[9px] flex-1 sm:flex-1 shrink-0 snap-start min-w-[120px] sm:min-w-0">
                 <Tag className="h-3.5 w-3.5 sm:h-3 sm:w-3 shrink-0" /> <span className="truncate">No hidden fees</span>
               </div>
             )}
-            {vehicle.noHiddenFees && unlimitedKm && (
+            {noHiddenFees && unlimitedKm && (
               <div className="w-px h-5 bg-slate-200 shrink-0 hidden sm:block" />
             )}
             

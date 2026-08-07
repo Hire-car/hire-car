@@ -98,7 +98,7 @@ const baseVehicle: Vehicle = {
 
 describe("VehicleCard enrichment field gating", () => {
   it("hides rating, weekly/monthly, logo, Super Host and chips when their data is absent", () => {
-    const { container, unmount } = render(<VehicleCard vehicle={{ ...baseVehicle, dailyDistanceLimitKm: 200 }} />);
+    const { container, unmount } = render(<VehicleCard vehicle={{ ...baseVehicle, dailyDistanceLimitKm: 200, freeCancellation: false, noHiddenFees: false }} />);
     const text = container.textContent || "";
     expect(text).not.toContain("Reviews");
     expect(text).not.toContain("Weekly from");
