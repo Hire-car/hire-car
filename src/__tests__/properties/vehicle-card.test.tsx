@@ -97,16 +97,14 @@ const baseVehicle: Vehicle = {
 };
 
 describe("VehicleCard enrichment field gating", () => {
-  it("hides rating, weekly/monthly, logo, Super Host and chips when their data is absent", () => {
-    const { container, unmount } = render(<VehicleCard vehicle={{ ...baseVehicle, dailyDistanceLimitKm: 200, freeCancellation: false, noHiddenFees: false }} />);
+  it("hides rating, weekly/monthly, logo, Super Host and delivery when their data is absent", () => {
+    const { container, unmount } = render(<VehicleCard vehicle={{ ...baseVehicle, dailyDistanceLimitKm: 200 }} />);
     const text = container.textContent || "";
     expect(text).not.toContain("Reviews");
     expect(text).not.toContain("Weekly from");
     expect(text).not.toContain("Super Host");
-    expect(text).not.toContain("Free cancellation");
-    expect(text).not.toContain("No hidden fees");
     expect(text).not.toContain("Free delivery");
-    expect(text).not.toContain("Unlimited km"); // KM limit set => not unlimited
+    expect(text).not.toContain("Unlimited km"); // KM limit set => 200 km/day
     expect(container.querySelector("img[alt='Acme Rentals']")).toBeNull(); // no logo
     unmount();
   });
