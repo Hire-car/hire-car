@@ -66,6 +66,16 @@ export default async function AdminFeaturedPage() {
           <label className="text-sm font-medium">Ends at</label>
           <input name="endsAt" type="datetime-local" required className="mt-1 w-full rounded-lg border border-input px-3 py-2 text-sm" />
         </div>
+        <div className="md:col-span-2">
+          <label className="text-sm font-medium">Featured Paragraph (up to 100 words)</label>
+          <textarea
+            name="featuredParagraph"
+            rows={3}
+            maxLength={600}
+            placeholder="Add a custom featured paragraph (up to 100 words) highlighting this vehicle's key features, drive quality, and rental details..."
+            className="mt-1 w-full rounded-lg border border-input px-3 py-2 text-sm"
+          />
+        </div>
         <button type="submit" className="md:col-span-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
           Create placement
         </button>

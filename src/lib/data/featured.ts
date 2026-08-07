@@ -129,6 +129,7 @@ export const getActiveFeaturedVehicles = unstable_cache(
       freeCancellation: false,
       noHiddenFees: false,
       superHost: computeSuperHost({ verified, avgRating, reviewCount }),
+      featuredParagraph: `Experience exceptional performance and comfort with this ${v.year} ${v.make} ${v.model}. Featuring an efficient ${v.fuel.toLowerCase()} engine, smooth ${v.transmission.toLowerCase()} transmission, seating for ${v.seats}, and modern amenities, it offers a high-quality rental experience in ${v.branches.city}.`,
     } satisfies Vehicle;
   });
 }, ["featured-vehicles"], { revalidate: 3600, tags: ["featured"] });

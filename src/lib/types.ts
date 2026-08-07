@@ -37,6 +37,8 @@ export type Vehicle = {
   freeCancellation?: boolean;
   noHiddenFees?: boolean;
   superHost?: boolean;
+  description?: string | null;
+  featuredParagraph?: string | null;
 };
 
 export type Vendor = {
