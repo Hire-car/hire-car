@@ -52,16 +52,8 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="gallery-main-frame group relative aspect-[16/10] sm:h-[420px] md:h-[480px] w-full overflow-hidden rounded-2xl bg-slate-950 border border-slate-800/80 shadow-md touch-pan-y select-none"
+        className="gallery-main-frame group relative aspect-[16/10] sm:h-[420px] md:h-[480px] w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none"
       >
-        {/* Ambient Blur Backdrop */}
-        <ImageWithFallback
-          src={images[currentIndex].url}
-          alt=""
-          fill
-          aria-hidden="true"
-          className="object-cover blur-2xl scale-110 opacity-50 brightness-75 select-none pointer-events-none"
-        />
 
         <div
           style={{
