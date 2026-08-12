@@ -89,15 +89,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
           />
         </div>
 
-        {/* Expand button in the center */}
-        <button
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          aria-label="View full screen"
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md shadow-lg transition-all hover:bg-black/80 hover:scale-105 pointer-events-auto"
-        >
-          <Maximize2 className="h-6 w-6" strokeWidth={2.5} />
-        </button>
+
 
         {images.length > 1 && (
           <>
