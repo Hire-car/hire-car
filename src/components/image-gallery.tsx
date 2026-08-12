@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { ImageWithFallback } from "@/components/image-with-fallback";
-import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, X } from "lucide-react";
 import { useSwipeGesture } from "@/hooks/use-swipe-gesture";
 import { usePinchZoom } from "@/hooks/use-pinch-zoom";
 import { PaginationDots } from "./pagination-dots";
@@ -16,6 +16,7 @@ interface GalleryImage {
 
 export function ImageGallery({ images }: { images: GalleryImage[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const handleNext = useCallback(() => {
@@ -83,9 +84,20 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-contain drop-shadow-2xl transition-opacity duration-300"
+            className="object-contain drop-shadow-2xl transition-opacity duration-300 cursor-pointer"
+            onClick={() => setIsModalOpen(true)}
           />
         </div>
+
+        {/* Expand button in the center */}
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          aria-label="View full screen"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-md shadow-lg transition-all hover:bg-black/80 hover:scale-105 pointer-events-auto"
+        >
+          <Maximize2 className="h-6 w-6" strokeWidth={2.5} />
+        </button>
 
         {images.length > 1 && (
           <>
@@ -137,6 +149,63 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             ))}
           </div>
         </>
+      )}
+
+      {/* Full Screen Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-sm touch-none">
+          {/* Close button */}
+          <button
+            onClick={() => setIsModalOpen(false)}
+            aria-label="Close full screen"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+          >
+            <X className="h-6 w-6" />
+          </button>
+
+          {/* Modal Main Image */}
+          <div className="relative h-full max-h-[85vh] w-full max-w-7xl p-4 flex items-center justify-center mt-8">
+            <Image
+              src={images[currentIndex].url}
+              alt={images[currentIndex].alt_text || "Full screen vehicle image"}
+              fill
+              className="object-contain"
+              sizes="100vw"
+              priority
+            />
+          </div>
+
+          {/* Modal Navigation */}
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrev();
+                }}
+                className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-[60] flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all border border-white/10"
+              >
+                <ChevronLeft className="h-8 w-8" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNext();
+                }}
+                className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-[60] flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-all border border-white/10"
+              >
+                <ChevronRight className="h-8 w-8" />
+              </button>
+            </>
+          )}
+
+          {/* Image Counter */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-4 py-2 text-sm text-white/90 font-medium backdrop-blur-md z-[60]">
+            {currentIndex + 1} / {images.length}
+          </div>
+        </div>
       )}
     </div>
   );
