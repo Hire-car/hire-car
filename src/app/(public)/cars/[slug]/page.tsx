@@ -241,7 +241,7 @@ export default async function VehicleDetailPage({
 
         {/* Image Gallery */}
         <Card variant="elevated" className="mb-8 p-3 sm:p-4 bg-white overflow-hidden">
-          <ImageGallery images={images} />
+          <ImageGallery images={images} vehicleId={vehicle.id} />
         </Card>
 
         {/* Two-column layout */}

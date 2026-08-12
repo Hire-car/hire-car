@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, X } from "lucide-react
 import { useSwipeGesture } from "@/hooks/use-swipe-gesture";
 import { usePinchZoom } from "@/hooks/use-pinch-zoom";
 import { PaginationDots } from "./pagination-dots";
+import { SavedVehicleButton } from "@/components/saved-vehicle-button";
 
 interface GalleryImage {
   id: string;
@@ -14,7 +15,7 @@ interface GalleryImage {
   alt_text: string;
 }
 
-export function ImageGallery({ images }: { images: GalleryImage[] }) {
+export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], vehicleId?: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -74,7 +75,7 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             position: "relative",
             zIndex: 10,
           }}
-          className="p-2 sm:p-4"
+          className=""
         >
           <ImageWithFallback
             src={images[currentIndex].url}
@@ -84,12 +85,16 @@ export function ImageGallery({ images }: { images: GalleryImage[] }) {
             loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-contain drop-shadow-2xl transition-opacity duration-300 cursor-pointer"
+            className="object-cover transition-opacity duration-300 cursor-pointer"
             onClick={() => setIsModalOpen(true)}
           />
         </div>
 
-
+        {vehicleId && (
+          <div className="absolute top-4 right-4 z-20">
+            <SavedVehicleButton vehicleId={vehicleId} className="shadow-lg h-11 w-11 hover:scale-105" />
+          </div>
+        )}
 
         {images.length > 1 && (
           <>
