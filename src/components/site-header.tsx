@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-// usePathname removed
 import { Menu, ChevronDown, User, Headphones } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createBrowserClient } from "@supabase/ssr";
@@ -39,7 +38,6 @@ export function SiteHeader() {
   const headerRef = useRef<HTMLElement>(null);
   useHeaderHeight(headerRef);
 
-  // pathname removed
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [profileHref, setProfileHref] = useState("/customer/dashboard");
@@ -79,7 +77,7 @@ export function SiteHeader() {
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     
     // Check auth state
     const supabase = createBrowserClient(
@@ -148,10 +146,10 @@ export function SiteHeader() {
         <AnimatePresence>
           {!isScrolled && (
             <motion.div 
-              initial={{ height: 40, opacity: 1 }}
-              exit={{ height: 0, opacity: 0, overflow: 'hidden' }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-r from-orange-600 via-[#ea580c] to-amber-500 text-white text-xs font-bold tracking-wide py-2.5 px-4 flex justify-center sm:justify-between items-center shadow-inner"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+              transition={{ duration: 0.25 }}
+              className="bg-gradient-to-r from-[#c04505] via-[#ea580c] to-amber-500 text-white text-xs font-bold tracking-wide py-2.5 px-4 flex justify-center sm:justify-between items-center shadow-inner overflow-hidden"
             >
               <span className="hidden sm:inline-block">Australia&apos;s trusted premium car rental marketplace</span>
               <div className="flex items-center gap-4">

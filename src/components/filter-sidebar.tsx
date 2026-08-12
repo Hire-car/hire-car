@@ -358,7 +358,7 @@ export function FilterSidebar({
           <div className="shrink-0 p-4 border-t border-slate-100 bg-white pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <button
               onClick={handleClose}
-              className="w-full py-3 bg-amber-500 text-slate-950 font-semibold rounded-lg hover:bg-amber-400 transition-colors"
+              className="w-full py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-orange-500 active:scale-[0.98] transition-all shadow-sm"
             >
               Show {totalResults} results
             </button>

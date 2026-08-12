@@ -64,8 +64,6 @@ function ProfileDropdown({ onLogout, email, initial }: { onLogout: () => void, e
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -80,6 +78,9 @@ function ProfileDropdown({ onLogout, email, initial }: { onLogout: () => void, e
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Open account menu"
+        aria-expanded={isOpen}
+        aria-haspopup="true"
         className="flex items-center gap-2 p-1 pr-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/20"
       >
         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
@@ -378,10 +379,10 @@ export function DashboardShell({
             <Link
               key={href}
               href={href}
-              className={`group flex items-center gap-3 rounded-xl px-4 min-h-[44px] text-sm font-bold transition-all duration-300 ${
+              className={`group flex items-center gap-3 rounded-xl px-4 min-h-[44px] text-sm font-bold transition-all duration-200 active:scale-[0.98] ${
                 isActive
-                  ? "bg-gradient-to-r from-orange-50 to-amber-50/30 text-primary shadow-sm relative overflow-hidden"
-                  : "text-slate-500 hover:bg-slate-50/80 hover:text-slate-900 hover:shadow-sm"
+                  ? "bg-orange-50 text-primary border border-primary/15 shadow-sm relative overflow-hidden"
+                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
               }`}
               aria-current={isActive ? "page" : undefined}
             >
@@ -399,10 +400,6 @@ export function DashboardShell({
 
   return (
     <div className="min-h-screen bg-slate-50/50 relative selection:bg-primary/20 selection:text-primary">
-      {/* Dynamic Background Blurs */}
-      <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-orange-50/40 to-transparent pointer-events-none -z-10" />
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] rounded-full bg-blue-500/5 blur-[100px] pointer-events-none -z-10" />
 
       {/* Header */}
       <header className="sticky top-0 z-40 glass-panel border-b-0 shadow-sm">
@@ -516,7 +513,7 @@ export function DashboardShell({
         <div className="flex flex-col md:flex-row gap-8">
           {/* Desktop sidebar */}
           <aside className="hidden md:block w-[260px] shrink-0">
-            <div className="sticky top-24 rounded-3xl glass-panel bg-white/40 p-4 h-[calc(100vh-8rem)] overflow-y-auto hidden-scrollbar">
+            <div className="sticky top-24 rounded-2xl bg-white border border-slate-200 p-4 h-[calc(100vh-8rem)] overflow-y-auto hidden-scrollbar shadow-sm">
               <nav>{navContent}</nav>
             </div>
           </aside>

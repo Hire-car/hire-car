@@ -26,7 +26,7 @@ export function FilterChips({ filters, onRemove }: FilterChipsProps) {
       {filters.map((filter) => (
         <div
           key={filter.key}
-          className="flex items-center gap-1 shrink-0 rounded-full bg-orange-50 border border-orange-200 px-3 py-2 text-sm text-orange-800 min-h-[44px]"
+          className="flex items-center gap-1 shrink-0 rounded-full bg-orange-50 border border-orange-200 px-3 py-2 text-sm text-orange-800"
         >
           <span className="whitespace-nowrap">{filter.label}</span>
           <button

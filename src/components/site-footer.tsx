@@ -71,6 +71,31 @@ const socialLinks = [
 export function SiteFooter() {
   return (
     <footer className="bg-[#0f172a] text-white">
+      {/* Newsletter Row */}
+      <div className="border-b border-slate-800">
+        <div className="mx-auto max-w-[1280px] px-4 md:px-6 lg:px-8 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Stay in the loop</p>
+              <h3 className="text-lg font-bold text-white">Get the best deals straight to your inbox</h3>
+            </div>
+            <form className="flex items-center gap-2 w-full sm:w-auto" action="/api/newsletter" method="POST">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="flex-1 sm:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
+              />
+              <button
+                type="submit"
+                className="shrink-0 bg-primary hover:bg-orange-500 active:scale-[0.98] text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-all"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer Content */}
       <div className="mx-auto max-w-[1280px] px-4 md:px-6 lg:px-8 py-10 md:py-12">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6">

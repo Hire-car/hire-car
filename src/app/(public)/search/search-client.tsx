@@ -265,7 +265,7 @@ export function SearchClient({
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setIsMobileSearchModalOpen(true)}
-            className="flex-1 bg-slate-50 hover:bg-slate-100 transition-colors rounded-full py-2.5 px-4 flex items-center gap-3 border border-slate-200 shadow-sm min-w-0"
+            className="flex-1 bg-slate-50 hover:bg-slate-100 active:scale-[0.98] transition-all rounded-full py-2.5 px-4 flex items-center gap-3 border border-slate-200 shadow-sm min-w-0"
           >
             <Search className="h-4 w-4 text-primary shrink-0" />
             <div className="flex flex-col items-start min-w-0 flex-1">
@@ -282,7 +282,7 @@ export function SearchClient({
           <button
             onClick={() => setIsMobileFilterOpen(true)}
             aria-label="Open filters"
-            className="shrink-0 bg-white hover:bg-slate-50 transition-colors rounded-full p-3 border border-slate-200 shadow-[var(--shadow-sm)] flex items-center justify-center relative"
+            className="shrink-0 bg-white hover:bg-slate-50 active:scale-[0.98] transition-all rounded-full p-3 border border-slate-200 shadow-[var(--shadow-sm)] flex items-center justify-center relative"
           >
             <SlidersHorizontal className="h-4 w-4 text-slate-600" />
             {activeFilterChips.length > 0 && (
@@ -364,7 +364,7 @@ export function SearchClient({
                 {/* Mobile Filter Button */}
                 <button
                   onClick={() => setIsMobileFilterOpen(true)}
-                  className="lg:hidden flex items-center gap-2 px-4 py-2 bg-muted text-foreground/70 rounded-lg font-semibold hover:bg-muted/80 transition-colors"
+                  className="lg:hidden flex items-center gap-2 px-4 py-2 bg-muted text-foreground/70 rounded-lg font-semibold hover:bg-muted/80 active:scale-[0.98] transition-all"
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                   Filters
@@ -386,7 +386,7 @@ export function SearchClient({
                 <div className="relative">
                   <button
                     onClick={() => setIsSortOpen(!isSortOpen)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-muted border border-border rounded-lg text-sm font-semibold text-foreground/70 hover:border-border/80 hover:bg-muted/80 transition-all"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-muted border border-border rounded-lg text-sm font-semibold text-foreground/70 hover:border-border/80 hover:bg-muted/80 active:scale-[0.98] transition-all"
                   >
                     <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
                     {sortOptions.find((o) => o.value === sortBy)?.label}

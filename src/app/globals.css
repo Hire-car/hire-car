@@ -6,7 +6,8 @@
 
 :root {
   /* Original Clean Theme */
-  --primary: #ea580c;          /* Original Orange */
+  --primary: #c04505;          /* Darkened for WCAG AA contrast with white text */
+  --primary-hover: #ea580c;    /* Lighter hover/accent state */
   --primary-foreground: #ffffff;
 
   --success: #10b981;
@@ -44,7 +45,7 @@
   --input: #e2e8f0;
   --ring: var(--primary);
 
-  --font-heading: var(--font-sans, "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif);
+  --font-heading: var(--font-sans, "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif);
 
   /* Border Radius - Premium & Soft */
   --radius: 0.5rem;

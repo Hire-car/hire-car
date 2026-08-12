@@ -29,8 +29,6 @@ export const metadata = {
 
 import { Suspense } from "react";
 
-// ... existing imports ...
-
 async function AdminDashboardContent() {
   const [metrics, pendingVendors, pendingListings, fraudFlags, pendingReviews, analytics] = await Promise.all(
     [
@@ -47,7 +45,6 @@ async function AdminDashboardContent() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <section className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200/50 pb-6 relative">
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
             <div className="p-2.5 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl shadow-lg shadow-orange-500/20">
@@ -343,13 +340,12 @@ function MetricCard({ icon: Icon, label, value, total, trend, color, href }: any
   const theme = colorMap[color];
 
   return (
-    <Link href={href} className={`group relative overflow-hidden rounded-3xl border glass-panel card-lift p-6 ${theme.bg}`}>
-      <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${theme.glow} rounded-full blur-2xl transition-transform duration-700 group-hover:scale-150`} />
+    <Link href={href} className={`group relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm hover:shadow-md transition-all duration-200 active:scale-[0.98] ${theme.bg}`}>
       <div className="relative z-10 flex items-center justify-between mb-6">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${theme.iconBg} ${theme.text} shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3`}>
+        <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${theme.iconBg} ${theme.text} shadow-sm`}>
           <Icon className="h-6 w-6" />
         </div>
-        <div className="text-4xl font-black text-slate-800 drop-shadow-sm">{value}</div>
+        <div className="text-4xl font-black text-slate-800">{value}</div>
       </div>
       <div className="relative z-10 text-sm font-bold text-slate-600 uppercase tracking-wider">{label}</div>
       <div className="relative z-10 mt-3 flex items-center justify-between text-xs font-medium">

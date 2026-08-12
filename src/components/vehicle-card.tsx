@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
-import Image from "next/image";
 import { ImageWithFallback } from "@/components/image-with-fallback";
+
 import {
   MapPin,
   ArrowRight,
@@ -279,7 +278,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         {/* Row 5: Primary CTA */}
         <Link
           href={`/cars/${vehicle.slug}`}
-          className="w-full flex items-center justify-center gap-1.5 bg-[#FF4D00] hover:bg-[#E64500] text-white py-2.5 sm:py-3 rounded-lg font-semibold text-sm shadow-[0_4px_14px_rgba(255,77,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,77,0,0.4)] hover:-translate-y-0.5 transition-all group/btn mt-auto"
+          className="w-full flex items-center justify-center gap-1.5 bg-[#FF4D00] hover:bg-[#E64500] text-white py-2.5 sm:py-3 rounded-lg font-semibold text-sm shadow-[0_4px_14px_rgba(255,77,0,0.3)] hover:shadow-[0_6px_20px_rgba(255,77,0,0.4)] hover:-translate-y-0.5 active:scale-[0.98] transition-all group/btn mt-auto"
         >
           Check Availability
           <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />

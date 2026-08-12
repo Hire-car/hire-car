@@ -6,22 +6,19 @@ const steps = [
     step: 1,
     icon: MapPin,
     title: "Search by Location",
-    description:
-      "Search for available vehicles in your area from verified local operators.",
+    description: "Search for available vehicles in your area from verified local operators.",
   },
   {
     step: 2,
     icon: BarChart3,
     title: "Compare & Choose",
-    description:
-      "Compare prices, features, and reviews to find your ideal rental.",
+    description: "Compare prices, features, and reviews to find your ideal rental.",
   },
   {
     step: 3,
     icon: MessageCircle,
     title: "Contact & Book",
-    description:
-      "Reach out directly to the vendor — no middleman, no hidden fees.",
+    description: "Reach out directly to the vendor — no middleman, no hidden fees.",
   },
 ];
 
@@ -37,25 +34,26 @@ export function HowItWorks() {
         </p>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-3">
+      <div className="relative grid gap-8 md:grid-cols-3">
+        {/* Connector line between steps (desktop only) */}
+        <div className="hidden md:block absolute top-10 left-[calc(16.67%+1.5rem)] right-[calc(16.67%+1.5rem)] h-px bg-border" aria-hidden="true" />
+
         {steps.map(({ step, icon: Icon, title, description }) => (
           <div
             key={step}
-            className="relative rounded-xl border border-border bg-card p-6 shadow-sm text-center transition-shadow hover:shadow-md"
+            className="relative flex flex-col items-center text-center px-4"
           >
-            {/* Numbered badge */}
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow">
-              {step}
-            </span>
-
-            {/* Icon container */}
-            <div className="mx-auto mt-4 mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-primary/10">
-              <Icon className="h-7 w-7 text-primary" />
+            {/* Step number circle with brand accent */}
+            <div className="relative z-10 flex h-20 w-20 items-center justify-center rounded-full bg-white border-2 border-primary/20 shadow-sm mb-5">
+              <Icon className="h-8 w-8 text-primary" />
+              <span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-black text-white shadow">
+                {step}
+              </span>
             </div>
 
             {/* Title and description */}
             <h3 className="text-lg font-bold text-foreground mb-2">{title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               {description}
             </p>
           </div>

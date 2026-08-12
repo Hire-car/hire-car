@@ -48,13 +48,14 @@ const popularLocations = [
 ];
 
 const browseCategories = [
-  { name: "Sedan", href: "/categories/sedan" },
-  { name: "SUV", href: "/categories/suv" },
-  { name: "People mover", href: "/categories/people-mover" },
-  { name: "Van", href: "/categories/van" },
-  { name: "Ute", href: "/categories/ute" },
-  { name: "Luxury", href: "/categories/luxury" },
+  { name: "Sedan", href: "/categories/sedan", emoji: "🚗" },
+  { name: "SUV", href: "/categories/suv", emoji: "🚙" },
+  { name: "People Mover", href: "/categories/people-mover", emoji: "🚐" },
+  { name: "Van", href: "/categories/van", emoji: "🚌" },
+  { name: "Ute", href: "/categories/ute", emoji: "🛻" },
+  { name: "Luxury", href: "/categories/luxury", emoji: "🏎️" },
 ];
+
 
 export default async function Home() {
   const supabase = createAdminClient();
@@ -160,7 +161,7 @@ export default async function Home() {
                 <div className="mt-9 flex flex-wrap items-center gap-4">
                   <Link
                     href="/search"
-                    className="group inline-flex items-center gap-2 rounded-xl bg-[#ea580c] px-7 py-3.5 text-sm font-bold text-white hover:bg-[#f97316] transition-all shadow-xl shadow-[#ea580c]/30 hover:scale-[1.02]"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-[#c04505] px-7 py-3.5 text-sm font-bold text-white hover:bg-[#ea580c] transition-all shadow-xl shadow-[#ea580c]/30 active:scale-[0.98]"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                     Search Vehicles
@@ -173,12 +174,6 @@ export default async function Home() {
                   </Link>
                 </div>
 
-                {/* Inline mini trust row */}
-                <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-400" /> Verified businesses</span>
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-400" /> No hidden fees</span>
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-emerald-400" /> Australia-wide</span>
-                </div>
               </div>
             </div>
           </div>
@@ -298,42 +293,40 @@ export default async function Home() {
               Find the right vehicle type for your trip
             </p>
           </MotionScroll>
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {browseCategories.map((cat) => (
               <Link
                 key={cat.name}
                 href={cat.href}
-                className="block rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground hover:border-primary hover:text-primary transition-colors"
+                className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-white p-5 text-center hover:border-primary/40 hover:shadow-md active:scale-[0.97] transition-all duration-200"
               >
-                {cat.name}
+                <span className="text-3xl" role="img" aria-label={cat.name}>{cat.emoji}</span>
+                <span className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">{cat.name}</span>
               </Link>
             ))}
           </div>
         </Section>
 
         {/* ===== 7. VENDOR CTA ===== */}
-        <Section variant="navy" size="lg" container className="relative overflow-hidden">
-          {/* Soft decorative glows using the premium blue accent */}
-          <div className="pointer-events-none absolute top-10 right-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="pointer-events-none absolute bottom-10 left-1/3 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+        <Section variant="muted" size="lg" container className="relative overflow-hidden">
 
           <div className="relative max-w-2xl">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/15 border border-primary/30 px-4 py-1.5 mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-4 py-1.5 mb-8">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">Now accepting new operators</span>
+              <span className="text-xs font-bold text-foreground uppercase tracking-wider">Now accepting new operators</span>
             </div>
 
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.1] mb-6">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground tracking-tight leading-[1.1] mb-6">
               Grow your rental business
               <br />
               <span className="text-primary">with qualified leads</span>
             </h2>
 
-            <p className="text-lg md:text-xl text-slate-300 font-medium mb-10 max-w-lg leading-relaxed">
+            <p className="text-lg md:text-xl text-muted-foreground font-medium mb-10 max-w-lg leading-relaxed">
               List your fleet alongside verified operators across Australia — with zero booking fees.
             </p>
 
@@ -347,10 +340,10 @@ export default async function Home() {
               ].map((benefit) => (
                 <li
                   key={benefit}
-                  className="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                  className="flex items-center gap-3 rounded-xl bg-background border border-border px-4 py-3"
                 >
                   <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
-                  <span className="text-sm font-medium text-slate-200">{benefit}</span>
+                  <span className="text-sm font-medium text-foreground">{benefit}</span>
                 </li>
               ))}
             </ul>
@@ -359,12 +352,12 @@ export default async function Home() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <Link
                 href="/auth/sign-in"
-                className="group inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="group inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-[#c04505] px-6 py-3 text-base font-bold text-white shadow-lg transition-all hover:bg-[#ea580c] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 List Your Fleet Free
                 <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
-              <span className="text-sm text-slate-400 font-medium">
+              <span className="text-sm text-muted-foreground font-medium">
                 No credit card required · 2 min setup
               </span>
             </div>
@@ -411,27 +404,14 @@ export default async function Home() {
         </section>
 
         {/* SEO Section */}
-        <section className="relative py-20 md:py-28 overflow-hidden">
-          {/* Background image */}
-          <div className="absolute inset-0">
-            <Image
-              src="https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?auto=format&fit=crop&w=1600&q=80"
-              alt="Australian road"
-              fill
-              loading="lazy"
-              sizes="100vw"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/95 via-[#0f172a]/85 to-[#0f172a]/70" />
-          </div>
-
+        <section className="relative py-20 md:py-28 overflow-hidden bg-background border-t border-border">
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <h2 className="text-3xl md:text-4xl font-black text-white mb-6 tracking-tight leading-tight">
+                <h2 className="text-3xl md:text-4xl font-black text-foreground mb-6 tracking-tight leading-tight">
                   Car Hire Across<br />Australia
                 </h2>
-                <div className="space-y-4 text-base text-slate-300 leading-relaxed">
+                <div className="space-y-4 text-base text-muted-foreground leading-relaxed">
                   <p>
                     HireCar Marketplace makes it easy to find the right vehicle from trusted rental operators across Australia. Compare options from verified businesses in one place.
                   </p>
@@ -445,7 +425,7 @@ export default async function Home() {
                     <Link
                       key={city}
                       href={`/search?city=${city}`}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-white/10 border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 transition-colors"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-accent border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                     >
                       <span className="w-2 h-2 rounded-full bg-[#ea580c]" />
                       {city}
@@ -457,9 +437,9 @@ export default async function Home() {
               <div className="hidden md:flex flex-col items-center justify-center">
                 <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
                   {heroStats.map((stat) => (
-                    <div key={stat.label} className="rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm p-6 text-center">
-                      <p className={`text-3xl font-black ${stat.value === "$0" ? "text-[#ea580c]" : "text-white"}`}>{stat.value}</p>
-                      <p className="text-sm text-slate-400 mt-1">{stat.label}</p>
+                    <div key={stat.label} className="rounded-2xl bg-card border border-border p-6 text-center shadow-sm">
+                      <p className={`text-3xl font-black ${stat.value === "$0" ? "text-[#ea580c]" : "text-foreground"}`}>{stat.value}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
                     </div>
                   ))}
                 </div>

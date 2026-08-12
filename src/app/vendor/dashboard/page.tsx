@@ -14,11 +14,6 @@ export const metadata = {
   title: "Dashboard",
 };
 
-import { Suspense } from "react";
-
-// ... existing imports ...
-
-// New Component for the async data
 async function DashboardContent({ organization, userId }: { organization: any, userId: string }) {
   const metrics = await getDashboardMetrics(organization.id, userId);
 
@@ -37,20 +32,22 @@ async function DashboardContent({ organization, userId }: { organization: any, u
     <div className="space-y-6">
       {/* High-Converting Upsell Banner */}
       {!hasActiveSubscription && (
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-600 via-[#ea580c] to-amber-500 p-8 shadow-lg shadow-orange-500/20">
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay"></div>
+        <div className="relative overflow-hidden rounded-2xl bg-slate-950 p-8 shadow-xl border border-white/5">
+          {/* Subtle orange accent line */}
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-orange-400 to-transparent" />
           <div className="relative z-10 flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="max-w-2xl text-white">
-              <h2 className="text-2xl font-black tracking-tight sm:text-3xl">Ready to start receiving leads?</h2>
-              <p className="mt-2 text-orange-50 font-medium text-lg">
+              <p className="text-[11px] font-black uppercase tracking-widest text-primary mb-2">Fleet owners</p>
+              <h2 className="text-2xl font-black tracking-tight sm:text-3xl text-white">Ready to start receiving leads?</h2>
+              <p className="mt-2 text-slate-400 font-medium text-base">
                 Start your subscription today to list your fleet and get connected with verified customers across Australia.
               </p>
             </div>
             <Link
               href="/vendor/billing"
-              className="group inline-flex shrink-0 items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-orange-600 shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl hover:bg-orange-50"
+              className="group inline-flex shrink-0 items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:bg-orange-500 active:scale-[0.98]"
             >
-              <Zap className="h-5 w-5 text-amber-500 transition-transform group-hover:scale-110" fill="currentColor" />
+              <Zap className="h-4 w-4 transition-transform group-hover:scale-110" fill="currentColor" />
               Select Plan
             </Link>
           </div>
@@ -128,21 +125,23 @@ async function DashboardContent({ organization, userId }: { organization: any, u
 
       {/* Quick Actions */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-slate-900 mb-4">Quick Actions</h2>
+        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Quick Actions</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {quickActions.map(({ label, href, icon: Icon, color, badge }) => (
             <Link
               key={label}
               href={href}
-              className={`relative flex flex-col items-center gap-2 rounded-xl px-4 py-4 text-sm font-medium transition-all ${color}`}
+              className="relative flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-600 transition-all hover:border-primary/30 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]"
             >
               {badge !== undefined && (
                 <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
                   {badge}
                 </span>
               )}
-              <Icon className="h-5 w-5" />
-              {label}
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${color}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <span className="text-xs text-center leading-tight">{label}</span>
             </Link>
           ))}
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback, type ReactNode } from "react";
+import { useEffect, useRef, useCallback, useState, type ReactNode } from "react";
+
 import { useBodyScrollLock } from "@/hooks/use-body-scroll-lock";
 import { useSwipeGesture } from "@/hooks/use-swipe-gesture";
 
@@ -153,7 +154,7 @@ export function MobileDrawerNav({ isOpen, onClose, children }: MobileDrawerNavPr
 }
 
 /**
- * Expandable section using native <details>/<summary> for locations and categories.
+ * Expandable section with smooth animation for locations and categories.
  */
 export function DrawerSection({
   title,
@@ -162,9 +163,15 @@ export function DrawerSection({
   title: string;
   children: ReactNode;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <details className="group border-b border-gray-100">
-      <summary className="flex cursor-pointer items-center justify-between py-3 text-base font-medium text-gray-900 min-h-[44px] list-none [&::-webkit-details-marker]:hidden">
+    <div className="border-b border-gray-100">
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-expanded={isOpen}
+        className="flex w-full cursor-pointer items-center justify-between py-3 text-base font-semibold text-gray-900 min-h-[44px] text-left"
+      >
         {title}
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -176,13 +183,17 @@ export function DrawerSection({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="transition-transform group-open:rotate-180"
+          className={`transition-transform duration-200 shrink-0 ${isOpen ? "rotate-180" : ""}`}
           aria-hidden="true"
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
-      </summary>
-      <div className="pb-3 pl-2">{children}</div>
-    </details>
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-200 ease-in-out ${isOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}
+      >
+        <div className="pb-3 pl-2">{children}</div>
+      </div>
+    </div>
   );
 }

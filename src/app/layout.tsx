@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
-import { Inter, Outfit } from "next/font/google";
+import { Outfit } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -12,15 +12,9 @@ import { ScrollToTop } from "@/components/scroll-to-top";
 import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import { appleStartupImages } from "@/lib/pwa-splash";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
 const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-heading",
+  variable: "--font-sans",
   display: "swap",
 });
 
@@ -118,7 +112,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${inter.variable} ${outfit.variable} h-full antialiased`}
+      className={`${outfit.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-slate-50 text-slate-950 font-sans tracking-tight">

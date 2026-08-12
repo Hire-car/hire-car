@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/refs, @typescript-eslint/no-unused-vars */
 import { useEffect, useRef, type RefObject } from "react";
 
 export interface SwipeGestureOptions {
@@ -35,10 +34,6 @@ export function useSwipeGesture(
       startX = e.clientX;
       startY = e.clientY;
       tracking = true;
-    };
-
-    const handlePointerMove = (e: PointerEvent) => {
-      if (!tracking) return;
     };
 
     const handlePointerUp = (e: PointerEvent) => {
@@ -78,13 +73,11 @@ export function useSwipeGesture(
     };
 
     element.addEventListener("pointerdown", handlePointerDown);
-    element.addEventListener("pointermove", handlePointerMove);
     element.addEventListener("pointerup", handlePointerUp);
     element.addEventListener("pointercancel", handlePointerCancel);
 
     return () => {
       element.removeEventListener("pointerdown", handlePointerDown);
-      element.removeEventListener("pointermove", handlePointerMove);
       element.removeEventListener("pointerup", handlePointerUp);
       element.removeEventListener("pointercancel", handlePointerCancel);
     };
