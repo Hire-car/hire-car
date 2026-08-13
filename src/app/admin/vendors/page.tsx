@@ -94,7 +94,7 @@ export default async function AdminVendorsPage({ searchParams }: AdminVendorsPag
       </section>
 
       {/* Status Tabs */}
-      <div className="flex gap-2 border-b border-border">
+      <div className="flex gap-2 border-b border-border overflow-x-auto whitespace-nowrap no-scrollbar pb-px">
         {[
           { key: "pending", label: "Pending", count: counts.pending },
           { key: "approved", label: "Approved", count: counts.approved },
@@ -104,7 +104,7 @@ export default async function AdminVendorsPage({ searchParams }: AdminVendorsPag
           <Link
             key={tab.key}
             href={`/admin/vendors?status=${tab.key}`}
-            className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+            className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors shrink-0 flex items-center ${
               statusFilter === tab.key
                 ? "border-primary text-foreground"
                 : "border-transparent text-muted-foreground hover:text-foreground"

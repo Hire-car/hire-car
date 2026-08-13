@@ -11,6 +11,7 @@ import { MobileAnimationProvider } from "@/components/mobile-animation-provider"
 import { ScrollToTop } from "@/components/scroll-to-top";
 import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import { appleStartupImages } from "@/lib/pwa-splash";
+import NextTopLoader from 'nextjs-toploader';
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -116,6 +117,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full bg-slate-50 text-slate-950 font-sans tracking-tight overflow-x-hidden">
+        <NextTopLoader color="#ea580c" showSpinner={false} />
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
             <Script
