@@ -39,6 +39,7 @@ export type Vehicle = {
   superHost?: boolean;
   description?: string | null;
   featuredParagraph?: string | null;
+  imageCount?: number;
 };
 
 export type Vendor = {

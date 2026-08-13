@@ -73,6 +73,7 @@ export async function setupVehicleCollection() {
       { name: "no_hidden_fees", type: "bool" as const, facet: true, optional: true },
       { name: "vendor_logo_url", type: "string" as const, facet: false, optional: true },
       { name: "primary_image_url", type: "string" as const, facet: false, optional: true },
+      { name: "image_count", type: "int32" as const, facet: false, optional: true },
       { name: "verified", type: "bool" as const, facet: true, optional: true },
     ],
     default_sorting_field: "price_per_day_aud",
@@ -230,6 +231,7 @@ export async function searchVehicles(
         freeDelivery: doc.free_delivery,
         freeCancellation: doc.free_cancellation,
         noHiddenFees: doc.no_hidden_fees,
+        imageCount: (doc.image_count as number) || (doc.primary_image_url ? 1 : 0),
       };
     }) ?? []) as Vehicle[];
 
@@ -476,6 +478,7 @@ async function fallbackDatabaseSearch(
         freeCancellation: false,
         noHiddenFees: false,
         superHost: computeSuperHost({ verified, avgRating, reviewCount }),
+        imageCount: images.length,
       };
     }) ?? [];
 
@@ -603,14 +606,16 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
               .from("vehicle_images")
               .select("storage_path, approved, sort_order")
               .eq("vehicle_id", vehicle.id)
-              .order("sort_order", { ascending: true })
-              .limit(1);
+              .order("sort_order", { ascending: true });
+
+            const docWithImages = document as Record<string, string | number | boolean | string[] | null>;
+            docWithImages.image_count = images ? images.length : 0;
 
             if (images && images.length > 0) {
-              const bestImage = images[0];
+              const bestImage = images.find((img) => img.approved) ?? images[0];
               const bucket = bestImage.approved ? "vehicle-images" : "pending-vehicle-images";
               const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-              (document as Record<string, string | number | boolean | string[] | null>).primary_image_url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${bestImage.storage_path}`;
+              docWithImages.primary_image_url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${bestImage.storage_path}`;
             }
 
             await upsertVehicleDocument(document);
