@@ -5,10 +5,10 @@ const BASE = "https://www.hirecarmarketplace.com.au";
 const PAGE_SIZE = 5000;
 
 /**
- * `sitemap.ts` uses `generateSitemaps()`, which Next serves at
- * `/sitemap/[id].xml` with no `/sitemap.xml` index. So instead of advertising a
- * single (404-ing) `/sitemap.xml`, we list every existing chunk directly —
- * Google supports multiple `Sitemap:` directives. Chunks:
+ * `sitemap.ts` uses `generateSitemaps()`, which Next serves as a Sitemap Index
+ * at `/sitemap.xml`. The individual chunks are available at `/sitemap/[id].xml`.
+ * We list the chunks here explicitly just to be safe.
+ * Chunks:
  *   0 → static + pSEO + blog,  1 → vendors,  2+ → vehicle chunks.
  */
 async function sitemapUrls(): Promise<string[]> {

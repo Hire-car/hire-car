@@ -38,24 +38,17 @@ export default function customImageLoader({
   }
 
   // Fallback for everything else (e.g. local images)
-  // We MUST append width/quality to ensure the URL is unique per size in the srcset.
-  // Otherwise, some browsers (like Safari) fail to load images on the first visit
-  // because they get confused by identical URLs with different width descriptors.
+  // Route local assets through Next.js built-in optimizer
   try {
-    // Check if it's an absolute URL
-    if (src.startsWith("http://") || src.startsWith("https://")) {
-      const url = new URL(src);
-      url.searchParams.set("w", width.toString());
-      if (quality) url.searchParams.set("q", quality.toString());
-      return url.href;
+    if (src.startsWith("/") && !src.startsWith("//")) {
+      return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality || 75}`;
     }
     
-    // For relative URLs (e.g., /LOGO.png), append as query parameters
-    const [basePath, search] = src.split("?");
-    const params = new URLSearchParams(search || "");
-    params.set("w", width.toString());
-    if (quality) params.set("q", quality.toString());
-    return `${basePath}?${params.toString()}`;
+    // For absolute URLs not caught above, just append width
+    const url = new URL(src);
+    url.searchParams.set("w", width.toString());
+    if (quality) url.searchParams.set("q", quality.toString());
+    return url.href;
   } catch {
     return src;
   }

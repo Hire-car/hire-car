@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
 import { EmptyState } from "@/components/empty-state";
 import { CityCategoryHub } from "@/components/pseo/city-category-hub";
+import { SeoCrossLinkingMatrix } from "@/components/pseo/seo-cross-linking-matrix";
 import { searchVehicles } from "@/lib/search/typesense";
 import {
   isCategorySlug,
@@ -28,6 +29,7 @@ export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const { cityCategoryUrls } = await getIndexableSitemapUrls();
+  
   return cityCategoryUrls.map((url) => {
     // url is like /locations/sydney/suv
     const parts = url.split("/");
@@ -137,12 +139,12 @@ async function BrandCityPage({
                   <span className="text-amber-400 font-semibold text-sm">Verified Vehicles</span>
                 </div>
                 <h1 className="text-4xl font-black text-white sm:text-5xl">
-                  {displayBrand} for hire in {displayCity}
+                  {displayBrand} for hire in {displayCity}, Australia
                 </h1>
                 <p className="mt-3 text-slate-300 max-w-lg">
                   {total > 0
-                    ? `Compare ${total} ${displayBrand} vehicles from local operators.`
-                    : `Explore ${displayBrand} rental cars from verified local companies.`}
+                    ? `Compare ${total} ${displayBrand} vehicles from local Australian operators.`
+                    : `Explore ${displayBrand} rental cars from verified local Australian companies.`}
                 </p>
               </div>
               {avgPrice && (
@@ -187,6 +189,24 @@ async function BrandCityPage({
             />
           )}
         </section>
+
+        {/* Thick Programmatic Content block */}
+        <section className="bg-white border-t border-slate-200 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="text-2xl font-black text-slate-900 mb-4">Why hire a {displayBrand} in {displayCity}?</h2>
+            <p className="text-slate-600 leading-relaxed mb-4">
+              When visiting {displayCity}, a {displayBrand} provides the perfect blend of reliability, comfort, and performance for Australian roads. 
+              Whether you're navigating the city center or heading out for a coastal drive, our verified local operators offer competitive rates on 
+              {displayBrand} vehicles with zero marketplace booking fees.
+            </p>
+            <p className="text-slate-600 leading-relaxed">
+              Book directly with trusted Australian fleet owners to guarantee your specific {displayBrand} model. Enjoy peace of mind knowing all 
+              partners are fully vetted and meet our strict marketplace standards.
+            </p>
+          </div>
+        </section>
+
+        <SeoCrossLinkingMatrix currentCity={displayCity} />
       </main>
       <SiteFooter />
     </div>

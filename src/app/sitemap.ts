@@ -83,7 +83,7 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
 
     let pseoRoutes: MetadataRoute.Sitemap = [];
     try {
-      const { cityUrls, categoryUrls, cityCategoryUrls } = await getIndexableSitemapUrls();
+      const { cityUrls, categoryUrls, cityCategoryUrls, airportUrls, intentUrls, suburbUrls } = await getIndexableSitemapUrls();
       const now = new Date();
       
       const cityMapped = cityUrls.map((path) => ({
@@ -105,8 +105,27 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
         priority: 0.7,
       }));
 
+      const airportMapped = airportUrls.map((path) => ({
+        url: `${base}${path}`,
+        lastModified: now,
+        changeFrequency: "daily" as const,
+        priority: 0.85,
+      }));
+      const intentMapped = intentUrls.map((path) => ({
+        url: `${base}${path}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }));
+      const suburbMapped = suburbUrls.map((path) => ({
+        url: `${base}${path}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
+      }));
+
       // Limit PSEO to 45,000 URLs to stay safely under Google's 50k limit
-      pseoRoutes = [...cityMapped, ...categoryMapped, ...cityCategoryMapped].slice(0, 45000);
+      pseoRoutes = [...cityMapped, ...categoryMapped, ...cityCategoryMapped, ...airportMapped, ...intentMapped, ...suburbMapped].slice(0, 45000);
     } catch {
       // graceful fallback
     }

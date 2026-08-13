@@ -8,9 +8,9 @@ export const metadata: Metadata = {
   // Self-canonical collapses those permutations to the clean path.
   alternates: { canonical: "/search" },
   robots: {
-    index: true,
+    index: false,
     follow: true,
-    googleBot: { index: true, follow: true },
+    googleBot: { index: false, follow: true },
   },
 };
 

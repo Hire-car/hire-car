@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { SeoCrossLinkingMatrix } from "@/components/pseo/seo-cross-linking-matrix";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
@@ -199,6 +200,8 @@ export default async function CategoryPage({
             </div>
           </div>
         </section>
+
+        <SeoCrossLinkingMatrix />
       </main>
       <SiteFooter />
     </div>

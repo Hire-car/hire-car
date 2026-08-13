@@ -177,9 +177,27 @@ export async function getIndexableSitemapUrls() {
     .filter((c) => isIndexableCityCategory(c.count))
     .map((c) => `/locations/${c.citySlug}/${c.categorySlug}`);
 
+  const airportUrls = cities
+    .filter((c) => c.vehicleCount > 0)
+    .map((c) => `/locations/${c.slug}/airport`);
+
+  // Hardcode intents for now
+  const intentUrls = ["wedding", "long-term", "under-25", "cheap"].map(
+    (intent) => `/car-hire/${intent}`
+  );
+
+  // Suburb URLs disabled — the previous implementation generated fake suburb
+  // slugs (e.g. "sydney-central") that aren't real Australian suburbs. These
+  // served identical content to the parent city page, creating doorway pages.
+  // Re-enable only when real suburb data is sourced from branch addresses.
+  const suburbUrls: string[] = [];
+
   return {
     cityUrls,
     categoryUrls,
     cityCategoryUrls,
+    airportUrls,
+    intentUrls,
+    suburbUrls,
   };
 }

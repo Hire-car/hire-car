@@ -56,7 +56,7 @@ export function buildCollectionPageSchema(input: {
     url: `${SEO_BASE_URL}${input.url}`,
     isPartOf: {
       "@type": "WebSite",
-      name: "Hire Car",
+      name: "HireCar Marketplace",
       url: SEO_BASE_URL,
     },
   };
@@ -85,6 +85,7 @@ export function buildProductSchema(input: {
       url: `${SEO_BASE_URL}/cars/${input.slug}`,
       priceCurrency: "AUD",
       price: input.pricePerDayAud,
+      priceValidUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       availability: "https://schema.org/InStock",
       seller: {
         "@type": "Organization",
@@ -182,6 +183,36 @@ export function buildOrganizationSchema(input: {
   };
 }
 
+export function buildAutoRentalSchema(input: {
+  name: string;
+  url: string;
+  city?: string;
+  state?: string;
+  phone?: string | null;
+  email?: string | null;
+}) {
+  const schema: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "AutoRental",
+    name: input.name,
+    url: `${SEO_BASE_URL}${input.url}`,
+  };
+  
+  if (input.phone) schema.telephone = input.phone;
+  if (input.email) schema.email = input.email;
+  
+  if (input.city) {
+    schema.address = {
+      "@type": "PostalAddress",
+      addressLocality: input.city,
+      addressRegion: input.state,
+      addressCountry: "AU",
+    };
+  }
+
+  return schema;
+}
+
 export function buildArticleSchema(input: {
   title: string;
   description: string;
@@ -203,14 +234,14 @@ export function buildArticleSchema(input: {
     dateModified: input.dateModified,
     author: {
       "@type": "Organization",
-      name: input.authorName ?? "Hire Car Marketplace",
+      name: input.authorName ?? "HireCar Marketplace",
     },
     publisher: {
       "@type": "Organization",
-      name: "Hire Car Marketplace",
+      name: "HireCar Marketplace",
       logo: {
         "@type": "ImageObject",
-        url: `${base}/logo.png`,
+        url: `${base}/icons/icon-512.png`,
       },
     },
     mainEntityOfPage: {
@@ -251,5 +282,13 @@ export function buildBlogBreadcrumbSchema(input: {
 }
 
 export function serializeSchemas(schemas: object[]) {
-  return JSON.stringify(schemas);
+  // Wrap in @graph per Google's best practice — avoids bare JSON arrays
+  // which some rich result testing tools reject. Strip duplicate @context.
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": schemas.map((s) => {
+      const { "@context": _, ...rest } = s as Record<string, unknown>;
+      return rest;
+    }),
+  });
 }

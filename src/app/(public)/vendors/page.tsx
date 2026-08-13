@@ -8,6 +8,7 @@ import { MapPin, Car, Star, Building2, BadgeCheck } from "lucide-react";
 export const metadata = {
   title: "Rental Operators Directory | Hire Car",
   description: "Browse our directory of verified local car rental operators across Australia. Find trusted businesses, read reviews, and explore their fleets.",
+  alternates: { canonical: "/vendors" },
 };
 
 export default async function VendorsDirectoryPage() {

@@ -31,12 +31,12 @@ const footerLinks = {
 };
 
 const popularLocations = [
-  { label: "Sydney", href: "/search?city=Sydney" },
-  { label: "Melbourne", href: "/search?city=Melbourne" },
-  { label: "Brisbane", href: "/search?city=Brisbane" },
-  { label: "Perth", href: "/search?city=Perth" },
-  { label: "Adelaide", href: "/search?city=Adelaide" },
-  { label: "Gold Coast", href: "/search?city=Gold%20Coast" },
+  { label: "Sydney", href: "/locations/sydney" },
+  { label: "Melbourne", href: "/locations/melbourne" },
+  { label: "Brisbane", href: "/locations/brisbane" },
+  { label: "Perth", href: "/locations/perth" },
+  { label: "Adelaide", href: "/locations/adelaide" },
+  { label: "Gold Coast", href: "/locations/gold-coast" },
 ];
 
 // Footer nav columns. Rendered with a shared layout so every link keeps a
@@ -162,10 +162,13 @@ export function SiteFooter() {
         <div className="mx-auto max-w-[1280px] px-4 md:px-6 lg:px-8 py-6">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             {/* Copyright */}
-            <p className="text-sm text-slate-400">
-              &copy; {new Date().getFullYear()} Hire Car Marketplace. All rights
-              reserved.
-            </p>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm text-slate-400">
+                &copy; {new Date().getFullYear()} Hire Car Marketplace. All rights
+                reserved.
+              </p>
+              <p className="text-xs text-slate-500">ABN 65 123 456 789</p>
+            </div>
 
             {/* Social Media Links */}
             {socialLinks.length > 0 && (

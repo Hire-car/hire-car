@@ -37,6 +37,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.hirecarmarketplace.com.au"),
   alternates: {
     canonical: "/",
+    languages: {
+      "en-AU": "/",
+    },
   },
 
   manifest: "/manifest.json",
@@ -116,6 +119,9 @@ export default function RootLayout({
       className={`${outfit.variable} h-full antialiased overflow-x-hidden`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-full bg-slate-50 text-slate-950 font-sans tracking-tight overflow-x-hidden">
         <NextTopLoader color="#ea580c" showSpinner={false} />
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (

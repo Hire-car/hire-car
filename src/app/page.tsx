@@ -13,7 +13,7 @@ import { searchVehicles } from "@/lib/search/typesense";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MotionScroll } from "@/components/motion-scroll";
 import { Section } from "@/components/ui/section";
-import { buildWebSiteSchema, buildBrandOrganizationSchema, serializeSchemas } from "@/lib/seo";
+import { buildWebSiteSchema, buildBrandOrganizationSchema, serializeSchemas, buildFaqSchema } from "@/lib/seo";
 import {
   ArrowRight,
   ChevronDown,
@@ -21,17 +21,17 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "HireCar Marketplace | Premium Car Rental",
-  description: "Premium car rental. Without the premium price.",
+  title: "Car Hire & Rental Australia | HireCar Marketplace",
+  description: "Compare premium cars, vans, and utes from verified Australian rental operators. Book direct with zero marketplace fees. Find your perfect vehicle today.",
+  alternates: {
+    canonical: "https://www.hirecarmarketplace.com.au",
+  },
 };
 
 export const revalidate = 3600;
 
-// LCP hero background. Extracted to a constant so the same URL is used by both
-// the <Image> element and the mobile <link rel="preload"> below, guaranteeing
-// the preloaded resource matches what the browser actually fetches.
-const HERO_IMAGE_SRC =
-  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80";
+// LCP hero background.
+const HERO_IMAGE_SRC = "/hero.jpg";
 
 // Build a Next.js image-optimizer URL for a given width (q=75 is the default
 // allowed quality). Used to construct a responsive preload srcset for mobile.
@@ -123,7 +123,16 @@ export default async function Home() {
       */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeSchemas([buildWebSiteSchema(), buildBrandOrganizationSchema()]) }}
+        dangerouslySetInnerHTML={{ __html: serializeSchemas([
+          buildWebSiteSchema(), 
+          buildBrandOrganizationSchema(),
+          buildFaqSchema([
+            { question: "How do I book a vehicle?", answer: "Search for your location and dates, select a vehicle, and send an enquiry directly to the local operator. They will confirm availability and terms with you." },
+            { question: "Are there any hidden fees?", answer: "No. The price you see includes all taxes and basic insurance. Operators may offer optional extras like child seats or GPS at the counter." },
+            { question: "Can I cancel my reservation?", answer: "Most operators offer free cancellation up to 48 hours before pickup. You can view the specific cancellation policy of any vehicle before booking." },
+            { question: "Do I need a special license?", answer: "A valid standard driver's license from your home country is required. International drivers may need an International Driving Permit (IDP)." }
+          ])
+        ]) }}
       />
       <SiteHeader />
 
@@ -148,7 +157,7 @@ export default async function Home() {
             <div className="relative z-10 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8">
               <div className="max-w-2xl pt-16 pb-24 lg:pt-20 lg:pb-32">
                 <h1 className="text-4xl sm:text-5xl lg:text-[3.75rem] font-black text-white tracking-tight leading-[1.05]">
-                  Find the right vehicle,{" "}
+                  Premium Car Rental Australia,{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#fb923c] to-[#ea580c]">
                     direct from trusted operators.
                   </span>
@@ -300,7 +309,7 @@ export default async function Home() {
                 href={cat.href}
                 className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-white p-5 text-center hover:border-primary/40 hover:shadow-md active:scale-[0.97] transition-all duration-200"
               >
-                <span className="text-3xl" role="img" aria-label={cat.name}>{cat.emoji}</span>
+                <span className="text-3xl" role="img" aria-hidden="true">{cat.emoji}</span>
                 <span className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">{cat.name}</span>
               </Link>
             ))}
@@ -421,16 +430,19 @@ export default async function Home() {
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-2">
-                  {["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Gold Coast"].map((city) => (
+                  {["Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Gold Coast"].map((city) => {
+                    const slug = city.toLowerCase().replace(/\s+/g, "-");
+                    return (
                     <Link
                       key={city}
-                      href={`/search?city=${city}`}
+                      href={`/locations/${slug}`}
                       className="inline-flex items-center gap-1.5 rounded-full bg-accent border border-border px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                     >
                       <span className="w-2 h-2 rounded-full bg-[#ea580c]" />
                       {city}
                     </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

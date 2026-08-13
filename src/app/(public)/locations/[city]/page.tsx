@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/empty-state";
 import { searchVehicles } from "@/lib/search/typesense";
 import { MapPin, Car, ArrowLeft, Filter, ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
+import { SeoCrossLinkingMatrix } from "@/components/pseo/seo-cross-linking-matrix";
 import {
   getCityMeta,
   cityTitle,
@@ -137,7 +138,7 @@ export default async function LocationPage({
                   <span className="text-amber-400 font-semibold text-sm">{state}</span>
                 </div>
                 <h1 className="text-4xl font-black text-white sm:text-5xl">
-                  Car hire in {displayCity}
+                  Car hire in {displayCity}, Australia
                 </h1>
                 <p className="mt-3 text-slate-300 max-w-lg">
                   {total > 0
@@ -178,8 +179,8 @@ export default async function LocationPage({
           <section className="mx-auto max-w-7xl px-4 py-6 lg:py-8 sm:px-6 lg:px-8 border-b border-slate-200">
             <h2 className="text-lg lg:text-xl font-bold text-slate-900 mb-1 lg:mb-2">Market Insights: {displayCity}</h2>
             <p className="text-slate-600">
-              Based on {total} active listings on Hire Car, the average daily car rental in {displayCity} costs <strong>${avgPrice} AUD per day</strong>. 
-              {priceRange && ` Prices range from $${priceRange.min} to $${priceRange.max} depending on vehicle class and rental operator.`}
+              Based on {total} active listings on Hire Car, the average daily car rental in {displayCity}, Australia costs <strong>${avgPrice} AUD per day</strong>. 
+              {priceRange && ` Prices range from $${priceRange.min} to $${priceRange.max} depending on vehicle class and Australian rental operator.`}
             </p>
           </section>
         )}
@@ -235,7 +236,7 @@ export default async function LocationPage({
               Frequently asked questions
             </h2>
             <p className="text-sm text-slate-500 mb-8">
-              Common questions about hiring a car in {displayCity}
+              Common questions about hiring a car in {displayCity}, Australia
             </p>
             <div className="divide-y divide-slate-200">
               {cityFaqs.map((faq, i) => (
@@ -259,9 +260,9 @@ export default async function LocationPage({
         {total > 0 && (
           <section className="bg-slate-50 border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
-              <h2 className="text-xl font-bold text-slate-900 mb-3">Car hire in {displayCity}, {state}</h2>
+              <h2 className="text-xl font-bold text-slate-900 mb-3">Car hire in {displayCity}, {state} (Australia)</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
-                Hire Car connects you directly with verified local rental operators in {displayCity}. All vendors are
+                Hire Car connects you directly with verified Australian rental operators in {displayCity}. All vendors are
                 verified with ABN validation and go through an approval process before listing. There are no booking
                 fees — you contact the operator directly to arrange dates, pricing, and pickup. Browse by category,
                 fuel type, or price to find the right vehicle for your trip.
@@ -303,6 +304,8 @@ export default async function LocationPage({
             </div>
           </section>
         )}
+
+        <SeoCrossLinkingMatrix currentCity={displayCity} />
       </main>
 
       <SiteFooter />

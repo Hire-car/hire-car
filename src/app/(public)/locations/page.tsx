@@ -8,6 +8,7 @@ export const metadata = {
   title: "Car Hire Locations | Australia",
   description:
     "Find affordable car hire across Australia. Browse vehicle rentals by city from verified local operators.",
+  alternates: { canonical: "/locations" },
 };
 
 const CITY_EMOJI: Record<string, string> = {

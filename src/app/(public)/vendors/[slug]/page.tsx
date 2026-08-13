@@ -23,7 +23,7 @@ import { EmptyState } from "@/components/empty-state";
 import { VendorProfileHeader } from "@/components/vendor-profile-header";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Vehicle } from "@/lib/types";
-import { buildOrganizationSchema, buildFaqSchema, serializeSchemas } from "@/lib/seo";
+import { buildOrganizationSchema, buildAutoRentalSchema, buildFaqSchema, serializeSchemas } from "@/lib/seo";
 import { resolveVehicleImage } from "@/lib/image-utils";
 import type { VehicleImageRecord } from "@/lib/image-utils";
 
@@ -82,6 +82,11 @@ export async function generateMetadata({
   return {
     title: `${data.name} - Car Rental${location}`,
     description: `Verified car rental operator${location}. Browse their fleet on Hire Car Marketplace.`,
+    alternates: { canonical: `/vendors/${slug}` },
+    openGraph: {
+      title: `${data.name} - Car Rental${location}`,
+      description: `Verified car rental operator${location}. Browse their fleet on Hire Car Marketplace.`,
+    },
   };
 }
 
@@ -268,20 +273,14 @@ export default async function VendorPage({
 
   const vendorFaqs = vendor.vendor_faqs ?? [];
 
-  const autoRentalSchema = {
-    "@context": "https://schema.org",
-    "@type": "AutoRental",
+  const autoRentalSchema = buildAutoRentalSchema({
     name: vendor.name,
-    url: `https://www.hirecarmarketplace.com.au/vendors/${vendor.slug}`,
-    ...(vendor.phone && { telephone: vendor.phone }),
-    ...(vendor.email && { email: vendor.email }),
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: vendor.city,
-      addressRegion: vendor.state,
-      addressCountry: "AU",
-    },
-  };
+    url: `/vendors/${vendor.slug}`,
+    city: vendor.city,
+    state: vendor.state,
+    phone: vendor.phone,
+    email: vendor.email,
+  });
 
   const organizationSchema = buildOrganizationSchema({
     name: vendor.name,
