@@ -129,7 +129,7 @@ export default async function AirportCarHirePage({
               delivery or quick shuttle services. 
             </p>
             <p className="text-slate-600 leading-relaxed">
-              Support local Australian businesses and get exactly the car you booked, rather than relying on the "or similar" 
+              Support local Australian businesses and get exactly the car you booked, rather than relying on the &quot;or similar&quot; 
               fine print typical of major international rental chains.
             </p>
           </div>

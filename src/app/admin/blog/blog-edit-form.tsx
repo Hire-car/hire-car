@@ -117,7 +117,7 @@ export function BlogEditForm({ article, categories, cancelHref }: BlogEditFormPr
             <Label htmlFor="body">Body (HTML)</Label>
             <div className="mt-1">
               <RichTextEditor value={bodyContent} onChange={setBodyContent} />
-              <input type="hidden" name="body" value={bodyContent} />
+              <input type="hidden" id="body" name="body" value={bodyContent} />
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               Rich text editor enabled. Custom styles, images, and embedded media are supported.

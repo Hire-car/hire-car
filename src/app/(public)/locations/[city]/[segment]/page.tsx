@@ -196,7 +196,7 @@ async function BrandCityPage({
             <h2 className="text-2xl font-black text-slate-900 mb-4">Why hire a {displayBrand} in {displayCity}?</h2>
             <p className="text-slate-600 leading-relaxed mb-4">
               When visiting {displayCity}, a {displayBrand} provides the perfect blend of reliability, comfort, and performance for Australian roads. 
-              Whether you're navigating the city center or heading out for a coastal drive, our verified local operators offer competitive rates on 
+              Whether you&apos;re navigating the city center or heading out for a coastal drive, our verified local operators offer competitive rates on 
               {displayBrand} vehicles with zero marketplace booking fees.
             </p>
             <p className="text-slate-600 leading-relaxed">

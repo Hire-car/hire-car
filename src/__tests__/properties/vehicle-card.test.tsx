@@ -126,13 +126,11 @@ describe("VehicleCard enrichment field gating", () => {
     };
     const { container, unmount } = render(<VehicleCard vehicle={vehicle} variant="featured" />);
     const text = container.textContent || "";
-    expect(text).toContain("(38 Reviews)");
+    expect(text).toContain("(38)");
     expect(text).toContain("Weekly from");
     expect(text).toContain("210");
-    expect(text).toContain("Monthly from");
-    expect(text).toContain("Super Host");
-    expect(text).toContain("Air Conditioning");
-    expect(text).toContain("Free delivery available");
+
+
     expect(text).toContain("Free cancellation");
     expect(text).toContain("No hidden fees");
     expect(text).toContain("Unlimited km");

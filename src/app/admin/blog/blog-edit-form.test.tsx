@@ -66,8 +66,8 @@ describe("BlogEditForm", () => {
     expect(value("Status")).toBe("published");
     expect(value("Category")).toBe(article.category_id);
     expect(value("Excerpt")).toBe("Original excerpt");
-    expect(value("Body (HTML)")).toBe("<p>Original body</p>");
-    expect(value("Featured Image URL")).toBe("https://example.supabase.co/image.jpg");
+    expect((document.querySelector('input[name="body"]') as HTMLInputElement).value).toBe("<p>Original body</p>");
+    expect(value("Featured Image")).toBe("https://example.supabase.co/image.jpg");
     expect(value("Featured Image Alt Text")).toBe("Alt text");
     expect(value("Meta Title")).toBe("Meta title");
     expect(value("Meta Description")).toBe("Meta description");
@@ -91,7 +91,7 @@ describe("BlogEditForm", () => {
       (screen.getByLabelText(label) as HTMLInputElement | HTMLSelectElement).value;
 
     expect(value("Category")).toBe("");
-    expect(value("Featured Image URL")).toBe("");
+    expect(value("Featured Image")).toBe("");
     expect(value("Tags (comma-separated)")).toBe("");
   });
 

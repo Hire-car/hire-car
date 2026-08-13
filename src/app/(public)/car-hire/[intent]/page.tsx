@@ -14,7 +14,7 @@ import {
 } from "@/lib/seo";
 import { Heart, Calendar, Key, Wallet, Car } from "lucide-react";
 
-const INTENTS: Record<string, { title: string, desc: string, icon: any }> = {
+const INTENTS: Record<string, { title: string, desc: string, icon: React.ElementType }> = {
   "wedding": {
     title: "Wedding Car Hire",
     desc: "Make your special day perfect with premium and luxury wedding car hire from Australian operators.",
@@ -143,7 +143,7 @@ export default async function IntentCarHirePage({
           <div className="mx-auto max-w-4xl">
             <h2 className="text-2xl font-black text-slate-900 mb-4">The Best {config.title} in Australia</h2>
             <p className="text-slate-600 leading-relaxed mb-4">
-              Booking {config.title.toLowerCase()} doesn't have to be complicated. Our marketplace connects you directly 
+              Booking {config.title.toLowerCase()} doesn&apos;t have to be complicated. Our marketplace connects you directly 
               with verified Australian rental operators who specialize in exactly what you need. By avoiding the big 
               international chains, you can often negotiate better terms, clearer insurance policies, and direct communication 
               with the fleet owner.

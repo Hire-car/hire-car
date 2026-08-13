@@ -126,5 +126,5 @@ export function toFriendlyAuthError(error: unknown): string {
   if (process.env.NODE_ENV === "development") {
     console.error("[Auth Error Unhandled]:", error);
   }
-  return message || (typeof shape.message === "string" ? shape.message : FRIENDLY_AUTH_MESSAGES.generic);
+  return FRIENDLY_AUTH_MESSAGES.generic;
 }

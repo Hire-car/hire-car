@@ -123,7 +123,7 @@ export default async function SuburbCarHirePage({
             <p className="text-slate-600 leading-relaxed mb-4">
               Why travel across {displayCity} when you can pick up your rental car right near {displaySuburb}? 
               We connect you directly with Australian fleet operators servicing the {displaySuburb} area. 
-              Whether you need a compact car for running errands or an SUV for a weekend getaway, you'll find competitive local rates here.
+              Whether you need a compact car for running errands or an SUV for a weekend getaway, you&apos;ll find competitive local rates here.
             </p>
           </div>
         </section>
