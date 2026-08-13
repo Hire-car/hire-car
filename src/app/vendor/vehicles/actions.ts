@@ -13,7 +13,7 @@ import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
 import { evaluateVehicleListing } from "@/lib/ai/vehicle-moderation";
 import { processSearchIndexJobs } from "@/lib/search/typesense";
 
-export async function syncVehicleCompletenessStatus(vehicleId: string, supabase: any) {
+export async function syncVehicleCompletenessStatus(vehicleId: string, supabase: ReturnType<typeof createAdminClient>) {
   const { data: vehicle } = await supabase.from("vehicles").select("*").eq("id", vehicleId).single();
   const { count: imagesCount } = await supabase
     .from("vehicle_images")
@@ -626,7 +626,7 @@ export async function getVehicleImageCounts(vehicleIds: string[]): Promise<Recor
     .select("vehicle_id")
     .in("vehicle_id", vehicleIds);
     
-  return (data || []).reduce((acc: Record<string, number>, img: any) => {
+  return (data || []).reduce((acc: Record<string, number>, img: { vehicle_id: string }) => {
     acc[img.vehicle_id] = (acc[img.vehicle_id] || 0) + 1;
     return acc;
   }, {});

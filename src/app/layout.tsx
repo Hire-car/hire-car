@@ -112,10 +112,10 @@ export default function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${outfit.variable} h-full antialiased`}
+      className={`${outfit.variable} h-full antialiased overflow-x-hidden`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-slate-50 text-slate-950 font-sans tracking-tight">
+      <body className="min-h-full bg-slate-50 text-slate-950 font-sans tracking-tight overflow-x-hidden">
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <>
             <Script

@@ -33,7 +33,7 @@ export const getFaqs = unstable_cache(
       return [];
     }
 
-    const grouped = data.reduce((acc: FaqCategory[], curr: any) => {
+    const grouped = data.reduce((acc: FaqCategory[], curr: { id: string; category: string; question: string; answer: string; sort_order: number }) => {
       let cat = acc.find((c) => c.category === curr.category);
       if (!cat) {
         cat = { category: curr.category, questions: [] };

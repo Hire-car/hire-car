@@ -36,9 +36,10 @@ export function LocationAutocomplete({ onSelect, onInputChange, defaultValue = "
 
   useEffect(() => {
     if (defaultValue !== undefined && defaultValue !== value) {
-      setValue(defaultValue);
+      const id = setTimeout(() => setValue(defaultValue), 0);
+      return () => clearTimeout(id);
     }
-  }, [defaultValue]);
+  }, [defaultValue, value]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

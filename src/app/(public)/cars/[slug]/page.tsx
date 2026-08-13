@@ -240,9 +240,9 @@ export default async function VehicleDetailPage({
         </ScrollIndicator>
 
         {/* Two-column layout */}
-        <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:gap-12 mt-4">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12 mt-4">
           {/* LEFT: Main content */}
-          <div className="space-y-6">
+          <div className="space-y-6 min-w-0">
             {/* Image Gallery */}
             <div className="w-full">
               <ImageGallery images={images} vehicleId={vehicle.id} />
@@ -416,6 +416,7 @@ export default async function VehicleDetailPage({
                 isLoggedIn={!!user}
                 userProfile={userProfile}
                 instantBook={vehicle.instant_book}
+                pricePerDay={vehicle.price_per_day_aud}
               />
             </Card>
 

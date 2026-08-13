@@ -5,7 +5,7 @@ async function main() {
   const data = await res.json();
   console.log(`Found ${data.found} vehicles in Typesense`);
   if (data.hits) {
-    console.log(data.hits.map((h: any) => ({ title: h.document.title, city: h.document.city })));
+    console.log(data.hits.map((h: { document: { title: string; city: string } }) => ({ title: h.document.title, city: h.document.city })));
   }
 }
 main();

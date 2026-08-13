@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Send, MessageCircle, Zap, ArrowRight } from "lucide-react";
+import { useRef, useState, useMemo } from "react";
+import { Send, MessageCircle, Zap, ArrowRight, Info, Calendar as CalendarIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -18,24 +18,28 @@ interface EnquiryWidgetProps {
     phone: string;
   } | null;
   instantBook?: boolean;
+  pricePerDay: number;
 }
 
-export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, instantBook }: EnquiryWidgetProps) {
+export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, instantBook, pricePerDay }: EnquiryWidgetProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [leadId, setLeadId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [pickupCity, setPickupCity] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [message, setMessage] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [licenseConfirmed, setLicenseConfirmed] = useState(false);
+  const [showGuestForm, setShowGuestForm] = useState(false);
+  const [guestFormMode, setGuestFormMode] = useState<"book" | "message">("book");
 
   const endDateRef = useRef<HTMLInputElement>(null);
 
@@ -47,14 +51,42 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     }
   }
 
-  const handleQuickSubmit = async () => {
+  const daysCount = useMemo(() => {
+    if (!startDate || !endDate) return 1;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diff = end.getTime() - start.getTime();
+    const days = Math.ceil(diff / (1000 * 3600 * 24));
+    return days > 0 ? days : 1;
+  }, [startDate, endDate]);
+
+  const totalPrice = daysCount > 1 ? daysCount * pricePerDay : pricePerDay;
+
+  const handleQuickSubmit = async (isMessage = false) => {
+    if (!startDate || !endDate) {
+      setError("Please select both a start date and an end date.");
+      return;
+    }
+    if (endDate < startDate) {
+      setError("End date must be on or after the start date.");
+      return;
+    }
+    if (!licenseConfirmed) {
+      setError("Please confirm you hold a valid driver's license.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     try {
+      const msg = isMessage 
+        ? "Hi, I have a question about this vehicle."
+        : "I am interested in booking this vehicle.";
+
       const res = await fetch("/api/leads/quick", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vehicleId, vendorId }),
+        body: JSON.stringify({ vehicleId, vendorId, startDate, endDate, message: msg }),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -79,7 +111,15 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     e.preventDefault();
 
     if (!turnstileToken) {
-      setError("Please complete the security challenge. (If you don't see it, your adblocker or browser shields might be blocking it)");
+      setError("Please complete the security challenge.");
+      return;
+    }
+    if (!startDate || !endDate) {
+      setError("Please select both a start date and an end date.");
+      return;
+    }
+    if (!licenseConfirmed) {
+      setError("Please confirm you hold a valid driver's license.");
       return;
     }
 
@@ -87,9 +127,8 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     setError(null);
 
     if (startDate && endDate && endDate < startDate) {
-      setError("Return date must be on or after the pickup date.");
+      setError("End date must be on or after the start date.");
       setIsSubmitting(false);
-      // Guide the user to the invalid field on mobile (Req 4.5).
       scrollIntoViewAndFocus(endDateRef.current);
       return;
     }
@@ -107,7 +146,7 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           pickupCity,
           startDate,
           endDate,
-          message,
+          message: guestFormMode === "book" && !message ? "I am interested in booking this vehicle." : message,
           consent: true,
           turnstileToken,
         }),
@@ -134,12 +173,22 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     }
   };
 
+  const handleRevealGuestForm = (mode: "book" | "message") => {
+    if (!startDate || !endDate) {
+      setError("Please select your dates first.");
+      return;
+    }
+    setGuestFormMode(mode);
+    setShowGuestForm(true);
+    setError(null);
+  };
+
   if (success) {
     const chatPath = leadId ? `/messages/${leadId}` : "/customer/enquiries";
     const signInHref = `/auth/sign-in?redirectedFrom=${encodeURIComponent(chatPath)}`;
 
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center shadow-sm">
+      <div className="bg-white p-6 pb-7 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 mb-4">
           <MessageCircle className="h-7 w-7 text-emerald-600" />
         </div>
@@ -175,203 +224,223 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     );
   }
 
-  if (isLoggedIn) {
-    return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          {instantBook ? (
-            <><Zap className="h-5 w-5 text-amber-500 fill-amber-500" /> Instant Book</>
-          ) : (
-            "Request to Book"
-          )}
-        </h2>
-        <p className="mt-2 text-sm text-slate-500">
-          Click below to express your interest. We&apos;ll share your contact details (
-          <span className="font-semibold text-slate-900">{userProfile?.email}</span>) with the vendor and open a chat.
-        </p>
-
-        {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p>}
-
-        <label className="mt-6 flex items-start gap-3 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 cursor-pointer">
-          <input
-            type="checkbox"
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-            checked={licenseConfirmed}
-            onChange={(e) => setLicenseConfirmed(e.target.checked)}
-            required
-          />
-          <span className="leading-snug">
-            I confirm I hold a valid, unrestricted driver&apos;s license and understand the vendor will require it upon pickup.
-          </span>
-        </label>
-
-        <button
-          onClick={handleQuickSubmit}
-          disabled={isSubmitting || !licenseConfirmed}
-          className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c2410c] to-[#ea580c] px-4 py-3.5 text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2 transition-all"
-        >
-          {isSubmitting ? (
-            <span className="flex items-center gap-2">
-              <span className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Sending...
-            </span>
-          ) : (
-            <>
-              {instantBook ? <Zap className="h-5 w-5 fill-white" /> : <Send className="h-5 w-5" />}
-              {instantBook ? "Instant Book" : "Request to Book"}
-            </>
-          )}
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-semibold flex items-center gap-2">
-        {instantBook ? (
-          <><Zap className="h-5 w-5 text-amber-500 fill-amber-500" /> Instant Book</>
-        ) : (
-          "Request to Book"
-        )}
-      </h2>
-      <p className="mt-1 text-sm text-slate-500">
-        Or{" "}
-        <Link href="/auth/sign-in" className="font-medium text-amber-600 hover:underline">
-          log in
-        </Link>{" "}
-        for 1-click enquiries with instant chat.
+    <div className="bg-white p-6 pb-7">
+      <h2 className="text-xl font-bold text-slate-900">Check your dates</h2>
+      <p className="mt-1 text-[13px] text-slate-500 mb-5">
+        Prices may vary depending on your selected dates.
       </p>
 
-      {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mb-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 font-medium">{error}</p>}
 
-      <form className="mt-6 grid gap-4.5" onSubmit={handleGuestSubmit}>
-        <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
-          placeholder="Full name"
-          name="name"
-          autoComplete="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
-          placeholder="Email"
-          type="email"
-          name="email"
-          inputMode="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
-          placeholder="Phone number"
-          type="tel"
-          name="phone"
-          inputMode="tel"
-          autoComplete="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
-        <input
-          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
-          placeholder="Pickup city"
-          name="pickupCity"
-          autoComplete="address-level2"
-          value={pickupCity}
-          onChange={(e) => setPickupCity(e.target.value)}
-          required
-        />
-        <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Pickup date</label>
-            <input
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all text-slate-700"
-              type="date"
-              value={startDate}
-              min={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setStartDate(e.target.value)}
-              required
-            />
+            <label className="text-sm font-medium text-slate-700 mb-1.5 block">Start date</label>
+            <div className="relative">
+              <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400" />
+              <input
+                className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-3 text-[15px] font-medium focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all text-slate-900"
+                type="date"
+                value={startDate}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => setStartDate(e.target.value)}
+                required
+              />
+            </div>
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">Return date</label>
-            <input
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all text-slate-700"
-              type="date"
-              ref={endDateRef}
-              value={endDate}
-              min={startDate || new Date().toISOString().split("T")[0]}
-              onChange={(e) => setEndDate(e.target.value)}
-              required
-            />
+            <label className="text-sm font-medium text-slate-700 mb-1.5 block">End date</label>
+            <div className="relative">
+              <CalendarIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400" />
+              <input
+                className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-3 text-[15px] font-medium focus:border-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 transition-all text-slate-900"
+                type="date"
+                ref={endDateRef}
+                value={endDate}
+                min={startDate || new Date().toISOString().split("T")[0]}
+                onChange={(e) => setEndDate(e.target.value)}
+                required
+              />
+            </div>
           </div>
         </div>
-        <textarea
-          className="w-full min-h-[100px] rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-base md:text-sm font-medium focus:bg-white focus:border-orange-400 focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all resize-none placeholder:text-slate-400"
-          placeholder="Optional message to the vendor..."
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-        />
-        <label className="flex items-start gap-3 text-sm text-slate-600 mt-2 bg-slate-50 p-4 rounded-xl border border-slate-100 cursor-pointer">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500" required />
-          <span className="leading-snug">I agree for Hire Car to share my enquiry details with this verified local vendor.</span>
-        </label>
 
-        <label className="flex items-start gap-3 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 cursor-pointer">
-          <input
-            type="checkbox"
-            className="mt-0.5 h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-            checked={licenseConfirmed}
-            onChange={(e) => setLicenseConfirmed(e.target.checked)}
-            required
-          />
-          <span className="leading-snug">
-            I confirm I hold a valid, unrestricted driver&apos;s license and understand the vendor will require it upon pickup.
-          </span>
-        </label>
-
-        <div className="flex justify-center">
-          {/*
-            Defer the Cloudflare Turnstile script until browser idle time (after
-            FCP) instead of letting the widget inject it eagerly. injectScript is
-            disabled and the script is loaded via next/script "lazyOnload"; the
-            onload callback name matches what the widget registers on window, so
-            it renders once the deferred script finishes loading (Requirement 6.5).
-          */}
-          <Script
-            src={`${SCRIPT_URL}?onload=${DEFAULT_ONLOAD_NAME}&render=explicit`}
-            strategy="lazyOnload"
-          />
-          <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-            injectScript={false}
-            onSuccess={(token) => setTurnstileToken(token)}
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting || !licenseConfirmed}
-          className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#c2410c] to-[#ea580c] px-4 py-3.5 text-base font-bold text-white shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 focus:outline-none focus:ring-2 focus:ring-orange-600 focus:ring-offset-2 transition-all"
-        >
-          {isSubmitting ? (
-            <span className="flex items-center gap-2">
-              <span className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Sending...
+        <div className="flex items-center justify-between border-y border-slate-100 py-4 my-2">
+          <div>
+            <p className="text-[15px] font-bold text-slate-900">Total price</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <p className="text-[13px] text-slate-500">Includes taxes</p>
+              <Info className="h-3.5 w-3.5 text-slate-400" />
+            </div>
+          </div>
+          <div className="text-right flex items-baseline gap-1.5">
+            <span className="text-3xl font-black text-[#ea580c]">${totalPrice}</span>
+            <span className="text-[11px] font-bold text-slate-500 uppercase">
+              AUD {startDate && endDate && daysCount > 1 ? `/ total` : '/ day'}
             </span>
-          ) : (
-            <>
-              {instantBook ? <Zap className="h-5 w-5 fill-white" /> : <Send className="h-5 w-5" />}
+          </div>
+        </div>
+
+        {!isLoggedIn && !showGuestForm ? (
+          <div className="pt-2 flex flex-col gap-3">
+             <button
+              type="button"
+              onClick={() => handleRevealGuestForm("book")}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#ea580c] px-4 py-3.5 text-[15px] font-bold text-white hover:bg-[#c2410c] transition-colors"
+            >
+              <Send className="h-[18px] w-[18px]" />
               {instantBook ? "Instant Book" : "Request to Book"}
-            </>
-          )}
-        </button>
-      </form>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRevealGuestForm("message")}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <MessageCircle className="h-[18px] w-[18px]" />
+              Message the provider
+            </button>
+          </div>
+        ) : !isLoggedIn && showGuestForm ? (
+          <form className="mt-4 border-t border-slate-100 pt-5 grid gap-4" onSubmit={handleGuestSubmit}>
+            <p className="text-sm font-semibold text-slate-900 mb-1">
+              {guestFormMode === "book" ? "Enter your details to book" : "Enter your details to message"}
+            </p>
+            
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-[15px] font-medium focus:bg-white focus:border-[#ea580c] focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+              placeholder="Full name"
+              name="name"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-[15px] font-medium focus:bg-white focus:border-[#ea580c] focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+              placeholder="Email address"
+              type="email"
+              name="email"
+              inputMode="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-[15px] font-medium focus:bg-white focus:border-[#ea580c] focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+              placeholder="Phone number"
+              type="tel"
+              name="phone"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+            <input
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-[15px] font-medium focus:bg-white focus:border-[#ea580c] focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all placeholder:text-slate-400"
+              placeholder="Pickup city"
+              name="pickupCity"
+              autoComplete="address-level2"
+              value={pickupCity}
+              onChange={(e) => setPickupCity(e.target.value)}
+              required
+            />
+            <textarea
+              className="w-full min-h-[100px] rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-[15px] font-medium focus:bg-white focus:border-[#ea580c] focus:outline-none focus:ring-4 focus:ring-orange-100 transition-all resize-none placeholder:text-slate-400"
+              placeholder={guestFormMode === "book" ? "Optional message to the vendor..." : "Type your message here..."}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              required={guestFormMode === "message"}
+            />
+
+            <label className="flex items-start gap-3 text-[13px] text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 cursor-pointer mt-2">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#ea580c] focus:ring-[#ea580c]"
+                checked={licenseConfirmed}
+                onChange={(e) => setLicenseConfirmed(e.target.checked)}
+                required
+              />
+              <span className="leading-snug">
+                I confirm I hold a valid, unrestricted driver&apos;s license and understand the vendor will require it upon pickup.
+              </span>
+            </label>
+
+            <div className="flex justify-center mt-2">
+              <Script
+                src={`${SCRIPT_URL}?onload=${DEFAULT_ONLOAD_NAME}&render=explicit`}
+                strategy="lazyOnload"
+              />
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                injectScript={false}
+                onSuccess={(token) => setTurnstileToken(token)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting || !licenseConfirmed || !turnstileToken}
+              className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#ea580c] px-4 py-3.5 text-[15px] font-bold text-white hover:bg-[#c2410c] disabled:opacity-50 transition-colors"
+            >
+              {isSubmitting ? (
+                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {guestFormMode === "book" ? (instantBook ? "Instant Book" : "Request to Book") : "Send Message"}
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => setShowGuestForm(false)}
+              className="mt-1 w-full text-center text-[13px] font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+            >
+              Cancel
+            </button>
+          </form>
+        ) : (
+          <div className="pt-2 flex flex-col gap-3">
+            {!licenseConfirmed && (
+              <label className="flex items-start gap-3 text-[13px] text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 cursor-pointer mb-2">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#ea580c] focus:ring-[#ea580c]"
+                  checked={licenseConfirmed}
+                  onChange={(e) => setLicenseConfirmed(e.target.checked)}
+                  required
+                />
+                <span className="leading-snug">
+                  I confirm I hold a valid, unrestricted driver&apos;s license.
+                </span>
+              </label>
+            )}
+            
+            <button
+              onClick={() => handleQuickSubmit(false)}
+              disabled={isSubmitting || !licenseConfirmed}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#ea580c] px-4 py-3.5 text-[15px] font-bold text-white hover:bg-[#c2410c] disabled:opacity-50 transition-colors"
+            >
+              {isSubmitting ? (
+                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <Send className="h-[18px] w-[18px]" />
+              )}
+              {instantBook ? "Instant Book" : "Request to Book"}
+            </button>
+            <button
+              onClick={() => handleQuickSubmit(true)}
+              disabled={isSubmitting || !licenseConfirmed}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] font-bold text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
+            >
+              <MessageCircle className="h-[18px] w-[18px]" />
+              Message the provider
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

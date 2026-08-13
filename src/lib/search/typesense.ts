@@ -198,7 +198,7 @@ export async function searchVehicles(
     const results = await client.collections<Vehicle>(VEHICLE_COLLECTION_NAME).documents().search(searchParameters);
 
     const vehicles: Vehicle[] = (results.hits?.map((hit) => {
-      const doc = hit.document as Record<string, any>;
+      const doc = hit.document as Record<string, string | number | boolean | string[] | null>;
       return {
         id: doc.id,
         slug: doc.slug,
@@ -610,7 +610,7 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
               const bestImage = images[0];
               const bucket = bestImage.approved ? "vehicle-images" : "pending-vehicle-images";
               const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-              (document as any).primary_image_url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${bestImage.storage_path}`;
+              (document as Record<string, string | number | boolean | string[] | null>).primary_image_url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${bestImage.storage_path}`;
             }
 
             await upsertVehicleDocument(document);

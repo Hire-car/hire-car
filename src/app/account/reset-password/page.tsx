@@ -25,12 +25,12 @@ export default function ResetPasswordPage() {
       const params = new URLSearchParams(hash.substring(1));
       const description = params.get("error_description");
       if (description) {
-        setErrorMsg(description.replace(/\+/g, " "));
+        setTimeout(() => setErrorMsg(description.replace(/\+/g, " ")), 0);
       } else {
-        setErrorMsg("The reset link is invalid or has expired.");
+        setTimeout(() => setErrorMsg("The reset link is invalid or has expired."), 0);
       }
     }
-    setHashParsed(true);
+    setTimeout(() => setHashParsed(true), 0);
   }, []);
 
   async function handleUpdatePassword(e: React.FormEvent) {
