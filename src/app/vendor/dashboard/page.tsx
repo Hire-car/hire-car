@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MetricCard } from "@/components/metric-card";

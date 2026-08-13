@@ -7,11 +7,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { updateOrganizationProfile, uploadVendorDocument } from "./actions";
 import { BrandForm } from "./brand-form";
 import { ProfileForm } from "./profile-form";
+import { AboutFaqForm } from "./about-faq-form";
 import { getOrganizationPlanCode, getSupportTierLabel, organizationHasFeature } from "@/lib/plan-features";
 import { ApiKeysPanel } from "@/components/vendor/api-keys-panel";
 import {
   Building2, Users, Phone, Globe, MapPin, Shield,
-  CheckCircle, Clock, Hash, Mail, Image as ImageIcon, FileText, Bell, UserPlus, Info
+  CheckCircle, Clock, Hash, Mail, Image as ImageIcon, FileText, Bell, UserPlus, Info, MessageSquare
 } from "lucide-react";
 
 export const metadata = {
@@ -41,7 +42,7 @@ export default async function VendorSettingsPage() {
   // Fetch full org details
   const { data: org } = await supabase
     .from("organizations")
-    .select("id, name, slug, abn, billing_email, website, phone, address, status, verified_at, created_at")
+    .select("id, name, slug, abn, billing_email, website, phone, address, status, verified_at, created_at, bio, logo_url, about_business, vendor_faqs")
     .eq("id", organization.id)
     .single();
 
@@ -154,7 +155,24 @@ export default async function VendorSettingsPage() {
           />
         </div>
 
-        {/* Global Policies */}
+        {/* About the Business & FAQs – full width */}
+        <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50">
+              <MessageSquare className="h-4.5 w-4.5 text-violet-600" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">About &amp; FAQs</h2>
+              <p className="text-xs text-slate-400">Tell customers about your business and answer common questions</p>
+            </div>
+          </div>
+
+          <AboutFaqForm
+            organizationId={org!.id}
+            defaultAbout={(org as any)?.about_business}
+            defaultFaqs={(org as any)?.vendor_faqs}
+          />
+        </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-6">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50">

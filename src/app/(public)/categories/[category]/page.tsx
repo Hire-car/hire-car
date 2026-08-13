@@ -21,7 +21,9 @@ import {
   VEHICLE_CATEGORIES,
 } from "@/lib/seo";
 import { getIndexableSitemapUrls } from "@/lib/seo/discovery";
-import { Car, MapPin } from "lucide-react";
+import { getCategoryFaqs } from "@/lib/seo/category-faqs";
+import { Car, MapPin, ChevronDown } from "lucide-react";
+
 
 export const revalidate = 3600;
 
@@ -74,6 +76,8 @@ export default async function CategoryPage({
       ? Math.round(vehicles.reduce((acc, v) => acc + v.pricePerDayAud, 0) / vehicles.length)
       : null;
 
+  const categoryFaqs = getCategoryFaqs(category, avgPrice);
+
   const schemas = [
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
@@ -85,14 +89,7 @@ export default async function CategoryPage({
       url: `/categories/${categorySlug}`,
     }),
     buildItemListSchema(vehicles.map((v) => v.slug)),
-    buildFaqSchema([
-      {
-        question: `How much does ${category} car hire cost in Australia?`,
-        answer: avgPrice
-          ? `Based on active Hire Car listings, ${category} hire averages $${avgPrice} AUD per day nationally.`
-          : `Prices vary by city, season, and operator.`,
-      },
-    ]),
+    buildFaqSchema(categoryFaqs),
   ];
 
   return (
@@ -155,7 +152,35 @@ export default async function CategoryPage({
           )}
         </section>
 
-        <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
+        {/* FAQ Section */}
+        <section className="bg-white border-t border-slate-200 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-2xl font-black text-slate-900 mb-2">
+              Frequently asked questions
+            </h2>
+            <p className="text-sm text-slate-500 mb-8">
+              Common questions about {category.toLowerCase()} hire in Australia
+            </p>
+            <div className="divide-y divide-slate-200">
+              {categoryFaqs.map((faq, i) => (
+                <details key={i} className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+                    <span className="text-base font-semibold text-slate-900 leading-snug">
+                      {faq.question}
+                    </span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-180 mt-0.5" />
+                  </summary>
+                  <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Browse other categories */}
+        <section className="bg-slate-50 border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-4xl">
             <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
               <Car className="h-5 w-5" />
@@ -166,7 +191,7 @@ export default async function CategoryPage({
                 <Link
                   key={c}
                   href={`/categories/${categoryToSlug(c)}`}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-colors"
                 >
                   {c}
                 </Link>

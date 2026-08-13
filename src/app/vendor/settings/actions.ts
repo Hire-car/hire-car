@@ -8,6 +8,76 @@ import { requireUser } from "@/lib/security/auth";
 import { ensureUserCanManageOrganization } from "@/lib/data/vendor";
 import { z } from "zod";
 
+const faqItemSchema = z.object({
+  question: z.string().trim().min(3).max(200),
+  answer: z.string().trim().min(3).max(600),
+});
+
+const aboutFaqSchema = z.object({
+  organizationId: z.string().uuid(),
+  about_business: z.string().trim().max(2000).optional().or(z.literal("")),
+  vendor_faqs: z.array(faqItemSchema).max(5),
+});
+
+export async function updateVendorAboutAndFaqs(prevState: any, formData: FormData) {
+  const user = await requireUser();
+
+  let parsedFaqs: unknown[] = [];
+  try {
+    parsedFaqs = JSON.parse((formData.get("vendor_faqs") as string) || "[]");
+  } catch {
+    return { error: "Invalid FAQ data. Please try again.", success: false };
+  }
+
+  // Strip empty Q&A pairs before validation
+  const rawFaqs = (parsedFaqs as any[]).filter(
+    (f) => f?.question?.trim() && f?.answer?.trim()
+  );
+
+  const parsed = aboutFaqSchema.safeParse({
+    organizationId: formData.get("organizationId"),
+    about_business: (formData.get("about_business") as string) || "",
+    vendor_faqs: rawFaqs,
+  });
+
+  if (!parsed.success) {
+    const msg = parsed.error.issues[0]?.message ?? "Invalid form data.";
+    return { error: msg, success: false };
+  }
+
+  const { organizationId, about_business, vendor_faqs } = parsed.data;
+
+  await ensureUserCanManageOrganization(user.id, organizationId);
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("organizations")
+    .update({
+      about_business: about_business || null,
+      vendor_faqs: vendor_faqs.length > 0 ? vendor_faqs : [],
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", organizationId);
+
+  if (error) {
+    return { error: `Failed to save: ${error.message}`, success: false };
+  }
+
+  await supabase.from("audit_logs").insert({
+    actor_user_id: user.id,
+    action: "vendor_about_faqs_updated",
+    resource_type: "organization",
+    resource_id: organizationId,
+    metadata: { faq_count: vendor_faqs.length },
+  });
+
+  revalidatePath("/vendor/settings");
+  revalidatePath(`/vendors`, "layout"); // revalidate public vendor pages
+  return { success: true, error: null };
+}
+
+
+
 const profileSchema = z.object({
   organizationId: z.string().uuid(),
   name: z.string().trim().min(2).max(160),

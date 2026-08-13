@@ -9,8 +9,11 @@ import {
   Mail,
   Building2,
   ChevronRight,
+  ChevronDown,
   MessageSquare,
   User,
+  BookOpen,
+  HelpCircle,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -20,7 +23,7 @@ import { EmptyState } from "@/components/empty-state";
 import { VendorProfileHeader } from "@/components/vendor-profile-header";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Vehicle } from "@/lib/types";
-import { buildOrganizationSchema, serializeSchemas } from "@/lib/seo";
+import { buildOrganizationSchema, buildFaqSchema, serializeSchemas } from "@/lib/seo";
 import { resolveVehicleImage } from "@/lib/image-utils";
 import type { VehicleImageRecord } from "@/lib/image-utils";
 
@@ -41,6 +44,8 @@ type VendorData = {
   state: string;
   verified: boolean;
   description: string | null;
+  about_business: string | null;
+  vendor_faqs: { question: string; answer: string }[];
   phone: string | null;
   email: string | null;
   website: string | null;
@@ -88,6 +93,7 @@ async function getVendor(slug: string): Promise<VendorData | null> {
     .from("organizations")
     .select(`
       id, name, slug, status, billing_email, website, phone, created_at,
+      about_business, vendor_faqs,
       branches(id, name, city, state, status)
     `)
     .eq("slug", slug)
@@ -131,8 +137,10 @@ async function getVendor(slug: string): Promise<VendorData | null> {
     slug: org.slug,
     city,
     state,
-    verified: true, // Passed status === approved check
+    verified: true,
     description: null,
+    about_business: (org as any).about_business ?? null,
+    vendor_faqs: Array.isArray((org as any).vendor_faqs) ? (org as any).vendor_faqs : [],
     phone: org.phone ?? null,
     email: org.billing_email ?? null,
     website: org.website ?? null,
@@ -258,6 +266,8 @@ export default async function VendorPage({
 
   const memberSince = new Date(vendor.created_at).getFullYear();
 
+  const vendorFaqs = vendor.vendor_faqs ?? [];
+
   const autoRentalSchema = {
     "@context": "https://schema.org",
     "@type": "AutoRental",
@@ -276,14 +286,19 @@ export default async function VendorPage({
   const organizationSchema = buildOrganizationSchema({
     name: vendor.name,
     url: `/vendors/${vendor.slug}`,
-    description: vendor.description || undefined,
+    description: vendor.about_business || vendor.description || undefined,
   });
+
+  const schemas: object[] = [autoRentalSchema, organizationSchema];
+  if (vendorFaqs.length > 0) {
+    schemas.push(buildFaqSchema(vendorFaqs));
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeSchemas([autoRentalSchema, organizationSchema]) }}
+        dangerouslySetInnerHTML={{ __html: serializeSchemas(schemas) }}
       />
       <SiteHeader />
 
@@ -390,6 +405,46 @@ export default async function VendorPage({
             </div>
           )}
         </section>
+
+        {/* About the Business */}
+        {vendor.about_business && (
+          <section>
+            <div className="flex items-center gap-3 mb-5">
+              <BookOpen className="h-5 w-5 text-primary" />
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">About the Business</h2>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                {vendor.about_business}
+              </p>
+            </div>
+          </section>
+        )}
+
+        {/* Vendor FAQs */}
+        {vendorFaqs.length > 0 && (
+          <section>
+            <div className="flex items-center gap-3 mb-5">
+              <HelpCircle className="h-5 w-5 text-primary" />
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">Frequently Asked Questions</h2>
+            </div>
+            <div className="rounded-2xl border border-border bg-card divide-y divide-border overflow-hidden">
+              {vendorFaqs.map((faq, i) => (
+                <details key={i} className="group px-6">
+                  <summary className="flex cursor-pointer list-none items-center justify-between py-5 gap-4">
+                    <span className="text-sm font-semibold text-foreground leading-snug">
+                      {faq.question}
+                    </span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180" />
+                  </summary>
+                  <p className="pb-5 text-sm text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Reviews Section */}
         <section>

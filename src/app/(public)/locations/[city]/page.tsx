@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
 import { EmptyState } from "@/components/empty-state";
 import { searchVehicles } from "@/lib/search/typesense";
-import { MapPin, Car, ArrowLeft, Filter } from "lucide-react";
+import { MapPin, Car, ArrowLeft, Filter, ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
 import {
   getCityMeta,
@@ -20,6 +20,7 @@ import {
   buildItemListSchema,
   serializeSchemas,
 } from "@/lib/seo";
+import { getCityFaqs } from "@/lib/seo/city-faqs";
 import { getIndexableSitemapUrls, getCitiesWithCounts } from "@/lib/seo/discovery";
 import { cityToSlug } from "@/lib/seo/slugs";
 
@@ -96,6 +97,8 @@ export default async function LocationPage({
     .sort((a, b) => b.vehicleCount - a.vehicleCount)
     .slice(0, 10);
 
+  const cityFaqs = getCityFaqs(slug, displayCity, avgPrice);
+
   const schemas = [
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
@@ -103,14 +106,7 @@ export default async function LocationPage({
       { name: displayCity, path: `/locations/${slug}` },
     ]),
     buildItemListSchema(vehicles.map((v) => v.slug)),
-    buildFaqSchema([
-      {
-        question: `What is the average cost of car hire in ${displayCity}?`,
-        answer: avgPrice
-          ? `Based on active listings, the average car hire in ${displayCity} costs $${avgPrice} AUD per day.`
-          : `Car hire prices in ${displayCity} vary based on season and vehicle type.`,
-      },
-    ]),
+    buildFaqSchema(cityFaqs),
   ];
 
   return (
@@ -232,9 +228,36 @@ export default async function LocationPage({
           )}
         </section>
 
+        {/* FAQ Section */}
+        <section className="bg-white border-t border-slate-200 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="text-2xl font-black text-slate-900 mb-2">
+              Frequently asked questions
+            </h2>
+            <p className="text-sm text-slate-500 mb-8">
+              Common questions about hiring a car in {displayCity}
+            </p>
+            <div className="divide-y divide-slate-200">
+              {cityFaqs.map((faq, i) => (
+                <details key={i} className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+                    <span className="text-base font-semibold text-slate-900 leading-snug">
+                      {faq.question}
+                    </span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-180 mt-0.5" />
+                  </summary>
+                  <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+                    {faq.answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* SEO text footer */}
         {total > 0 && (
-          <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
+          <section className="bg-slate-50 border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
               <h2 className="text-xl font-bold text-slate-900 mb-3">Car hire in {displayCity}, {state}</h2>
               <p className="text-sm text-slate-600 leading-relaxed">
@@ -248,7 +271,7 @@ export default async function LocationPage({
                   <Link
                     key={cat}
                     href={`/locations/${slug}/${categoryToSlug(cat)}`}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-colors"
+                    className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-colors"
                   >
                     {cat} hire in {displayCity}
                   </Link>
