@@ -98,8 +98,8 @@ export function MarketingForm() {
             </select>
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="recipients" className="flex-wrap">Manual recipients <span className="text-muted-foreground font-normal">(one per line, or comma-separated)</span></Label>
+          <div className="grid gap-2 min-w-0">
+            <Label htmlFor="recipients" className="flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2">Manual recipients <span className="text-muted-foreground font-normal text-xs sm:text-sm">(one per line, or comma-separated)</span></Label>
             <Textarea
               id="recipients"
               name="recipients"
@@ -119,22 +119,24 @@ export function MarketingForm() {
             </div>
           </div>
 
-          <div className="grid gap-2">
+          <div className="grid gap-2 min-w-0">
             <Label htmlFor="body">Email body <span className="text-red-500">*</span></Label>
-            <div className="mt-1">
-              <RichTextEditor value={bodyContent} onChange={setBodyContent} />
+            <div className="mt-1 w-full overflow-x-auto rounded-xl border border-input">
+              <div className="min-w-[600px] sm:min-w-0">
+                <RichTextEditor value={bodyContent} onChange={setBodyContent} />
+              </div>
               <input type="hidden" name="body" value={bodyContent} />
             </div>
             <p className="text-xs text-muted-foreground">Rich text editor enabled. Custom styles, images, and embedded media are supported.</p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="ctaLabel" className="flex-wrap">CTA button label <span className="text-muted-foreground font-normal">(optional)</span></Label>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="ctaLabel" className="flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2">CTA button label <span className="text-muted-foreground font-normal text-xs sm:text-sm">(optional)</span></Label>
               <Input id="ctaLabel" name="ctaLabel" placeholder="Browse vehicles" />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="ctaUrl" className="flex-wrap">CTA button URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
+            <div className="grid gap-2 min-w-0">
+              <Label htmlFor="ctaUrl" className="flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2">CTA button URL <span className="text-muted-foreground font-normal text-xs sm:text-sm">(optional)</span></Label>
               <Input id="ctaUrl" name="ctaUrl" type="url" placeholder="https://www.hirecarmarketplace.com.au/search" />
             </div>
           </div>
