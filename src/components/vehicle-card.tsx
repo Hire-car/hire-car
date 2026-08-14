@@ -150,12 +150,13 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               <BadgeCheck className="h-4 w-4 text-[#1D9BF0] fill-[#1D9BF0] stroke-white shrink-0" />
             </div>
           </Link>
-          
-          <div className="flex items-center gap-1.5 shrink-0">
-            <Star className="h-4 w-4 fill-[#FFB800] text-[#FFB800]" />
-            <span className="font-bold text-[#FFB800] text-[13px] sm:text-sm">{hasRating ? vehicle.avgRating!.toFixed(1) : "5.0"}</span>
-            <span className="text-slate-500 font-semibold text-[13px] sm:text-sm">({hasRating ? vehicle.reviewCount : "0"})</span>
-          </div>
+          {hasRating && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Star className="h-4 w-4 fill-[#FFB800] text-[#FFB800]" />
+              <span className="font-bold text-[#FFB800] text-[13px] sm:text-sm">{vehicle.avgRating!.toFixed(1)}</span>
+              <span className="text-slate-500 font-semibold text-[13px] sm:text-sm">({vehicle.reviewCount})</span>
+            </div>
+          )}
         </div>
 
         <div className="w-full h-px border-t border-dashed border-slate-200 my-5" />
