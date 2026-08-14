@@ -383,7 +383,7 @@ export function SearchClient({
 
               <div className="flex items-center gap-3 pr-2">
                 {/* Sort Dropdown */}
-                <div className="relative">
+                <div className="relative z-50">
                   <button
                     onClick={() => setIsSortOpen(!isSortOpen)}
                     className="flex items-center gap-2 px-4 py-2.5 bg-muted border border-border rounded-lg text-sm font-semibold text-foreground/70 hover:border-border/80 hover:bg-muted/80 active:scale-[0.98] transition-all"
@@ -395,7 +395,7 @@ export function SearchClient({
                     />
                   </button>
                   {isSortOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg border border-border shadow-[var(--shadow-lg)] z-10 overflow-hidden py-1">
+                    <div className="absolute right-0 sm:right-auto sm:left-0 top-full mt-2 w-56 bg-white rounded-lg border border-border shadow-[var(--shadow-lg)] z-50 overflow-hidden py-1">
                       {sortOptions.map((option) => (
                         <button
                           key={option.value}
