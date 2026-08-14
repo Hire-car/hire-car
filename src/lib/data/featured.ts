@@ -117,6 +117,7 @@ export const getActiveFeaturedVehicles = unstable_cache(
       city: v.branches.city,
       state: v.branches.state,
       imageUrl: resolveVehicleImage(supabaseUrl, v.vehicle_images ?? [], v.category),
+      imageCount: v.vehicle_images?.length || 1,
       vendorName: v.organizations.name,
       vendorSlug: v.organizations.slug,
       branchName: v.branches.name,

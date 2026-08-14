@@ -86,7 +86,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
             sizes="(max-width: 1024px) 100vw, 1024px"
-            className="object-contain sm:object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
+            className="object-contain object-center transition-transform duration-700 group-hover:scale-[1.03]"
           />
         </Link>
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none opacity-80" />
@@ -210,17 +210,17 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         </div>
 
         {/* Trust Chips */}
-        <div className="flex flex-wrap items-center gap-2 mb-6 w-full">
-          <div className="flex flex-auto sm:flex-1 items-center justify-center gap-1.5 bg-[#EEFDF3] text-[#039855] px-2.5 py-1.5 rounded-lg font-bold text-[10px]">
+        <div className="grid grid-cols-3 items-center gap-1.5 sm:gap-2 mb-6 w-full">
+          <div className="flex flex-col xl:flex-row items-center justify-center gap-1 sm:gap-1.5 bg-[#EEFDF3] text-[#039855] p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-bold text-[9px] sm:text-[10px] text-center w-full h-full">
             <ShieldCheck className="h-3.5 w-3.5 shrink-0" /> <span>Free cancellation</span>
           </div>
           
-          <div className="flex flex-auto sm:flex-1 items-center justify-center gap-1.5 bg-[#EFF8FF] text-[#175CD3] px-2.5 py-1.5 rounded-lg font-bold text-[10px]">
+          <div className="flex flex-col xl:flex-row items-center justify-center gap-1 sm:gap-1.5 bg-[#EFF8FF] text-[#175CD3] p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-bold text-[9px] sm:text-[10px] text-center w-full h-full">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             <span>No hidden fees</span>
           </div>
           
-          <div className="flex flex-auto sm:flex-1 items-center justify-center gap-1.5 bg-[#F9F5FF] text-[#6941C6] px-2.5 py-1.5 rounded-lg font-bold text-[10px]">
+          <div className="flex flex-col xl:flex-row items-center justify-center gap-1 sm:gap-1.5 bg-[#F9F5FF] text-[#6941C6] p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg font-bold text-[9px] sm:text-[10px] text-center w-full h-full">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect width="16" height="16" x="4" y="4" rx="2" ry="2"/><rect width="6" height="6" x="9" y="9" rx="1" ry="1"/></svg>
             <span>{unlimitedKm ? "Unlimited km" : `${vehicle.dailyDistanceLimitKm} km/day`}</span>
           </div>
