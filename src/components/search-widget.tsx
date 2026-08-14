@@ -284,6 +284,8 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
             WHERE
           </label>
           <LocationAutocomplete 
+            defaultValue={location}
+            onInputChange={(val) => setLocation(val)}
             onSelect={(res) => {
               if (res?.features?.[0]?.properties?.name) {
                 setLocation(res.features[0].properties.name);
