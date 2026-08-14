@@ -76,8 +76,20 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     <div className="min-w-0 w-full h-full bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col overflow-hidden">
       
       {/* 1. HERO IMAGE SECTION */}
-      <div className="relative w-full aspect-[16/10] bg-white z-20">
-        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 overflow-hidden" aria-label={vehicle.title}>
+      <div className="relative w-full aspect-[16/10] bg-slate-900 z-20 overflow-hidden">
+        {/* Blurred Backdrop to fill letterboxing */}
+        <div className="absolute inset-0 z-0">
+          <ImageWithFallback
+            src={vehicle.imageUrl}
+            alt=""
+            fill
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            className="object-cover opacity-60 blur-xl scale-125"
+          />
+        </div>
+        
+        {/* Foreground Image (never crops) */}
+        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10 overflow-hidden" aria-label={vehicle.title}>
           <ImageWithFallback
             src={vehicle.imageUrl}
             alt={vehicle.title}
@@ -89,31 +101,32 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             className="object-contain object-center transition-transform duration-700 group-hover:scale-[1.03]"
           />
         </Link>
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none opacity-80" />
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none opacity-80 z-20" />
         
         {/* Top Left: Featured Badge */}
         {(variant === "featured" || priority) && (
-          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 bg-[#FF4D00] text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+          <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-30 bg-[#FF4D00] text-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
             <Star className="h-3.5 w-3.5 fill-white text-white" />
             <span className="text-[11px] font-semibold tracking-wide">Featured</span>
           </div>
         )}
 
         {/* Top Right: Favourite Button */}
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-30">
           <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform">
             <SavedVehicleButton vehicleId={vehicle.id} initialSaved={saved} />
           </div>
         </div>
 
         {/* Bottom Left: Photo Count */}
-        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-10 bg-[#1E293B]/80 backdrop-blur-md text-white px-2 py-1 rounded flex items-center gap-1.5 shadow-sm">
+        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-30 bg-[#1E293B]/80 backdrop-blur-md text-white px-2 py-1 rounded flex items-center gap-1.5 shadow-sm">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
           <span className="text-[11px] font-semibold tracking-wide">1/{vehicle.imageCount || 1}</span>
         </div>
 
         {/* Bottom Right: Price Card */}
-        <div className="absolute -bottom-6 right-3 sm:-bottom-8 sm:right-4 z-20 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-3 sm:p-4 flex flex-col items-center min-w-[120px]">
+        <div className="absolute -bottom-6 right-3 sm:-bottom-8 sm:right-4 z-30 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-slate-100 p-3 sm:p-4 flex flex-col items-center min-w-[120px]">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">From</span>
           <div className="flex items-baseline mt-1 mb-1.5">
             <span className="text-2xl sm:text-3xl font-black text-[#101828] leading-none">${vehicle.pricePerDayAud}</span>
