@@ -79,15 +79,15 @@ export function SiteFooter() {
               <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Stay in the loop</p>
               <h3 className="text-lg font-bold text-white">Get the best deals straight to your inbox</h3>
             </div>
-            <form className="flex items-center gap-2 w-full sm:w-auto" action="/api/newsletter" method="POST">
+            <form className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto" action="/api/newsletter" method="POST">
               <input
                 type="email"
                 placeholder="Your email address"
-                className="flex-1 sm:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
+                className="w-full sm:w-64 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 sm:py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
               />
               <button
                 type="submit"
-                className="shrink-0 bg-primary hover:bg-orange-500 active:scale-[0.98] text-white font-bold text-sm px-5 py-2.5 rounded-lg transition-all"
+                className="w-full sm:w-auto shrink-0 bg-primary hover:bg-orange-500 active:scale-[0.98] text-white font-bold text-sm px-5 py-3 sm:py-2.5 rounded-lg transition-all"
               >
                 Subscribe
               </button>
