@@ -90,7 +90,7 @@ function ProfileDropdown({ onLogout, email, initial }: { onLogout: () => void, e
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-64 rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="absolute right-[-10px] sm:right-0 mt-3 w-[85vw] sm:w-64 max-w-sm rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="p-4 border-b border-slate-100/50 bg-slate-50/30">
             <p className="text-sm font-bold text-slate-900">Signed In As</p>
             <p className="text-xs font-medium text-slate-500 mt-0.5 truncate">{email}</p>
@@ -202,7 +202,7 @@ function NotificationDropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="absolute right-[-10px] sm:right-0 mt-3 w-[90vw] sm:w-80 max-w-sm rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="p-4 border-b border-slate-100/50 bg-slate-50/30 flex items-center justify-between">
             <p className="text-sm font-bold text-slate-900">Notifications</p>
             {unreadCount > 0 && (
