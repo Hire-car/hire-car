@@ -76,33 +76,36 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     <div className="min-w-0 w-full h-full bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col overflow-hidden">
       
       {/* 1. HERO IMAGE SECTION */}
-      <div className="relative w-full aspect-[16/10] bg-slate-900 z-20 overflow-hidden">
-        {/* Blurred Backdrop to fill letterboxing */}
-        <div className="absolute inset-0 z-0">
-          <ImageWithFallback
-            src={vehicle.imageUrl}
-            alt=""
-            fill
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            className="object-cover opacity-60 blur-xl scale-125"
-          />
+      <div className="relative w-full aspect-[16/10] z-20">
+        {/* Inner container for images to keep them contained */}
+        <div className="absolute inset-0 bg-slate-900 overflow-hidden rounded-t-xl">
+          {/* Blurred Backdrop to fill letterboxing */}
+          <div className="absolute inset-0 z-0">
+            <ImageWithFallback
+              src={vehicle.imageUrl}
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-cover opacity-60 blur-xl scale-125"
+            />
+          </div>
+          
+          {/* Foreground Image (never crops) */}
+          <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10" aria-label={vehicle.title}>
+            <ImageWithFallback
+              src={vehicle.imageUrl}
+              alt={vehicle.title}
+              fill
+              priority={priority}
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : "auto"}
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="object-contain object-center transition-transform duration-700 group-hover:scale-[1.03]"
+            />
+          </Link>
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none opacity-80 z-20" />
         </div>
-        
-        {/* Foreground Image (never crops) */}
-        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10 overflow-hidden" aria-label={vehicle.title}>
-          <ImageWithFallback
-            src={vehicle.imageUrl}
-            alt={vehicle.title}
-            fill
-            priority={priority}
-            loading={priority ? "eager" : "lazy"}
-            fetchPriority={priority ? "high" : "auto"}
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            className="object-contain object-center transition-transform duration-700 group-hover:scale-[1.03]"
-          />
-        </Link>
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none opacity-80 z-20" />
         
         {/* Top Left: Featured Badge */}
         {(variant === "featured" || priority) && (

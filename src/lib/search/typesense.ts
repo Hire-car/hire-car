@@ -612,10 +612,11 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
             docWithImages.image_count = images ? images.length : 0;
 
             if (images && images.length > 0) {
-              const bestImage = images.find((img) => img.approved) ?? images[0];
-              const bucket = bestImage.approved ? "vehicle-images" : "pending-vehicle-images";
-              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-              docWithImages.primary_image_url = `${supabaseUrl}/storage/v1/object/public/${bucket}/${bestImage.storage_path}`;
+              const bestImage = images.find((img) => img.approved);
+              if (bestImage) {
+                const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+                docWithImages.primary_image_url = `${supabaseUrl}/storage/v1/object/public/vehicle-images/${bestImage.storage_path}`;
+              }
             }
 
             await upsertVehicleDocument(document);

@@ -65,8 +65,12 @@ export function resolveVehicleImage(
   }
 
   const sorted = [...images].sort((a, b) => a.sort_order - b.sort_order);
-  // Prefer approved (public bucket) first; fall back to any image
-  const best = sorted.find((img) => img.approved) ?? sorted[0];
+  // Prefer approved (public bucket) first. 
+  // Do not show pending images on the public site to avoid 404 errors.
+  const best = sorted.find((img) => img.approved);
+  if (!best) {
+    return getCategoryFallback(category);
+  }
   return buildStorageUrl(supabaseUrl, best);
 }
 
@@ -96,7 +100,12 @@ export function resolveGalleryImages(
 ): GalleryImage[] {
   if (!images || images.length === 0) return [];
 
-  return [...images]
+  // Only show approved images on the public site to avoid 404 errors
+  const approvedImages = images.filter((img) => img.approved);
+  
+  if (approvedImages.length === 0) return [];
+
+  return [...approvedImages]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((img) => ({
       id: img.id,
