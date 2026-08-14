@@ -1,33 +1,8 @@
 import type { MetadataRoute } from "next";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 const BASE = "https://www.hirecarmarketplace.com.au";
-const PAGE_SIZE = 5000;
 
-/**
- * `sitemap.ts` uses `generateSitemaps()`, which Next serves as a Sitemap Index
- * at `/sitemap.xml`. The individual chunks are available at `/sitemap/[id].xml`.
- * We list the chunks here explicitly just to be safe.
- * Chunks:
- *   0 → static + pSEO + blog,  1 → vendors,  2+ → vehicle chunks.
- */
-async function sitemapUrls(): Promise<string[]> {
-  try {
-    const supabase = createAdminClient();
-    const { count } = await supabase
-      .from("vehicles")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "approved");
-    const vehicleChunks = Math.ceil((count || 0) / PAGE_SIZE) || 1;
-    const total = 2 + vehicleChunks; // ids 0..(1 + vehicleChunks)
-    return Array.from({ length: total }, (_, id) => `${BASE}/sitemap/${id}.xml`);
-  } catch {
-    // Fallback matches sitemap.ts's own fallback of chunks [0, 1, 2].
-    return [`${BASE}/sitemap/0.xml`, `${BASE}/sitemap/1.xml`, `${BASE}/sitemap/2.xml`];
-  }
-}
-
-export default async function robots(): Promise<MetadataRoute.Robots> {
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
@@ -46,6 +21,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         ],
       },
     ],
-    sitemap: await sitemapUrls(),
+    sitemap: `${BASE}/sitemap.xml`,
   };
 }
