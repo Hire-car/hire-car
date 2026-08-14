@@ -77,7 +77,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       
       {/* 1. HERO IMAGE SECTION */}
       <div className="relative w-full aspect-[16/10] bg-slate-100 z-20">
-        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-4 overflow-hidden" aria-label={vehicle.title}>
+        <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 overflow-hidden" aria-label={vehicle.title}>
           <ImageWithFallback
             src={vehicle.imageUrl}
             alt={vehicle.title}
