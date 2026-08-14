@@ -64,7 +64,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                 }}
                 placeholder={location || "City or airport"}
                 hideIcon={true}
-                inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-slate-900 font-semibold placeholder:text-slate-400 outline-none truncate"
+                inputClassName="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-base text-slate-900 font-semibold placeholder:text-slate-400 outline-none truncate"
               />
             </div>
 
@@ -82,7 +82,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
+                  className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
                 />
               </div>
               <div className="flex-1 min-w-0 bg-slate-50 relative px-3 py-2.5 sm:px-4 rounded-xl border border-slate-200 focus-within:border-primary focus-within:bg-white transition-colors overflow-hidden">
@@ -97,7 +97,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                   value={returnDate}
                   onChange={(e) => setReturnDate(e.target.value)}
                   min={pickupDate || new Date().toISOString().split("T")[0]}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
+                  className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
                 />
               </div>
             </div>
@@ -132,7 +132,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               }} 
               placeholder="City or airport"
               hideIcon={true}
-              inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none truncate"
+              inputClassName="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none truncate"
             />
           </div>
 
@@ -152,7 +152,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                 value={pickupDate}
                 onChange={(e) => setPickupDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none appearance-none"
+                className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none appearance-none"
               />
             </div>
 
@@ -170,7 +170,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                 value={returnDate}
                 onChange={(e) => setReturnDate(e.target.value)}
                 min={pickupDate || new Date().toISOString().split("T")[0]}
-                className="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none appearance-none"
+                className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none appearance-none"
               />
             </div>
           </div>
@@ -185,7 +185,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none pr-6 appearance-none cursor-pointer"
+                  className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[15px] font-semibold text-slate-900 placeholder:text-slate-400 outline-none pr-6 appearance-none cursor-pointer"
                 >
                   {categories.map((cat) => (
                     <option key={cat.value} value={cat.value}>
@@ -230,7 +230,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               }} 
               placeholder={location || "City or airport"} 
               hideIcon={true}
-              inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold placeholder:text-slate-400 outline-none truncate"
+              inputClassName="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold placeholder:text-slate-400 outline-none truncate"
             />
           </div>
           
@@ -244,7 +244,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               value={pickupDate}
               onChange={(e) => setPickupDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
-              className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+              className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
             />
           </div>
 
@@ -258,7 +258,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
               min={pickupDate || new Date().toISOString().split("T")[0]}
-              className="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
+              className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-sm text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400"
             />
           </div>
 
@@ -291,7 +291,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
             }} 
             placeholder={location || "City or airport"} 
             hideIcon={true}
-            inputClassName="w-full bg-transparent border-none p-0 focus:ring-0 text-base md:text-sm text-slate-900 font-medium placeholder:text-slate-400 outline-none"
+            inputClassName="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-base md:text-sm text-slate-900 font-medium placeholder:text-slate-400 outline-none"
           />
         </div>
 
@@ -307,7 +307,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
               value={pickupDate}
               onChange={(e) => setPickupDate(e.target.value)}
-              className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
+              className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
             />
           </div>
 
@@ -322,7 +322,7 @@ export function SearchWidget({ variant = "hero", className = "", onSubmit }: Sea
               onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
-              className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
+              className="w-full bg-transparent border-transparent focus:border-transparent focus:ring-0 shadow-none p-0 focus:ring-0 text-[13px] sm:text-sm md:text-base text-slate-900 font-semibold outline-none appearance-none placeholder:text-slate-400 min-w-0"
             />
           </div>
         </div>
