@@ -167,34 +167,34 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         <div className="w-full h-px border-t border-dashed border-slate-200 my-5" />
 
         {/* Specs Grid */}
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            <Car className="h-4 w-4 text-slate-700" />
-            <div className="flex flex-col">
+        <div className="flex items-center justify-between w-full gap-1">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Car className="h-4 w-4 text-slate-700 shrink-0" />
+            <div className="flex flex-col min-w-0">
               <span className="text-[#101828] font-bold text-[11px] truncate leading-tight">{vehicle.category}</span>
               <span className="text-slate-500 text-[10px] font-semibold capitalize truncate">Body Type</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-700"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
-            <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-700 shrink-0"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>
+            <div className="flex flex-col min-w-0">
               <span className="text-[#101828] font-bold text-[11px] truncate leading-tight">{vehicle.transmission}</span>
               <span className="text-slate-500 text-[10px] font-semibold capitalize truncate">Transmission</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-700"><line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg>
-            <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-700 shrink-0"><line x1="3" x2="15" y1="22" y2="22"/><line x1="4" x2="14" y1="9" y2="9"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg>
+            <div className="flex flex-col min-w-0">
               <span className="text-[#101828] font-bold text-[11px] truncate leading-tight">{vehicle.fuel}</span>
               <span className="text-slate-500 text-[10px] font-semibold capitalize truncate">Fuel Type</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-slate-700" />
-            <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Users className="h-4 w-4 text-slate-700 shrink-0" />
+            <div className="flex flex-col min-w-0">
               <span className="text-[#101828] font-bold text-[11px] truncate leading-tight">{vehicle.seats} Seats</span>
               <span className="text-slate-500 text-[10px] font-semibold capitalize truncate">Seating</span>
             </div>
