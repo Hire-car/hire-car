@@ -71,7 +71,7 @@ export default async function AdminBlogPage({ searchParams }: AdminBlogPageProps
         <CreateBlogButton />
       </div>
 
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-xl border border-border overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-muted/50 border-b border-border">
             <tr>

@@ -99,7 +99,7 @@ export function MarketingForm() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="recipients">Manual recipients <span className="text-muted-foreground font-normal">(one per line, or comma-separated)</span></Label>
+            <Label htmlFor="recipients" className="flex-wrap">Manual recipients <span className="text-muted-foreground font-normal">(one per line, or comma-separated)</span></Label>
             <Textarea
               id="recipients"
               name="recipients"
@@ -130,11 +130,11 @@ export function MarketingForm() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="ctaLabel">CTA button label <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Label htmlFor="ctaLabel" className="flex-wrap">CTA button label <span className="text-muted-foreground font-normal">(optional)</span></Label>
               <Input id="ctaLabel" name="ctaLabel" placeholder="Browse vehicles" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="ctaUrl">CTA button URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
+              <Label htmlFor="ctaUrl" className="flex-wrap">CTA button URL <span className="text-muted-foreground font-normal">(optional)</span></Label>
               <Input id="ctaUrl" name="ctaUrl" type="url" placeholder="https://www.hirecarmarketplace.com.au/search" />
             </div>
           </div>
