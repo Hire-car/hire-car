@@ -98,19 +98,19 @@ export function ApiKeysPanel({ organizationId, keys, hasAccess }: ApiKeysPanelPr
         <p className="mb-4 text-sm text-red-600">{error}</p>
       )}
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <input
           type="text"
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="Key label (e.g. Fleet sync)"
-          className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
+          className="w-full sm:flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
         />
         <button
           type="button"
           onClick={handleCreate}
           disabled={isCreating}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+          className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 shrink-0"
         >
           {isCreating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
           Create key

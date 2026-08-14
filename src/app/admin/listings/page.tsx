@@ -108,7 +108,7 @@ export default async function AdminListingsPage({ searchParams }: AdminListingsP
       </section>
 
       {/* Status Tabs */}
-      <div className="flex gap-2 border-b border-border">
+      <div className="flex gap-2 border-b border-border overflow-x-auto no-scrollbar whitespace-nowrap">
         {[
           { key: "pending", label: "Pending", count: counts.pending },
           { key: "approved", label: "Approved", count: counts.approved },
