@@ -78,19 +78,8 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       {/* 1. HERO IMAGE SECTION */}
       <div className="relative w-full aspect-[16/10] z-20">
         {/* Inner container for images to keep them contained */}
-        <div className="absolute inset-0 bg-slate-900 overflow-hidden rounded-t-xl">
-          {/* Blurred Backdrop to fill letterboxing */}
-          <div className="absolute inset-0 z-0">
-            <ImageWithFallback
-              src={vehicle.imageUrl}
-              alt=""
-              fill
-              sizes="(max-width: 1024px) 100vw, 1024px"
-              className="object-cover opacity-60 blur-xl scale-125"
-            />
-          </div>
-          
-          {/* Foreground Image (never crops) */}
+        <div className="absolute inset-0 bg-slate-100 overflow-hidden rounded-t-xl">
+          {/* Foreground Image */}
           <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10" aria-label={vehicle.title}>
             <ImageWithFallback
               src={vehicle.imageUrl}
@@ -100,11 +89,11 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               loading={priority ? "eager" : "lazy"}
               fetchPriority={priority ? "high" : "auto"}
               sizes="(max-width: 1024px) 100vw, 1024px"
-              className="object-contain object-center transition-transform duration-700 group-hover:scale-[1.03]"
+              className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
             />
           </Link>
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none opacity-80 z-20" />
+          {/* Gradient Overlay for text readability (badges, etc) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none z-20" />
         </div>
         
         {/* Top Left: Featured Badge */}
