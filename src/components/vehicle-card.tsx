@@ -210,19 +210,19 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         </div>
 
         {/* Trust Chips */}
-        <div className="flex items-center gap-2 mb-6 w-full">
-          <div className="flex items-center justify-center gap-1.5 bg-[#EEFDF3] text-[#039855] px-2.5 py-1.5 rounded-lg font-bold text-[10px] flex-1">
-            <ShieldCheck className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">Free cancellation</span>
+        <div className="flex flex-wrap items-center gap-2 mb-6 w-full">
+          <div className="flex flex-auto sm:flex-1 items-center justify-center gap-1.5 bg-[#EEFDF3] text-[#039855] px-2.5 py-1.5 rounded-lg font-bold text-[10px]">
+            <ShieldCheck className="h-3.5 w-3.5 shrink-0" /> <span>Free cancellation</span>
           </div>
           
-          <div className="flex items-center justify-center gap-1.5 bg-[#EFF8FF] text-[#175CD3] px-2.5 py-1.5 rounded-lg font-bold text-[10px] flex-1">
+          <div className="flex flex-auto sm:flex-1 items-center justify-center gap-1.5 bg-[#EFF8FF] text-[#175CD3] px-2.5 py-1.5 rounded-lg font-bold text-[10px]">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span className="truncate">No hidden fees</span>
+            <span>No hidden fees</span>
           </div>
           
-          <div className="flex items-center justify-center gap-1.5 bg-[#F9F5FF] text-[#6941C6] px-2.5 py-1.5 rounded-lg font-bold text-[10px] flex-1">
+          <div className="flex flex-auto sm:flex-1 items-center justify-center gap-1.5 bg-[#F9F5FF] text-[#6941C6] px-2.5 py-1.5 rounded-lg font-bold text-[10px]">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect width="16" height="16" x="4" y="4" rx="2" ry="2"/><rect width="6" height="6" x="9" y="9" rx="1" ry="1"/></svg>
-            <span className="truncate">{unlimitedKm ? "Unlimited km" : `${vehicle.dailyDistanceLimitKm} km/day`}</span>
+            <span>{unlimitedKm ? "Unlimited km" : `${vehicle.dailyDistanceLimitKm} km/day`}</span>
           </div>
         </div>
 
