@@ -102,7 +102,7 @@ export async function SimilarVehicles({ currentVehicleId, city, category, make }
           <ChevronRight className="h-4 w-4" />
         </Link>
       </div>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {vehicles.map((v) => (
           <VehicleCard key={v.id} vehicle={v} />
         ))}

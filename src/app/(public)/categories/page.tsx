@@ -63,7 +63,7 @@ export default async function CategoriesPage() {
               Categories will appear here as vehicles are listed.
             </p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {categories.map(({ category, slug, count }) => {
                 const hasVehicles = count > 0;
                 return (

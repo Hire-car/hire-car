@@ -81,7 +81,7 @@ export default async function LocationsPage() {
               Cities will appear here as vendors list vehicles.
             </p>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {cities.map(({ city, state, slug, vehicleCount, operatorCount }) => {
                 const hasVehicles = vehicleCount > 0;
                 return (

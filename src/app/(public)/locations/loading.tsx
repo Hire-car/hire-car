@@ -28,7 +28,7 @@ export default function LocationsLoading() {
           <Skeleton variant="text" className="h-4 w-28" />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="rounded-3xl border border-border bg-card p-6 space-y-4">
               <div className="flex items-start justify-between">
