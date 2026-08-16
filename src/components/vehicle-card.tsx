@@ -135,9 +135,9 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         
         {/* Title */}
         <Link href={`/cars/${vehicle.slug}`}>
-          <h2 className="text-sm font-medium text-[#101828] leading-snug hover:text-[#FF4D00] transition-colors line-clamp-2">
+          <h3 className="!text-sm !font-medium text-[#101828] leading-snug hover:text-[#FF4D00] transition-colors line-clamp-2">
             {vehicle.title}
-          </h2>
+          </h3>
         </Link>
         
         {/* Vendor & Rating */}
