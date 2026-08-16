@@ -15,7 +15,7 @@ import NextTopLoader from 'nextjs-toploader';
 
 const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-outfit",
   display: "swap",
 });
 

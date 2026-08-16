@@ -183,6 +183,18 @@ export default async function Home() {
                   </Link>
                 </div>
 
+                <div className="mt-8 flex flex-wrap items-center gap-6">
+                  <div className="flex items-center gap-2 text-[13px] font-semibold text-slate-300">
+                    <CheckCircle2 className="h-4 w-4 text-[#00C853]" /> Verified businesses
+                  </div>
+                  <div className="flex items-center gap-2 text-[13px] font-semibold text-slate-300">
+                    <CheckCircle2 className="h-4 w-4 text-[#00C853]" /> No hidden fees
+                  </div>
+                  <div className="flex items-center gap-2 text-[13px] font-semibold text-slate-300">
+                    <CheckCircle2 className="h-4 w-4 text-[#00C853]" /> Australia-wide
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
