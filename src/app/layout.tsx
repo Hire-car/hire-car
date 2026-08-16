@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
-import { Outfit } from "next/font/google";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -13,9 +13,9 @@ import { PwaInstallBanner } from "@/components/pwa/pwa-install-banner";
 import { appleStartupImages } from "@/lib/pwa-splash";
 import NextTopLoader from 'nextjs-toploader';
 
-const outfit = Outfit({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-outfit",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -116,7 +116,7 @@ export default function RootLayout({
   return (
     <html
       lang="en-AU"
-      className={`${outfit.variable} h-full antialiased overflow-x-hidden`}
+      className={`${inter.variable} h-full antialiased overflow-x-hidden`}
       suppressHydrationWarning
     >
       <head>
