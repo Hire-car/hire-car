@@ -53,7 +53,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         </div>
         <CardContent className="flex-1 min-w-0 py-3 px-4 flex flex-col justify-between">
           <div>
-            <div className="!font-bold !tracking-tight text-slate-900 truncate !text-[16px] md:!text-[17px]">
+            <div className="!font-bold !tracking-tight text-slate-900 truncate !text-[17px] md:!text-[18px]">
               {vehicle.title}
             </div>
             <div className="flex items-center gap-2 mt-1.5">
@@ -135,7 +135,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
         
         {/* Title */}
         <Link href={`/cars/${vehicle.slug}`}>
-          <div className="!text-[17px] md:!text-[18px] !font-bold !tracking-tight !leading-tight text-slate-900 hover:text-[#FF4D00] transition-colors line-clamp-2">
+          <div className="!text-[18px] md:!text-[20px] !font-bold !tracking-tight !leading-tight text-slate-900 hover:text-[#FF4D00] transition-colors line-clamp-2">
             {vehicle.title}
           </div>
         </Link>
