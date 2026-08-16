@@ -14,15 +14,15 @@ export function BrandLogo({
   priority = false,
 }: BrandLogoProps) {
   return (
-    <div className={cn("relative h-[56px] w-[220px] shrink-0", className)}>
+    <div className={cn("relative h-[40px] w-[160px] md:h-[44px] md:w-[176px] shrink-0", className)}>
       <Image
         src="/LOGO.png"
         alt="HireCar Marketplace"
         fill
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
-        sizes="(max-width: 640px) 180px, 220px"
-        className={cn("object-contain", imageClassName)}
+        sizes="(max-width: 640px) 140px, 176px"
+        className={cn("object-contain object-left", imageClassName)}
       />
     </div>
   );
