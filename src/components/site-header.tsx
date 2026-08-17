@@ -162,7 +162,7 @@ export function SiteHeader({ initialAuth }: SiteHeaderProps = {}) {
       window.removeEventListener("scroll", handleScroll);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initialAuth]);
 
   return (
     <>
