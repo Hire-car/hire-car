@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getCategoryCounts } from "@/lib/seo/discovery";
 import { Car, Search, ArrowRight } from "lucide-react";
@@ -106,3 +106,4 @@ export default async function CategoriesPage() {
     </div>
   );
 }
+

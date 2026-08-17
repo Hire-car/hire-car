@@ -6,8 +6,6 @@ import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Building2, ShieldCheck, HeartHandshake, ArrowRight, Zap, Car, Lock, Globe, AlertCircle, DollarSign } from "lucide-react";
 import { useRef } from "react";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 
 export function AboutClient() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -22,8 +20,6 @@ export function AboutClient() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-slate-950 text-slate-50 selection:bg-orange-500/30 selection:text-orange-200">
-      <SiteHeader />
-
       <main className="relative z-10 overflow-hidden">
         {/* SECTION 1: Artistic Hero */}
         <section className="relative min-h-[90vh] flex items-center justify-center pt-20 pb-32 px-4 sm:px-6 lg:px-8">
@@ -351,8 +347,6 @@ export function AboutClient() {
           </div>
         </section>
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

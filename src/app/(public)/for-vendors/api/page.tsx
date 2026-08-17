@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Code2, Key, ArrowLeft } from "lucide-react";
 
@@ -82,3 +82,4 @@ Authorization: Bearer hc_live_xxx
     </div>
   );
 }
+

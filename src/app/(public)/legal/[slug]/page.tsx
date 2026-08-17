@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 
 type PolicySection = {
   heading: string;

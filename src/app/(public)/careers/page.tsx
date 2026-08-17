@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import Link from "next/link";
 import { ArrowRight, Sparkles, Zap, Heart, Rocket, Users, Target } from "lucide-react";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Metadata } from "next";
 
@@ -165,3 +165,4 @@ export default function CareersPage() {
     </div>
   );
 }
+

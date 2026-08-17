@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { getCitiesWithCounts } from "@/lib/seo/discovery";
 import { MapPin, Car, ArrowRight, Search } from "lucide-react";
@@ -161,3 +161,4 @@ export default async function LocationsPage() {
     </div>
   );
 }
+

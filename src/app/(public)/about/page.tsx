@@ -1,4 +1,6 @@
 import { AboutClient } from "./about-client";
+import { SiteHeader } from "@/components/server-site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 export const metadata = {
   title: "About Us | Hire Car",
@@ -6,5 +8,12 @@ export const metadata = {
 };
 
 export default function AboutPage() {
-  return <AboutClient />;
+  return (
+    <>
+      <SiteHeader />
+      <AboutClient />
+      <SiteFooter />
+    </>
+  );
 }
+

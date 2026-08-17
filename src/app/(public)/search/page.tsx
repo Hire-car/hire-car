@@ -1,5 +1,7 @@
 import { SearchClient } from "./search-client";
 import { searchVehicles } from "@/lib/search/typesense";
+import { SiteHeader } from "@/components/server-site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 export default async function SearchPage({
   searchParams,
@@ -45,10 +47,15 @@ export default async function SearchPage({
   }
 
   return (
-    <SearchClient
-      initialVehicles={results.vehicles}
-      initialTotal={results.total}
-      initialFacetCounts={results.facetCounts || {}}
-    />
+    <>
+      <SiteHeader />
+      <SearchClient
+        initialVehicles={results.vehicles}
+        initialTotal={results.total}
+        initialFacetCounts={results.facetCounts || {}}
+      />
+      <SiteFooter />
+    </>
   );
 }
+

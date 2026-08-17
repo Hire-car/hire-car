@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { EmptyState } from "@/components/empty-state";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -166,3 +166,4 @@ export default async function VendorsDirectoryPage() {
     </div>
   );
 }
+

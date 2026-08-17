@@ -1,4 +1,4 @@
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 
 export const metadata = { title: "How It Works | Hire Car" };
@@ -34,3 +34,4 @@ export default function HowItWorksPage() {
     </div>
   );
 }
+

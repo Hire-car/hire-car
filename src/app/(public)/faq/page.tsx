@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MessageCircleQuestion } from "lucide-react";
 import { getFaqs } from "@/lib/data/faqs";
@@ -79,3 +79,4 @@ export default async function FAQPage() {
     </>
   );
 }
+

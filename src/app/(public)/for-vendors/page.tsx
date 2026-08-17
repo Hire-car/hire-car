@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MotionScroll } from "@/components/motion-scroll";
 import {
@@ -317,3 +317,4 @@ export default function ForVendorsPage() {
     </div>
   );
 }
+

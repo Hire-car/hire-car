@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/security/auth";
 import { getVendorContext } from "@/lib/data/vendor";
-import { Section } from "@/components/ui/section";
 import { PricingContent } from "./pricing-content";
+import { SiteHeader } from "@/components/server-site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 export const metadata = {
   title: "Pricing | Hire Car",
@@ -20,8 +21,11 @@ export default async function PricingPage() {
   }
 
   return (
-    <Section variant="gradient" size="lg" container className="pt-8">
+    <>
+      <SiteHeader />
       <PricingContent />
-    </Section>
+      <SiteFooter />
+    </>
   );
 }
+

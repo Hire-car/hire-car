@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { ChatSidebar } from "@/components/chat-sidebar";
 
 export const metadata = {
@@ -130,3 +130,4 @@ export default async function MessagesLayout({
     </div>
   );
 }
+

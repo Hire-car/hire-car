@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { VehicleCard } from "@/components/vehicle-card";
 import { SearchWidget } from "@/components/search-widget";
 import { LocationCard } from "@/components/location-card";
@@ -477,3 +477,4 @@ export default async function Home() {
     </div>
   );
 }
+

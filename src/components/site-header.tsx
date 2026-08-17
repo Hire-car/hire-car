@@ -29,7 +29,18 @@ const headerSocialLinks = [
   typeof s.href === "string" && s.href.trim().length > 0,
 );
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+  initialAuth?: {
+    isLoggedIn: boolean;
+    isVendor: boolean;
+    profileHref: string;
+    profileLabel: string;
+    vendorUpgradeHref: string;
+    listFleetLabel: string;
+  } | null;
+}
+
+export function SiteHeader({ initialAuth }: SiteHeaderProps = {}) {
   const [isScrolled, setIsScrolled] = useState(false);
   const { isMobileNavOpen: isMobileMenuOpen, setIsMobileNavOpen: setIsMobileMenuOpen } = useMobileState();
   const [isMobileMenuMounted, setIsMobileMenuMounted] = useState(false);
@@ -38,13 +49,13 @@ export function SiteHeader() {
   const headerRef = useRef<HTMLElement>(null);
   useHeaderHeight(headerRef);
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
-  const [profileHref, setProfileHref] = useState("/customer/dashboard");
-  const [profileLabel, setProfileLabel] = useState("My Account");
-  const [isVendor, setIsVendor] = useState(false);
-  const [vendorUpgradeHref, setVendorUpgradeHref] = useState("/vendor/upgrade");
-  const [listFleetLabel, setListFleetLabel] = useState("List Your Fleet");
+  const [isLoggedIn, setIsLoggedIn] = useState(initialAuth?.isLoggedIn ?? false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(!initialAuth);
+  const [profileHref, setProfileHref] = useState(initialAuth?.profileHref ?? "/customer/dashboard");
+  const [profileLabel, setProfileLabel] = useState(initialAuth?.profileLabel ?? "My Account");
+  const [isVendor, setIsVendor] = useState(initialAuth?.isVendor ?? false);
+  const [vendorUpgradeHref, setVendorUpgradeHref] = useState(initialAuth?.vendorUpgradeHref ?? "/vendor/upgrade");
+  const [listFleetLabel, setListFleetLabel] = useState(initialAuth?.listFleetLabel ?? "List Your Fleet");
 
   const locations = [
     { name: "Sydney", href: "/locations/sydney" },
@@ -87,6 +98,7 @@ export function SiteHeader() {
     
     const loadUserContext = async (hasSession: boolean) => {
       if (!hasSession) {
+        localStorage.removeItem("hirecar_user_context");
         setProfileHref("/customer/dashboard");
         setProfileLabel("My Account");
         setIsVendor(false);
@@ -95,10 +107,24 @@ export function SiteHeader() {
         return;
       }
 
+      const cached = localStorage.getItem("hirecar_user_context");
+      if (cached) {
+        try {
+          const data = JSON.parse(cached);
+          setProfileHref(data.profileHref ?? "/customer/dashboard");
+          setProfileLabel(data.profileLabel ?? "My Account");
+          setIsVendor(!!data.isVendor);
+          setVendorUpgradeHref(data.vendorUpgradeHref ?? "/vendor/upgrade");
+          setListFleetLabel(data.listFleetLabel ?? "List Your Fleet");
+          setIsLoadingAuth(false); // Eliminate flicker immediately using cache
+        } catch (e) {}
+      }
+
       try {
         const res = await fetch("/api/user/context");
         if (res.ok) {
           const data = await res.json();
+          localStorage.setItem("hirecar_user_context", JSON.stringify(data));
           setProfileHref(data.profileHref ?? "/customer/dashboard");
           setProfileLabel(data.profileLabel ?? "My Account");
           setIsVendor(!!data.isVendor);
@@ -122,7 +148,9 @@ export function SiteHeader() {
       setIsLoadingAuth(false);
     };
     
-    checkAuth();
+    if (!initialAuth) {
+      checkAuth();
+    }
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const loggedIn = !!session;

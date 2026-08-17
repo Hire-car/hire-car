@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
 // notFound removed
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
 import { EmptyState } from "@/components/empty-state";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SeoCrossLinkingMatrix } from "@/components/pseo/seo-cross-linking-matrix";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
 import { EmptyState } from "@/components/empty-state";

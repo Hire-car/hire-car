@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/lib/security/auth";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { LayoutDashboard, MessageCircle, Settings, LogOut, Heart, Shield } from "lucide-react";
 
@@ -69,3 +69,4 @@ export default async function CustomerLayout({
     </div>
   );
 }
+

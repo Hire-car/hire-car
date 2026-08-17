@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { ShieldAlert, Car } from "lucide-react";
 
@@ -76,3 +76,4 @@ export default function RulesPage() {
     </div>
   );
 }
+

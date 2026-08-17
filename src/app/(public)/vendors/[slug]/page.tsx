@@ -15,7 +15,7 @@ import {
   BookOpen,
   HelpCircle,
 } from "lucide-react";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
 import { Card, CardContent } from "@/components/ui/card";

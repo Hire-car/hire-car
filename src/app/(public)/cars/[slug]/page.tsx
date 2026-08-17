@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BadgeCheck, Phone, Eye, Star, MapPin, ChevronRight, Users, Fuel, Settings, Check, Info } from "lucide-react";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SimilarVehicles } from "@/components/similar-vehicles";
 import { createAdminClient } from "@/lib/supabase/admin";

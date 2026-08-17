@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { MotionScroll } from "@/components/motion-scroll";
 import {
   Check, X, Zap, ArrowRight, Star, Shield, Headphones,
@@ -141,10 +139,8 @@ export function PricingContent() {
   const [annual, setAnnual] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      <SiteHeader />
-
-      <main className="pt-20">
+    <div className="min-h-screen bg-slate-50 selection:bg-[#ea580c]/30 selection:text-[#ea580c] font-sans">
+      <main className="relative z-10 overflow-hidden">
         {/* Vibrant Hero */}
         <section className="relative overflow-hidden bg-white border-b border-slate-200/50 px-4 py-24 text-center sm:px-6 lg:px-8">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-orange-50/50 via-transparent to-transparent pointer-events-none" />
@@ -423,8 +419,6 @@ export function PricingContent() {
           </MotionScroll>
         </section>
       </main>
-
-      <SiteFooter />
     </div>
   );
 }

@@ -23,6 +23,7 @@ export function HeaderAuth() {
     
     const loadUserContext = async (hasSession: boolean) => {
       if (!hasSession) {
+        localStorage.removeItem("hirecar_user_context");
         setProfileHref("/customer/dashboard");
         setProfileLabel("My Account");
         setIsVendor(false);
@@ -31,10 +32,24 @@ export function HeaderAuth() {
         return;
       }
 
+      const cached = localStorage.getItem("hirecar_user_context");
+      if (cached) {
+        try {
+          const data = JSON.parse(cached);
+          setProfileHref(data.profileHref ?? "/customer/dashboard");
+          setProfileLabel(data.profileLabel ?? "My Account");
+          setIsVendor(!!data.isVendor);
+          setVendorUpgradeHref(data.vendorUpgradeHref ?? "/vendor/upgrade");
+          setListFleetLabel(data.listFleetLabel ?? "List Your Fleet");
+          setIsLoadingAuth(false);
+        } catch (e) {}
+      }
+
       try {
         const res = await fetch("/api/user/context");
         if (res.ok) {
           const data = await res.json();
+          localStorage.setItem("hirecar_user_context", JSON.stringify(data));
           setProfileHref(data.profileHref ?? "/customer/dashboard");
           setProfileLabel(data.profileLabel ?? "My Account");
           setIsVendor(!!data.isVendor);

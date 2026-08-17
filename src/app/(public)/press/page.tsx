@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 
 export const metadata = {
@@ -40,3 +40,4 @@ export default function PressPage() {
     </div>
   );
 }
+

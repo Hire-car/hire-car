@@ -4,8 +4,6 @@
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
 import { FilterSidebar } from "@/components/filter-sidebar";
 import { FilterChips } from "@/components/filter-chips";
@@ -251,7 +249,6 @@ export function SearchClient({
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
 
       {/* Search Bar (Desktop) */}
       <div className="hidden md:block bg-white border-b border-slate-200 shadow-sm py-4 relative z-20">
@@ -595,8 +592,6 @@ export function SearchClient({
           </div>
         </DialogContent>
       </Dialog>
-
-      <SiteFooter />
     </div>
   );
 }
