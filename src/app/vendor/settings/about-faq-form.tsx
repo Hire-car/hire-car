@@ -12,14 +12,18 @@ interface AboutFaqFormProps {
   defaultFaqs?: Faq[] | null;
 }
 
-const MAX_FAQS = 5;
+const MAX_FAQS = 9;
 
 const FAQ_PLACEHOLDERS: Faq[] = [
   { question: "How does pick-up and drop-off work?", answer: "" },
-  { question: "What is required to rent a vehicle?", answer: "" },
-  { question: "Do you require a deposit?", answer: "" },
-  { question: "What is your cancellation policy?", answer: "" },
-  { question: "Are vehicles available for long-term hire?", answer: "" },
+  { question: "What documentation is required to rent a vehicle?", answer: "" },
+  { question: "Do you require a security deposit and how is it processed?", answer: "" },
+  { question: "What is your complete cancellation and refund policy?", answer: "" },
+  { question: "Are vehicles available for long-term hire or commercial leasing?", answer: "" },
+  { question: "What is included in the base insurance coverage?", answer: "" },
+  { question: "Is there a daily mileage or kilometre limit on the rental?", answer: "" },
+  { question: "Do you offer roadside assistance in case of a breakdown?", answer: "" },
+  { question: "Can I take the vehicle off-road or out of state?", answer: "" },
 ];
 
 export function AboutFaqForm({ organizationId, defaultAbout, defaultFaqs }: AboutFaqFormProps) {
@@ -158,7 +162,7 @@ export function AboutFaqForm({ organizationId, defaultAbout, defaultFaqs }: Abou
                   type="text"
                   value={faq.question}
                   onChange={(e) => updateFaq(i, "question", e.target.value)}
-                  maxLength={200}
+                  maxLength={300}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
                   placeholder="e.g., Do you offer free delivery?"
                 />
@@ -174,10 +178,10 @@ export function AboutFaqForm({ organizationId, defaultAbout, defaultFaqs }: Abou
                   id={`faq-a-${i}`}
                   value={faq.answer}
                   onChange={(e) => updateFaq(i, "answer", e.target.value)}
-                  rows={3}
-                  maxLength={600}
+                  rows={4}
+                  maxLength={2000}
                   className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all resize-none"
-                  placeholder="Provide a clear, helpful answer for customers…"
+                  placeholder="Provide a clear, helpful, and detailed answer for customers…"
                 />
               </div>
             </div>

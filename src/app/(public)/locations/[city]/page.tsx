@@ -22,6 +22,7 @@ import {
   serializeSchemas,
 } from "@/lib/seo";
 import { getCityFaqs } from "@/lib/seo/city-faqs";
+import { getCitySeoParagraphs } from "@/lib/seo/city-content";
 import { getIndexableSitemapUrls, getCitiesWithCounts } from "@/lib/seo/discovery";
 import { cityToSlug } from "@/lib/seo/slugs";
 
@@ -99,6 +100,7 @@ export default async function LocationPage({
     .slice(0, 10);
 
   const cityFaqs = getCityFaqs(slug, displayCity, avgPrice);
+  const seoParagraphs = getCitySeoParagraphs(displayCity, state, total);
 
   const schemas = [
     buildBreadcrumbSchema([
@@ -261,13 +263,14 @@ export default async function LocationPage({
           <section className="bg-slate-50 border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
               <h2 className="text-xl font-bold text-slate-900 mb-3">Car hire in {displayCity}, {state} (Australia)</h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Hire Car connects you directly with verified Australian rental operators in {displayCity}. All vendors are
-                verified with ABN validation and go through an approval process before listing. There are no booking
-                fees — you contact the operator directly to arrange dates, pricing, and pickup. Browse by category,
-                fuel type, or price to find the right vehicle for your trip.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-3">
+              <div className="space-y-4">
+                {seoParagraphs.map((paragraph, idx) => (
+                  <p key={idx} className="text-sm text-slate-600 leading-relaxed">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
                 {VEHICLE_CATEGORIES.map((cat) => (
                   <Link
                     key={cat}

@@ -1,6 +1,6 @@
 /**
  * Category-specific FAQ data for vehicle category pages.
- * Each entry maps a category name to 3–5 relevant Q&As.
+ * Each entry maps a category name to 8–9 relevant Q&As.
  */
 
 export interface CategoryFaq {
@@ -9,396 +9,537 @@ export interface CategoryFaq {
 }
 
 const CATEGORY_FAQS: Record<string, CategoryFaq[]> = {
-  Sedan: [
+  "Sedan": [
     {
-      question: "What is a sedan and is it the right hire car for me?",
-      answer:
-        "A sedan is a traditional passenger car with a separate enclosed boot (trunk). It typically seats 4–5 people comfortably and is ideal for city driving, airport transfers, and road trips where comfort and fuel efficiency matter. It's one of the most popular hire car choices in Australia.",
+      question: "What exactly is a Sedan and is it the right choice for my rental needs?",
+      answer: "A Sedan is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Sedan is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Sedan against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "How fuel-efficient are hire sedans?",
-      answer:
-        "Sedans are generally among the most fuel-efficient hire car options. Most modern sedans average 7–10 litres per 100 km for petrol, with hybrid variants offering even better economy. This makes them cost-effective for longer drives and regional road trips.",
+      question: "How fuel-efficient is a typical Sedan hire vehicle?",
+      answer: "The fuel efficiency of a Sedan can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "How many bags fit in a hire sedan?",
-      answer:
-        "Boot capacity varies by model, but most sedans comfortably fit 2 large suitcases and 2 carry-on bags. Confirm specific boot dimensions with the operator if you're travelling with bulky luggage.",
+      question: "How much luggage and how many passengers can a Sedan comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Sedan. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Do hire sedans come with automatic or manual transmission?",
-      answer:
-        "Most hire sedans on the platform are automatic, making them easy to drive in city traffic. If you need a manual, filter by transmission when browsing or ask the operator directly.",
+      question: "Do Sedan rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Sedan vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "Can I hire a sedan for a long-distance road trip in Australia?",
-      answer:
-        "Absolutely. Sedans are well-suited for long road trips thanks to their comfortable seating and good fuel economy. Check with the operator about kilometre limits — some offer unlimited km plans ideal for interstate travel.",
+      question: "Are there any specific driver's licence requirements for hiring a Sedan in Australia?",
+      answer: "For standard Sedan models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Sedan for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Sedan specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Sedan?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Sedan can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Sedan?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Sedan. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Sedan through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Sedan includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  SUV: [
+  "SUV": [
     {
-      question: "What's the difference between an SUV and a 4WD hire car?",
-      answer:
-        "An SUV (Sport Utility Vehicle) is typically a large, raised-ride-height vehicle that may be 2WD, AWD, or 4WD. A dedicated 4WD is engineered for serious off-road use with low-range gearing. If you're heading off sealed roads (e.g., into national parks or on unsealed tracks), confirm whether the SUV is a true 4WD before booking.",
+      question: "What exactly is a SUV and is it the right choice for my rental needs?",
+      answer: "A SUV is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a SUV is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a SUV against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "How many people and bags can an SUV hire car fit?",
-      answer:
-        "Most SUVs seat 5–7 passengers and offer significantly more cargo space than a sedan. Large SUVs can handle 4–5 suitcases plus carry-ons, making them popular for family road trips and group travel.",
+      question: "How fuel-efficient is a typical SUV hire vehicle?",
+      answer: "The fuel efficiency of a SUV can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Are hire SUVs suitable for the Australian outback?",
-      answer:
-        "This depends on the specific model. Many modern SUVs handle well on gravel and dirt roads but are not designed for extreme off-road terrain. For outback tracks, creek crossings, or unpaved national park roads, ask the operator for a proper 4WD with high clearance.",
+      question: "How much luggage and how many passengers can a SUV comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a SUV. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Is SUV hire more expensive than a sedan?",
-      answer:
-        "SUVs typically cost more to hire per day due to their size, features, and higher fuel consumption. However, for larger groups, splitting the cost of one SUV vs. two sedans can be very economical. Compare current listings to find the best daily rate.",
+      question: "Do SUV rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of SUV vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "Do hire SUVs come with roof racks or tow bars?",
-      answer:
-        "Some operators offer SUVs with roof racks, tow bars, or luggage carriers as extras. Check individual listings and contact the operator directly if you need specific accessories for your trip.",
+      question: "Are there any specific driver's licence requirements for hiring a SUV in Australia?",
+      answer: "For standard SUV models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired SUV for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a SUV specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a SUV?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a SUV can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a SUV?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a SUV. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a SUV through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a SUV includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
   "People mover": [
     {
-      question: "How many passengers can a people mover hire car seat?",
-      answer:
-        "People movers typically seat 7–8 passengers, making them ideal for large families, group airport transfers, or team travel. Some larger models (such as Toyota HiAce commuter vans) can seat up to 12. Check the specific listing for exact seating capacity.",
+      question: "What exactly is a People mover and is it the right choice for my rental needs?",
+      answer: "A People mover is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a People mover is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a People mover against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "Is a people mover easy to drive for someone used to a regular car?",
-      answer:
-        "Most people movers are based on car or van platforms and handle similarly to a large family wagon. They have a higher seating position and a larger turning circle than a sedan, so allow extra room when parking and reversing. Most available models are automatic.",
+      question: "How fuel-efficient is a typical People mover hire vehicle?",
+      answer: "The fuel efficiency of a People mover can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "What's the difference between a people mover and a minibus hire?",
-      answer:
-        "A people mover typically seats up to 8 passengers and can be driven on a standard car licence. A minibus generally seats 9–22 passengers and may require a specific licence class. Confirm seating needs and licence requirements with the operator.",
+      question: "How much luggage and how many passengers can a People mover comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a People mover. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Can I use a people mover for an airport transfer for a large group?",
-      answer:
-        "Yes — people movers are a popular and cost-effective option for group airport transfers. They typically offer enough boot space for 6–8 suitcases. Confirm luggage capacity with the operator, particularly for oversized bags.",
+      question: "Do People mover rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of People mover vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "Are people movers fuel-efficient?",
-      answer:
-        "People movers use more fuel than sedans or hatchbacks due to their size and weight, typically averaging 10–14 litres per 100 km. However, when split across multiple passengers, the per-person fuel cost is often lower than booking separate cars.",
+      question: "Are there any specific driver's licence requirements for hiring a People mover in Australia?",
+      answer: "For standard People mover models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired People mover for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a People mover specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a People mover?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a People mover can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a People mover?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a People mover. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a People mover through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a People mover includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Van: [
+  "Van": [
     {
-      question: "What types of van can I hire in Australia?",
-      answer:
-        "Available van hire options typically include compact vans (e.g., Toyota HiAce, Ford Transit), cargo vans for moving goods, and passenger vans for group travel. Browse listings on the platform to compare available models and capacity in your area.",
+      question: "What exactly is a Van and is it the right choice for my rental needs?",
+      answer: "A Van is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Van is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Van against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "Do I need a special licence to hire a van in Australia?",
-      answer:
-        "Most vans up to 4.5 tonne GVM can be driven on a standard Australian car licence (Class C). Larger or heavier vans may require a light rigid (LR) or medium rigid (MR) licence. Always confirm with the operator before booking.",
+      question: "How fuel-efficient is a typical Van hire vehicle?",
+      answer: "The fuel efficiency of a Van can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Can I hire a van to move furniture or house contents?",
-      answer:
-        "Yes — cargo vans are commonly used for moving furniture, appliances, and household goods. Check the van's load capacity and internal dimensions to ensure your items will fit. Some operators also offer furniture protection equipment.",
+      question: "How much luggage and how many passengers can a Van comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Van. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "How much does van hire cost per day in Australia?",
-      answer:
-        "Van hire costs vary by size, model, and operator. Compact vans typically start from $80–$150/day, while larger cargo vans may cost more. Check current listings on the platform to compare daily rates in your city.",
+      question: "Do Van rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Van vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "Is there a minimum hire period for vans?",
-      answer:
-        "Minimum hire periods vary by operator — some offer single-day hire, while others require a minimum of 2–3 days. Contact the operator directly to confirm availability for your required dates.",
+      question: "Are there any specific driver's licence requirements for hiring a Van in Australia?",
+      answer: "For standard Van models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Van for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Van specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Van?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Van can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Van?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Van. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Van through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Van includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Ute: [
+  "Ute": [
     {
-      question: "What can I use a hire ute for?",
-      answer:
-        "Utes (utility vehicles) are popular for moving garden supplies, building materials, furniture, bikes, and other cargo that won't fit in a regular car. They're also great for towing trailers (with appropriate tow bar) and for work-related tasks.",
+      question: "What exactly is a Ute and is it the right choice for my rental needs?",
+      answer: "A Ute is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Ute is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Ute against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "How much weight can a hire ute carry?",
-      answer:
-        "Payload capacity varies by model. Single-cab utes typically carry 600–1,200 kg, while dual-cab utes range from 700 to 1,000 kg depending on the model. Always check the specific vehicle's payload rating and do not exceed it.",
+      question: "How fuel-efficient is a typical Ute hire vehicle?",
+      answer: "The fuel efficiency of a Ute can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Do I need a special licence to drive a hire ute?",
-      answer:
-        "Most utes can be driven on a standard Australian car licence (Class C) as they fall under 4.5 tonne GVM. Confirm with the operator if there are any specific requirements for the model you're hiring.",
+      question: "How much luggage and how many passengers can a Ute comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Ute. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Can a hire ute tow a trailer?",
-      answer:
-        "Many utes are equipped with tow bars and can tow trailers, boats, or caravans — but this must be confirmed with the operator. Towing capacity varies significantly by model. Never tow above the vehicle's rated capacity.",
+      question: "Do Ute rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Ute vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "What is the difference between a single-cab and dual-cab ute hire?",
-      answer:
-        "A single-cab ute has one row of seating (typically 2 seats) and maximum tray space. A dual-cab ute has two rows of seating (4–5 seats) plus a shorter tray. Dual-cabs are more versatile for combined work and passenger use.",
+      question: "Are there any specific driver's licence requirements for hiring a Ute in Australia?",
+      answer: "For standard Ute models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Ute for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Ute specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Ute?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Ute can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Ute?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Ute. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Ute through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Ute includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Luxury: [
+  "Luxury": [
     {
-      question: "What luxury vehicles are available to hire in Australia?",
-      answer:
-        "Luxury hire options on the platform include premium European and Japanese marques — such as Mercedes-Benz, BMW, Audi, Lexus, and more — covering executive sedans, luxury SUVs, and prestige coupes. Browse current listings to see what's available in your city.",
+      question: "What exactly is a Luxury and is it the right choice for my rental needs?",
+      answer: "A Luxury is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Luxury is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Luxury against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "Is insurance included with luxury car hire?",
-      answer:
-        "Insurance arrangements vary by operator. Many luxury hire operators offer their own comprehensive cover or a damage waiver option. Always clarify what cover is included and what your excess liability is before confirming a booking.",
+      question: "How fuel-efficient is a typical Luxury hire vehicle?",
+      answer: "The fuel efficiency of a Luxury can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Can I hire a luxury car for a special occasion or wedding?",
-      answer:
-        "Yes — luxury hire vehicles are popular for weddings, corporate events, and special occasions. Contact the operator directly to discuss your needs, preferred pick-up/drop-off, and any special requirements such as decoration or chauffeur options.",
+      question: "How much luggage and how many passengers can a Luxury comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Luxury. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "What is the minimum age to hire a luxury car in Australia?",
-      answer:
-        "Many luxury car operators require drivers to be at least 25 years old due to insurance requirements. Minimum age and additional age-related fees vary by operator, so always confirm before enquiring.",
+      question: "Do Luxury rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Luxury vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "How much does luxury car hire cost per day in Australia?",
-      answer:
-        "Luxury car hire rates vary widely depending on the model and operator, typically starting from $200–$400+ AUD per day for premium sedans and higher for prestige or exotic vehicles. Browse current listings to compare rates in your city.",
+      question: "Are there any specific driver's licence requirements for hiring a Luxury in Australia?",
+      answer: "For standard Luxury models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Luxury for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Luxury specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Luxury?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Luxury can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Luxury?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Luxury. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Luxury through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Luxury includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Hatchback: [
+  "Hatchback": [
     {
-      question: "What makes a hatchback a good hire car choice?",
-      answer:
-        "Hatchbacks offer a practical combination of compact size, good fuel economy, and a versatile rear cargo area. Their smaller footprint makes them easy to park in city environments, and the hatch opening allows loading of items that wouldn't fit in a sedan boot.",
+      question: "What exactly is a Hatchback and is it the right choice for my rental needs?",
+      answer: "A Hatchback is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Hatchback is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Hatchback against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "How many passengers can a hire hatchback seat?",
-      answer:
-        "Most hatchbacks comfortably seat 4–5 adults. The rear cabin space varies by model — some small hatchbacks are tight for tall adults in the back seats, so consider a larger vehicle for longer trips with full passenger loads.",
+      question: "How fuel-efficient is a typical Hatchback hire vehicle?",
+      answer: "The fuel efficiency of a Hatchback can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Are hire hatchbacks good for city driving?",
-      answer:
-        "Yes — hatchbacks are one of the best choices for city driving. Their smaller size makes navigating tight streets and parking much easier than larger vehicles, and they generally offer excellent fuel economy in stop-start traffic.",
+      question: "How much luggage and how many passengers can a Hatchback comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Hatchback. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "How much boot space does a hire hatchback have?",
-      answer:
-        "Boot space in hatchbacks ranges from around 250 litres (small hatchbacks) to 380+ litres (medium/large hatchbacks). With the rear seats folded, most hatchbacks can carry reasonably large items. Confirm exact dimensions with the operator if needed.",
+      question: "Do Hatchback rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Hatchback vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "Is a hatchback or sedan better for a road trip?",
-      answer:
-        "Both work well for road trips. Sedans often have a larger, more secure boot, while hatchbacks offer flexible cargo loading. For comfort on long drives, consider a medium or large hatchback with good highway stability.",
+      question: "Are there any specific driver's licence requirements for hiring a Hatchback in Australia?",
+      answer: "For standard Hatchback models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Hatchback for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Hatchback specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Hatchback?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Hatchback can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Hatchback?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Hatchback. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Hatchback through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Hatchback includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Convertible: [
+  "Convertible": [
     {
-      question: "Is a hire convertible practical for touring Australia?",
-      answer:
-        "Convertibles are a great choice for coastal and scenic drives in good weather — popular routes include the Great Ocean Road, NSW South Coast, and Queensland's Sunshine Coast hinterland. They are less practical for large groups, bad weather, or carrying lots of luggage.",
+      question: "What exactly is a Convertible and is it the right choice for my rental needs?",
+      answer: "A Convertible is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Convertible is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Convertible against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "What is the boot space like in a hire convertible?",
-      answer:
-        "Convertibles typically have a smaller boot than equivalent coupes or sedans, partly due to the folding roof mechanism. Pack light — most convertibles accommodate 1–2 small suitcases comfortably.",
+      question: "How fuel-efficient is a typical Convertible hire vehicle?",
+      answer: "The fuel efficiency of a Convertible can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "What is the minimum age to hire a convertible?",
-      answer:
-        "Most operators require drivers to be at least 25 years old to hire a convertible. Young-driver fees or age restrictions vary by operator, so always confirm when making an enquiry.",
+      question: "How much luggage and how many passengers can a Convertible comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Convertible. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Can I hire a convertible in winter in Australia?",
-      answer:
-        "Australia's mild climate means convertibles can be enjoyable year-round in northern states. In Victoria, Tasmania, and the ACT, winters can be cold — a convertible with a heated cabin and good heater makes it manageable, but always check the season and forecast for your region.",
+      question: "Do Convertible rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Convertible vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "How many people can a hire convertible seat?",
-      answer:
-        "Most hire convertibles are 2-seaters or 4-seaters. Four-seat convertibles often have smaller rear seats suitable for children or short trips rather than full adult comfort. Confirm seating capacity with the operator.",
+      question: "Are there any specific driver's licence requirements for hiring a Convertible in Australia?",
+      answer: "For standard Convertible models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Convertible for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Convertible specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Convertible?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Convertible can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Convertible?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Convertible. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Convertible through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Convertible includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Coupe: [
+  "Coupe": [
     {
-      question: "What is a coupe and who is it best suited for?",
-      answer:
-        "A coupe is a two-door car with a fixed roof and a sloping, sporty roofline. It typically seats 2 adults in the front and 2 in a smaller rear seat. Coupes are best for drivers seeking a sporty, stylish hire car for couple or solo trips.",
+      question: "What exactly is a Coupe and is it the right choice for my rental needs?",
+      answer: "A Coupe is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Coupe is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Coupe against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "Is a coupe practical for a road trip?",
-      answer:
-        "Coupes are comfortable for 1–2 people on road trips, with reasonable boot space and good highway performance. For 3–4 passengers or significant luggage, consider a sedan or wagon instead.",
+      question: "How fuel-efficient is a typical Coupe hire vehicle?",
+      answer: "The fuel efficiency of a Coupe can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Are hire coupes automatic or manual?",
-      answer:
-        "Most hire coupes available on the platform are automatic. If you specifically want a manual coupe, check individual listings or contact the operator to confirm transmission type before enquiring.",
+      question: "How much luggage and how many passengers can a Coupe comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Coupe. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "What is the minimum age to hire a coupe?",
-      answer:
-        "Age requirements vary by operator and the specific model — particularly for performance or prestige coupes which often require drivers to be 25+. Always confirm with the operator.",
+      question: "Do Coupe rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Coupe vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "How do coupes compare to sedans on fuel economy?",
-      answer:
-        "Coupes are generally comparable to sedans in fuel efficiency, as they share similar drivetrains. Performance or V8 coupes will use more fuel. Check the vehicle specs in each listing for real-world fuel consumption figures.",
+      question: "Are there any specific driver's licence requirements for hiring a Coupe in Australia?",
+      answer: "For standard Coupe models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Coupe for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Coupe specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Coupe?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Coupe can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Coupe?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Coupe. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Coupe through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Coupe includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Wagon: [
+  "Wagon": [
     {
-      question: "What is a station wagon hire car good for?",
-      answer:
-        "Station wagons offer the passenger comfort of a sedan with significantly more cargo space. They are ideal for family road trips, airport runs with lots of luggage, and carrying sports or outdoor gear. The flat-folding rear seats add even more versatility.",
+      question: "What exactly is a Wagon and is it the right choice for my rental needs?",
+      answer: "A Wagon is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Wagon is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Wagon against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "How much cargo space does a hire wagon have?",
-      answer:
-        "Boot capacity varies by model, typically from 500–700 litres with seats up and 1,500–2,000 litres with rear seats folded. This makes them comparable to small SUVs for practicality, often at a lower hire cost.",
+      question: "How fuel-efficient is a typical Wagon hire vehicle?",
+      answer: "The fuel efficiency of a Wagon can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Is a wagon a good alternative to an SUV hire car?",
-      answer:
-        "For road trips on sealed roads, a wagon can be an excellent and often more economical alternative to an SUV. Wagons sit lower, handle better, and often get better fuel economy. If you need off-road capability, an SUV or 4WD is a better choice.",
+      question: "How much luggage and how many passengers can a Wagon comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Wagon. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Can a hire wagon tow a trailer?",
-      answer:
-        "Some wagons are fitted with tow bars and can tow light trailers, camper trailers, or boat trailers up to the vehicle's rated towing capacity. Confirm towing capability and maximum weight with the operator before booking.",
+      question: "Do Wagon rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Wagon vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "How many passengers can a hire wagon seat?",
-      answer:
-        "Most wagons seat 5 adults comfortably. Some larger wagon models (such as 7-seat wagons) offer a third row, though rear-most seats are typically small and best for children.",
+      question: "Are there any specific driver's licence requirements for hiring a Wagon in Australia?",
+      answer: "For standard Wagon models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Wagon for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Wagon specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Wagon?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Wagon can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Wagon?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Wagon. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Wagon through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Wagon includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
   "Sports car": [
     {
-      question: "What sports cars are available to hire in Australia?",
-      answer:
-        "The range of sports cars available through Hire Car Marketplace varies by city and operator. Listings may include models such as the Ford Mustang, Toyota GR86, Porsche 718, and other performance vehicles. Browse current listings to see what's available near you.",
+      question: "What exactly is a Sports car and is it the right choice for my rental needs?",
+      answer: "A Sports car is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Sports car is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Sports car against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "What is the minimum age to hire a sports car?",
-      answer:
-        "Most operators require sports car drivers to be at least 25 years old. Additional conditions may include a clean driving record and specific licence class. Always confirm requirements with the operator before enquiring.",
+      question: "How fuel-efficient is a typical Sports car hire vehicle?",
+      answer: "The fuel efficiency of a Sports car can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Is insurance included with sports car hire?",
-      answer:
-        "Insurance cover varies by operator. Many sports car hire operators require a bond and offer a damage waiver to reduce or eliminate your excess. Confirm all insurance terms in detail before confirming a booking.",
+      question: "How much luggage and how many passengers can a Sports car comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Sports car. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Can I hire a sports car for a track day?",
-      answer:
-        "Track use is generally not permitted with hire vehicles. Always read the operator's terms and conditions — most hire agreements explicitly prohibit use on racetracks, circuits, or speed events.",
+      question: "Do Sports car rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Sports car vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "How does sports car hire work on Hire Car Marketplace?",
-      answer:
-        "Browse available sports car listings, click through to view details, and contact the operator directly to check availability, arrange pickup, and confirm pricing. There are no booking fees — you deal directly with the local operator.",
+      question: "Are there any specific driver's licence requirements for hiring a Sports car in Australia?",
+      answer: "For standard Sports car models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Sports car for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Sports car specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Sports car?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Sports car can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Sports car?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Sports car. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Sports car through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Sports car includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Minibus: [
+  "Minibus": [
     {
-      question: "How many passengers can a hire minibus seat?",
-      answer:
-        "Minibuses available on the platform typically seat between 9 and 22 passengers. The most common hire minibus configurations are 12-seat and 15-seat. Always confirm exact seating capacity with the operator.",
+      question: "What exactly is a Minibus and is it the right choice for my rental needs?",
+      answer: "A Minibus is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Minibus is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Minibus against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "Do I need a special licence to drive a hire minibus?",
-      answer:
-        "In Australia, minibuses seating more than 12 passengers typically require a medium rigid (MR) or higher licence class. Minibuses up to 12 seats may be driveable on a standard car licence depending on the GVM — confirm with the operator and your state's licence requirements.",
+      question: "How fuel-efficient is a typical Minibus hire vehicle?",
+      answer: "The fuel efficiency of a Minibus can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "What are hire minibuses commonly used for in Australia?",
-      answer:
-        "Minibus hire is popular for school excursions, sporting team transport, corporate group travel, wedding party transfers, airport group pickups, and conference shuttles. Contact operators directly to discuss your specific requirements.",
+      question: "How much luggage and how many passengers can a Minibus comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Minibus. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "How much does minibus hire cost per day?",
-      answer:
-        "Minibus hire rates vary depending on passenger capacity, model, and operator. Browse current listings on the platform to compare available daily rates in your city.",
+      question: "Do Minibus rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Minibus vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "Can I hire a minibus for a multi-day trip?",
-      answer:
-        "Yes — many operators offer multi-day minibus hire. Longer-term hire often comes with a reduced daily rate. Contact the operator directly to arrange your dates and discuss kilometre inclusions for extended hire.",
+      question: "Are there any specific driver's licence requirements for hiring a Minibus in Australia?",
+      answer: "For standard Minibus models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Minibus for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Minibus specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Minibus?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Minibus can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Minibus?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Minibus. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Minibus through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Minibus includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Truck: [
+  "Truck": [
     {
-      question: "What types of hire trucks are available in Australia?",
-      answer:
-        "Hire trucks on the platform range from light trucks and tray trucks through to larger rigid trucks. Common uses include moving house, transporting equipment, landscaping deliveries, and commercial freight. Browse listings to find available truck types in your city.",
+      question: "What exactly is a Truck and is it the right choice for my rental needs?",
+      answer: "A Truck is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Truck is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Truck against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "What licence do I need to hire a truck?",
-      answer:
-        "Light trucks up to 4.5 tonne GVM can be driven on a standard Class C car licence. Larger trucks require a Light Rigid (LR) or Medium Rigid (MR) licence. Always confirm the GVM and licence requirements with the operator before booking.",
+      question: "How fuel-efficient is a typical Truck hire vehicle?",
+      answer: "The fuel efficiency of a Truck can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Can I hire a truck to move house?",
-      answer:
-        "Yes — truck hire is a popular and cost-effective option for house moves. Ensure you select a truck with sufficient load volume and payload capacity for your belongings. Ask the operator about load-securing equipment such as tie-down straps and blankets.",
+      question: "How much luggage and how many passengers can a Truck comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Truck. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "Is there a minimum hire period for trucks?",
-      answer:
-        "Minimum hire periods vary by operator. Many offer single-day or weekend hire options, while others have a minimum of 2–3 days. Contact the operator directly to confirm availability and minimum hire terms.",
+      question: "Do Truck rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Truck vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "How do I estimate what size truck I need for my move?",
-      answer:
-        "As a rough guide: a 1-bedroom apartment typically needs a 3–4 tonne truck, a 2–3 bedroom home needs a 6–8 tonne truck, and a large family home may need 8–12+ tonnes. When in doubt, go larger — it's better to have extra space than to need two trips.",
+      question: "Are there any specific driver's licence requirements for hiring a Truck in Australia?",
+      answer: "For standard Truck models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Truck for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Truck specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Truck?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Truck can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Truck?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Truck. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Truck through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Truck includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
-
-  Campervan: [
+  "Campervan": [
     {
-      question: "What's included in a campervan hire in Australia?",
-      answer:
-        "Inclusions vary by operator, but most campervans come with a bed, basic cooking facilities (gas burner or microwave), a small sink, storage, and bedding. Some are fully self-contained with a shower and toilet. Always confirm what's included with the operator before booking.",
+      question: "What exactly is a Campervan and is it the right choice for my rental needs?",
+      answer: "A Campervan is a specific class of vehicle designed to cater to particular driving preferences, passenger requirements, and cargo needs. Choosing a Campervan is highly recommended if its unique features—such as its seating layout, overall size, and performance characteristics—align with the nature of your trip. Whether you need efficient city transport, spacious family travel, or robust load-carrying capacity, evaluating the core attributes of a Campervan against your itinerary will ensure a comfortable and practical rental experience."
     },
     {
-      question: "Do I need a special licence to hire a campervan?",
-      answer:
-        "Most campervans can be driven on a standard Australian car licence (Class C) as they fall under 4.5 tonne GVM. Larger motorhomes may require a light rigid (LR) licence. Confirm the GVM and licence requirements with the operator.",
+      question: "How fuel-efficient is a typical Campervan hire vehicle?",
+      answer: "The fuel efficiency of a Campervan can vary significantly depending on the exact make, model, engine size, and whether it features a hybrid drivetrain. Generally speaking, operators maintain modern, well-serviced fleets to ensure optimal fuel economy. If minimizing your petrol or diesel expenses is a primary concern for your upcoming journey, we strongly advise checking the specific engine details on the individual vehicle listing or contacting the operator directly to inquire about expected fuel consumption rates."
     },
     {
-      question: "Where can I park and stay overnight in a hire campervan?",
-      answer:
-        "You can stay at caravan parks, campgrounds (national park and private), and designated free-camping areas. If the campervan is certified self-contained, you may have more free camping options. Download the Wikicamps Australia app to find and plan campsites along your route.",
+      question: "How much luggage and how many passengers can a Campervan comfortably accommodate?",
+      answer: "Capacity is a crucial factor when hiring a Campervan. The passenger seating and boot (trunk) space are optimized for this specific vehicle class, but exact dimensions can differ between manufacturers. Most listings will clearly indicate the maximum number of passengers and provide a reliable estimate of how many large suitcases and small carry-on bags can securely fit in the vehicle. Always verify these details to ensure everyone travels in comfort without compromising safety or visibility."
     },
     {
-      question: "How much does campervan hire cost per day in Australia?",
-      answer:
-        "Campervan hire rates vary widely based on size, age, and features. Compact 2-berth campervans typically start from $100–$200/day, while larger self-contained motorhomes can be $200–$400+/day. Browse current listings to compare pricing in your area.",
+      question: "Do Campervan rental vehicles come equipped with automatic or manual transmissions?",
+      answer: "The vast majority of Campervan vehicles available on our marketplace are equipped with modern automatic transmissions, as this is the overwhelming preference for most contemporary drivers navigating varied traffic conditions. However, if you specifically require or prefer a manual transmission, you can utilize the platform's filtering tools to search for manual options, or reach out to the vehicle operator directly to confirm the transmission type before finalizing your booking."
     },
     {
-      question: "What is the best time of year to hire a campervan in Australia?",
-      answer:
-        "The best time depends on your destination. The dry season (April–October) is ideal for northern Australia and the outback. For southern states and Tasmania, summer (November–March) offers the warmest weather. Spring and autumn are pleasant nearly everywhere and parks are less crowded than school holidays.",
+      question: "Are there any specific driver's licence requirements for hiring a Campervan in Australia?",
+      answer: "For standard Campervan models that fall under a Gross Vehicle Mass (GVM) of 4.5 tonnes and carry fewer than 12 passengers, a standard Australian Class C (Car) driver's licence is entirely sufficient. However, if you are looking at particularly large, heavy, or high-capacity variants within this category, you might legally require a Light Rigid (LR) or Medium Rigid (MR) licence. It is imperative that you confirm the exact licence requirements with the operator before booking."
     },
+    {
+      question: "Can I use a hired Campervan for long-distance interstate road trips?",
+      answer: "Absolutely, many renters choose a Campervan specifically for extended road trips and interstate travel due to its characteristics. However, before embarking on a long journey, you must confirm two things with the operator: first, whether their specific insurance policy permits interstate travel, and second, what the vehicle's kilometre allowance is. Look for listings that explicitly offer 'unlimited kilometres' to avoid incurring substantial excess mileage charges upon return."
+    },
+    {
+      question: "What is the typical minimum age required to hire a Campervan?",
+      answer: "While the baseline minimum age to rent most standard vehicles is 21, the requirement for a Campervan can sometimes be higher, particularly if the specific model is classified as a performance, luxury, or heavy commercial vehicle. In such cases, operators or their insurers may require the driver to be at least 25 years old. Drivers aged 21-24 should also anticipate a potential young-driver surcharge. Always check the specific age criteria listed by the operator."
+    },
+    {
+      question: "Are child seats and other accessories available when hiring a Campervan?",
+      answer: "Yes, many operators understand the diverse needs of renters and offer a range of optional extras that can be fitted to a Campervan. This frequently includes baby seats, child booster seats, GPS navigation units, and sometimes even roof racks or snow chains depending on the season and location. These accessories typically incur an additional daily fee. You should communicate your exact requirements to the operator well in advance to ensure they have the necessary equipment available."
+    },
+    {
+      question: "How does insurance work when hiring a Campervan through the marketplace?",
+      answer: "Insurance arrangements are managed directly by the independent rental operators listed on the platform. Typically, the daily rental rate for a Campervan includes standard comprehensive insurance or a collision damage waiver, which comes with a predetermined financial excess that you are liable for in the event of damage. Most operators provide you with the option to pay an additional daily premium to significantly reduce this excess amount. You must carefully read and understand the operator's specific terms and conditions regarding insurance before signing the rental agreement."
+    }
   ],
 };
 
@@ -417,18 +558,38 @@ export function getCategoryFaqs(
   // Generic fallback
   return [
     {
-      question: `How much does ${category} hire cost in Australia?`,
+      question: `How much does it typically cost to hire a ${category} in Australia?`,
       answer: avgPrice
-        ? `Based on current listings, ${category} hire averages around $${avgPrice} AUD per day nationally. Prices vary by city, operator, and season.`
-        : `Prices vary by city and operator. Browse current listings to compare daily rates for ${category} hire across Australia.`,
+        ? `Based on our current comprehensive platform listings, hiring a ${category} averages around $${avgPrice} AUD per day on a national level. It is important to remember that exact prices will fluctuate based on the specific city you are renting in, the individual operator's pricing, the vehicle's age, and peak seasonal demand.`
+        : `Prices for hiring a ${category} can vary significantly based on your location, the time of year, and the specific operator you select. We highly recommend browsing our current, up-to-date listings to compare daily rates and find the best possible deal for a ${category} across Australia.`,
     },
     {
-      question: `How do I book a ${category} on Hire Car Marketplace?`,
-      answer: `Browse available ${category} listings, click through to see full details, and contact the operator directly to arrange pickup dates and pricing. There are no booking fees on Hire Car Marketplace.`,
+      question: `What is the best way to book a ${category} on the Hire Car Marketplace?`,
+      answer: `Booking is simple and direct. Browse the available ${category} listings on our platform, click on a vehicle that catches your eye to review its full details, specifications, and rental terms. From there, use the provided contact options to reach out to the local operator directly. You can arrange your pickup dates, confirm the total pricing, and finalize the booking with them. Best of all, Hire Car Marketplace charges zero booking fees.`,
     },
     {
-      question: `Are ${category} hire operators verified?`,
-      answer: `Yes — all operators on Hire Car Marketplace are verified with ABN validation and go through an approval process before listing. You can hire with confidence from local Australian rental companies.`,
+      question: `Are the operators offering ${category} rentals thoroughly verified?`,
+      answer: `Absolutely. Trust and safety are paramount on our platform. Every single operator listing a ${category} on the Hire Car Marketplace has undergone a stringent verification process. This includes mandatory ABN (Australian Business Number) validation and a comprehensive profile review before they are permitted to list any vehicles. You can confidently hire from reputable, local Australian rental companies.`,
     },
+    {
+      question: `Can I hire a ${category} for a very short duration, like a single day?`,
+      answer: `Minimum hire periods for a ${category} are entirely at the discretion of the individual rental operators. While many operators are perfectly happy to accommodate single-day or weekend rentals, others may enforce a 2 or 3-day minimum booking period, especially during busy holiday seasons. Check the specific listing details or contact the operator to confirm their minimum rental duration.`,
+    },
+    {
+      question: `Is roadside assistance included when I hire a ${category}?`,
+      answer: `In the vast majority of cases, yes. Reputable operators providing a ${category} typically include 24/7 roadside assistance as part of the standard rental agreement to ensure your peace of mind in the event of a mechanical failure or flat battery. Always confirm this inclusion and ask for the emergency contact procedure when you collect the keys from the operator.`,
+    },
+    {
+      question: `What documentation do I need to bring when picking up my ${category}?`,
+      answer: `When you arrive to collect your ${category}, you will typically need to present a valid, full driver's licence (and an International Driving Permit if your licence is not in English), a valid credit card in the primary driver's name for the security bond, and potentially a secondary form of identification such as a passport or utility bill. Operators will clearly outline their specific documentation requirements prior to pickup.`,
+    },
+    {
+      question: `Are there any restrictions on where I can drive a ${category}?`,
+      answer: `Driving restrictions depend heavily on the operator's terms and the specific type of ${category} you hire. Common restrictions include prohibitions against driving on unsealed dirt roads, taking vehicles to specific remote islands (like K'gari/Fraser Island), or driving above the snow line without prior written authorization and fitted snow chains. Always declare your intended travel route to the operator to ensure you remain fully insured.`,
+    },
+    {
+      question: `How is the security deposit (bond) handled when hiring a ${category}?`,
+      answer: `When you hire a ${category}, the operator will typically place a pre-authorization hold on your credit card for a specific bond amount when you pick up the vehicle. This acts as security against potential damage or unpaid tolls/infringements. Provided the vehicle is returned in its original condition and all terms are met, the hold is released. The time it takes for funds to become fully available again depends on your specific bank's processing times.`,
+    }
   ];
 }

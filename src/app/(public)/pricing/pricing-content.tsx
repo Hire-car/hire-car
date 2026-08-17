@@ -93,28 +93,41 @@ const FEATURE_ROWS = [
 
 const FAQS = [
   {
-    a: "Yes — you can start with the Starter plan which is completely free for up to 5 vehicles. You can upgrade or cancel anytime.",
+    q: "Is there a free plan available for new operators?",
+    a: "Yes, absolutely! You can start with our Starter plan which is completely free of charge for up to 5 vehicle listings. This is the perfect way to test the waters, experience the platform's features, and start generating leads without any upfront financial commitment. You can upgrade, downgrade, or cancel at any time as your business needs evolve.",
   },
   {
-    q: "Can I change plans later?",
-    a: "Absolutely. You can upgrade or downgrade at any time from your Billing dashboard. Upgrades take effect immediately; downgrades apply at the next renewal.",
+    q: "Can I change my subscription plan later as my fleet grows?",
+    a: "Yes, flexibility is a core part of our platform. You can effortlessly upgrade or downgrade your subscription plan at any time directly from your Billing dashboard. Upgrades take effect immediately so you can add more vehicles right away, while downgrades will apply at the start of your next billing renewal cycle to ensure you get the most out of your current plan.",
   },
   {
-    q: "What happens if I exceed my vehicle limit?",
-    a: "You won't be able to add new vehicles until you upgrade your plan. Existing listings remain active.",
+    q: "What happens if I exceed my current plan's vehicle listing limit?",
+    a: "If you reach the maximum number of vehicles allowed on your current plan, you won't be able to publish any new vehicle listings until you upgrade to a higher tier. However, rest assured that your existing, active listings will remain completely unaffected and will continue to generate leads and visibility on the marketplace.",
   },
   {
-    q: "Do you store my payment details?",
-    a: "No. All payments are processed securely through Stripe. Hire Car never stores card numbers or banking information.",
+    q: "How secure is the payment process, and do you store my credit card details?",
+    a: "Security is our top priority. All subscription payments are processed securely through Stripe, an industry-leading payment gateway certified to PCI Service Provider Level 1. Hire Car never stores your full credit card numbers or sensitive banking information on our servers, ensuring your financial data remains completely protected.",
   },
   {
-    q: "What is the Business/Enterprise plan?",
-    a: "For fleets of 300+ vehicles, we offer custom contracts, dedicated account management, white-glove onboarding, and SLA-backed support. Contact our sales team for a quote.",
+    q: "What does the Business/Enterprise plan include?",
+    a: "Our Enterprise plan is tailored for large-scale, national operators with fleets exceeding 300 vehicles. It includes custom pricing contracts, dedicated white-glove onboarding, a personal account manager, Service Level Agreement (SLA)-backed support, and full API access for seamless integration with your existing management systems. Contact our sales team for a personalized quote.",
   },
   {
-    q: "Do you offer annual billing discounts?",
-    a: "Yes — switching to annual billing saves 10% compared to monthly. Toggle above to see annual pricing.",
+    q: "Do you offer any discounts for annual billing subscriptions?",
+    a: "Yes, we highly encourage annual commitments by offering a significant discount. Switching to annual billing saves you 10% compared to paying month-to-month. You can easily toggle the pricing switch at the top of this page to see the exact savings you'll receive on each plan by choosing the annual option.",
   },
+  {
+    q: "Are there any hidden fees or setup costs involved?",
+    a: "No, we believe in complete transparency. There are absolutely no hidden fees, setup costs, or surprising charges when you sign up. The price you see on our pricing page is exactly what you pay. You handle your own rental transactions directly with the customers, so we don't take a commission on your bookings either.",
+  },
+  {
+    q: "What kind of customer support can I expect?",
+    a: "Your level of support depends on your chosen plan. Starter plans receive prompt email support. Growth plans get priority email and phone support for faster resolutions. Our Pro and Enterprise users enjoy dedicated phone lines, priority email routing, same-day response guarantees, and even dedicated account managers to help optimize their marketplace presence.",
+  },
+  {
+    q: "Can I cancel my subscription at any time?",
+    a: "Yes, you have complete control over your subscription. There are no lock-in contracts for our standard monthly plans, and you can cancel your subscription at any time via your account settings. Once canceled, you will retain access to your plan's features until the end of your current billing period.",
+  }
 ];
 
 const TRUST_ITEMS = [

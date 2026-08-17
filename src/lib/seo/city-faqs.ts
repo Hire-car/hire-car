@@ -1,6 +1,6 @@
 /**
  * City-specific FAQ data for location pages.
- * Each entry maps a city slug to 3–5 locally-relevant Q&As.
+ * Each entry maps a city slug to 8–9 locally-relevant Q&As.
  */
 
 export interface CityFaq {
@@ -9,340 +9,461 @@ export interface CityFaq {
 }
 
 const CITY_FAQS: Record<string, CityFaq[]> = {
-  sydney: [
+  "sydney": [
     {
-      question: "Do I need a car to get around Sydney?",
-      answer:
-        "Sydney has good public transport in the CBD and inner suburbs, but a hire car is very useful for visiting areas like the Northern Beaches, Royal National Park, Blue Mountains, and the Hunter Valley — all of which are difficult to reach by train or bus.",
+      question: "Do I need a hire car to get around Sydney effectively?",
+      answer: "While Sydney does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car in Sydney?",
-      answer:
-        "Most Hire Car Marketplace operators in Sydney are based across the CBD, North Shore, Western Suburbs, and near Sydney Airport (SYD). Pickup locations vary by operator — contact them directly to arrange a convenient handover point.",
+      question: "Where are the most convenient locations to pick up a hire car in Sydney?",
+      answer: "In Sydney, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Are there toll roads I should know about in Sydney?",
-      answer:
-        "Yes — Sydney has an extensive toll road network including the Harbour Tunnel, Cross City Tunnel, M7, M5, and others. Most tolls are cashless and charged via e-Tag or a linked number plate account. Confirm with your operator how tolls are handled for your hire vehicle.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Sydney?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Sydney. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "Is parking easy in Sydney with a rental car?",
-      answer:
-        "Parking in central Sydney can be expensive and limited. Many rental customers prefer to park at their hotel or use park-and-ride facilities in the suburbs. Always check local parking signs and time restrictions to avoid fines.",
+      question: "What are the typical parking options and associated costs for a rental car in Sydney?",
+      answer: "Parking in the bustling inner city of Sydney can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the minimum age to hire a car in Sydney?",
-      answer:
-        "Minimum age requirements vary by operator, but most require drivers to be at least 21 years old. Drivers under 25 may attract a young-driver surcharge. Always check the individual operator's terms before booking.",
+      question: "What is the minimum age requirement to rent and drive a car in Sydney?",
+      answer: "To legally hire and drive a car in Sydney, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Sydney?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Sydney. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Sydney?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Sydney. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Sydney?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Sydney, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Sydney?",
+      answer: "Driving in Sydney follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  melbourne: [
+  "melbourne": [
     {
-      question: "Do I need a hire car in Melbourne or is public transport enough?",
-      answer:
-        "Melbourne's tram, train, and bus network covers the inner city well. However, a rental car is ideal for day trips to the Yarra Valley, Mornington Peninsula, Great Ocean Road, or Dandenong Ranges, which are not easily accessible by public transport.",
+      question: "Do I need a hire car to get around Melbourne effectively?",
+      answer: "While Melbourne does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "What are Melbourne's hook turns and do they affect hire car drivers?",
-      answer:
-        "Hook turns are a unique Melbourne traffic rule for turning right at certain CBD intersections — you wait in the left lane instead of the right before turning on a green light. They apply at specific signposted intersections. Plan your CBD route in advance if you're unfamiliar with them.",
+      question: "Where are the most convenient locations to pick up a hire car in Melbourne?",
+      answer: "In Melbourne, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Are there tram tracks I need to watch out for when driving?",
-      answer:
-        "Yes — Melbourne's extensive tram network means tram tracks are embedded in many roads. Take extra care when changing lanes or parking near tracks, and always give way to trams at designated stops.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Melbourne?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Melbourne. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "Where can I pick up a hire car in Melbourne?",
-      answer:
-        "Hire Car Marketplace operators in Melbourne are spread across the CBD, Bayside, Dandenong, and suburbs near Melbourne Airport (MEL). Pickup locations are arranged directly with the operator at time of booking.",
+      question: "What are the typical parking options and associated costs for a rental car in Melbourne?",
+      answer: "Parking in the bustling inner city of Melbourne can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the minimum age requirement to hire a car in Melbourne?",
-      answer:
-        "Most operators require drivers to be at least 21. Drivers aged 21–24 may be subject to a young-driver surcharge. Confirm age and licence requirements with the specific operator before enquiring.",
+      question: "What is the minimum age requirement to rent and drive a car in Melbourne?",
+      answer: "To legally hire and drive a car in Melbourne, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Melbourne?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Melbourne. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Melbourne?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Melbourne. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Melbourne?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Melbourne, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Melbourne?",
+      answer: "Driving in Melbourne follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  brisbane: [
+  "brisbane": [
     {
-      question: "Is Brisbane a good city to explore by hire car?",
-      answer:
-        "Yes — Brisbane is very car-friendly. While the CBD is walkable, a hire car opens up the Gold Coast, Sunshine Coast, Toowoomba, and the Scenic Rim — all popular day trips from the city.",
+      question: "Do I need a hire car to get around Brisbane effectively?",
+      answer: "While Brisbane does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car in Brisbane?",
-      answer:
-        "Operators on Hire Car Marketplace are based across Brisbane CBD, Southside, Ipswich, and areas near Brisbane Airport (BNE). Pickup is arranged directly with your chosen operator.",
+      question: "Where are the most convenient locations to pick up a hire car in Brisbane?",
+      answer: "In Brisbane, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Does Brisbane have tolls I should be aware of?",
-      answer:
-        "Brisbane has several toll roads including the Legacy Way, Clem7 Tunnel, Airport Link, and the Go Between Bridge. Most require a Linkt account or linked plate. Check with your operator how tolls are handled for your hire vehicle.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Brisbane?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Brisbane. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "What is the weather like for driving in Brisbane?",
-      answer:
-        "Brisbane enjoys warm, sunny weather year-round, making it great for road trips. Be prepared for afternoon summer storms and heavy downpours during the wet season (November–March), which can reduce visibility quickly.",
+      question: "What are the typical parking options and associated costs for a rental car in Brisbane?",
+      answer: "Parking in the bustling inner city of Brisbane can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What are the age requirements to hire a car in Brisbane?",
-      answer:
-        "Most operators require drivers to be at least 21 years old, with a young-driver fee potentially applying to those aged 21–24. Always check the operator's specific terms.",
+      question: "What is the minimum age requirement to rent and drive a car in Brisbane?",
+      answer: "To legally hire and drive a car in Brisbane, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Brisbane?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Brisbane. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Brisbane?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Brisbane. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Brisbane?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Brisbane, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Brisbane?",
+      answer: "Driving in Brisbane follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  perth: [
+  "perth": [
     {
-      question: "Do I need a hire car in Perth?",
-      answer:
-        "A hire car is highly recommended in Perth. While the city centre and train lines are accessible, suburbs are spread out and key attractions like Margaret River, Fremantle, and Swan Valley are best explored by car.",
+      question: "Do I need a hire car to get around Perth effectively?",
+      answer: "While Perth does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car in Perth?",
-      answer:
-        "Hire Car Marketplace operators are located across the CBD, Fremantle, northern suburbs, and near Perth Airport (PER). Coordinate pickup details directly with the operator.",
+      question: "Where are the most convenient locations to pick up a hire car in Perth?",
+      answer: "In Perth, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Are there toll roads in Perth?",
-      answer:
-        "Perth currently has no major toll roads, making it one of Australia's most road-trip-friendly cities. You can drive freely across the metro area without worrying about e-tag charges.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Perth?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Perth. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "What is the best time of year to hire a car and road trip from Perth?",
-      answer:
-        "Spring (September–November) and autumn (March–May) offer the most pleasant driving conditions. Summer can be extremely hot — particularly in inland areas — so ensure your hire car has working air conditioning.",
+      question: "What are the typical parking options and associated costs for a rental car in Perth?",
+      answer: "Parking in the bustling inner city of Perth can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What licence do I need to hire a car in Perth?",
-      answer:
-        "A valid Australian state driver's licence is accepted by all operators. International visitors can use a valid overseas licence along with an International Driving Permit (IDP) if the licence is not in English.",
+      question: "What is the minimum age requirement to rent and drive a car in Perth?",
+      answer: "To legally hire and drive a car in Perth, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Perth?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Perth. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Perth?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Perth. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Perth?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Perth, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Perth?",
+      answer: "Driving in Perth follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  adelaide: [
+  "adelaide": [
     {
-      question: "Is Adelaide easy to drive in?",
-      answer:
-        "Adelaide is one of Australia's most driver-friendly capitals — wide roads, a simple grid layout in the CBD, and easy access to the Adelaide Hills, Barossa Valley, and McLaren Vale wine regions make it ideal for a hire car trip.",
+      question: "Do I need a hire car to get around Adelaide effectively?",
+      answer: "While Adelaide does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car in Adelaide?",
-      answer:
-        "Hire Car Marketplace operators are based across the city and near Adelaide Airport (ADL). Arrange pickup details directly with your chosen operator when making an enquiry.",
+      question: "Where are the most convenient locations to pick up a hire car in Adelaide?",
+      answer: "In Adelaide, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Are there good day-trip routes from Adelaide with a hire car?",
-      answer:
-        "Absolutely. The Barossa Valley is just an hour away, the Adelaide Hills and Hahndorf are 30 minutes from the CBD, and the Fleurieu Peninsula and McLaren Vale are ideal for wine and beach day trips.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Adelaide?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Adelaide. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "Does Adelaide have tolls?",
-      answer:
-        "Adelaide currently has no major toll roads, so you can drive around the metro area and to nearby regions without any toll charges.",
+      question: "What are the typical parking options and associated costs for a rental car in Adelaide?",
+      answer: "Parking in the bustling inner city of Adelaide can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the minimum age to hire a car in Adelaide?",
-      answer:
-        "Most operators require drivers to be 21 or older. A young-driver surcharge may apply to those aged 21–24. Always confirm requirements with the individual operator.",
+      question: "What is the minimum age requirement to rent and drive a car in Adelaide?",
+      answer: "To legally hire and drive a car in Adelaide, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Adelaide?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Adelaide. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Adelaide?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Adelaide. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Adelaide?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Adelaide, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Adelaide?",
+      answer: "Driving in Adelaide follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
   "gold-coast": [
     {
-      question: "Do I need a hire car on the Gold Coast?",
-      answer:
-        "The Gold Coast light rail (G:link) connects Broadbeach to Helensvale, making the strip accessible without a car. However, a hire car is great for exploring the Hinterland, Lamington National Park, Currumbin Wildlife Sanctuary, and making day trips to Brisbane or Byron Bay.",
+      question: "Do I need a hire car to get around Gold Coast effectively?",
+      answer: "While Gold Coast does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car on the Gold Coast?",
-      answer:
-        "Operators on Hire Car Marketplace are located across Surfers Paradise, Broadbeach, Coolangatta, and near Gold Coast Airport (OOL). Pickup location is agreed directly with the operator.",
+      question: "Where are the most convenient locations to pick up a hire car in Gold Coast?",
+      answer: "In Gold Coast, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Are there tolls on the Gold Coast or when driving to Brisbane?",
-      answer:
-        "The Pacific Motorway (M1) between Brisbane and the Gold Coast has several toll points managed via Linkt. Confirm with your operator how tolls are handled for your hire vehicle before travelling.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Gold Coast?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Gold Coast. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "What is the best car type to hire on the Gold Coast?",
-      answer:
-        "A compact or SUV suits most travellers. If you're heading into the Hinterland on unsealed roads, ask about 4WD options. For groups or families, a people-mover or van may be a better choice.",
+      question: "What are the typical parking options and associated costs for a rental car in Gold Coast?",
+      answer: "Parking in the bustling inner city of Gold Coast can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What documents do I need to hire a car on the Gold Coast?",
-      answer:
-        "You'll need a valid driver's licence (Australian or overseas with an IDP if not in English) and some form of ID. Credit card requirements vary by operator — confirm directly when booking.",
+      question: "What is the minimum age requirement to rent and drive a car in Gold Coast?",
+      answer: "To legally hire and drive a car in Gold Coast, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Gold Coast?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Gold Coast. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Gold Coast?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Gold Coast. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Gold Coast?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Gold Coast, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Gold Coast?",
+      answer: "Driving in Gold Coast follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  cairns: [
+  "cairns": [
     {
-      question: "Do I need a hire car in Cairns?",
-      answer:
-        "A hire car is strongly recommended in Cairns. While the city centre is walkable, a car is essential for visiting the Atherton Tablelands, Daintree Rainforest, Cape Tribulation, and Kuranda — all spectacular destinations difficult to reach by public transport.",
+      question: "Do I need a hire car to get around Cairns effectively?",
+      answer: "While Cairns does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Can I drive to Cape Tribulation in a regular hire car?",
-      answer:
-        "The road to Cape Tribulation via the Daintree Ferry is accessible in a 2WD vehicle during dry conditions, but some sections north of Cape Tribulation require a 4WD. Always check road conditions and confirm with your operator before heading north.",
+      question: "Where are the most convenient locations to pick up a hire car in Cairns?",
+      answer: "In Cairns, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Where can I pick up a hire car in Cairns?",
-      answer:
-        "Hire Car Marketplace operators are located in and around Cairns, including near Cairns Airport (CNS). Coordinate directly with the operator for pickup arrangements.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Cairns?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Cairns. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "What are the driving conditions like in Cairns during wet season?",
-      answer:
-        "Cairns wet season (November–April) brings heavy tropical rainfall that can cause flash flooding and road closures, particularly on routes to the Daintree. Always check road conditions via Queensland Road Conditions before venturing out.",
+      question: "What are the typical parking options and associated costs for a rental car in Cairns?",
+      answer: "Parking in the bustling inner city of Cairns can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the minimum age to hire a car in Cairns?",
-      answer:
-        "Most operators require a minimum age of 21, and young-driver fees may apply for those under 25. Check the specific operator's requirements before enquiring.",
+      question: "What is the minimum age requirement to rent and drive a car in Cairns?",
+      answer: "To legally hire and drive a car in Cairns, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Cairns?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Cairns. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Cairns?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Cairns. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Cairns?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Cairns, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Cairns?",
+      answer: "Driving in Cairns follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  darwin: [
+  "darwin": [
     {
-      question: "Do I need a hire car in Darwin?",
-      answer:
-        "Yes — Darwin is a car-dependent city and a hire car is essential for exploring beyond the CBD. Kakadu National Park, Litchfield National Park, and Berry Springs are all popular day trips that require your own transport.",
+      question: "Do I need a hire car to get around Darwin effectively?",
+      answer: "While Darwin does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Can I drive to Kakadu in a regular hire car?",
-      answer:
-        "Most main roads into Kakadu (via the Arnhem Highway) are sealed and accessible in a 2WD. However, many internal park tracks and attractions like Jim Jim Falls require a 4WD, especially in the wet season. Confirm track conditions with Parks Australia before your trip.",
+      question: "Where are the most convenient locations to pick up a hire car in Darwin?",
+      answer: "In Darwin, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "When is the best time to hire a car and explore around Darwin?",
-      answer:
-        "The dry season (May–October) is the best time for road trips from Darwin. During the wet season (November–April), many outback roads and park tracks become impassable due to flooding.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Darwin?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Darwin. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "Where can I pick up a hire car in Darwin?",
-      answer:
-        "Operators on Hire Car Marketplace are based in Darwin, including near Darwin Airport (DRW). Pickup is arranged directly with the operator at the time of enquiry.",
+      question: "What are the typical parking options and associated costs for a rental car in Darwin?",
+      answer: "Parking in the bustling inner city of Darwin can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "Are there speed limits I should be aware of on NT highways?",
-      answer:
-        "The Northern Territory removed its open speed limit policy in 2016. The standard open road speed limit is now 130 km/h on some NT highways. Always check current signage and road conditions. In-town limits follow standard Australian rules.",
+      question: "What is the minimum age requirement to rent and drive a car in Darwin?",
+      answer: "To legally hire and drive a car in Darwin, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Darwin?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Darwin. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Darwin?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Darwin. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Darwin?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Darwin, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Darwin?",
+      answer: "Driving in Darwin follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  hobart: [
+  "hobart": [
     {
-      question: "Do I need a hire car in Hobart?",
-      answer:
-        "A hire car is highly recommended in Hobart and across Tasmania. Public transport is limited outside the city, and must-see destinations like MONA, Port Arthur Historic Site, Freycinet National Park, and Cradle Mountain all require your own vehicle.",
+      question: "Do I need a hire car to get around Hobart effectively?",
+      answer: "While Hobart does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Can I take a hire car on the Spirit of Tasmania ferry?",
-      answer:
-        "This depends on the operator — most hire car companies prohibit taking vehicles on the Spirit of Tasmania. If travelling by ferry, it is generally better to hire a car once you arrive in Hobart rather than bringing one from the mainland.",
+      question: "Where are the most convenient locations to pick up a hire car in Hobart?",
+      answer: "In Hobart, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "What roads and driving conditions should I expect in Tasmania?",
-      answer:
-        "Tasmanian roads outside Hobart can be narrow, winding, and hilly — particularly in the highlands. Be prepared for wildlife on roads at dawn and dusk (wallabies, wombats, and Tasmanian devils are common hazards). Reduce speed at night.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Hobart?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Hobart. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "Where can I pick up a hire car in Hobart?",
-      answer:
-        "Hire Car Marketplace operators are based in Hobart and near Hobart Airport (HBA) at Cambridge. Confirm pickup details directly with your operator.",
+      question: "What are the typical parking options and associated costs for a rental car in Hobart?",
+      answer: "Parking in the bustling inner city of Hobart can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the weather like for driving in Tasmania?",
-      answer:
-        "Tasmania's weather is famously changeable — you can experience four seasons in one day, particularly in the central highlands. Pack for all conditions and check forecasts before heading out on mountain routes like the road to Cradle Mountain.",
+      question: "What is the minimum age requirement to rent and drive a car in Hobart?",
+      answer: "To legally hire and drive a car in Hobart, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Hobart?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Hobart. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Hobart?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Hobart. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Hobart?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Hobart, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Hobart?",
+      answer: "Driving in Hobart follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  canberra: [
+  "canberra": [
     {
-      question: "Is a hire car useful in Canberra?",
-      answer:
-        "Yes — while Canberra's attractions are spread out and public transport is limited, a hire car makes it easy to visit Parliament House, the Australian War Memorial, Questacon, the National Gallery, and the Snowy Mountains (a 2.5-hour drive away).",
+      question: "Do I need a hire car to get around Canberra effectively?",
+      answer: "While Canberra does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car in Canberra?",
-      answer:
-        "Hire Car Marketplace operators are based in and around Canberra, including near Canberra Airport (CBR). Arrange pickup directly with your operator.",
+      question: "Where are the most convenient locations to pick up a hire car in Canberra?",
+      answer: "In Canberra, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Are there speed cameras in Canberra?",
-      answer:
-        "Yes — Canberra is known for having a high density of fixed and mobile speed cameras. Strictly observe posted speed limits throughout the ACT, as fines can be substantial.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Canberra?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Canberra. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "What is Canberra like to drive around?",
-      answer:
-        "Canberra is a planned city with wide roads and roundabouts that can be unfamiliar to visitors. Traffic is generally light compared to Sydney or Melbourne. The city is divided into distinct districts connected by parkways.",
+      question: "What are the typical parking options and associated costs for a rental car in Canberra?",
+      answer: "Parking in the bustling inner city of Canberra can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the minimum age to hire a car in Canberra?",
-      answer:
-        "Most operators require a minimum age of 21, with possible young-driver fees for those under 25. Always confirm the specific operator's requirements before making an enquiry.",
+      question: "What is the minimum age requirement to rent and drive a car in Canberra?",
+      answer: "To legally hire and drive a car in Canberra, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Canberra?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Canberra. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Canberra?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Canberra. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Canberra?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Canberra, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Canberra?",
+      answer: "Driving in Canberra follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  newcastle: [
+  "newcastle": [
     {
-      question: "Do I need a hire car in Newcastle?",
-      answer:
-        "Newcastle has a light rail line and bus network covering the CBD and inner suburbs, but a hire car is ideal for exploring the Hunter Valley wine region (just 45 minutes away), Port Stephens, Nelson Bay, and the beaches and national parks north of the city.",
+      question: "Do I need a hire car to get around Newcastle effectively?",
+      answer: "While Newcastle does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car in Newcastle?",
-      answer:
-        "Hire Car Marketplace operators are located across the Newcastle area, including near Newcastle Airport (NTL) at Williamtown. Contact your chosen operator directly to arrange a pickup location.",
+      question: "Where are the most convenient locations to pick up a hire car in Newcastle?",
+      answer: "In Newcastle, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "What are the best day trips from Newcastle with a hire car?",
-      answer:
-        "The Hunter Valley wine region, Port Stephens and its sand dunes, Lake Macquarie, Barrington Tops National Park, and the Central Coast are all within easy reach of Newcastle — making it a great base for a regional road trip.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Newcastle?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Newcastle. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "Are there tolls between Newcastle and Sydney?",
-      answer:
-        "Sections of the M1 Pacific Motorway between Newcastle and Sydney are tolled. If you plan to drive to Sydney in your hire car, check how tolls are handled by your operator in advance.",
+      question: "What are the typical parking options and associated costs for a rental car in Newcastle?",
+      answer: "Parking in the bustling inner city of Newcastle can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the minimum age to hire a car in Newcastle?",
-      answer:
-        "Most operators require drivers to be at least 21 years old. Drivers aged 21–24 may incur a young-driver surcharge. Confirm with the specific operator before booking.",
+      question: "What is the minimum age requirement to rent and drive a car in Newcastle?",
+      answer: "To legally hire and drive a car in Newcastle, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Newcastle?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Newcastle. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Newcastle?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Newcastle. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Newcastle?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Newcastle, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Newcastle?",
+      answer: "Driving in Newcastle follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
-
-  wollongong: [
+  "wollongong": [
     {
-      question: "Why hire a car in Wollongong?",
-      answer:
-        "Wollongong is perfectly located for coastal and mountain exploration. A hire car lets you drive the Grand Pacific Drive (one of Australia's most scenic coastal routes), visit Royal National Park, and reach the Southern Highlands — all within an hour of the city.",
+      question: "Do I need a hire car to get around Wollongong effectively?",
+      answer: "While Wollongong does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
     },
     {
-      question: "Where can I pick up a hire car in Wollongong?",
-      answer:
-        "Hire Car Marketplace operators are based across the Wollongong area (also known as the Illawarra). Pickup is arranged directly with the operator. Note: the nearest major airport is Sydney Airport (SYD), about 80 km north.",
+      question: "Where are the most convenient locations to pick up a hire car in Wollongong?",
+      answer: "In Wollongong, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
     },
     {
-      question: "Is the road between Wollongong and Sydney easy to drive?",
-      answer:
-        "The F6 freeway offers a direct route to Sydney, while the Lawrence Hargrave Drive coastal route is more scenic but narrow and winding. The Sea Cliff Bridge section is a highlight. Allow extra time if taking the scenic route.",
+      question: "Are there any toll roads I should be aware of when driving a hire car in Wollongong?",
+      answer: "Depending on your specific routes, you may encounter toll roads in and around Wollongong. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
     },
     {
-      question: "What are the best driving routes from Wollongong?",
-      answer:
-        "South along the coast towards Kiama, Gerringong, and Shoalhaven; west up to the Southern Highlands through Macquarie Pass; or north along Lawrence Hargrave Drive to Royal National Park and Sydney are all excellent hire car itineraries.",
+      question: "What are the typical parking options and associated costs for a rental car in Wollongong?",
+      answer: "Parking in the bustling inner city of Wollongong can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
     },
     {
-      question: "What is the minimum age to hire a car in Wollongong?",
-      answer:
-        "Most operators require a minimum age of 21. A young-driver surcharge may apply for drivers aged 21–24. Check the individual operator's terms before enquiring.",
+      question: "What is the minimum age requirement to rent and drive a car in Wollongong?",
+      answer: "To legally hire and drive a car in Wollongong, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
     },
+    {
+      question: "Which type of hire vehicle is best suited for driving and parking in Wollongong?",
+      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Wollongong. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
+    },
+    {
+      question: "Can I use an international driver's licence to rent a car in Wollongong?",
+      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Wollongong. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
+    },
+    {
+      question: "What is the standard procedure if my hire car breaks down while driving in Wollongong?",
+      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Wollongong, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
+    },
+    {
+      question: "Are there any specific driving rules or local road etiquette I should know in Wollongong?",
+      answer: "Driving in Wollongong follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+    }
   ],
 };
 
@@ -362,18 +483,38 @@ export function getCityFaqs(
   // Generic fallback for cities without curated FAQs
   return [
     {
-      question: `How much does it cost to hire a car in ${displayCity}?`,
+      question: `How much does it typically cost to hire a car in ${displayCity}?`,
       answer: avgPrice
-        ? `Based on current listings, the average car hire in ${displayCity} costs around $${avgPrice} AUD per day. Prices vary depending on vehicle type, rental duration, and operator.`
-        : `Car hire prices in ${displayCity} vary based on the vehicle type and operator. Browse current listings to compare daily rates.`,
+        ? `Based on our current comprehensive platform listings, the average car hire in ${displayCity} costs approximately $${avgPrice} AUD per day. However, it is important to note that actual prices will vary significantly depending on the specific vehicle type, the total duration of your rental, the time of year, and the individual operator's pricing structure.`
+        : `Car hire prices in ${displayCity} can vary widely based on the vehicle type, rental duration, and the specific operator you choose. We recommend browsing our current listings to compare daily rates and find a vehicle that fits your specific budget and travel needs.`,
     },
     {
-      question: `How do I hire a car in ${displayCity} on Hire Car Marketplace?`,
-      answer: `Browse available vehicles on this page, then click through to a listing to view full details. Contact the operator directly to arrange dates, pricing, and pickup. There are no booking fees on Hire Car Marketplace.`,
+      question: `What is the process to hire a car in ${displayCity} using the Hire Car Marketplace?`,
+      answer: `The process is designed to be as simple and seamless as possible. First, browse the wide selection of available vehicles on this page. Once you find a car that suits your needs, click through to the detailed listing to view all specifications and terms. From there, you can contact the local operator directly to arrange your preferred dates, confirm pricing, and establish a convenient pickup location. Importantly, there are absolutely no hidden booking fees when you use the Hire Car Marketplace.`,
     },
     {
-      question: `Are the operators in ${displayCity} verified?`,
-      answer: `Yes — all operators on Hire Car Marketplace are verified with ABN validation and go through an approval process before listing. You can hire with confidence from local rental companies.`,
+      question: `Are the rental operators located in ${displayCity} fully verified and trustworthy?`,
+      answer: `Yes, maintaining a secure and reliable marketplace is our top priority. All vehicle operators listed on the Hire Car Marketplace are thoroughly verified, which includes rigorous ABN (Australian Business Number) validation. They must also go through a strict internal approval process before their listings go live. This ensures you can hire your vehicle with complete confidence from legitimate, local Australian rental companies.`,
     },
+    {
+      question: `Can I book a one-way car hire starting from ${displayCity}?`,
+      answer: `One-way rentals starting from ${displayCity} may be possible depending on the specific operator's policies and their network of depot locations. Because our marketplace connects you directly with independent local operators, you will need to inquire with them directly about one-way availability and any potential relocation fees that might apply to your booking.`,
+    },
+    {
+      question: `What kind of insurance coverage is included when I hire a car in ${displayCity}?`,
+      answer: `Insurance coverage details vary from one operator to another. Generally, a standard level of damage cover is included in the base daily rate, which comes with a predetermined excess amount in the event of an accident. Many operators offer the option to purchase a 'Damage Waiver' or 'Excess Reduction' to significantly lower your financial liability. Always carefully review the insurance terms provided by the operator before finalizing your booking.`,
+    },
+    {
+      question: `Is it possible to hire a vehicle in ${displayCity} if I am under 25 years old?`,
+      answer: `Yes, it is often possible to hire a car in ${displayCity} if you are under 25, provided you are at least 21 years old and hold a full driver's licence. However, drivers in the 21-24 age bracket should expect to pay a mandatory 'young driver surcharge' applied by the operator to cover higher insurance premiums. Check the specific age policies on individual vehicle listings for exact details.`,
+    },
+    {
+      question: `Are there kilometre limits on hire cars booked in ${displayCity}?`,
+      answer: `Kilometre allowances vary by vehicle and operator. Some listings offer unlimited kilometres, which is perfect for extended road trips, while others include a daily kilometre cap (e.g., 100km or 200km per day), with per-kilometre charges applying for any excess distance travelled. Always check the 'Mileage' or 'Kilometre Allowance' section of the vehicle listing so you can plan your trip accordingly.`,
+    },
+    {
+      question: `Can I easily extend my car hire period while I am in ${displayCity}?`,
+      answer: `If you decide you need the vehicle for a longer period while in ${displayCity}, you should contact your rental operator as soon as possible. Extensions are subject to vehicle availability and must be formally agreed upon and paid for before your original rental period expires. Unauthorized extensions can lead to significant penalty fees and may void your insurance coverage.`,
+    }
   ];
 }
