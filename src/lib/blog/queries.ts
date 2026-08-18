@@ -179,8 +179,8 @@ export async function getAllPublishedArticleSlugs(): Promise<
   }));
 }
 
-export async function getAdminBlogArticles(): Promise<
-  {
+export async function getAdminBlogArticles(page = 1, pageSize = 50): Promise<{
+  articles: {
     id: string;
     title: string;
     slug: string;
@@ -188,16 +188,26 @@ export async function getAdminBlogArticles(): Promise<
     source: string;
     published_at: string | null;
     created_at: string;
-  }[]
-> {
+  }[];
+  total: number;
+  totalPages: number;
+}> {
   const supabase = createAdminClient();
-  const { data } = await supabase
-    .from("blog_articles")
-    .select("id, title, slug, status, source, published_at, created_at")
-    .order("created_at", { ascending: false })
-    .limit(50);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-  return data ?? [];
+  const { data, count } = await supabase
+    .from("blog_articles")
+    .select("id, title, slug, status, source, published_at, created_at", { count: "exact" })
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  const total = count ?? 0;
+  return {
+    articles: data ?? [],
+    total,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  };
 }
 
 export type AdminBlogArticleDetail = {

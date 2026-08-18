@@ -13,13 +13,14 @@ import { CreateBlogButton } from "./create-blog-button";
 export const metadata = { title: "Blog | Admin" };
 
 interface AdminBlogPageProps {
-  searchParams: Promise<{ edit?: string }>;
+  searchParams: Promise<{ edit?: string; page?: string }>;
 }
 
 export default async function AdminBlogPage({ searchParams }: AdminBlogPageProps) {
   await requireAdminRole(["owner", "admin"]);
-  const { edit } = await searchParams;
-  const articles = await getAdminBlogArticles();
+  const { edit, page } = await searchParams;
+  const currentPage = page ? parseInt(page, 10) : 1;
+  const { articles, totalPages } = await getAdminBlogArticles(currentPage);
 
   if (edit) {
     const [article, categories] = await Promise.all([
@@ -125,6 +126,40 @@ export default async function AdminBlogPage({ searchParams }: AdminBlogPageProps
           </tbody>
         </table>
       </div>
+      
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4">
+          <div className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex items-center gap-2">
+            {currentPage > 1 ? (
+              <Link
+                href={`/admin/blog?page=${currentPage - 1}`}
+                className="rounded-md border border-input bg-background px-3 py-1 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+              >
+                Previous
+              </Link>
+            ) : (
+              <span className="rounded-md border border-input bg-muted px-3 py-1 text-sm font-medium text-muted-foreground cursor-not-allowed">
+                Previous
+              </span>
+            )}
+            {currentPage < totalPages ? (
+              <Link
+                href={`/admin/blog?page=${currentPage + 1}`}
+                className="rounded-md border border-input bg-background px-3 py-1 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+              >
+                Next
+              </Link>
+            ) : (
+              <span className="rounded-md border border-input bg-muted px-3 py-1 text-sm font-medium text-muted-foreground cursor-not-allowed">
+                Next
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
