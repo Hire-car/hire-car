@@ -1,6 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag as nextRevalidateTag } from "next/cache";
+const revalidateTag = (tag: string) => (nextRevalidateTag as any)(tag);
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/security/auth";
 import {
@@ -246,6 +248,8 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
     // Sync completeness status based on details and images
     await syncVehicleCompletenessStatus(vehicle.id, supabase);
 
+    revalidateTag(`vendor-vehicles-${organizationId}`);
+    revalidateTag(`vendor-metrics-${organizationId}`);
     revalidatePath("/vendor/vehicles");
     revalidatePath("/vendor/dashboard");
     await invalidatePseoForVehicle(supabase, vehicle.id);
@@ -490,6 +494,8 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
   // Sync completeness status based on details and images
   await syncVehicleCompletenessStatus(vehicleId, supabase);
 
+  revalidateTag(`vendor-vehicles-${organizationId}`);
+  revalidateTag(`vendor-metrics-${organizationId}`);
   revalidatePath("/vendor/vehicles");
   revalidatePath(`/vendor/vehicles/${vehicleId}`);
   await invalidatePseoForVehicle(supabase, vehicleId);
@@ -576,6 +582,8 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
     metadata: { organization_id: organizationId },
   });
 
+  revalidateTag(`vendor-vehicles-${organizationId}`);
+  revalidateTag(`vendor-metrics-${organizationId}`);
   revalidatePath("/vendor/vehicles");
   revalidatePath("/vendor/dashboard");
 
@@ -599,23 +607,29 @@ export async function getOrganizationVehicles(organizationId: string, page: numb
   const user = await requireUser();
   await ensureUserCanManageOrganization(user.id, organizationId);
 
-  const supabase = createAdminClient();
-  
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize - 1;
+  return unstable_cache(
+    async (orgId: string, p: number, pSize: number) => {
+      const supabase = createAdminClient();
+      
+      const start = (p - 1) * pSize;
+      const end = start + pSize - 1;
 
-  const { data: vehicles, error, count } = await supabase
-    .from("vehicles")
-    .select("*, branches(name, city, state)", { count: "exact" })
-    .eq("organization_id", organizationId)
-    .order("created_at", { ascending: false })
-    .range(start, end);
+      const { data: vehicles, error, count } = await supabase
+        .from("vehicles")
+        .select("*, branches(name, city, state)", { count: "exact" })
+        .eq("organization_id", orgId)
+        .order("created_at", { ascending: false })
+        .range(start, end);
 
-  if (error) {
-    throw new Error(`Failed to fetch vehicles: ${error.message}`);
-  }
+      if (error) {
+        throw new Error(`Failed to fetch vehicles: ${error.message}`);
+      }
 
-  return { vehicles: vehicles ?? [], totalCount: count ?? 0, page, pageSize };
+      return { vehicles: vehicles ?? [], totalCount: count ?? 0, page: p, pageSize: pSize };
+    },
+    [`vendor-vehicles-${organizationId}-${page}-${pageSize}`],
+    { tags: [`vendor-vehicles-${organizationId}`], revalidate: 3600 }
+  )(organizationId, page, pageSize);
 }
 
 export async function getVehicleImageCounts(vehicleIds: string[]): Promise<Record<string, number>> {

@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type VendorContext = {
@@ -101,11 +101,19 @@ export async function enforceVehicleLimit(organizationId: string): Promise<void>
 }
 
 export const getVendorContext = cache(async function getVendorContext(userId: string): Promise<VendorContext> {
-  const supabase = createAdminClient();
+  return unstable_cache(
+    async (id: string) => {
+      const supabase = createAdminClient();
 
-  const { data: memberships, error } = await supabase
-    .from("organization_members")
-    .select("organization_id, role")
+      const { data, error } = await supabase
+        .from("organization_members")
+    .select(`
+      role,
+      organizations (
+        id, name, slug, status, abn,
+        branches (id, name, city, state, address, status, phone, whatsapp)
+      )
+    `)
     .eq("user_id", userId);
 
   if (error) {
@@ -116,56 +124,42 @@ export const getVendorContext = cache(async function getVendorContext(userId: st
     };
   }
 
-  const organizationIds = memberships?.map((item) => item.organization_id) ?? [];
-
-  if (organizationIds.length === 0) {
+  if (!data || data.length === 0) {
     return { organizations: [] };
   }
 
-  const [orgResult, branchResult] = await Promise.all([
-    supabase
-      .from("organizations")
-      .select("id, name, slug, status, abn")
-      .in("id", organizationIds)
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("branches")
-      .select("id, organization_id, name, city, state, address, status, phone, whatsapp")
-      .in("organization_id", organizationIds)
-      .order("created_at", { ascending: true }),
-  ]);
+  // Filter out any members that don't have an associated organization (shouldn't happen, but safe)
+  // and map to the required structure
+  const organizations = data
+    .filter(row => row.organizations != null)
+    .map(row => {
+      // Cast because Supabase nested queries typing can be strict
+      const org = row.organizations as any;
+      return {
+        id: org.id,
+        name: org.name,
+        slug: org.slug,
+        status: org.status,
+        abn: org.abn,
+        // Ensure branches is an array
+        branches: Array.isArray(org.branches) ? org.branches.map((b: any) => ({
+          id: b.id,
+          name: b.name,
+          city: b.city,
+          state: b.state,
+          address: b.address,
+          status: b.status,
+          phone: b.phone,
+          whatsapp: b.whatsapp,
+        })) : [],
+      };
+    });
 
-  if (orgResult.error || branchResult.error) {
-    console.error("Organizations fetch error:", orgResult.error);
-    console.error("Branches fetch error:", branchResult.error);
-    return {
-      organizations: [],
-      setupError: "Failed to load vendor data. Please try again or contact support."
-    };
-  }
-
-  const organizations = orgResult.data;
-  const branches = branchResult.data;
-
-  return {
-    organizations:
-      organizations?.map((organization) => ({
-        ...organization,
-        branches:
-          (branches || [])
-            .filter((branch) => branch.organization_id === organization.id)
-            .map((branch) => ({
-              id: branch.id,
-              name: branch.name,
-              city: branch.city,
-              state: branch.state,
-              address: branch.address,
-              status: branch.status,
-              phone: branch.phone,
-              whatsapp: branch.whatsapp,
-            })),
-      })) ?? [],
-  };
+    return { organizations };
+  },
+  [`vendor-context-${userId}`],
+  { tags: [`vendor-context-${userId}`], revalidate: 3600 }
+  )(userId);
 });
 
 export async function ensureUserCanManageOrganization(
@@ -339,18 +333,20 @@ export async function getDashboardMetrics(
 ): Promise<DashboardMetrics> {
   await ensureUserCanManageOrganization(userId, organizationId);
 
-  const supabase = createAdminClient();
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  return unstable_cache(
+    async (orgId: string) => {
+      const supabase = createAdminClient();
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [
-    metricsRes,
-    limitInfo,
-    branchRes,
-  ] = await Promise.all([
-    supabase.rpc("get_vendor_dashboard_metrics", { org_id: organizationId }).single(),
-    getVehicleLimitInfo(organizationId),
-    supabase.from("branches").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
-  ]);
+      const [
+        metricsRes,
+        limitInfo,
+        branchRes,
+      ] = await Promise.all([
+        supabase.rpc("get_vendor_dashboard_metrics", { org_id: orgId }).single(),
+        getVehicleLimitInfo(orgId),
+        supabase.from("branches").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
+      ]);
 
   if (metricsRes.error) throw new Error(`Failed to fetch metrics: ${metricsRes.error.message}`);
   if (branchRes.error) throw new Error(`Failed to fetch branches: ${branchRes.error.message}`);
@@ -380,11 +376,15 @@ export async function getDashboardMetrics(
       ? `${limitInfo.currentCount} / ${limitInfo.limit}`
       : `${limitInfo.currentCount} / ∞`,
     branchCount: branchCount ?? 0,
-    clickStats: {
-      phone: metrics.phone_clicks_30d,
-      whatsapp: metrics.whatsapp_clicks_30d,
-      total: metrics.total_clicks_30d,
-    },
-    totalViews: metrics.total_views,
-  };
+      clickStats: {
+        phone: metrics.phone_clicks_30d,
+        whatsapp: metrics.whatsapp_clicks_30d,
+        total: metrics.total_clicks_30d,
+      },
+      totalViews: metrics.total_views,
+    };
+  },
+  [`vendor-metrics-${organizationId}`],
+  { tags: [`vendor-metrics-${organizationId}`], revalidate: 3600 }
+  )(organizationId);
 }

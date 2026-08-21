@@ -260,7 +260,7 @@ function DashboardSkeleton() {
   );
 }
 
-export default async function VendorDashboardPage() {
+async function DashboardWrapper() {
   const user = await requireUser();
   const context = await getVendorContext(user.id);
 
@@ -282,9 +282,13 @@ export default async function VendorDashboardPage() {
 
   const organization = context.organizations[0];
 
+  return <DashboardContent organization={organization} userId={user.id} />;
+}
+
+export default function VendorDashboardPage() {
   return (
     <Suspense fallback={<DashboardSkeleton />}>
-      <DashboardContent organization={organization} userId={user.id} />
+      <DashboardWrapper />
     </Suspense>
   );
 }

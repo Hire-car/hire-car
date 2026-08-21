@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag as nextRevalidateTag } from "next/cache";
+const revalidateTag = (tag: string) => (nextRevalidateTag as any)(tag);
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getVendorContext, ensureUserCanManageOrganization } from "@/lib/data/vendor";
 import { getBranchLimit, getOrganizationPlanCode } from "@/lib/plan-features";
@@ -72,6 +73,8 @@ export async function createBranch(prevState: any, formData: FormData) {
       metadata: { name: payload.name, city: payload.city },
     });
 
+    revalidateTag(`vendor-context-${user.id}`);
+    revalidateTag(`vendor-metrics-${payload.organizationId}`);
     revalidatePath("/vendor/branches");
     await invalidatePseo({ city: payload.city });
     
@@ -137,6 +140,8 @@ export async function updateBranch(prevState: any, formData: FormData) {
       metadata: { branch_id: branchId, name: payload.name, city: payload.city },
     });
 
+    revalidateTag(`vendor-context-${user.id}`);
+    revalidateTag(`vendor-metrics-${organizationId}`);
     revalidatePath("/vendor/branches");
     await invalidatePseo({ city: payload.city });
     
@@ -174,6 +179,8 @@ export async function deleteBranch(branchId: string, organizationId: string) {
       metadata: { branch_id: branchId },
     });
 
+    revalidateTag(`vendor-context-${user.id}`);
+    revalidateTag(`vendor-metrics-${organizationId}`);
     revalidatePath("/vendor/branches");
     return { success: true };
   } catch (err) {
@@ -358,6 +365,9 @@ export async function transferBranch(formData: FormData) {
       }),
     ]);
 
+    revalidateTag(`vendor-context-${user.id}`);
+    revalidateTag(`vendor-metrics-${organizationId}`);
+    revalidateTag(`vendor-metrics-${newOrganization.id}`);
     revalidatePath("/vendor/branches");
     
     return { success: true };

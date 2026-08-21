@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 // import removed
+import { Suspense } from "react";
 import { getCurrentVendorContext } from "./actions";
 import { BranchForm } from "./branch-form";
 import { BranchCard } from "./branch-card";
 import { GitBranch, MapPin, Phone, Plus, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 
-export default async function VendorBranchesPage() {
+async function BranchesContent() {
   const context = await getCurrentVendorContext();
   
   if (context.organizations.length === 0) {
@@ -16,14 +17,7 @@ export default async function VendorBranchesPage() {
   const firstOrganization = context.organizations[0];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-slate-900">Branches</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Manage your pickup locations. Vehicles belong to branches so public visibility and lead routing remain precise.
-        </p>
-      </div>
+    <>
 
       {context.setupError && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-5 flex items-start gap-3">
@@ -96,6 +90,33 @@ export default async function VendorBranchesPage() {
           <BranchForm organizationId={firstOrganization.id} />
         </div>
       )}
+    </>
+  );
+}
+
+function BranchesSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse mt-6">
+      <div className="h-[300px] rounded-2xl bg-slate-200"></div>
+      <div className="h-[200px] rounded-2xl bg-slate-200"></div>
+    </div>
+  );
+}
+
+export default function VendorBranchesPage() {
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h1 className="text-2xl font-bold text-slate-900">Branches</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Manage your pickup locations. Vehicles belong to branches so public visibility and lead routing remain precise.
+        </p>
+      </div>
+
+      <Suspense fallback={<BranchesSkeleton />}>
+        <BranchesContent />
+      </Suspense>
     </div>
   );
 }

@@ -11,6 +11,8 @@ import { OrgSwitcher } from "@/components/vendor/org-switcher";
 import { organizationHasFeature } from "@/lib/plan-features";
 import { Car, MapPin, Tag, Fuel, Settings2, Users, AlertCircle, Edit2, Eye } from "lucide-react";
 
+import { Suspense } from "react";
+
 export const metadata = {
   title: "Vehicles",
 };
@@ -19,7 +21,7 @@ interface VehiclesPageProps {
   searchParams: Promise<{ org?: string; edit?: string; page?: string }>;
 }
 
-export default async function VendorVehiclesPage({ searchParams }: VehiclesPageProps) {
+async function VehiclesContent({ searchParams }: VehiclesPageProps) {
   const user = await requireUser();
   const params = await searchParams;
   const context = await getVendorContext(user.id);
@@ -259,5 +261,22 @@ export default async function VendorVehiclesPage({ searchParams }: VehiclesPageP
         )}
       </div>
     </div>
+  );
+}
+
+function VehiclesSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse mt-6">
+      <div className="h-[200px] rounded-2xl bg-slate-200"></div>
+      <div className="h-[400px] rounded-2xl bg-slate-200"></div>
+    </div>
+  );
+}
+
+export default function VendorVehiclesPage(props: VehiclesPageProps) {
+  return (
+    <Suspense fallback={<VehiclesSkeleton />}>
+      <VehiclesContent searchParams={props.searchParams} />
+    </Suspense>
   );
 }
