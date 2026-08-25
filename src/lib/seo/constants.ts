@@ -1,10 +1,10 @@
 export const SEO_BASE_URL = "https://www.hirecarmarketplace.com.au";
 
 export const THIN_PAGE_THRESHOLDS = {
-  city: 5,
-  cityCategory: 3,
-  brand: 3,
-  categoryNational: 10,
+  city: 0,
+  cityCategory: 0,
+  brand: 0,
+  categoryNational: 0,
 } as const;
 
 /** Optional curated overrides for known cities (slug → meta). */
