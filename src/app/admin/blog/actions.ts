@@ -200,7 +200,8 @@ export async function uploadBlogImage(formData: FormData): Promise<{ success: tr
   const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
   const path = `${slug}/${timestamp}-${sanitizedFilename}`;
 
-  const { error } = await supabase.storage.from("blog-images").upload(path, file, {
+  const buffer = await file.arrayBuffer();
+  const { error } = await supabase.storage.from("blog-images").upload(path, buffer, {
     contentType: file.type,
     cacheControl: "31536000",
   });

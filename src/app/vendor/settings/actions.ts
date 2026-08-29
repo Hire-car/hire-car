@@ -207,9 +207,10 @@ export async function uploadVendorDocument(formData: FormData) {
   const ext = file.name.split(".").pop() ?? "pdf";
   const path = `${organizationId}/${documentType}-${Date.now()}.${ext}`;
 
+  const buffer = await file.arrayBuffer();
   const { error: uploadError } = await supabase.storage
     .from("vendor-documents")
-    .upload(path, file, { upsert: false });
+    .upload(path, buffer, { upsert: false, contentType: file.type });
 
   if (uploadError) {
     throw new Error(uploadError.message);

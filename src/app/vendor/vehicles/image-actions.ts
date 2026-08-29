@@ -72,9 +72,10 @@ export async function uploadTempVehicleImage(
   const storagePath = `${organizationId}/temp_${timestamp}-${sanitizedFilename}`;
 
   // Upload to Supabase Storage
+  const buffer = await file.arrayBuffer();
   const { error: uploadError } = await supabase.storage
     .from(bucketName)
-    .upload(storagePath, file, {
+    .upload(storagePath, buffer, {
       contentType: file.type,
       cacheControl: "3600",
     });
