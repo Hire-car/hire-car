@@ -27,8 +27,11 @@ export async function evaluateVehicleListing(listingData: {
 
   const ai = new GoogleGenAI({ apiKey });
 
+  const currentYear = new Date().getFullYear();
   const prompt = `You are a strict Trust and Safety Moderator for a premium Australian Car Hire Marketplace.
 Analyze the following vehicle listing submission for potential fraud, spam, unrealistic pricing, or policy violations.
+
+The current year is ${currentYear}. Vehicles up to model year ${currentYear + 1} are completely valid and normal. Do not reject listings simply because the car is new (e.g. 2025 or 2026 models). Minor discrepancies between the title and the year field are acceptable and should not result in rejection unless they are completely absurd.
 
 Listing Data:
 ${JSON.stringify(listingData, null, 2)}
@@ -36,7 +39,7 @@ ${JSON.stringify(listingData, null, 2)}
 Criteria for rejection (flagSeverity: high or critical):
 - Unrealistic price (e.g., $1/day or $10,000/day for a normal car).
 - Spam, gibberish, or profanity in the title or notes.
-- Physically impossible combinations (e.g., a 2025 Toyota Corolla listed as a 20-seat Bus).
+- Physically impossible combinations (e.g., a ${currentYear + 10} Toyota Corolla listed as a 20-seat Bus).
 - Suspicious contact details hidden in the notes (bypassing platform messaging).
 
 If the listing appears normal, realistic, and safe, approve it.
