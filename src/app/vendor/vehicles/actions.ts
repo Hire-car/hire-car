@@ -238,12 +238,26 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
             sort_order: index,
             approved: orgData.status === "approved",
           }));
-          await supabase.from("vehicle_images").insert(newImages);
+          const { error: imgError } = await supabase.from("vehicle_images").insert(newImages);
+          if (imgError) {
+            console.error("Failed to insert vehicle images:", imgError);
+          }
         }
       } catch (err) {
-        console.warn("Failed to parse tempImagePaths", err);
+        console.error("Failed to parse tempImagePaths:", err);
       }
     }
+
+    // Create search index job (fire and forget - don't fail on this)
+    // Done at the very end to ensure all relations (images, features) are committed.
+    await supabase.from("search_index_jobs").insert({
+      vehicle_id: vehicle.id,
+      operation: "upsert",
+      status: "pending",
+    }).then(async ({ error: e }) => {
+      if (e) console.warn("search_index_jobs insert failed:", e.message);
+      else await processSearchIndexJobs();
+    });
 
     // Sync completeness status based on details and images
     await syncVehicleCompletenessStatus(vehicle.id, supabase);
@@ -408,16 +422,6 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
       return { success: false, error: `Failed to update vehicle: ${error.message}` };
     }
 
-    // Create search index job
-    await supabase.from("search_index_jobs").insert({
-      vehicle_id: vehicleId,
-      operation: (updateData.status || existingVehicle.status) === "approved" ? "upsert" : "delete",
-      status: "pending",
-    }).then(async ({ error: e }) => {
-      if (e) console.warn("search_index_jobs insert failed:", e.message);
-      else await processSearchIndexJobs();
-    });
-
     // Create fraud flag for admin attention
     if (aiRejectionReason) {
       await supabase.from("fraud_flags").insert({
@@ -487,8 +491,20 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
         await supabase.from("vehicle_images").insert(newImages);
       }
     } catch (err) {
-      console.warn("Failed to parse tempImagePaths", err);
+      console.error("Failed to parse tempImagePaths:", err);
     }
+  }
+
+  // Create search index job after everything else is saved
+  if (Object.keys(updateData).length > 0 || data.features !== undefined || tempImagePathsJson) {
+    await supabase.from("search_index_jobs").insert({
+      vehicle_id: vehicleId,
+      operation: (updateData.status || existingVehicle.status) === "approved" ? "upsert" : "delete",
+      status: "pending",
+    }).then(async ({ error: e }) => {
+      if (e) console.warn("search_index_jobs insert failed:", e.message);
+      else await processSearchIndexJobs();
+    });
   }
 
   // Sync completeness status based on details and images
