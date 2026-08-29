@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { MetricCard } from "@/components/metric-card";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext, getDashboardMetrics } from "@/lib/data/vendor";
@@ -280,7 +281,9 @@ async function DashboardWrapper() {
     redirect("/vendor/upgrade");
   }
 
-  const organization = context.organizations[0];
+  const cookieStore = await cookies();
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value;
+  const organization = context.organizations.find((o) => o.id === selectedOrgId) || context.organizations[0];
 
   return <DashboardContent organization={organization} userId={user.id} />;
 }

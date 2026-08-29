@@ -228,7 +228,7 @@ export async function transferBranch(formData: FormData) {
     // 1. Check if the branch actually belongs to the user's organization
     const { data: branchCheck, error: branchCheckError } = await supabase
       .from("branches")
-      .select("id, name, organizations!inner(name)")
+      .select("id, name, city, organizations!inner(name)")
       .eq("id", payload.branchId)
       .eq("organization_id", organizationId)
       .single();
@@ -301,6 +301,7 @@ export async function transferBranch(formData: FormData) {
       .from("branches")
       .update({ 
         organization_id: newOrganization.id,
+        status: "pending",
         updated_at: new Date().toISOString()
       })
       .eq("id", payload.branchId);
@@ -370,6 +371,10 @@ export async function transferBranch(formData: FormData) {
     revalidateTag(`vendor-metrics-${newOrganization.id}`);
     revalidatePath("/vendor/branches");
     
+    if (branchCheck.city) {
+      await invalidatePseo({ city: branchCheck.city });
+    }
+
     return { success: true };
   } catch (err: any) {
     console.error("Transfer branch error:", err);

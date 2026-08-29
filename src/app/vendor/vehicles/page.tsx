@@ -7,7 +7,7 @@ import { getVehicleImages } from "./image-actions";
 import VehicleForm from "./vehicle-form";
 import { DeleteVehicleButton } from "./delete-button";
 import { BulkUpload } from "@/components/vendor/bulk-upload";
-import { OrgSwitcher } from "@/components/vendor/org-switcher";
+import { cookies } from "next/headers";
 import { organizationHasFeature } from "@/lib/plan-features";
 import { Car, MapPin, Tag, Fuel, Settings2, Users, AlertCircle, Edit2, Eye } from "lucide-react";
 
@@ -18,7 +18,7 @@ export const metadata = {
 };
 
 interface VehiclesPageProps {
-  searchParams: Promise<{ org?: string; edit?: string; page?: string }>;
+  searchParams: Promise<{ edit?: string; page?: string }>;
 }
 
 async function VehiclesContent({ searchParams }: VehiclesPageProps) {
@@ -39,11 +39,12 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
     redirect("/vendor/upgrade");
   }
 
-  const selectedOrgId = params.org || context.organizations[0]?.id;
+  const cookieStore = await cookies();
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value || context.organizations[0]?.id;
   const organization = context.organizations.find((o) => o.id === selectedOrgId);
 
   if (!organization) {
-    redirect("/vendor/vehicles?org=" + context.organizations[0]?.id);
+    redirect("/vendor/vehicles");
   }
 
   const page = parseInt(params.page || "1", 10) || 1;
@@ -80,11 +81,6 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
               Manage your fleet listings for <span className="font-medium text-slate-700">{organization.name}</span>.
             </p>
           </div>
-          <OrgSwitcher
-            organizations={context.organizations}
-            selectedOrgId={selectedOrgId}
-            basePath="/vendor/vehicles"
-          />
         </div>
 
         {/* Plan Usage */}
@@ -220,7 +216,7 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
                       <Eye className="h-4 w-4" />
                     </Link>
                     <Link
-                      href={`/vendor/vehicles?org=${selectedOrgId}&edit=${vehicle.id}`}
+                      href={`/vendor/vehicles?edit=${vehicle.id}`}
                       className="flex items-center justify-center h-9 w-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition-all"
                       title="Edit"
                     >
@@ -242,7 +238,7 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
             <div className="flex gap-2">
               {page > 1 && (
                 <Link
-                  href={`/vendor/vehicles?org=${selectedOrgId}&page=${page - 1}`}
+                  href={`/vendor/vehicles?page=${page - 1}`}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm transition-colors"
                 >
                   Previous
@@ -250,7 +246,7 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
               )}
               {page * pageSize < totalCount && (
                 <Link
-                  href={`/vendor/vehicles?org=${selectedOrgId}&page=${page + 1}`}
+                  href={`/vendor/vehicles?page=${page + 1}`}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm transition-colors"
                 >
                   Next

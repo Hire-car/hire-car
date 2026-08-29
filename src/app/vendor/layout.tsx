@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { requireUser } from "@/lib/security/auth";
+import { cookies } from "next/headers";
 
 import { getVendorContext } from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -22,7 +23,15 @@ export default async function VendorLayout({ children }: { children: ReactNode }
     return <div className="min-h-screen bg-slate-50">{children}</div>;
   }
 
-  const organizationId = context.organizations[0].id;
+  // Get active org from cookie
+  const cookieStore = await cookies();
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value;
+  
+  let activeOrg = context.organizations.find(o => o.id === selectedOrgId);
+  if (!activeOrg) {
+    activeOrg = context.organizations[0];
+  }
+  const organizationId = activeOrg.id;
   
   // OPTIMIZATION: Do not block the initial layout render with notifications query
   const supabase = createAdminClient();
@@ -44,6 +53,7 @@ export default async function VendorLayout({ children }: { children: ReactNode }
       // A better approach would be to fetch this inside a Client Component or use SWR.
       // For now, to unblock TTFB, we default to empty array and let the user click to load if needed,
       // or we can just fetch it before if it's fast. Let's just fetch it but use Promise.all with the others.
+      organizations={context.organizations.map(o => ({ id: o.id, name: o.name }))}
     >
       {children}
     </DashboardShell>

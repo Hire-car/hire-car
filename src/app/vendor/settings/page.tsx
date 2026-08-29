@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext } from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -36,7 +37,9 @@ export default async function VendorSettingsPage() {
     redirect("/vendor/upgrade");
   }
 
-  const organization = context.organizations[0];
+  const cookieStore = await cookies();
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value;
+  const organization = context.organizations.find((o) => o.id === selectedOrgId) || context.organizations[0];
   const supabase = createAdminClient();
 
   // Fetch full org details

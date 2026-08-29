@@ -377,7 +377,7 @@ export async function transferBranchAction(formData: FormData) {
     // Get branch details for email
     const { data: branchCheck, error: branchCheckError } = await supabase
       .from("branches")
-      .select("id, name, organizations!inner(name)")
+      .select("id, name, city, organizations!inner(name, billing_email)")
       .eq("id", payload.branchId)
       .single();
 
@@ -476,7 +476,9 @@ export async function transferBranchAction(formData: FormData) {
         operation: "upsert",
         status: "pending"
       }));
-      await supabase.from("search_index_jobs").insert(jobs);
+      await supabase.from("search_index_jobs").insert(jobs).then(async () => {
+        await processSearchIndexJobs();
+      });
     }
 
     // Log audit event
@@ -495,11 +497,14 @@ export async function transferBranchAction(formData: FormData) {
 
     // Send Email Notifications
     const branchName = branchCheck.name;
-    const vendorName = (branchCheck.organizations as unknown as { name: string }).name;
+    const branchCity = branchCheck.city;
+    const orgData = (branchCheck.organizations as unknown as { name: string, billing_email: string });
+    const vendorName = orgData.name;
+    const vendorEmail = orgData.billing_email;
 
     await Promise.allSettled([
       sendBranchTransferInitiatedEmail({
-        to: user.email!,
+        to: vendorEmail,
         vendorName: vendorName,
         branchName: branchName,
         newOwnerEmail: payload.email,
@@ -511,6 +516,10 @@ export async function transferBranchAction(formData: FormData) {
         branchName: branchName,
       }),
     ]);
+
+    if (branchCity) {
+      await invalidatePseo({ city: branchCity });
+    }
 
     revalidatePath("/admin/branches");
     revalidatePath("/admin/vendors");

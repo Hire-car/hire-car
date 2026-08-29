@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { syncCheckoutSessionForOrganization } from "@/lib/billing/sync-checkout-session";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext } from "@/lib/data/vendor";
@@ -76,7 +77,9 @@ export default async function VendorBillingPage(props: {
     redirect("/vendor/upgrade");
   }
 
-  const organization = context.organizations[0];
+  const cookieStore = await cookies();
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value;
+  const organization = context.organizations.find((o) => o.id === selectedOrgId) || context.organizations[0];
 
   if (searchParams.checkout === "success" && searchParams.synced !== "1") {
     try {

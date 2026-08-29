@@ -28,6 +28,7 @@ import {
   Shield,
   UserCog,
   FileText,
+  Building2,
 } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 import { BrandLogo } from "@/components/brand-logo";
@@ -252,6 +253,69 @@ function NotificationDropdown({
   );
 }
 
+function OrgSwitcher({ 
+  organizations, 
+  currentOrgId 
+}: { 
+  organizations: { id: string; name: string }[]; 
+  currentOrgId: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const currentOrg = organizations.find(o => o.id === currentOrgId) || organizations[0];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (id: string) => {
+    document.cookie = `vendor_org_id=${id}; path=/; max-age=31536000`;
+    window.location.reload();
+  };
+
+  if (organizations.length <= 1) return null;
+
+  return (
+    <div className="relative hidden sm:block" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+      >
+        <Building2 className="h-4 w-4 text-slate-500" />
+        <span className="text-sm font-semibold text-slate-700 max-w-[120px] truncate">{currentOrg?.name}</span>
+        <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white border border-slate-200 shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="p-2">
+            <p className="px-2 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Switch Agency</p>
+            {organizations.map(org => (
+              <button
+                key={org.id}
+                onClick={() => handleSelect(org.id)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  org.id === currentOrgId 
+                    ? "bg-orange-50 text-orange-700" 
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                {org.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DashboardShell({
   children,
   mode,
@@ -260,6 +324,7 @@ export function DashboardShell({
   userEmail,
   orgId,
   initialNotifications,
+  organizations = [],
 }: {
   children: ReactNode;
   mode: "vendor" | "admin";
@@ -268,6 +333,7 @@ export function DashboardShell({
   userEmail?: string;
   orgId?: string;
   initialNotifications?: DashboardNotification[];
+  organizations?: { id: string; name: string }[];
 }) {
   const pathname = usePathname();
   let baseLinks = mode === "vendor" ? vendorLinks : adminLinks;
@@ -441,6 +507,10 @@ export function DashboardShell({
             </Link>
             
             <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+            
+            {mode === "vendor" && orgId && (
+              <OrgSwitcher organizations={organizations} currentOrgId={orgId} />
+            )}
             
             <NotificationDropdown mode={mode} initialNotifications={initialNotifications} orgId={orgId} />
             

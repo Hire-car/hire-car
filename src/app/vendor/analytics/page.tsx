@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { MetricCard } from "@/components/metric-card";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext, getDashboardMetrics } from "@/lib/data/vendor";
@@ -27,7 +28,9 @@ export default async function VendorAnalyticsPage() {
     redirect("/vendor/upgrade");
   }
 
-  const organization = context.organizations[0];
+  const cookieStore = await cookies();
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value;
+  const organization = context.organizations.find((o) => o.id === selectedOrgId) || context.organizations[0];
   const hasAnalytics = await organizationHasFeature(organization.id, "contactAnalytics");
 
   if (!hasAnalytics) {

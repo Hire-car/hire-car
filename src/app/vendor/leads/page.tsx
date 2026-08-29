@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/security/auth";
 import { getVendorContext, getOrganizationLeads, getLeadStats } from "@/lib/data/vendor";
 import { updateLeadStatus } from "./actions";
 import { RealtimeLeadsListener } from "@/components/realtime-leads-listener";
-import { OrgSwitcher } from "@/components/vendor/org-switcher";
+import { cookies } from "next/headers";
 import { organizationHasFeature } from "@/lib/plan-features";
 import { MessageSquare, Mail, Phone, MapPin, Calendar, ChevronRight, Inbox } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -14,7 +14,7 @@ export const metadata = {
 };
 
 interface LeadsPageProps {
-  searchParams: Promise<{ org?: string; status?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; page?: string }>;
 }
 
 const statusConfig = {
@@ -42,11 +42,12 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
     redirect("/vendor/upgrade");
   }
 
-  const selectedOrgId = params.org || context.organizations[0]?.id;
+  const cookieStore = await cookies();
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value || context.organizations[0]?.id;
   const organization = context.organizations.find((o) => o.id === selectedOrgId);
 
   if (!organization) {
-    redirect("/vendor/leads?org=" + context.organizations[0]?.id);
+    redirect("/vendor/leads");
   }
 
   const statusFilter = params.status as "new" | "contacted" | "converted" | "lost" | undefined;
@@ -85,11 +86,6 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
               Customer enquiries for <span className="font-medium text-slate-700">{organization.name}</span>
             </p>
           </div>
-          <OrgSwitcher
-            organizations={context.organizations}
-            selectedOrgId={selectedOrgId}
-            basePath="/vendor/leads"
-          />
         </div>
       </div>
 
@@ -120,7 +116,7 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
         ].map(({ label, value }) => (
           <Link
             key={label}
-            href={value ? `/vendor/leads?org=${selectedOrgId}&status=${value}` : `/vendor/leads?org=${selectedOrgId}`}
+            href={value ? `/vendor/leads?status=${value}` : `/vendor/leads`}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
               statusFilter === value
                 ? "bg-slate-950 text-white shadow-sm"
@@ -295,7 +291,7 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
         <div className="flex items-center justify-center gap-2">
           {page > 1 && (
             <Link
-              href={`/vendor/leads?org=${selectedOrgId}${statusFilter ? `&status=${statusFilter}` : ""}&page=${page - 1}`}
+              href={`/vendor/leads?${statusFilter ? `status=${statusFilter}&` : ""}page=${page - 1}`}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
             >
               ← Previous
@@ -306,7 +302,7 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
           </span>
           {page < totalPages && (
             <Link
-              href={`/vendor/leads?org=${selectedOrgId}${statusFilter ? `&status=${statusFilter}` : ""}&page=${page + 1}`}
+              href={`/vendor/leads?${statusFilter ? `status=${statusFilter}&` : ""}page=${page + 1}`}
               className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
             >
               Next →
