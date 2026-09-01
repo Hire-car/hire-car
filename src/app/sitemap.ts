@@ -38,9 +38,9 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
     const staticDate = new Date("2025-06-01T00:00:00Z");
 
     const staticRoutes: MetadataRoute.Sitemap = [
-      // Core pages — highest priority. `/search` is intentionally excluded: it
-      // is noindexed, so listing it in the sitemap is a conflicting signal.
+      // Core pages — highest priority.
       { url: base, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
+      { url: `${base}/search`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
       { url: `${base}/locations`, lastModified: new Date(), changeFrequency: "daily", priority: 0.85 },
       { url: `${base}/vendors`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
       { url: `${base}/categories`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },

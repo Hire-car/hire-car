@@ -243,7 +243,7 @@ export function AboutClient() {
               >
                 <div className="aspect-square sm:aspect-[4/3] lg:aspect-square overflow-hidden rounded-[2.5rem] shadow-2xl relative group">
                   <Image
-                    src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1200&q=80"
+                    src="https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80"
                     alt="Independent car rental operator handing over keys"
                     fill
                     sizes="(max-width: 1024px) 100vw, 50vw"

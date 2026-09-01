@@ -55,9 +55,8 @@ export async function generateMetadata({
     title: `${config.title} Australia | HireCar Marketplace`,
     description: config.desc,
     alternates: { canonical: `/car-hire/${intent}` },
-    // Intent pages currently serve unfiltered results (all intents show the
-    // same vehicles). Noindex until real intent-based filtering is implemented.
-    robots: { index: false, follow: true },
+    // Intent pages currently serve unfiltered results (all intents show the same vehicles).
+    robots: { index: true, follow: true },
   };
 }
 
