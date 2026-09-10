@@ -25,6 +25,46 @@ const CITY_FAQS: Record<string, CityFaq[]> = {
     {
       question: "How much is a week-long car rental in Sydney?",
       answer: "The average cost of a week-long car rental in Sydney can be around AUD $350–$560. An economy car may cost less, while an SUV or larger car may cost more. Prices can vary depending on the date, season, and rental company."
+    },
+    {
+      question: "How much does it cost to hire a sports car in Sydney?",
+      answer: "Sports car hire can start at around AUD $130 per day, while premium performance and exotic cars can cost several hundred or even more than AUD $1,000 per day."
+    },
+    {
+      question: "What is the cheapest sports car to hire in Sydney?",
+      answer: "Entry-level performance cars such as an Audi S3 or similar models can be among the more affordable options, with current listings around the low-AUD-$100s per day."
+    },
+    {
+      question: "Can I hire a Porsche in Sydney?",
+      answer: "Yes. Porsche models are available through some Sydney rental and car-sharing providers, although availability and pricing vary by model and date."
+    },
+    {
+      question: "Can I hire a Ferrari in Sydney?",
+      answer: "Ferrari hire is available through selected prestige rental providers. Availability depends on the location, model and booking dates."
+    },
+    {
+      question: "How old do I need to be to hire a sports car?",
+      answer: "Age requirements depend on the rental provider and vehicle. Some prestige providers have higher minimum ages. For example, Avis Prestige lists 25 years for prestige cars and 30 years for supercars."
+    },
+    {
+      question: "Can international visitors hire a sports car in Sydney?",
+      answer: "Yes, subject to the rental company's requirements and NSW licence rules. Temporary overseas visitors can generally drive with a current overseas licence for up to six months while meeting NSW conditions."
+    },
+    {
+      question: "Do sports car rentals require a security deposit?",
+      answer: "Many premium rental providers require a security bond. The amount depends on the vehicle and supplier. Avis Prestige currently states bonds between AUD $5,000 and $15,000."
+    },
+    {
+      question: "Are kilometres limited on sports car rentals?",
+      answer: "They can be. Some prestige rentals include a daily kilometre allowance, with additional charges applying after the included limit."
+    },
+    {
+      question: "Is insurance included with sports car hire?",
+      answer: "Insurance arrangements vary by provider and vehicle. Always check what protection is included, the excess amount and any exclusions before booking."
+    },
+    {
+      question: "Should I book a sports car in advance?",
+      answer: "Yes. Booking early can give you a better choice of models and dates, particularly for popular cars and busy periods."
     }
   ],
   "melbourne": [
