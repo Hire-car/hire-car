@@ -11,40 +11,20 @@ export interface CityFaq {
 const CITY_FAQS: Record<string, CityFaq[]> = {
   "sydney": [
     {
-      question: "Do I need a hire car to get around Sydney effectively?",
-      answer: "While Sydney does offer a public transport network in its city centre, hiring a car is highly recommended for a truly complete and unconstrained travel experience. A rental vehicle grants you the freedom to explore the wider metropolitan area at your own pace, uncover hidden coastal and suburban gems, and seamlessly take scenic day trips to surrounding national parks or wine regions that are often difficult to reach via train or bus. It saves you valuable transit time and provides unparalleled flexibility for your unique itinerary."
+      question: "How much does it cost to rent a car in Sydney?",
+      answer: "In Sydney, you can expect to pay around AUD $48 to $80 per day for a cheaper rental car. The price can be higher if you choose a bigger car or a vehicle with more features."
     },
     {
-      question: "Where are the most convenient locations to pick up a hire car in Sydney?",
-      answer: "In Sydney, you can conveniently pick up a hire car from a wide variety of locations. Our marketplace operators are strategically distributed across the central business district (CBD), key suburban hubs, and near major transport terminals like the local airport. When you finalize your booking, you can coordinate directly with the local operator to arrange a pickup and drop-off point that perfectly aligns with your travel schedule and accommodation location."
+      question: "How much does a Standard Car hire cost in Sydney?",
+      answer: "On average, a standard car rental in Sydney can cost around AUD $55 per day. The price may vary depending on the date, season, and car model."
     },
     {
-      question: "Are there any toll roads I should be aware of when driving a hire car in Sydney?",
-      answer: "Depending on your specific routes, you may encounter toll roads in and around Sydney. The majority of Australia's major urban centres utilize cashless, electronic tolling systems rather than physical toll booths. It is essential to discuss toll management with your hire car operator prior to beginning your trip. Many operators can provide a vehicle fitted with an electronic tag or will explain how you can set up a temporary visitor pass to ensure you avoid unexpected administrative fees and fines."
+      question: "What is the cheapest rental car in Sydney?",
+      answer: "The cheapest rental car is usually an Economy or Compact Car. Prices can start at around AUD $48–$50 per day. The price may vary depending on the date, season, and rental company."
     },
     {
-      question: "What are the typical parking options and associated costs for a rental car in Sydney?",
-      answer: "Parking in the bustling inner city of Sydney can often be competitive and relatively expensive, with metered street parking and commercial parking garages being the standard options. To mitigate these costs, consider booking accommodation that explicitly includes secure parking. For daytime exploration, look into early-bird parking rates at commercial garages, or utilize park-and-ride facilities located at suburban transport hubs for easier access to the city centre."
-    },
-    {
-      question: "What is the minimum age requirement to rent and drive a car in Sydney?",
-      answer: "To legally hire and drive a car in Sydney, the vast majority of rental operators require the primary driver to be at least 21 years of age and hold a full, valid driver's licence. Furthermore, drivers aged between 21 and 24 are frequently subject to a young-driver surcharge due to standard insurance industry policies. It is highly recommended that you carefully check the specific age requirements and fee structures of individual operators before confirming your reservation."
-    },
-    {
-      question: "Which type of hire vehicle is best suited for driving and parking in Sydney?",
-      answer: "The ideal vehicle type depends entirely on your specific travel plans and passenger numbers in Sydney. For navigating busy city streets and easily fitting into tight urban parking spots, a compact hatchback or a standard sedan is usually perfect. However, if you are planning extensive family road trips to nearby coastal towns, hinterland areas, or national parks, a more spacious SUV or a comfortable people mover would provide the necessary extra legroom and luggage capacity."
-    },
-    {
-      question: "Can I use an international driver's licence to rent a car in Sydney?",
-      answer: "Yes, international visitors are generally permitted to use a valid, current overseas driver's licence to rent a vehicle in Sydney. However, if your original licence is not printed in English, you will also be legally required to provide an International Driving Permit (IDP) alongside your native licence. Ensure you carry both of these documents with you at all times when driving, along with your passport for secondary identification purposes."
-    },
-    {
-      question: "What is the standard procedure if my hire car breaks down while driving in Sydney?",
-      answer: "In the unlikely and unfortunate event of a mechanical breakdown in Sydney, your first priority should be to safely pull your vehicle over to the side of the road and activate your hazard lights. Most vehicles hired through our comprehensive marketplace include round-the-clock roadside assistance. You should immediately contact your specific rental operator using the designated emergency phone number provided in your rental agreement; they will guide you step-by-step on how to get the vehicle repaired or quickly replaced."
-    },
-    {
-      question: "Are there any specific driving rules or local road etiquette I should know in Sydney?",
-      answer: "Driving in Sydney follows standard Australian road rules, which means you must always drive on the left side of the road and strictly adhere to all posted speed limits, which are strictly enforced by cameras and police. In school zones, speed limits are heavily reduced during specific hours. Always yield to pedestrians at marked crossings and be highly aware of sharing the road safely with cyclists and, depending on the specific area, public transport vehicles like trams or large buses."
+      question: "How much is a week-long car rental in Sydney?",
+      answer: "The average cost of a week-long car rental in Sydney can be around AUD $350–$560. An economy car may cost less, while an SUV or larger car may cost more. Prices can vary depending on the date, season, and rental company."
     }
   ],
   "melbourne": [

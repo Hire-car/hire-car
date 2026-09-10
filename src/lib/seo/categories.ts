@@ -1,10 +1,10 @@
 export const VEHICLE_CATEGORIES = [
-  "Sedan",
+  "Luxury",
   "SUV",
   "People mover",
+  "Sedan",
   "Van",
   "Ute",
-  "Luxury",
   "Hatchback",
   "Convertible",
   "Coupe",

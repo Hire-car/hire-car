@@ -25,6 +25,7 @@ import { getCityFaqs } from "@/lib/seo/city-faqs";
 import { getCitySeoParagraphs } from "@/lib/seo/city-content";
 import { getIndexableSitemapUrls, getCitiesWithCounts } from "@/lib/seo/discovery";
 import { cityToSlug } from "@/lib/seo/slugs";
+import { SydneyContent } from "@/components/locations/sydney-content";
 
 export const revalidate = 3600;
 
@@ -263,13 +264,17 @@ export default async function LocationPage({
           <section className="bg-slate-50 border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
               <h2 className="text-xl font-bold text-slate-900 mb-3">Car hire in {displayCity}, {state} (Australia)</h2>
-              <div className="space-y-4">
-                {seoParagraphs.map((paragraph, idx) => (
-                  <p key={idx} className="text-sm text-slate-600 leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+              {slug === "sydney" ? (
+                <SydneyContent />
+              ) : (
+                <div className="space-y-4">
+                  {seoParagraphs.map((paragraph, idx) => (
+                    <p key={idx} className="text-sm text-slate-600 leading-relaxed">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              )}
               <div className="mt-6 flex flex-wrap gap-3">
                 {VEHICLE_CATEGORIES.map((cat) => (
                   <Link
@@ -277,7 +282,7 @@ export default async function LocationPage({
                     href={`/locations/${slug}/${categoryToSlug(cat)}`}
                     className="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:border-slate-300 transition-colors"
                   >
-                    {cat} hire in {displayCity}
+                    {cat === "Luxury" || cat === "SUV" ? `${cat} car` : cat} hire in {displayCity}
                   </Link>
                 ))}
               </div>

@@ -14,6 +14,7 @@ import {
   slugToCategory,
 } from "@/lib/seo";
 import { Filter, Car } from "lucide-react";
+import { SydneySportsCarContent } from "@/components/locations/sydney-sports-car-content";
 
 export const revalidate = 3600;
 
@@ -140,32 +141,40 @@ export async function CityCategoryHub({ citySlug, categorySlug }: CityCategoryHu
           )}
         </section>
 
-        {total > 0 && (
+        {citySlug === "sydney" && categorySlug === "sports-car" ? (
           <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
-              <h2 className="text-xl font-bold text-slate-900 mb-3">
-                {category} rental in {searchCity}
-              </h2>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Hire Car lists verified {category} vehicles from independent operators in {searchCity}.
-                Compare daily rates, contact vendors directly, and arrange pickup without platform booking fees.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href={`/categories/${categorySlug}`}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                >
-                  {category} hire Australia-wide
-                </Link>
-                <Link
-                  href={`/locations/${citySlug}`}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
-                >
-                  All vehicles in {searchCity}
-                </Link>
-              </div>
+              <SydneySportsCarContent />
             </div>
           </section>
+        ) : (
+          total > 0 && (
+            <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
+              <div className="mx-auto max-w-4xl">
+                <h2 className="text-xl font-bold text-slate-900 mb-3">
+                  {category} rental in {searchCity}
+                </h2>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  Hire Car lists verified {category} vehicles from independent operators in {searchCity}.
+                  Compare daily rates, contact vendors directly, and arrange pickup without platform booking fees.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href={`/categories/${categorySlug}`}
+                    className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  >
+                    {category} hire Australia-wide
+                  </Link>
+                  <Link
+                    href={`/locations/${citySlug}`}
+                    className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  >
+                    All vehicles in {searchCity}
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )
         )}
       </main>
       <SiteFooter />
