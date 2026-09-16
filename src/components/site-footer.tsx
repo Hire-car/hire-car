@@ -188,6 +188,22 @@ export function SiteFooter() {
               </div>
             )}
           </div>
+
+          {/* Agency Credit */}
+          <div className="mt-8 flex justify-center text-center">
+            <p className="text-sm text-slate-400 font-light">
+              Website by{" "}
+              <a
+                href="https://www.tradiedigitalagency.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-normal text-slate-300 hover:text-white transition-colors"
+                aria-label="Tradie Digital Agency (opens in a new tab)"
+              >
+                Tradie Digital Agency
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

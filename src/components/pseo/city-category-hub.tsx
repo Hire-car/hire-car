@@ -15,6 +15,7 @@ import {
 } from "@/lib/seo";
 import { Filter, Car } from "lucide-react";
 import { SydneySportsCarContent } from "@/components/locations/sydney-sports-car-content";
+import { SydneyVanContent } from "@/components/locations/sydney-van-content";
 
 export const revalidate = 3600;
 
@@ -145,6 +146,12 @@ export async function CityCategoryHub({ citySlug, categorySlug }: CityCategoryHu
           <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
               <SydneySportsCarContent />
+            </div>
+          </section>
+        ) : citySlug === "sydney" && categorySlug === "van" ? (
+          <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl">
+              <SydneyVanContent />
             </div>
           </section>
         ) : (
