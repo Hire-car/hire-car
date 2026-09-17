@@ -24,6 +24,7 @@ import {
 import { getIndexableSitemapUrls } from "@/lib/seo/discovery";
 import { getCategoryFaqs } from "@/lib/seo/category-faqs";
 import { Car, MapPin, ChevronDown } from "lucide-react";
+import { LuxuryCategoryContent } from "@/components/seo/luxury-category-content";
 
 
 export const revalidate = 3600;
@@ -152,6 +153,12 @@ export default async function CategoryPage({
             />
           )}
         </section>
+
+        {category === "Luxury" && (
+          <section className="bg-white border-t border-slate-200">
+            <LuxuryCategoryContent />
+          </section>
+        )}
 
         {/* FAQ Section */}
         <section className="bg-white border-t border-slate-200 py-12 px-4 sm:px-6 lg:px-8">
