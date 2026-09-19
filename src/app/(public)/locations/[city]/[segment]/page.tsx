@@ -53,11 +53,16 @@ export async function generateMetadata({
     const { total, vehicles } = await searchVehicles("", { city: meta.title, category }, { page: 1, perPage: 24 });
     const lowestPrice = vehicles.length > 0 ? Math.min(...vehicles.map(v => v.pricePerDayAud)) : undefined;
 
+    const defaultTitle = cityCategoryTitle(city, category, meta.state, lowestPrice);
+    const metaTitle = city.toLowerCase() === "sydney" && category === "Sports car"
+      ? "Sports Car Hire Sydney, Compare Prices & Features (2026)"
+      : defaultTitle;
+
     return {
-      title: cityCategoryTitle(city, category, meta.state, lowestPrice),
+      title: metaTitle,
       description: cityCategoryDescription(city, category, total, meta.state),
       openGraph: {
-        title: cityCategoryTitle(city, category, meta.state, lowestPrice),
+        title: defaultTitle,
         description: cityCategoryDescription(city, category, total, meta.state),
       },
       alternates: { canonical: `/locations/${city}/${segment}` },

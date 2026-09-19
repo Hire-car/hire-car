@@ -47,11 +47,16 @@ export async function generateMetadata({
 
   const { total } = await searchVehicles("", { category }, { page: 1, perPage: 1 });
 
+  const defaultTitle = categoryNationalTitle(category);
+  const metaTitle = category === "Luxury" 
+    ? "Luxury Car Rentals In Australia | Hire Mercedes, BMW & Premium Cars" 
+    : defaultTitle;
+
   return {
-    title: categoryNationalTitle(category),
+    title: metaTitle,
     description: categoryNationalDescription(category, total),
     openGraph: {
-      title: categoryNationalTitle(category),
+      title: defaultTitle,
       description: categoryNationalDescription(category, total),
     },
     alternates: { canonical: `/categories/${categorySlug}` },
