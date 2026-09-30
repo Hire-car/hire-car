@@ -3,9 +3,12 @@ import Link from "next/link";
 export function LuxuryCategoryContent() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 text-slate-800">
-      <h2 className="text-3xl font-black text-slate-900 mb-6">Compare the cheapest luxury car rental deals and enjoy a memorable journey with self-drive experience.</h2>
+      <h2 className="text-3xl font-black text-slate-900 mb-6">Luxury Car Hire Australia</h2>
+      <p className="mb-4 text-slate-600 leading-relaxed">
+        Looking for luxury car hire in Australia? Hire Car Marketplace offers car rental options across 100+ locations throughout Australia, giving you the freedom to travel with comfort, style, and a vehicle that suits your needs.
+      </p>
       <p className="mb-6 text-slate-600 leading-relaxed">
-        Discover luxury car rental options with Hire Car Marketplace. Hire Mercedes, BMW, Ferrari, and other premium cars, and compare luxury car rental deals across Australia from verified local operators.
+        Our platform helps you compare the prices, vehicle features, availability, and rental terms of supercars, luxury SUVs, and premium cars such as Mercedes, BMW, Audi, Maserati, Mustang, and Chevrolet. Choose your preferred car and enjoy a great driving experience. Simply follow these easy steps to get ready for your journey.
       </p>
       <ul className="list-disc pl-6 mb-8 text-slate-600 space-y-2">
         <li>First, visit the Hire Car Marketplace website and start your booking. Choose your preferred location, such as Sydney, Melbourne, or Perth.</li>
