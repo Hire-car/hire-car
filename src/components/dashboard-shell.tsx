@@ -275,6 +275,7 @@ function OrgSwitcher({
   }, []);
 
   const handleSelect = (id: string) => {
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie = `vendor_org_id=${id}; path=/; max-age=31536000`;
     window.location.reload();
   };

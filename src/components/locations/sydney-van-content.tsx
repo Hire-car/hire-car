@@ -151,7 +151,7 @@ export function SydneyVanContent() {
           </div>
           <div>
             <h4 className="text-lg font-bold text-slate-800">Furniture collection</h4>
-            <p className="text-slate-600">Buying furniture from a store or marketplace can create a transport problem if the item will not fit in a normal car. Measure the item first and compare those dimensions with the van's cargo area.</p>
+            <p className="text-slate-600">Buying furniture from a store or marketplace can create a transport problem if the item will not fit in a normal car. Measure the item first and compare those dimensions with the van&apos;s cargo area.</p>
           </div>
           <div>
             <h4 className="text-lg font-bold text-slate-800">Events and equipment</h4>

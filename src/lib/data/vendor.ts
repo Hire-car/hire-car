@@ -134,6 +134,7 @@ export const getVendorContext = cache(async function getVendorContext(userId: st
     .filter(row => row.organizations != null)
     .map(row => {
       // Cast because Supabase nested queries typing can be strict
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const org = row.organizations as any;
       return {
         id: org.id,
@@ -142,6 +143,7 @@ export const getVendorContext = cache(async function getVendorContext(userId: st
         status: org.status,
         abn: org.abn,
         // Ensure branches is an array
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         branches: Array.isArray(org.branches) ? org.branches.map((b: any) => ({
           id: b.id,
           name: b.name,

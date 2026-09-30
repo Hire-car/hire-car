@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag as nextRevalidateTag } from "next/cache";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const revalidateTag = (tag: string) => (nextRevalidateTag as any)(tag);
 import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";

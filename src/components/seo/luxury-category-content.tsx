@@ -3,12 +3,9 @@ import Link from "next/link";
 export function LuxuryCategoryContent() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 text-slate-800">
-      <h2 className="text-3xl font-black text-slate-900 mb-6">Luxury Car Hire Australia</h2>
-      <p className="mb-4 text-slate-600 leading-relaxed">
-        Looking for luxury car hire in Australia? Hire Car Marketplace offers car rental options across 100+ locations throughout Australia, giving you the freedom to travel with comfort, style, and a vehicle that suits your needs.
-      </p>
+      <h2 className="text-3xl font-black text-slate-900 mb-6">Compare the cheapest luxury car rental deals and enjoy a memorable journey with self-drive experience.</h2>
       <p className="mb-6 text-slate-600 leading-relaxed">
-        Our platform helps you compare the prices, vehicle features, availability, and rental terms of supercars, luxury SUVs, and premium cars such as Mercedes, BMW, Audi, Maserati, Mustang, and Chevrolet. Choose your preferred car and enjoy a great driving experience. Simply follow these easy steps to get ready for your journey.
+        Discover luxury car rental options with Hire Car Marketplace. Hire Mercedes, BMW, Ferrari, and other premium cars, and compare luxury car rental deals across Australia from verified local operators.
       </p>
       <ul className="list-disc pl-6 mb-8 text-slate-600 space-y-2">
         <li>First, visit the Hire Car Marketplace website and start your booking. Choose your preferred location, such as Sydney, Melbourne, or Perth.</li>
@@ -56,7 +53,7 @@ export function LuxuryCategoryContent() {
         <li><strong>Weekend trips:</strong> A sports car or premium sedan can suit a short getaway when driving comfort and vehicle style are important.</li>
         <li><strong>Family holidays:</strong> A luxury SUV can provide more space for passengers and luggage.</li>
         <li><strong>Road trips:</strong> For longer journeys, check the included kilometres, luggage capacity, fuel policy and roadside assistance before booking.</li>
-        <li><strong>Special events:</strong> Sports and exotic cars can be available for celebrations, photo shoots and other events, depending on the rental provider's rules.</li>
+        <li><strong>Special events:</strong> Sports and exotic cars can be available for celebrations, photo shoots and other events, depending on the rental provider&apos;s rules.</li>
       </ul>
 
       <h2 className="text-2xl font-bold text-slate-900 mt-10 mb-6">Tips for Finding the Best Luxury Car Hire Deals in Australia</h2>
@@ -93,7 +90,7 @@ export function LuxuryCategoryContent() {
         </div>
         <div>
           <h3 className="text-lg font-semibold text-slate-900 mb-2">Inspect the Car Before Driving</h3>
-          <p>Check the vehicle's exterior and interior before leaving the pickup location. Take clear photos of existing scratches, dents or other visible damage and make sure they are recorded according to the rental provider's process. This gives you a clear record of the vehicle's condition at pickup. Hire Car Marketplace also recommends checking a rental vehicle carefully before driving away.</p>
+          <p>Check the vehicle&apos;s exterior and interior before leaving the pickup location. Take clear photos of existing scratches, dents or other visible damage and make sure they are recorded according to the rental provider&apos;s process. This gives you a clear record of the vehicle&apos;s condition at pickup. Hire Car Marketplace also recommends checking a rental vehicle carefully before driving away.</p>
         </div>
       </div>
 
