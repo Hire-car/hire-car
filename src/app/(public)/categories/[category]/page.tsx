@@ -115,7 +115,11 @@ export default async function CategoryPage({
               <span>/</span>
               <span className="text-white font-medium">{category}</span>
             </nav>
-            <h1 className="text-4xl font-black text-white sm:text-5xl">{category} car hire Australia</h1>
+            <h1 className="text-4xl font-black text-white sm:text-5xl">
+              {category === "Luxury" 
+                ? "Compare the cheapest luxury car rental deals and enjoy a memorable journey with self-drive experience."
+                : `${category} car hire Australia`}
+            </h1>
             <p className="mt-3 text-slate-300 max-w-2xl">
               {categoryNationalDescription(category, total)}
             </p>
