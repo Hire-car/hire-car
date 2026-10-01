@@ -38,6 +38,9 @@ export function categoryNationalTitle(category: VehicleCategory) {
 }
 
 export function categoryNationalDescription(category: VehicleCategory, total: number) {
+  if (category === "Luxury") {
+    return "Discover luxury car rental options with Hire Car Marketplace. Hire Mercedes, BMW, Ferrari, and other premium cars, and compare luxury car rental deals across Australia from verified local operators.";
+  }
   return `Compare ${total} ${category} rental vehicles across Australia from verified local operators. No booking fees — contact vendors directly.`;
 }
 
