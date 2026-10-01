@@ -121,7 +121,9 @@ export default async function CategoryPage({
                 : `${category} car hire Australia`}
             </h1>
             <p className="mt-3 text-slate-300 max-w-2xl">
-              {categoryNationalDescription(category, total)}
+              {category === "Luxury"
+                ? "Discover luxury car rental options with Hire Car Marketplace. Hire Mercedes, BMW, Ferrari, and other premium cars, and compare luxury car rental deals across Australia from verified local operators."
+                : categoryNationalDescription(category, total)}
             </p>
           </div>
         </section>
