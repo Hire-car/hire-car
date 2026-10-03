@@ -125,18 +125,59 @@ export async function sendWelcomeEmail(input: {
   if (!transporter) return { skipped: true };
   const isVendor = input.role === "vendor";
   const dashboardUrl = isVendor ? `${getAppUrl()}/vendor/dashboard` : `${getAppUrl()}/search`;
+  
+  const vendorSignOff = `
+<br/><br/>
+<p style="margin: 0;">Kind regards,</p>
+<br/>
+<p style="margin: 0; font-weight: bold;">Jessica Wilson</p>
+<p style="margin: 0;">Customer Success</p>
+<p style="margin: 0;">Hire Car Marketplace Australia</p>
+<p style="margin: 0;">📧 support@hirecarmarketplace.com.au</p>
+<p style="margin: 0;">🌐 <a href="https://www.hirecarmarketplace.com.au" style="color: #ea580c; text-decoration: none;">https://www.hirecarmarketplace.com.au</a></p>
+<div style="margin-top: 24px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+  <div style="display: flex; align-items: center; margin-bottom: 16px;">
+    <img src="${getAppUrl()}/LOGO.png" alt="Hire Car Marketplace" style="height: 48px; margin-right: 16px;" />
+    <div>
+      <h3 style="margin: 0; font-size: 16px; color: #0f172a; text-transform: uppercase;">Jessica Wilson</h3>
+      <p style="margin: 0; font-size: 12px; color: #ea580c; font-weight: 700; letter-spacing: 0.05em;">CUSTOMER SUPPORT</p>
+    </div>
+  </div>
+  <div style="font-size: 13px; color: #475569; line-height: 1.6; margin-bottom: 16px;">
+    <p style="margin: 0;">📞 1300 123 456</p>
+    <p style="margin: 0;">📧 support@hirecarmarketplace.com.au</p>
+    <p style="margin: 0;">🌐 www.hirecarmarketplace.com.au</p>
+    <p style="margin: 0;">📍 Australia Wide</p>
+  </div>
+  <div style="border-top: 1px solid #cbd5e1; padding-top: 16px; margin-bottom: 8px;">
+    <p style="margin: 0; font-size: 12px; color: #334155; font-weight: 600; text-align: center;">
+      ✓ Trusted Vendors &nbsp; ✓ Wide Range of Vehicles &nbsp; ✓ Secure Bookings &nbsp; ✓ Dedicated Support
+    </p>
+  </div>
+  <p style="margin: 0; font-size: 12px; font-style: italic; color: #64748b; text-align: center;">
+    "Find the perfect rental. List your vehicles. Grow your business."
+  </p>
+</div>
+`;
+
   const greeting = isVendor
-    ? "<p>Your vendor account is ready! Start adding your fleet to our marketplace and reach thousands of potential renters across Australia.</p>"
+    ? `<p>Your vendor account is ready! Start adding your fleet to our marketplace and reach thousands of potential renters across Australia.</p>${vendorSignOff}`
     : "<p>You're all set to find your perfect rental car across Australia. Browse thousands of vehicles from verified local vendors.</p>";
+
+  const subject = isVendor 
+    ? "Your Vendor Account Has Been Approved – Please Proceed with the Next Steps in the Listing Process." 
+    : "Welcome to Hire Car Marketplace! 🚗";
+
+  const title = isVendor ? "Welcome to Hire Car Marketplace! 🚗" : "Welcome to HireCar! 🎊";
   const ctaLabel = isVendor ? "Go to Vendor Dashboard" : "Browse Cars";
 
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
     to: input.to,
-    subject: "Welcome to Hire Car Marketplace! 🚗",
+    subject: subject,
     html: buildEmailTemplate({
-      title: "Welcome to HireCar! 🎊",
+      title: title,
       name: input.name || "there",
       bodyHtml: greeting,
       ctaText: ctaLabel,

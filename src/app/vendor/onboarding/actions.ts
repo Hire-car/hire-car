@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/security/auth";
 import { uniqueSlug } from "@/lib/slug";
 import { onboardingSchema } from "@/lib/validation/schemas";
+import { sendWelcomeEmail } from "@/lib/email/ses";
 
 type OnboardingActionResult = {
   error?: string;
@@ -46,7 +47,7 @@ async function createVendorOnboardingRecords(
       website: input.website || null,
       phone: input.phone,
       address: input.address,
-      status: "pending",
+      status: "approved",
     })
     .select("id")
     .single();
@@ -184,6 +185,15 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
       return { error: "Vendor onboarding failed. Please try again." };
     }
   }
+
+  // Send the welcome/approval email now that they are automatically approved
+  await sendWelcomeEmail({
+    to: user.email ?? "",
+    name: payload.contactName,
+    role: "vendor",
+  }).catch((err) => {
+    console.error("Failed to send vendor welcome email:", err);
+  });
 
   revalidatePath("/vendor/dashboard");
   revalidatePath("/vendor/branches");
