@@ -4,7 +4,7 @@ import { cityToSlug } from "./slugs";
 
 const revalidateTag = (tag: string) => {
   try {
-    (nextRevalidateTag as any)(tag);
+    (nextRevalidateTag as unknown as (t: string) => void)(tag);
   } catch {
     // revalidateTag only functions within a Next.js request context; catch safely in standalone scripts
   }

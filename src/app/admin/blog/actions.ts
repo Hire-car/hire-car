@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag as nextRevalidateTag } from "next/cache";
-const revalidateTag = (tag: string) => { try { (nextRevalidateTag as any)(tag); } catch {} };
+const revalidateTag = (tag: string) => { try { (nextRevalidateTag as unknown as (t: string) => void)(tag); } catch {} };
 import { redirect } from "next/navigation";
 import { publishDailyBlog } from "@/lib/blog/publish-daily";
 import { requireAdminRole } from "@/lib/security/auth";

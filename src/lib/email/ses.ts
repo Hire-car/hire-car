@@ -1,26 +1,48 @@
 import nodemailer from "nodemailer";
 import { getAppUrl, optionalEnv } from "@/lib/config";
 
-const smtpHost = optionalEnv("SMTP_HOST") || "email-smtp.ap-southeast-2.amazonaws.com";
-const smtpPort = parseInt(optionalEnv("SMTP_PORT") || "465", 10);
-const smtpUser = optionalEnv("SMTP_USER") || "AKIAT3STWTTRRYLGNUFV";
-const smtpPass = optionalEnv("SMTP_PASS") || "BJAbtXLb/IGLJXuvaD6+gCPG9GWGgUUfhFgW1ZqzAkvs";
+// ─── SMTP Configuration ───────────────────────────────────────────────────────
+// All credentials MUST be supplied via environment variables.
+// No hardcoded fallback credentials are permitted in source code.
+// If SMTP_USER or SMTP_PASS are missing, the transporter will be null and
+// all send functions will return { skipped: true } without throwing.
+// See: https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html
+const smtpHost = optionalEnv("SMTP_HOST") ?? "email-smtp.ap-southeast-2.amazonaws.com";
+const smtpPort = parseInt(optionalEnv("SMTP_PORT") ?? "465", 10);
+const smtpUser = optionalEnv("SMTP_USER");
+const smtpPass = optionalEnv("SMTP_PASS");
 
-export const transporter = (smtpHost && smtpUser && smtpPass)
-  ? nodemailer.createTransport({
-      host: smtpHost,
-      port: smtpPort,
-      secure: smtpPort === 465,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    })
-  : null;
+if (!smtpUser || !smtpPass) {
+  // Log a safe warning — do NOT include any credential values here.
+  console.warn(
+    "[email] SMTP_USER or SMTP_PASS environment variables are not set. " +
+      "Email sending is disabled until these are configured. " +
+      "See: https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html"
+  );
+}
 
-const FROM = process.env.EMAIL_FROM ?? "Hire Car Marketplace <noreply@hirecarmarketplace.com.au>";
-const REPLY_TO = process.env.REPLY_TO_EMAIL ?? process.env.CONTACT_EMAIL_TO ?? "support@hirecarmarketplace.com.au";
-const ADMIN_EMAIL = process.env.CONTACT_EMAIL_TO ?? "admin@hirecarmarketplace.com.au";
+export const transporter =
+  smtpHost && smtpUser && smtpPass
+    ? nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      })
+    : null;
+
+const FROM =
+  process.env.EMAIL_FROM ??
+  "Hire Car Marketplace <noreply@hirecarmarketplace.com.au>";
+const REPLY_TO =
+  process.env.REPLY_TO_EMAIL ??
+  process.env.CONTACT_EMAIL_TO ??
+  "support@hirecarmarketplace.com.au";
+export const ADMIN_EMAIL =
+  process.env.CONTACT_EMAIL_TO ?? "admin@hirecarmarketplace.com.au";
 
 // --- Base Template Engine ---
 function buildEmailTemplate({
@@ -29,7 +51,7 @@ function buildEmailTemplate({
   bodyHtml,
   ctaText,
   ctaUrl,
-  footerText = "You're receiving this because you have an account at hirecarmarketplace.com.au."
+  footerText = "You're receiving this because you have an account at hirecarmarketplace.com.au.",
 }: {
   title: string;
   name?: string;
@@ -39,11 +61,16 @@ function buildEmailTemplate({
   footerText?: string;
 }) {
   const logoHtml = `<img src="${getAppUrl()}/LOGO.png" alt="Hire Car Marketplace" style="height: 80px; width: auto; max-width: 100%;" />`;
-  const nameHtml = name ? `<p style="margin-bottom: 24px; font-weight: 500;">Hi ${name},</p>` : "";
-  const ctaHtml = ctaText && ctaUrl ? `
+  const nameHtml = name
+    ? `<p style="margin-bottom: 24px; font-weight: 500;">Hi ${name},</p>`
+    : "";
+  const ctaHtml =
+    ctaText && ctaUrl
+      ? `
     <div style="text-align: center; margin: 40px 0 24px;">
       <a href="${ctaUrl}" style="background: linear-gradient(135deg, #ea580c, #f59e0b); color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 4px 14px 0 rgba(234, 88, 12, 0.39); width: 100%; max-width: 300px; box-sizing: border-box;">${ctaText} &rarr;</a>
-    </div>` : "";
+    </div>`
+      : "";
 
   return `
 <div style="font-family: 'Inter', Roboto, sans-serif; width: 100%; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 24px 16px; box-sizing: border-box;">
@@ -75,7 +102,7 @@ export async function sendLeadAlert(input: {
 }) {
   if (!transporter) return { skipped: true };
   const dashboardUrl = `${getAppUrl()}/vendor/dashboard`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -85,8 +112,8 @@ export async function sendLeadAlert(input: {
       title: "New Rental Lead! 🎉",
       bodyHtml: `<p><strong>${input.customerName}</strong> has submitted a new rental enquiry for your vehicle: <strong>${input.vehicleTitle}</strong>.</p><p>Respond quickly to increase your chances of securing the booking.</p>`,
       ctaText: "Review Lead",
-      ctaUrl: dashboardUrl
-    })
+      ctaUrl: dashboardUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -99,7 +126,7 @@ export async function sendCustomerEnquiryConfirmation(input: {
 }) {
   if (!transporter) return { skipped: true };
   const chatUrl = `${getAppUrl()}/messages/${input.leadId}`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -110,8 +137,8 @@ export async function sendCustomerEnquiryConfirmation(input: {
       name: input.customerName,
       bodyHtml: `<p>Your rental enquiry for <strong>${input.vehicleTitle}</strong> has been successfully sent to the vendor.</p><p>You will be notified as soon as they reply. You can track your conversation and messages anytime by signing in.</p>`,
       ctaText: "View Conversation",
-      ctaUrl: chatUrl
-    })
+      ctaUrl: chatUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -124,8 +151,10 @@ export async function sendWelcomeEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const isVendor = input.role === "vendor";
-  const dashboardUrl = isVendor ? `${getAppUrl()}/vendor/dashboard` : `${getAppUrl()}/search`;
-  
+  const dashboardUrl = isVendor
+    ? `${getAppUrl()}/vendor/dashboard`
+    : `${getAppUrl()}/search`;
+
   const vendorSignOff = `
 <br/><br/>
 <p style="margin: 0;">Kind regards,</p>
@@ -164,11 +193,13 @@ export async function sendWelcomeEmail(input: {
     ? `<p>Your vendor account is ready! Start adding your fleet to our marketplace and reach thousands of potential renters across Australia.</p>${vendorSignOff}`
     : "<p>You're all set to find your perfect rental car across Australia. Browse thousands of vehicles from verified local vendors.</p>";
 
-  const subject = isVendor 
-    ? "Your Vendor Account Has Been Approved – Please Proceed with the Next Steps in the Listing Process." 
+  const subject = isVendor
+    ? "Your Vendor Account Has Been Approved – Please Proceed with the Next Steps in the Listing Process."
     : "Welcome to Hire Car Marketplace! 🚗";
 
-  const title = isVendor ? "Welcome to Hire Car Marketplace! 🚗" : "Welcome to HireCar! 🎊";
+  const title = isVendor
+    ? "Welcome to Hire Car Marketplace! 🚗"
+    : "Welcome to HireCar! 🎊";
   const ctaLabel = isVendor ? "Go to Vendor Dashboard" : "Browse Cars";
 
   await transporter.sendMail({
@@ -181,8 +212,8 @@ export async function sendWelcomeEmail(input: {
       name: input.name || "there",
       bodyHtml: greeting,
       ctaText: ctaLabel,
-      ctaUrl: dashboardUrl
-    })
+      ctaUrl: dashboardUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -208,13 +239,11 @@ export async function sendMarketingEmail(input: {
       name: input.recipientName,
       bodyHtml: input.bodyHtml,
       ctaText: input.ctaLabel,
-      ctaUrl: input.ctaUrl
-    })
+      ctaUrl: input.ctaUrl,
+    }),
   });
   return { skipped: false };
 }
-
-
 
 // ─── Approval Emails ───────────────────────────────────────────────────────────
 export async function sendVendorApprovalEmail(input: {
@@ -223,7 +252,7 @@ export async function sendVendorApprovalEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const dashboardUrl = `${getAppUrl()}/vendor/dashboard`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -232,10 +261,11 @@ export async function sendVendorApprovalEmail(input: {
     html: buildEmailTemplate({
       title: "You are Approved! ✅",
       name: input.vendorName,
-      bodyHtml: "<p>Great news! Your vendor account has been reviewed and approved by our team. You can now start adding your vehicles to the marketplace and receiving leads.</p>",
+      bodyHtml:
+        "<p>Great news! Your vendor account has been reviewed and approved by our team. You can now start adding your vehicles to the marketplace and receiving leads.</p>",
       ctaText: "Go to Dashboard",
-      ctaUrl: dashboardUrl
-    })
+      ctaUrl: dashboardUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -246,7 +276,7 @@ export async function sendVehicleApprovalEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const listingsUrl = `${getAppUrl()}/vendor/fleet`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -256,8 +286,8 @@ export async function sendVehicleApprovalEmail(input: {
       title: "Vehicle Approved! 🎊",
       bodyHtml: `<p>Great news! Your listing for <strong>${input.vehicleTitle}</strong> has been approved and is now live on the marketplace for customers to see.</p>`,
       ctaText: "View Fleet",
-      ctaUrl: listingsUrl
-    })
+      ctaUrl: listingsUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -270,7 +300,7 @@ export async function sendAdminPendingReminderEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const adminUrl = `${getAppUrl()}/admin`;
-  
+
   const itemsHtml = `
     <ul>
       ${input.pendingVendorsCount > 0 ? `<li><strong>${input.pendingVendorsCount}</strong> pending vendors</li>` : ""}
@@ -288,8 +318,8 @@ export async function sendAdminPendingReminderEmail(input: {
       name: "Admin",
       bodyHtml: `<p>There are items in the moderation queue waiting for your approval:</p>${itemsHtml}`,
       ctaText: "Go to Admin Panel",
-      ctaUrl: adminUrl
-    })
+      ctaUrl: adminUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -301,7 +331,7 @@ export async function sendVendorUnreadLeadReminderEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const dashboardUrl = `${getAppUrl()}/vendor/leads`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -312,13 +342,11 @@ export async function sendVendorUnreadLeadReminderEmail(input: {
       name: input.vendorName,
       bodyHtml: `<p>You have <strong>${input.unreadCount}</strong> lead(s) waiting for your response. Responding quickly improves your ranking and increases your bookings!</p>`,
       ctaText: "View Leads",
-      ctaUrl: dashboardUrl
-    })
+      ctaUrl: dashboardUrl,
+    }),
   });
   return { skipped: false };
 }
-
-
 
 // ─── Internal Utilities ────────────────────────────────────────────────────────
 export async function sendNewMessageNotification(input: {
@@ -335,7 +363,7 @@ export async function sendNewMessageNotification(input: {
   const chatUrl = input.isVendorRecipient
     ? `${getAppUrl()}/vendor/leads/${input.leadId}`
     : `${getAppUrl()}/messages/${input.leadId}`;
-    
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -349,8 +377,8 @@ export async function sendNewMessageNotification(input: {
         "${preview}"
       </div>`,
       ctaText: "Reply Now",
-      ctaUrl: chatUrl
-    })
+      ctaUrl: chatUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -362,8 +390,11 @@ export async function sendContactMessage(input: {
   message: string;
 }) {
   if (!transporter) return { skipped: true };
-  const to = process.env.CONTACT_EMAIL_TO ?? process.env.EMAIL_FROM ?? "support@hirecarmarketplace.com.au";
-  
+  const to =
+    process.env.CONTACT_EMAIL_TO ??
+    process.env.EMAIL_FROM ??
+    "support@hirecarmarketplace.com.au";
+
   await transporter.sendMail({
     from: FROM,
     to,
@@ -382,7 +413,7 @@ export async function sendContactMessage(input: {
       <div style="background-color: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 24px; color: #475569;">
         ${input.message.replace(/\n/g, "<br>")}
       </div>`,
-    })
+    }),
   });
   return { skipped: false };
 }
@@ -391,12 +422,18 @@ export async function sendContactMessage(input: {
 const WHATSAPP_PREVIEW_MAX_LENGTH = 300;
 
 function sanitizeMessagePreview(raw: string): string {
-  const collapsed = raw.replace(/[\u0000-\u001F\u007F]+/g, " ").replace(/\s+/g, " ").trim();
+  const collapsed = raw
+    .replace(/[\u0000-\u001F\u007F]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   if (collapsed.length <= WHATSAPP_PREVIEW_MAX_LENGTH) return collapsed;
   return `${collapsed.slice(0, WHATSAPP_PREVIEW_MAX_LENGTH)}\u2026`;
 }
 
-async function withRetry<T>(operation: () => Promise<T>, maxAttempts = 3): Promise<T> {
+async function withRetry<T>(
+  operation: () => Promise<T>,
+  maxAttempts = 3
+): Promise<T> {
   const attempts = Math.max(1, Math.floor(maxAttempts));
   let lastError: unknown;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -420,20 +457,21 @@ export async function sendWhatsAppLeadAlert(
     messagePreview: string;
     leadUrl: string;
   },
-  maxAttempts = 3,
+  maxAttempts = 3
 ): Promise<{ skipped: boolean }> {
   if (!transporter) return { skipped: true };
   const preview = sanitizeMessagePreview(input.messagePreview);
-  
+
   await withRetry(
-    () => transporter!.sendMail({
-      from: FROM,
-      replyTo: REPLY_TO,
-      to: input.to,
-      subject: `New WhatsApp lead from ${input.senderName}`,
-      html: buildEmailTemplate({
-        title: "WhatsApp Lead 📱",
-        bodyHtml: `<p><strong>${input.senderName}</strong> sent a new WhatsApp enquiry.</p>
+    () =>
+      transporter!.sendMail({
+        from: FROM,
+        replyTo: REPLY_TO,
+        to: input.to,
+        subject: `New WhatsApp lead from ${input.senderName}`,
+        html: buildEmailTemplate({
+          title: "WhatsApp Lead 📱",
+          bodyHtml: `<p><strong>${input.senderName}</strong> sent a new WhatsApp enquiry.</p>
         <ul>
           <li><strong>Name:</strong> ${input.senderName}</li>
           <li><strong>Phone:</strong> ${input.senderPhone}</li>
@@ -441,11 +479,11 @@ export async function sendWhatsAppLeadAlert(
         <div style="background-color: #f1f5f9; padding: 16px; border-radius: 8px; font-style: italic; margin-bottom: 24px; color: #475569;">
           "${preview}"
         </div>`,
-        ctaText: "View Lead",
-        ctaUrl: input.leadUrl
-      })
-    }),
-    maxAttempts,
+          ctaText: "View Lead",
+          ctaUrl: input.leadUrl,
+        }),
+      }),
+    maxAttempts
   );
   return { skipped: false };
 }
@@ -460,7 +498,7 @@ export async function sendLeadConvertedEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const chatUrl = `${getAppUrl()}/messages/${input.leadId}`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -471,8 +509,8 @@ export async function sendLeadConvertedEmail(input: {
       name: input.customerName,
       bodyHtml: `<p>Great news! <strong>${input.vendorName}</strong> has officially accepted and confirmed your rental enquiry for the <strong>${input.vehicleTitle}</strong>.</p><p>You can view your booking details and coordinate pickup directly with the vendor using the secure messaging portal.</p>`,
       ctaText: "View Booking & Chat",
-      ctaUrl: chatUrl
-    })
+      ctaUrl: chatUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -485,8 +523,8 @@ export async function sendReviewRequestEmail(input: {
   leadId: string;
 }) {
   if (!transporter) return { skipped: true };
-  const reviewUrl = `${getAppUrl()}/customer/dashboard`; 
-  
+  const reviewUrl = `${getAppUrl()}/customer/dashboard`;
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -497,8 +535,8 @@ export async function sendReviewRequestEmail(input: {
       name: input.customerName,
       bodyHtml: `<p>We hope you had a fantastic experience renting the <strong>${input.vehicleTitle}</strong> from <strong>${input.vendorName}</strong>!</p><p>Your feedback is incredibly valuable to our community. Please take 60 seconds to leave a quick review for the vendor. This helps other renters make great choices and rewards good vendors.</p>`,
       ctaText: "Leave a Review",
-      ctaUrl: reviewUrl
-    })
+      ctaUrl: reviewUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -513,7 +551,7 @@ export async function sendBranchTransferInitiatedEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const dashboardUrl = `${getAppUrl()}/vendor/branches`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -524,8 +562,8 @@ export async function sendBranchTransferInitiatedEmail(input: {
       name: input.vendorName,
       bodyHtml: `<p>You have successfully initiated the transfer of <strong>${input.branchName}</strong> to <strong>${input.newBusinessName}</strong> (${input.newOwnerEmail}).</p><p>This branch is now owned by the new vendor and they have been notified to claim their account.</p>`,
       ctaText: "View Your Branches",
-      ctaUrl: dashboardUrl
-    })
+      ctaUrl: dashboardUrl,
+    }),
   });
   return { skipped: false };
 }
@@ -537,7 +575,7 @@ export async function sendBranchTransferReceivedEmail(input: {
 }) {
   if (!transporter) return { skipped: true };
   const loginUrl = `${getAppUrl()}/login`;
-  
+
   await transporter.sendMail({
     from: FROM,
     replyTo: REPLY_TO,
@@ -548,8 +586,8 @@ export async function sendBranchTransferReceivedEmail(input: {
       name: input.newBusinessName,
       bodyHtml: `<p>A vendor has transferred the branch <strong>${input.branchName}</strong> to you on the Hire Car Marketplace.</p><p>Your vendor account has been automatically created. Please log in (or sign up using this email address) to manage your new branch and vehicles.</p><p>Note: Your new vendor account will require admin approval before your listings are public.</p>`,
       ctaText: "Log in to Dashboard",
-      ctaUrl: loginUrl
-    })
+      ctaUrl: loginUrl,
+    }),
   });
   return { skipped: false };
 }

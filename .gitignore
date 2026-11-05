@@ -49,3 +49,6 @@ supabase/.temp/
 
 .playwright-mcp/
 check_typesense.ts
+
+lint-report.json
+*-report.json
