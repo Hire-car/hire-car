@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BadgeCheck, Phone, Eye, Star, MapPin, ChevronRight, Users, Fuel, Settings, Check, Info } from "lucide-react";
 import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -42,7 +42,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const data = await getCachedVehicleMetadata(slug);
+  const decodedSlug = decodeURIComponent(slug).trim();
+  const data = await getCachedVehicleMetadata(decodedSlug);
 
   if (!data) return {};
 
@@ -87,14 +88,20 @@ export default async function VehicleDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug).trim();
   
-  const data = await getCachedVehicleDetails(slug);
+  const data = await getCachedVehicleDetails(decodedSlug);
   
   if (!data) {
     notFound();
   }
 
   const { vehicle, vendorSub, reviews } = data;
+
+  // Canonical redirect: If accessed via UUID or non-canonical casing, 301 redirect to canonical slug
+  if (decodedSlug !== vehicle.slug) {
+    redirect(`/cars/${vehicle.slug}`);
+  }
   const supabase = createAdminClient();
 
   // Parallelise user auth + request headers — both are needed before render

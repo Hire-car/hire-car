@@ -6,8 +6,10 @@ import { resolveVehicleImage, type VehicleImageRecord } from "@/lib/image-utils"
 export const getCachedVehicleDetails = unstable_cache(
   async function getCachedVehicleDetails(slug: string) {
     const supabase = createAdminClient();
+    const cleanSlug = decodeURIComponent(slug).trim().toLowerCase();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanSlug);
 
-    const { data: vehicle, error } = await supabase
+    let query = supabase
       .from("vehicles")
       .select(`
         id, slug, title, notes, make, model, year, seats, fuel, transmission, category,
@@ -17,9 +19,15 @@ export const getCachedVehicleDetails = unstable_cache(
         vehicle_images(id, storage_path, alt_text, sort_order, approved),
         vehicle_features(feature)
       `)
-      .eq("slug", slug)
-      .eq("status", "approved")
-      .maybeSingle();
+      .eq("status", "approved");
+
+    if (isUuid) {
+      query = query.eq("id", cleanSlug);
+    } else {
+      query = query.ilike("slug", cleanSlug);
+    }
+
+    const { data: vehicle, error } = await query.maybeSingle();
 
     if (error) {
       console.error("[getCachedVehicleDetails] Query error for slug", slug, error);
@@ -52,23 +60,32 @@ export const getCachedVehicleDetails = unstable_cache(
       reviews: reviewsRes.data ?? []
     };
   },
-  ["public-vehicle-details-v3"],
+  ["public-vehicle-details-v4"],
   { revalidate: 3600, tags: ["vehicles", "public"] }
 );
 
 export const getCachedVehicleMetadata = unstable_cache(
   async function getCachedVehicleMetadata(slug: string) {
     const supabase = createAdminClient();
-    const { data } = await supabase
+    const cleanSlug = decodeURIComponent(slug).trim().toLowerCase();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanSlug);
+
+    let query = supabase
       .from("vehicles")
       .select("title, make, model, year, category, price_per_day_aud, vehicle_images(storage_path, approved, sort_order), branches(city, state)")
-      .eq("slug", slug)
-      .eq("status", "approved")
-      .single();
+      .eq("status", "approved");
+
+    if (isUuid) {
+      query = query.eq("id", cleanSlug);
+    } else {
+      query = query.ilike("slug", cleanSlug);
+    }
+
+    const { data } = await query.maybeSingle();
 
     return data;
   },
-  ["public-vehicle-metadata"],
+  ["public-vehicle-metadata-v3"],
   { revalidate: 3600, tags: ["vehicles", "public"] }
 );
 
@@ -92,7 +109,7 @@ export const getCachedSimilarVehicles = unstable_cache(
         vehicle_images(storage_path, approved, sort_order)
       `)
       .eq("status", "approved")
-      .eq("branches.city", city)
+      .ilike("branches.city", city)
       .eq("category", category)
       .neq("id", currentVehicleId)
       .limit(4);
@@ -112,7 +129,7 @@ export const getCachedSimilarVehicles = unstable_cache(
           vehicle_images(storage_path, approved, sort_order)
         `)
         .eq("status", "approved")
-        .eq("branches.city", city)
+        .ilike("branches.city", city)
         .eq("make", make)
         .neq("id", currentVehicleId)
         .limit(4 - data.length);
