@@ -70,7 +70,8 @@ export function EnquiryWidget({
     email.trim().length >= 3 &&
     phone.trim().length >= 8 &&
     pickupCity.trim().length >= 2 &&
-    licenseConfirmed
+    licenseConfirmed &&
+    (turnstileToken || !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,6 +104,10 @@ export function EnquiryWidget({
     }
     if (!licenseConfirmed) {
       setError("Please confirm you hold a valid driver's license.");
+      return;
+    }
+    if (!turnstileToken && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+      setError("Please complete the security challenge before submitting.");
       return;
     }
 
@@ -413,10 +418,13 @@ export function EnquiryWidget({
                 setTurnstileToken(token);
                 setError(null);
               }}
-              onExpire={() => setTurnstileToken("")}
-              onError={() => {
-                // Graceful fallback if Turnstile is blocked by ad-blocker
+              onExpire={() => {
                 setTurnstileToken("");
+                setError("Security challenge expired. Please verify again.");
+              }}
+              onError={() => {
+                setTurnstileToken("");
+                setError("Security verification failed to load. Please disable ad-blockers and refresh.");
               }}
             />
           </div>

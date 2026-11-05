@@ -27,7 +27,11 @@ export async function verifyTurnstile(token?: string, ip?: string) {
       body,
     },
   );
-  const payload = (await response.json()) as { success?: boolean };
+  const payload = (await response.json()) as { success?: boolean; "error-codes"?: string[] };
 
-  return { ok: payload.success === true, skipped: false };
+  if (!payload.success) {
+    console.warn("[Turnstile] Cloudflare siteverify rejected token:", payload);
+  }
+
+  return { ok: payload.success === true, skipped: false, errorCodes: payload["error-codes"] };
 }
