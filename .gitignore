@@ -46,3 +46,6 @@ supabase/.temp/
 
 .vercel
 .env*
+
+.playwright-mcp/
+check_typesense.ts
