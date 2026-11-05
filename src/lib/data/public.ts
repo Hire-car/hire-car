@@ -7,10 +7,10 @@ export const getCachedVehicleDetails = unstable_cache(
   async function getCachedVehicleDetails(slug: string) {
     const supabase = createAdminClient();
 
-    const { data: vehicle } = await supabase
+    const { data: vehicle, error } = await supabase
       .from("vehicles")
       .select(`
-        id, slug, title, description, make, model, year, seats, fuel, transmission, category,
+        id, slug, title, notes, make, model, year, seats, fuel, transmission, category,
         price_per_day_aud, daily_distance_limit_km, extra_distance_fee_aud, instant_book, status, organization_id, views_count,
         organizations(id, name, slug, status, verified_at),
         branches(name, city, state, status, phone, whatsapp),
@@ -19,7 +19,12 @@ export const getCachedVehicleDetails = unstable_cache(
       `)
       .eq("slug", slug)
       .eq("status", "approved")
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      console.error("[getCachedVehicleDetails] Query error for slug", slug, error);
+      return null;
+    }
 
     if (!vehicle) {
       return null;
@@ -47,7 +52,7 @@ export const getCachedVehicleDetails = unstable_cache(
       reviews: reviewsRes.data ?? []
     };
   },
-  ["public-vehicle-details-v2"],
+  ["public-vehicle-details-v3"],
   { revalidate: 3600, tags: ["vehicles", "public"] }
 );
 

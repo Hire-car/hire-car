@@ -7,9 +7,7 @@ import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, response } = await requireApiUser();
-    if (!user) return response;
-
+    const { user } = await requireApiUser();
     const ip = clientIp(request.headers);
     const ipHash = hashIpForStorage(ip);
     const { data: body, response: jsonError } = await readJsonBody(request);
@@ -23,20 +21,37 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // 1. Get user profile
-    const { data: profile, error: profileErr } = await supabase
-      .from("profiles")
-      .select("full_name, email, phone")
-      .eq("id", user.id)
-      .maybeSingle();
+    // 1. Resolve customer contact details (authenticated profile or guest body parameters)
+    let customerName = "";
+    let customerEmail = "";
+    let customerPhone = "";
+    const customerUserId = user?.id || null;
 
-    if (profileErr) {
-      console.error("[quick lead] User profile query error:", profileErr);
+    if (user) {
+      const { data: profile, error: profileErr } = await supabase
+        .from("profiles")
+        .select("full_name, email, phone")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profileErr) {
+        console.error("[quick lead] User profile query error:", profileErr);
+      }
+
+      customerName = profile?.full_name || body.name || body.customerName || "Customer";
+      customerEmail = profile?.email || body.email || body.customerEmail || "";
+      customerPhone = profile?.phone || body.phone || body.customerPhone || "Not provided";
+    } else {
+      customerName = body.name || body.customerName || "";
+      customerEmail = body.email || body.customerEmail || "";
+      customerPhone = body.phone || body.customerPhone || "Not provided";
     }
 
-    if (!profile || !profile.email) {
-      console.warn("[quick lead] User profile or email not found for ID:", user.id);
-      return NextResponse.json({ error: "Complete your profile first" }, { status: 400 });
+    if (!customerEmail) {
+      return NextResponse.json(
+        { error: "Please enter your contact details to submit your booking request." },
+        { status: 400 }
+      );
     }
 
     // 2. Validate vehicle and vendor
@@ -83,7 +98,7 @@ export async function POST(request: NextRequest) {
       .from("leads")
       .select("id")
       .eq("vehicle_id", vehicleId)
-      .eq("customer_email", profile.email)
+      .eq("customer_email", customerEmail)
       .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString())
       .maybeSingle();
 
@@ -112,16 +127,16 @@ export async function POST(request: NextRequest) {
     const ed = body.endDate || defaultEnd.toISOString().split('T')[0];
     const msg = body.message || "I am interested in this vehicle. Please contact me via chat.";
 
-    console.info("[quick lead] Creating lead record for user:", user.id);
+    console.info("[quick lead] Creating lead record for customer:", customerEmail);
     const { data: lead, error: leadError } = await supabase
       .from("leads")
       .insert({
         vehicle_id: vehicleId,
         vendor_id: vendorId,
-        customer_name: profile.full_name || "Interested User",
-        customer_email: profile.email,
-        customer_user_id: user.id,
-        customer_phone: profile.phone || "Not provided",
+        customer_name: customerName || "Customer",
+        customer_email: customerEmail,
+        customer_user_id: customerUserId,
+        customer_phone: customerPhone || "Not provided",
         pickup_city: branch?.city || "Unknown",
         start_date: sd,
         end_date: ed,
@@ -144,24 +159,26 @@ export async function POST(request: NextRequest) {
 
     console.info("[quick lead] Lead created successfully with ID:", lead.id);
 
-    // 5. Auto-create the first message in the chat thread
-    const { error: messageError } = await supabase.from("messages").insert({
-      lead_id: lead.id,
-      sender_user_id: user.id,
-      body: "I am interested in this vehicle. Is it still available?",
-    });
+    // 5. If customer is authenticated, auto-create the first message in the chat thread
+    if (customerUserId) {
+      const { error: messageError } = await supabase.from("messages").insert({
+        lead_id: lead.id,
+        sender_user_id: customerUserId,
+        body: "I am interested in this vehicle. Is it still available?",
+      });
 
-    if (messageError) {
-      console.error("[quick lead] Initial message creation failed:", messageError);
-    } else {
-      console.info("[quick lead] Initial message created successfully for lead:", lead.id);
+      if (messageError) {
+        console.error("[quick lead] Initial message creation failed:", messageError);
+      } else {
+        console.info("[quick lead] Initial message created successfully for lead:", lead.id);
+      }
     }
 
     const { error: eventError } = await supabase.from("lead_events").insert({
       lead_id: lead.id,
       event_type: "quick_interest_submitted",
-      metadata: { ip_hash: ipHash, user_id: user.id },
-      actor_user_id: user.id,
+      metadata: { ip_hash: ipHash, user_id: customerUserId, guest: !customerUserId },
+      actor_user_id: customerUserId,
     });
 
     if (eventError) {
@@ -173,7 +190,7 @@ export async function POST(request: NextRequest) {
         await sendLeadAlert({
           to: organization.billing_email,
           vehicleTitle: vehicle.title,
-          customerName: profile.full_name || "Interested User",
+          customerName: customerName || "Customer",
         });
       } catch (emailErr) {
         console.error("[quick lead] vendor alert failed:", emailErr);
@@ -182,8 +199,8 @@ export async function POST(request: NextRequest) {
 
     try {
       await sendCustomerEnquiryConfirmation({
-        to: profile.email,
-        customerName: profile.full_name || "Customer",
+        to: customerEmail,
+        customerName: customerName || "Customer",
         vehicleTitle: vehicle.title,
         leadId: lead.id,
       });

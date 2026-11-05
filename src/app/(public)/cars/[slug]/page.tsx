@@ -34,7 +34,7 @@ import {
 } from "@/lib/seo";
 import { resolveGalleryImages, buildStorageUrl, getVehicleImages } from "@/lib/image-utils";
 
-export const revalidate = 3600; // Cache for 1 hour at edge (ISR)
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
