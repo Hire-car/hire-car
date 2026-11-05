@@ -45,7 +45,9 @@ export async function generateMetadata({
   const decodedSlug = decodeURIComponent(slug).trim();
   const data = await getCachedVehicleMetadata(decodedSlug);
 
-  if (!data) return {};
+  if (!data) {
+    notFound();
+  }
 
   type BranchMeta = { city: string; state: string };
   type ImageRecord = { storage_path: string; approved: boolean; sort_order: number };
