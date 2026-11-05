@@ -16,6 +16,7 @@ import {
 import { Filter, Car } from "lucide-react";
 import { SydneySportsCarContent } from "@/components/locations/sydney-sports-car-content";
 import { SydneyVanContent } from "@/components/locations/sydney-van-content";
+import { SydneyLuxuryContent, SYDNEY_LUXURY_FAQS } from "@/components/locations/sydney-luxury-content";
 
 export const revalidate = 3600;
 
@@ -41,6 +42,8 @@ export async function CityCategoryHub({ citySlug, categorySlug }: CityCategoryHu
       ? Math.round(vehicles.reduce((acc, v) => acc + v.pricePerDayAud, 0) / vehicles.length)
       : null;
 
+  const isSydneyLuxury = citySlug === "sydney" && categorySlug === "luxury";
+
   const schemas = [
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
@@ -49,18 +52,22 @@ export async function CityCategoryHub({ citySlug, categorySlug }: CityCategoryHu
       { name: category, path: `/locations/${citySlug}/${categorySlug}` },
     ]),
     buildItemListSchema(vehicles.map((v) => v.slug)),
-    buildFaqSchema([
-      {
-        question: `How much does ${category} hire cost in ${searchCity}?`,
-        answer: avgPrice
-          ? `Based on active listings, ${category} hire in ${searchCity} averages $${avgPrice} AUD per day on Hire Car.`
-          : `${category} hire prices in ${searchCity} vary by operator and season.`,
-      },
-      {
-        question: `How do I book a ${category} in ${searchCity}?`,
-        answer: `Browse listings on Hire Car, send an enquiry to the vendor, and arrange pickup directly. There are no platform booking fees.`,
-      },
-    ]),
+    buildFaqSchema(
+      isSydneyLuxury
+        ? SYDNEY_LUXURY_FAQS
+        : [
+            {
+              question: `How much does ${category} hire cost in ${searchCity}?`,
+              answer: avgPrice
+                ? `Based on active listings, ${category} hire in ${searchCity} averages $${avgPrice} AUD per day on Hire Car.`
+                : `${category} hire prices in ${searchCity} vary by operator and season.`,
+            },
+            {
+              question: `How do I book a ${category} in ${searchCity}?`,
+              answer: `Browse listings on Hire Car, send an enquiry to the vendor, and arrange pickup directly. There are no platform booking fees.`,
+            },
+          ],
+    ),
   ];
 
   return (
@@ -93,10 +100,12 @@ export async function CityCategoryHub({ citySlug, categorySlug }: CityCategoryHu
                   <span className="text-amber-400 font-semibold text-sm">{meta.state}</span>
                 </div>
                 <h1 className="text-4xl font-black text-white sm:text-5xl">
-                  {category} hire in {searchCity}
+                  {isSydneyLuxury ? "Luxury Car Hire in Sydney" : `${category} hire in ${searchCity}`}
                 </h1>
                 <p className="mt-3 text-slate-300 max-w-lg">
-                  {cityCategoryDescription(citySlug, category, total, meta.state)}
+                  {isSydneyLuxury
+                    ? "Hire premium and luxury cars in Sydney. Explore a fleet of Mercedes, BMW, Audi, Ferrari and more for travel, special events, airport transfers and weddings."
+                    : cityCategoryDescription(citySlug, category, total, meta.state)}
                 </p>
               </div>
               {avgPrice && (
@@ -152,6 +161,12 @@ export async function CityCategoryHub({ citySlug, categorySlug }: CityCategoryHu
           <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-4xl">
               <SydneyVanContent />
+            </div>
+          </section>
+        ) : isSydneyLuxury ? (
+          <section className="bg-white border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl">
+              <SydneyLuxuryContent />
             </div>
           </section>
         ) : (

@@ -54,16 +54,24 @@ export async function generateMetadata({
     const lowestPrice = vehicles.length > 0 ? Math.min(...vehicles.map(v => v.pricePerDayAud)) : undefined;
 
     const defaultTitle = cityCategoryTitle(city, category, meta.state, lowestPrice);
-    const metaTitle = city.toLowerCase() === "sydney" && category === "Sports car"
-      ? "Sports Car Hire Sydney, Compare Prices & Features (2026)"
-      : defaultTitle;
+    const isSydneyLuxury = city.toLowerCase() === "sydney" && category === "Luxury";
+    const metaTitle =
+      city.toLowerCase() === "sydney" && category === "Sports car"
+        ? "Sports Car Hire Sydney, Compare Prices & Features (2026)"
+        : isSydneyLuxury
+        ? "Luxury Car Hire Sydney | Premium BMW, Ferrari & Audi Rentals"
+        : defaultTitle;
+
+    const metaDescription = isSydneyLuxury
+      ? "Hire premium and luxury cars in Sydney. Explore a fleet of Mercedes, BMW, Audi, Ferrari and more for travel, special events, airport transfers and weddings."
+      : cityCategoryDescription(city, category, total, meta.state);
 
     return {
       title: metaTitle,
-      description: cityCategoryDescription(city, category, total, meta.state),
+      description: metaDescription,
       openGraph: {
-        title: defaultTitle,
-        description: cityCategoryDescription(city, category, total, meta.state),
+        title: metaTitle,
+        description: metaDescription,
       },
       alternates: { canonical: `/locations/${city}/${segment}` },
       robots: cityCategoryRobots(total),
