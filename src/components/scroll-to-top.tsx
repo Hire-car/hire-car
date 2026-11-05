@@ -1,50 +1,53 @@
 "use client";
 
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
 import { ChevronUp } from "lucide-react";
-import { useScrollPosition } from "@/hooks/use-scroll-position";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMobileState } from "@/components/mobile-state-provider";
 
 /**
  * Floating scroll-to-top button that appears after scrolling
- * past 2× the viewport height. Respects reduced motion preference.
+ * past 2x the viewport height. Respects reduced motion preference.
  *
- * Positioning / layering:
- * - Sits in the same floating layer as the WhatsApp button
- *   (`--z-whatsapp`, z-50) which is below the mobile nav (z-60) and
- *   modals (z-70), so it can never obscure or be obscured by them.
- * - Stacks directly above the WhatsApp float (and therefore above the
- *   sticky CTA bar when it is visible) so the two floating buttons never
- *   overlap on mobile.
- * - Hides entirely while the mobile nav drawer or a modal is open, matching
- *   the WhatsApp button behaviour, to avoid interaction conflicts.
+ * Performance-optimized: Uses an internal rAF check that only triggers
+ * a React state update when the boolean visibility threshold transitions,
+ * avoiding continuous re-renders during scrolling.
  *
  * @validates Requirements 16.4, 11.2, 13.4
  */
 export function ScrollToTop() {
-  const scrollY = useScrollPosition();
   const prefersReduced = useReducedMotion();
   const { isStickyCtaVisible, isMobileNavOpen, isModalOpen } = useMobileState();
-  const [viewportHeight, setViewportHeight] = useState(0);
+  const [isPastThreshold, setIsPastThreshold] = useState(false);
 
   useEffect(() => {
-    setViewportHeight(window.innerHeight);
+    let ticking = false;
 
-    const handleResize = () => setViewportHeight(window.innerHeight);
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => window.removeEventListener("resize", handleResize);
+    const checkVisibility = () => {
+      const threshold = window.innerHeight * 2;
+      const shouldBeVisible = window.scrollY > threshold;
+      setIsPastThreshold((prev) => (prev !== shouldBeVisible ? shouldBeVisible : prev));
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(checkVisibility);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    checkVisibility();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
   }, []);
 
-  // Visibility threshold (Property 7): visible iff scrollY > 2 * vh.
-  // Always hidden while an overlay (mobile nav / modal) is open so it never
-  // conflicts with those higher layers.
-  const isVisible =
-    viewportHeight > 0 &&
-    scrollY > 2 * viewportHeight &&
-    !isMobileNavOpen &&
-    !isModalOpen;
+  const isVisible = isPastThreshold && !isMobileNavOpen && !isModalOpen;
 
   const handleClick = () => {
     window.scrollTo({
@@ -53,9 +56,6 @@ export function ScrollToTop() {
     });
   };
 
-  // Stack ~64px above the WhatsApp float (its ~52px height + 12px gap) so the
-  // two never overlap. When the sticky CTA is visible on mobile, the WhatsApp
-  // float lifts above the bar and this button lifts with it.
   const bottomClass = isStickyCtaVisible
     ? "bottom-[calc(var(--sticky-cta-height,44px)+12px+24px+64px+env(safe-area-inset-bottom))] lg:bottom-[calc(24px+64px+env(safe-area-inset-bottom))]"
     : "bottom-[calc(24px+64px+env(safe-area-inset-bottom))]";

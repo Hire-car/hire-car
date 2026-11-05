@@ -1,5 +1,6 @@
-﻿import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/security/auth";
 import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/ses";
 import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
 import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
@@ -39,6 +40,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: payload.error.flatten() }, { status: 400 });
   }
 
+  // Anti-spam honeypot check: reject bot submissions immediately
+  if (payload.data.honeypot) {
+    console.warn(`[Lead API] Honeypot triggered from IP ${ip}`);
+    return NextResponse.json({ error: "Unable to process submission" }, { status: 400 });
+  }
+
   // Rate limit by email to prevent distributed botting
   const emailLimit = await rateLimitSlidingWindow(`lead:email:${payload.data.email}`, 3, 60_000);
   
@@ -53,11 +60,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const challenge = await verifyTurnstile(payload.data.turnstileToken, ip);
-
-  if (!challenge.ok) {
-    console.info(`[Lead API] Turnstile challenge failed for IP ${ip}`);
-    return NextResponse.json({ error: "Security challenge failed" }, { status: 403 });
+  if (payload.data.turnstileToken) {
+    const challenge = await verifyTurnstile(payload.data.turnstileToken, ip);
+    if (!challenge.ok) {
+      console.info(`[Lead API] Turnstile challenge failed for IP ${ip}`);
+      return NextResponse.json({ error: "Security challenge failed" }, { status: 403 });
+    }
+  } else {
+    // If turnstileToken is absent, check whether Turnstile verification is strictly required
+    const secret = process.env.TURNSTILE_SECRET_KEY;
+    if (secret && process.env.TURNSTILE_OPTIONAL !== "true") {
+      const challenge = await verifyTurnstile(undefined, ip);
+      if (!challenge.ok) {
+        console.info(`[Lead API] Security challenge required for IP ${ip}`);
+        return NextResponse.json({ error: "Security challenge required" }, { status: 403 });
+      }
+    }
   }
 
   const supabase = createAdminClient();
@@ -137,6 +155,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Associate authenticated customer ID when logged in; support null for guest customers
+  const user = await getCurrentUser();
+  const customerUserId = user?.id ?? null;
+
   const { data: lead, error } = await supabase
     .from("leads")
     .insert({
@@ -145,6 +167,7 @@ export async function POST(request: NextRequest) {
       customer_name: payload.data.name,
       customer_email: payload.data.email,
       customer_phone: payload.data.phone,
+      customer_user_id: customerUserId,
       pickup_city: payload.data.pickupCity,
       start_date: payload.data.startDate,
       end_date: payload.data.endDate,
@@ -160,12 +183,34 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unable to save lead" }, { status: 500 });
   }
 
+  // If user is authenticated, also create initial message in chat thread
+  if (customerUserId) {
+    await supabase.from("messages").insert({
+      lead_id: lead.id,
+      sender_user_id: customerUserId,
+      body: payload.data.message || "I am interested in booking this vehicle.",
+    });
+  }
+
   // Log lead event
   await supabase.from("lead_events").insert({
     lead_id: lead.id,
     event_type: "submitted",
-    metadata: { ip_hash: ipHash },
+    metadata: { ip_hash: ipHash, guest: !customerUserId },
   });
+
+  // Notify vendor dashboard
+  try {
+    await supabase.from("notifications").insert({
+      organization_id: payload.data.vendorId,
+      title: "New Booking Request",
+      message: `${payload.data.name} requested to book ${vehicle.title} (${payload.data.startDate} to ${payload.data.endDate})`,
+      type: "info",
+      link: `/vendor/leads/${lead.id}`,
+    });
+  } catch (notifErr) {
+    console.error(`[Lead API] Failed to create notification for lead ${lead.id}:`, notifErr);
+  }
 
   // Send lead alert to vendor's actual billing email
   const vendorEmail = organization.billing_email;

@@ -180,8 +180,8 @@ async function BrandCityPage({
                 </Link>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {vehicles.map((v) => (
-                  <VehicleCard key={v.id} vehicle={v} />
+                {vehicles.map((v, index) => (
+                  <VehicleCard key={v.id} vehicle={v} priority={index < 4} />
                 ))}
               </div>
             </>

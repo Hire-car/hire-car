@@ -601,8 +601,13 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
 
   revalidateTag(`vendor-vehicles-${organizationId}`);
   revalidateTag(`vendor-metrics-${organizationId}`);
+  revalidateTag("vehicles");
+  revalidateTag("featured");
+  revalidateTag("stats");
   revalidatePath("/vendor/vehicles");
   revalidatePath("/vendor/dashboard");
+  revalidatePath("/");
+  revalidatePath("/search");
 
   return { success: true, vehicleId };
 }

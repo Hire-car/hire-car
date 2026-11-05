@@ -1,11 +1,10 @@
 "use client";
 
 import { useRef, useState, useMemo } from "react";
-import { Send, MessageCircle, Zap, ArrowRight, Info, Calendar as CalendarIcon } from "lucide-react";
+import { Send, MessageCircle, ArrowRight, Info, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import Script from "next/script";
-import { Turnstile, SCRIPT_URL, DEFAULT_ONLOAD_NAME } from "@marsidev/react-turnstile";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { scrollIntoViewAndFocus } from "@/lib/form-utils";
 
 interface EnquiryWidgetProps {
@@ -19,9 +18,18 @@ interface EnquiryWidgetProps {
   } | null;
   instantBook?: boolean;
   pricePerDay: number;
+  defaultCity?: string;
 }
 
-export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, instantBook, pricePerDay }: EnquiryWidgetProps) {
+export function EnquiryWidget({
+  vehicleId,
+  vendorId,
+  isLoggedIn,
+  userProfile,
+  instantBook,
+  pricePerDay,
+  defaultCity,
+}: EnquiryWidgetProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -31,11 +39,12 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [pickupCity, setPickupCity] = useState("");
+  const [name, setName] = useState(userProfile?.name || "");
+  const [email, setEmail] = useState(userProfile?.email || "");
+  const [phone, setPhone] = useState(userProfile?.phone || "");
+  const [pickupCity, setPickupCity] = useState(defaultCity || "");
   const [message, setMessage] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
   const [licenseConfirmed, setLicenseConfirmed] = useState(false);
   const [showGuestForm, setShowGuestForm] = useState(false);
@@ -61,6 +70,17 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
   }, [startDate, endDate]);
 
   const totalPrice = daysCount > 1 ? daysCount * pricePerDay : pricePerDay;
+
+  const isGuestFormValid = Boolean(
+    startDate &&
+    endDate &&
+    endDate >= startDate &&
+    name.trim().length >= 2 &&
+    email.trim().length >= 3 &&
+    phone.trim().length >= 8 &&
+    pickupCity.trim().length >= 2 &&
+    licenseConfirmed
+  );
 
   const handleQuickSubmit = async (isMessage = false) => {
     if (!startDate || !endDate) {
@@ -110,12 +130,29 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
   const handleGuestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!turnstileToken) {
-      setError("Please complete the security challenge.");
-      return;
-    }
     if (!startDate || !endDate) {
       setError("Please select both a start date and an end date.");
+      return;
+    }
+    if (endDate < startDate) {
+      setError("End date must be on or after the start date.");
+      scrollIntoViewAndFocus(endDateRef.current);
+      return;
+    }
+    if (!name.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!email.trim() || !email.includes("@")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (!phone.trim() || phone.trim().length < 8) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+    if (!pickupCity.trim()) {
+      setError("Please enter your pickup city.");
       return;
     }
     if (!licenseConfirmed) {
@@ -126,13 +163,6 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
     setIsSubmitting(true);
     setError(null);
 
-    if (startDate && endDate && endDate < startDate) {
-      setError("End date must be on or after the start date.");
-      setIsSubmitting(false);
-      scrollIntoViewAndFocus(endDateRef.current);
-      return;
-    }
-
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
@@ -140,33 +170,37 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
         body: JSON.stringify({
           vehicleId,
           vendorId,
-          name,
-          email,
-          phone,
-          pickupCity,
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          pickupCity: pickupCity.trim(),
           startDate,
           endDate,
           message: guestFormMode === "book" && !message ? "I am interested in booking this vehicle." : message,
           consent: true,
-          turnstileToken,
+          turnstileToken: turnstileToken || undefined,
+          honeypot,
         }),
       });
 
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to submit enquiry");
+        const errorMsg =
+          (typeof data.error === "string" ? data.error : null) ||
+          data.error?.formErrors?.[0] ||
+          data.message ||
+          "Failed to submit booking request. Please check your details and try again.";
+        throw new Error(errorMsg);
       }
 
       const id = data.leadId ?? data.id;
       if (id) {
         setLeadId(id);
-        setSuccess(true);
-      } else {
-        setSuccess(true);
       }
+      setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setTurnstileToken("");
     } finally {
       setIsSubmitting(false);
@@ -186,39 +220,55 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
   if (success) {
     const chatPath = leadId ? `/messages/${leadId}` : "/customer/enquiries";
     const signInHref = `/auth/sign-in?redirectedFrom=${encodeURIComponent(chatPath)}`;
+    const isBooking = guestFormMode === "book";
 
     return (
       <div className="bg-white p-6 pb-7 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 mb-4">
-          <MessageCircle className="h-7 w-7 text-emerald-600" />
+          <CheckCircle2 className="h-7 w-7 text-emerald-600" />
         </div>
-        <h3 className="text-lg font-semibold text-emerald-800">Enquiry Sent!</h3>
-        <p className="mt-2 text-sm text-emerald-600">
-          The vendor has been notified. {isLoggedIn ? "Opening your chat..." : "Sign in to chat with the vendor."}
+        <h3 className="text-lg font-bold text-slate-900">
+          {isBooking ? "Booking Request Submitted!" : "Enquiry Sent!"}
+        </h3>
+        <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+          {isBooking ? (
+            <>
+              Your booking request has been submitted successfully!
+              <br className="hidden sm:inline" />{" "}
+              The vehicle owner/vendor will review your request and contact you regarding the booking.
+            </>
+          ) : (
+            "The vendor has been notified of your enquiry and will respond shortly."
+          )}
         </p>
         {isLoggedIn && leadId ? (
           <button
             onClick={() => router.push(chatPath)}
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
+            className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
           >
             <MessageCircle className="h-4 w-4" />
             Open Chat
             <ArrowRight className="h-4 w-4" />
           </button>
         ) : (
-          <Link
-            href={signInHref}
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors"
-          >
-            <MessageCircle className="h-4 w-4" />
-            Sign in with Google to Chat
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        )}
-        {!isLoggedIn && (
-          <p className="mt-3 text-xs text-emerald-700">
-            Use the same email ({email}) when signing in to access this conversation.
-          </p>
+          <div className="mt-5 pt-4 border-t border-slate-100">
+            <p className="text-xs text-slate-500 mb-3">
+              Want to chat directly with the vendor or track updates?
+            </p>
+            <Link
+              href={signInHref}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Sign in with Google to Chat
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            {email && (
+              <p className="mt-2.5 text-xs text-slate-400">
+                Use <span className="font-medium text-slate-600">{email}</span> when signing in to access this conversation.
+              </p>
+            )}
+          </div>
         )}
       </div>
     );
@@ -277,14 +327,14 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
           <div className="text-right flex items-baseline gap-1.5">
             <span className="text-3xl font-black text-[#ea580c]">${totalPrice}</span>
             <span className="text-[11px] font-bold text-slate-500 uppercase">
-              AUD {startDate && endDate && daysCount > 1 ? `/ total` : '/ day'}
+              AUD {startDate && endDate && daysCount > 1 ? `/ total` : "/ day"}
             </span>
           </div>
         </div>
 
         {!isLoggedIn && !showGuestForm ? (
           <div className="pt-2 flex flex-col gap-3">
-             <button
+            <button
               type="button"
               onClick={() => handleRevealGuestForm("book")}
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#ea580c] px-4 py-3.5 text-[15px] font-bold text-white hover:bg-[#c2410c] transition-colors"
@@ -355,6 +405,18 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
               required={guestFormMode === "message"}
             />
 
+            {/* Hidden honeypot field for bot protection */}
+            <input
+              type="text"
+              name="website"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="hidden"
+            />
+
             <label className="flex items-start gap-3 text-[13px] text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 cursor-pointer mt-2">
               <input
                 type="checkbox"
@@ -368,21 +430,24 @@ export function EnquiryWidget({ vehicleId, vendorId, isLoggedIn, userProfile, in
               </span>
             </label>
 
-            <div className="flex justify-center mt-2">
-              <Script
-                src={`${SCRIPT_URL}?onload=${DEFAULT_ONLOAD_NAME}&render=explicit`}
-                strategy="lazyOnload"
-              />
+            <div className="flex justify-center mt-2 min-h-[65px]">
               <Turnstile
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                injectScript={false}
-                onSuccess={(token) => setTurnstileToken(token)}
+                onSuccess={(token) => {
+                  setTurnstileToken(token);
+                  setError(null);
+                }}
+                onExpire={() => setTurnstileToken("")}
+                onError={() => {
+                  // Fallback safely if Turnstile is blocked by ad-blocker
+                  setTurnstileToken("");
+                }}
               />
             </div>
 
             <button
               type="submit"
-              disabled={isSubmitting || !licenseConfirmed || !turnstileToken}
+              disabled={isSubmitting || !licenseConfirmed || !isGuestFormValid}
               className="mt-2 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#ea580c] px-4 py-3.5 text-[15px] font-bold text-white hover:bg-[#c2410c] disabled:opacity-50 transition-colors"
             >
               {isSubmitting ? (

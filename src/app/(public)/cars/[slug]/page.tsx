@@ -19,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { hashIpForStorage } from "@/lib/security/rate-limit";
 import type { Metadata } from "next";
 import {
@@ -96,17 +97,44 @@ export default async function VehicleDetailPage({
   const { vehicle, vendorSub, reviews } = data;
   const supabase = createAdminClient();
 
+  // Parallelise user auth + request headers — both are needed before render
+  const [user, headersList] = await Promise.all([
+    getCurrentUser(),
+    headers(),
+  ]);
 
+  // Profile fetch only when logged in; fire it concurrently with the view log.
+  const profilePromise = user
+    ? supabase
+        .from("profiles")
+        .select("full_name, email, phone")
+        .eq("id", user.id)
+        .single()
+    : Promise.resolve({ data: null });
 
-  // Get user for enquiry widget auth state
-  const user = await getCurrentUser();
+  // Background execution: scheduled via after() so it runs after response
+  // streaming without blocking render, while ensuring the serverless execution
+  // context stays alive until logging finishes.
+  const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
+  const ipHash = hashIpForStorage(ip);
+  const vehicleId = vehicle.id;
+  const currentUserId = user?.id || null;
+
+  after(async () => {
+    try {
+      await supabase.rpc("increment_vehicle_view", {
+        p_vehicle_id: vehicleId,
+        p_ip_hash: ipHash,
+        p_user_id: currentUserId,
+      });
+    } catch (err: unknown) {
+      console.error("Failed to log view in background:", err);
+    }
+  });
+
   let userProfile = null;
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, email, phone")
-      .eq("id", user.id)
-      .single();
+    const { data: profile } = await profilePromise;
     if (profile) {
       userProfile = {
         name: profile.full_name || "",
@@ -114,20 +142,6 @@ export default async function VehicleDetailPage({
         phone: profile.phone || "",
       };
     }
-  }
-
-  // Log view (non-blocking)
-  try {
-    const headersList = await headers();
-    const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
-    const ipHash = hashIpForStorage(ip);
-    await supabase.rpc("increment_vehicle_view", {
-      p_vehicle_id: vehicle.id,
-      p_ip_hash: ipHash,
-      p_user_id: user?.id || null,
-    });
-  } catch (err) {
-    console.error("Failed to log view:", err);
   }
 
   // Cast related records
@@ -417,6 +431,7 @@ export default async function VehicleDetailPage({
                 userProfile={userProfile}
                 instantBook={vehicle.instant_book}
                 pricePerDay={vehicle.price_per_day_aud}
+                defaultCity={branch?.city}
               />
             </Card>
 

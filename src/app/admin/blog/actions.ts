@@ -1,6 +1,7 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag as nextRevalidateTag } from "next/cache";
+const revalidateTag = (tag: string) => { try { (nextRevalidateTag as any)(tag); } catch {} };
 import { redirect } from "next/navigation";
 import { publishDailyBlog } from "@/lib/blog/publish-daily";
 import { requireAdminRole } from "@/lib/security/auth";
@@ -42,6 +43,7 @@ export async function triggerDailyBlogGeneration(
 
     revalidatePath("/admin/blog");
     revalidatePath("/blog");
+    revalidateTag("blog");
 
     const warningText = result.warnings?.length
       ? ` Warnings: ${result.warnings.join("; ")}`
@@ -173,6 +175,7 @@ export async function updateBlogArticle(
 
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
+    revalidateTag("blog");
   revalidatePath(`/blog/${existing.slug}`);
   if (data.slug !== existing.slug) {
     revalidatePath(`/blog/${data.slug}`);

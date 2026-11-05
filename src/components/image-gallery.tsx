@@ -82,7 +82,6 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
             alt={images[currentIndex].alt_text || "Vehicle Image"}
             fill
             priority={currentIndex === 0}
-            loading={currentIndex === 0 ? "eager" : "lazy"}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
             className="object-cover transition-opacity duration-300 cursor-pointer"

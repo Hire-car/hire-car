@@ -119,6 +119,7 @@ export const leadSchema = z
     message: z.string().trim().max(1000).optional().default(""),
     consent: z.literal(true),
     turnstileToken: z.string().optional(),
+    honeypot: z.string().optional().default(""),
   })
   .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
     message: "End date must be on or after start date",
