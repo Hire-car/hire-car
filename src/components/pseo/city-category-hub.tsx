@@ -100,11 +100,11 @@ export async function CityCategoryHub({ citySlug, categorySlug }: CityCategoryHu
                   <span className="text-amber-400 font-semibold text-sm">{meta.state}</span>
                 </div>
                 <h1 className="text-4xl font-black text-white sm:text-5xl">
-                  {isSydneyLuxury ? "Luxury Car Hire in Sydney" : `${category} hire in ${searchCity}`}
+                  {isSydneyLuxury ? "Luxury Car hire in Sydney" : `${category} hire in ${searchCity}`}
                 </h1>
                 <p className="mt-3 text-slate-300 max-w-lg">
                   {isSydneyLuxury
-                    ? "Hire premium and luxury cars in Sydney. Explore a fleet of Mercedes, BMW, Audi, Ferrari and more for travel, special events, airport transfers and weddings."
+                    ? "Hire premium and luxury cars in Sydney . Explore fleet of Mercedes, BMW, Audi, Ferrari and more for travel,  special event, airport transfer and weddings."
                     : cityCategoryDescription(citySlug, category, total, meta.state)}
                 </p>
               </div>

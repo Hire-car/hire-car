@@ -2,64 +2,64 @@ import { ChevronDown } from "lucide-react";
 
 export const SYDNEY_LUXURY_FAQS = [
   {
-    question: "How much does it cost to rent a luxury car in Sydney?",
+    question: "1. How much does it cost to rent a luxury car in Sydney?",
     answer:
-      "Prices typically start from around $150 per day for executive sedans, while high-performance sports cars and exotic supercars can range from $500 to over $1,500 per day. Rates vary depending on the season, vehicle model, and hire duration.",
+      "start from around $150 per day, while performance cars and exotic supercars can cost several hundred or several thousand dollars per day. Always check current quotes.",
   },
   {
-    question: "What types of luxury cars are available for rent in Sydney?",
+    question: "2. What types of luxury cars are available for rent in Sydney?",
     answer:
-      "Available categories include executive sedans, premium SUVs, luxury convertibles, sports coupes, and exotic supercars. Featured marques include Mercedes-Benz, BMW, Audi, Porsche, Range Rover, Ferrari, Lamborghini, and Rolls-Royce.",
+      "You can find luxury sedans, executive SUVs, sports cars, convertibles and exotic supercars. Popular options include BMW, Mercedes-Benz, Audi, Porsche, Ferrari, Lamborghini and Rolls-Royce.",
   },
   {
-    question: "Can I rent a luxury car in Sydney for a single day?",
+    question: "3. Can I rent a luxury car in Sydney for a single day?",
     answer:
-      "Yes. Most rental providers offer single-day luxury car hires. However, selected high-demand exotic supercars or peak weekend dates may require a minimum two-day reservation. Check availability and specific rental terms with the provider in advance.",
+      "Yes. Many providers offer daily luxury car rentals. However, some exotic vehicles have minimum hire periods or specific booking conditions. Confirm availability before making plans.",
   },
   {
-    question: "Do I need a special licence to hire a luxury car in Sydney?",
+    question: "4. Do I need a special licence to hire a luxury car in Sydney?",
     answer:
-      "No special licence is required for standard luxury passenger vehicles. You must hold an unrestricted, valid driver's licence. Provisional (P-plate) drivers are typically ineligible to rent high-performance and exotic vehicles.",
+      "Generally, you do not need a special licence to drive a standard luxury passenger car. However, you must hold an appropriate valid driving licence and meet the rental company's conditions.",
   },
   {
-    question: "What is the minimum age requirement for luxury car rental in Sydney?",
+    question: "5. What is the minimum age requirement for luxury car rental in Sydney?",
     answer:
-      "Most luxury car hire companies set the minimum driver age at 25 years. Certain high-powered supercars may require drivers to be 28 or 30 years old with at least three years of driving history.",
+      "Many providers set the minimum age at 25. Some standard premium vehicles may have lower age limits, while certain supercars require drivers to be 28 or older. Requirements vary by vehicle and company.",
   },
   {
-    question: "Can I rent a luxury car for a wedding or special occasion in Sydney?",
+    question: "6. Can I rent a luxury car for a wedding or special occasion in Sydney?",
     answer:
-      "Yes. Luxury and prestige vehicles are widely booked for weddings, formals, anniversaries, and VIP events. Depending on the provider, you can choose self-drive options or professional chauffeur services.",
+      "Yes. Many Sydney rental providers offer luxury vehicles for weddings, anniversaries, formal events and celebrations. You can choose a self-drive vehicle or arrange a chauffeur-driven service.",
   },
   {
-    question: "Are self-drive luxury car rentals available in Sydney?",
+    question: "7. Are self-drive luxury car rentals available in Sydney?",
     answer:
-      "Yes. Self-drive options are available across most premium sedans, luxury SUVs, and sports cars, provided you meet the required age, licence, and security deposit criteria.",
+      "Yes. You can choose from premium sedans, SUVs and selected exotic cars, subject to age, licence and insurance conditions.",
   },
   {
-    question: "Can I hire a luxury car in Sydney for a business meeting?",
+    question: "8. Can I hire a luxury car in Sydney for a business meeting?",
     answer:
-      "Yes. Executive sedans such as the Mercedes-Benz E-Class or BMW 5 Series and luxury SUVs are popular choices for corporate travel, conference visits, and client pickups across Sydney.",
+      "Yes. Executive sedans and premium SUVs are popular choices for business meetings, conferences and corporate travel.",
   },
   {
-    question: "Which luxury car brands can I rent in Sydney?",
+    question: "9. Which luxury car brands can I rent in Sydney?",
     answer:
-      "Sydney fleet providers offer leading luxury marques including Mercedes-Benz, BMW, Audi, Porsche, Range Rover, Bentley, Rolls-Royce, Ferrari, Lamborghini, and Maserati.",
+      "you can find BMW, Mercedes-Benz, Audi, Porsche, Bentley, Rolls-Royce, Ferrari, Lamborghini, Maserati and Range Rover vehicles.",
   },
   {
-    question: "Is insurance included when renting a luxury car in Sydney?",
+    question: "10. Is insurance included when renting a luxury car in Sydney?",
     answer:
-      "Standard rentals generally include comprehensive insurance coverage subject to a damage excess (deductible). Most operators offer excess reduction packages to lower your financial liability. Always review excess terms, security bond amounts, and policy exclusions prior to booking.",
+      "Insurance arrangements vary between providers. Some rentals include basic insurance, while others offer optional protection packages. Always check the damage excess, exclusions and coverage details.",
   },
   {
-    question: "Can I rent a luxury SUV in Sydney for a family trip?",
+    question: "11. Can I rent a luxury SUV in Sydney for a family trip?",
     answer:
-      "Yes. Prestige SUVs such as the Mercedes-Benz GLE, BMW X5, and Range Rover Sport provide spacious 5-seat comfort, substantial luggage space, and advanced safety features, making them well-suited for family road trips.",
+      "Yes. Luxury SUVs such as the BMW X5, Mercedes-Benz GLE and Range Rover Sport offer comfortable seating, useful luggage space and modern safety features. Check the exact seating capacity before booking.",
   },
   {
-    question: "Can I hire a luxury car in Sydney for a weekend getaway?",
+    question: "12. Can I hire a luxury car in Sydney for a weekend getaway?",
     answer:
-      "Yes. Weekend luxury packages are widely available for scenic drives to the Blue Mountains, Southern Highlands, or Hunter Valley. Always check daily kilometre allowances and return conditions before finalizing your booking.",
+      "Yes. Many providers offer weekend rental arrangements. Check minimum hire periods, kilometre allowances, vehicle availability and weekend pricing before confirming your reservation.",
   },
 ];
 
@@ -90,140 +90,183 @@ const LUXURY_VEHICLES_TABLE = [
   },
   {
     model: "Range Rover Sport",
-    features: "Powerful engine, luxury interior and commanding road presence",
+    features: "Powerful engine, luxury interior and road presence",
     specs: "5 seats, automatic transmission",
     bestFor: "Weekend trips",
   },
   {
     model: "Porsche 911",
-    features: "Iconic sports performance, precision handling and sleek design",
-    specs: "2+2 seats, PDK automatic transmission",
+    features: "Sports performance, distinctive design and responsive handling",
+    specs: "2 seats, automatic or PDK transmission, depending on model",
     bestFor: "Special occasions",
   },
   {
     model: "Lamborghini Huracan",
-    features: "V10 high-performance engine and striking supercar styling",
+    features: "High-performance engine and striking supercar design",
     specs: "2 seats, V10 engine, automatic transmission",
     bestFor: "Luxury experiences",
   },
   {
     model: "Rolls-Royce Ghost",
-    features: "Unmatched craftsmanship, whisper-quiet cabin and peerless comfort",
+    features: "Premium craftsmanship, spacious seating and refined comfort",
     specs: "5 seats, automatic transmission",
-    bestFor: "Weddings & VIP travel",
+    bestFor: "Weddings and VIP travel",
   },
 ];
 
 const TOP_FEATURES = [
   {
     title: "1. Premium Interior and Comfortable Seating",
-    desc: "Look for high-grade leather upholstery, multi-way power-adjustable seating, multi-zone climate control, and generous legroom to ensure comfort on longer journeys.",
+    desc: "Look for quality leather seats, adjustable seating, climate control and enough legroom. These features make a noticeable difference during longer journeys.",
   },
   {
     title: "2. Advanced Safety Technology",
-    desc: "Choose vehicles equipped with driver-assist technologies including adaptive cruise control, blind-spot monitoring, lane-keeping assistance, and 360-degree parking cameras.",
+    desc: "Choose vehicles with useful safety features such as adaptive cruise control, blind-spot monitoring, lane departure warnings, parking sensors and reversing cameras.",
   },
   {
-    title: "3. Modern Infotainment & Connectivity",
-    desc: "Wireless Apple CarPlay, Android Auto, Bluetooth audio streaming, and high-resolution satellite navigation make navigating Sydney seamless.",
+    title: "3. Modern Infotainment System",
+    desc: "Apple CarPlay, Android Auto, Bluetooth connectivity and built-in navigation make driving around Sydney easier.",
   },
   {
-    title: "4. Smooth Engine & Driving Dynamics",
-    desc: "A true luxury rental should deliver effortless power delivery, confident handling, and a quiet, insulated cabin whether cruising the motorway or city streets.",
+    title: "4. Smooth Engine Performance",
+    desc: "A good luxury vehicle should offer responsive acceleration, stable handling and a comfortable ride. Choose an engine and vehicle type that suit your driving needs.",
   },
   {
-    title: "5. Practical Luggage & Passenger Capacity",
-    desc: "Confirm boot space and seating layouts before reserving. Executive sedans suit business trips, while luxury SUVs accommodate larger groups and luggage with ease.",
+    title: "5. Luggage and Passenger Space",
+    desc: "Check the boot capacity and seating arrangement before booking. An executive sedan may suit business travellers, while a luxury SUV works better for families.",
   },
   {
-    title: "6. Meticulous Vehicle Condition & Maintenance",
-    desc: "Reputable providers maintain their vehicles to strict mechanical standards, ensuring pristine cleanliness and optimal performance from the moment you take the wheel.",
+    title: "6. Vehicle Condition and Maintenance",
+    desc: "Check the vehicle's condition, service history where available, tyre condition and cleanliness. A premium rental should feel premium from the moment you collect the keys.",
   },
 ];
 
 const WHY_CHOOSE = [
   {
-    title: "1. Flexible Rental Periods",
-    desc: "Whether you require a vehicle for a single day, a weekend escape, or an extended monthly rental, browse verified provider listings with flexible duration options.",
+    title: "1. Flexible Rental",
+    desc: "Different customers have different requirements. Some need a luxury car for one day, while others want a vehicle for a weekend or an extended period. Explore available listings and contact providers to discuss suitable rental arrangements.",
   },
   {
-    title: "2. Transparent Direct Quotes",
-    desc: "Connect directly with Australian rental operators. Review vehicle specs, inclusions, and rates without hidden platform markups or surprise checkout fees.",
+    title: "2. Easy Online Booking",
+    desc: "Browse available vehicles online, review their details and contact the relevant rental provider. This makes the process more convenient than visiting several rental offices.",
   },
   {
-    title: "3. Sydney Airport Pick-Up & Delivery",
-    desc: "Need luxury car hire at Sydney Airport (SYD)? Many participating operators provide direct airport terminal handovers or convenient hotel deliveries across Sydney.",
+    title: "3. Airport Pick-Up and Drop-Off Services",
+    desc: "Looking for luxury car hire Sydney Airport? Airport collection or vehicle delivery can save valuable time after a long flight. Check individual provider listings for airport availability, delivery charges and collection arrangements.",
   },
   {
-    title: "4. Effortless Vehicle Comparison",
-    desc: "Compare vehicle specifications, daily pricing, and included kilometre allowances side-by-side to find the ideal match for your travel plans.",
+    title: "4. Easy Vehicle Comparisons",
+    desc: "Compare different vehicle types, features and rental offers in one place. This helps you understand what each provider offers before making a decision.",
   },
   {
-    title: "5. Clear Pricing with No Hidden Surcharges",
-    desc: "Understand your full rental quote upfront, including standard insurance coverage, refundable bond requirements, and kilometre allowances before you commit.",
+    title: "5. Clear Pricing and No Hidden Charges",
+    desc: "Rental costs should be clear before you confirm a booking. Check the complete quote, including insurance, security deposits, additional kilometres, delivery charges and other applicable fees. Always review the provider's rental agreement.",
   },
   {
-    title: "6. Self-Drive and Chauffeur Options",
-    desc: "Choose between independent self-drive rentals and professional chauffeur-driven experiences suited for formal events and corporate transfers.",
+    title: "6. Self-Drive Options",
+    desc: "Prefer driving yourself? Explore luxury car hire self drive options and choose a vehicle that suits your travel plans. Check age restrictions, licence conditions and insurance requirements before booking.",
   },
   {
-    title: "7. Responsive Local Support",
-    desc: "Receive dedicated assistance from Australian-based vehicle operators who understand local driving conditions, toll networks, and route recommendations.",
+    title: "7. Customer Support",
+    desc: "Getting help with a booking should be straightforward. Check the available support channels and operating hours when choosing a provider, particularly if you need assistance outside normal business hours.",
   },
 ];
 
 const TOP_COMPANIES = [
   {
     name: "1. Hire Car Marketplace",
-    desc: "Hire Car Marketplace is an Australian vehicle rental platform connecting customers directly with verified local rental providers. Rather than being limited to a single company's fleet, customers can browse luxury sedans, prestige SUVs, and sports cars, compare live rates, and contact operators without booking fees.",
+    paragraphs: [
+      "Hire Car Marketplace is an Australian vehicle rental marketplace that connects customers with rental providers. Instead of relying on a single rental company's fleet, customers can explore different vehicle listings and compare available options.",
+      "It is useful for people who want to compare rental vehicles, review provider details and find suitable cars for personal or business travel.",
+      "The platform also helps rental businesses connect with potential customers looking for vehicles across Australia.",
+    ],
   },
   {
     name: "2. Prestige Rentals",
-    desc: "Prestige Rentals specializes in high-end, performance, and exotic vehicle hire across Australia. Their advertised fleet includes iconic models from Ferrari, Lamborghini, Audi R8, and Range Rover for luxury self-drive and promotional occasions.",
+    paragraphs: [
+      "Prestige Rentals is an option for customers interested in premium, performance and exotic vehicles. Its advertised vehicle selection includes models such as the Lamborghini Huracan, Ferrari California, Audi R8, BMW M4 and Range Rover Sport.",
+      "The company offers luxury rental options for customers seeking a more distinctive driving experience.",
+      "Before booking, compare the available vehicle, daily rate, kilometre allowance, security bond and insurance conditions.",
+    ],
   },
   {
     name: "3. Royal Car Hire",
-    desc: "Royal Car Hire offers luxury and prestige vehicle rentals in Sydney, providing both self-drive hires and chauffeur-driven services. Their fleet caters to weddings, formal events, corporate transfers, and VIP travel.",
+    paragraphs: [
+      "Royal Car Hire offers luxury and exotic vehicle hire in Sydney, with self-drive and chauffeur-driven services.",
+      "Its advertised fleet includes Rolls-Royce models, BMW M3 CS, Mercedes-Benz G63, Lamborghini Urus and other premium vehicles.",
+      "The company caters to weddings, corporate functions, special occasions and customers who want a high-end vehicle for personal travel.",
+    ],
   },
   {
     name: "4. Sydney Exotic Car Hire",
-    desc: "Sydney Exotic Car Hire provides access to sports and exotic performance cars across Sydney, facilitating rentals for enthusiasts and visitors looking for memorable driving experiences.",
+    paragraphs: [
+      "Sydney Exotic Car Hire provides access to luxury and exotic vehicles, with self-drive bookings facilitated through Turo.",
+      "Its fleet includes premium and performance vehicles, alongside other practical rental options. Customers can explore available cars and review booking conditions through its rental platform.",
+      "This option may suit travellers who want to experience a different vehicle without purchasing one.",
+    ],
   },
 ];
 
 const OCCASIONS = [
   {
-    name: "1. Wedding Celebrations",
-    desc: "Make an unforgettable arrival with an elegant Rolls-Royce, Mercedes-Benz, or luxury sports coupe that complements wedding photography and bridal party travel.",
+    title: "1. Wedding Celebrations",
+    desc: "Arrive at your wedding in a stylish Rolls-Royce, Mercedes-Benz or luxury sports car. These vehicles can add an elegant touch to wedding photographs and special moments.",
   },
   {
-    name: "2. Corporate & Executive Travel",
-    desc: "Project professionalism and arrive relaxed at high-stakes business meetings, industry conferences, and executive dinners across the Sydney CBD.",
+    title: "2. Corporate Meetings",
+    desc: "premium sedan or luxury SUV can create a professional impression when attending important business meetings, conferences and corporate events.",
   },
   {
-    name: "3. Business Trips & Client Transport",
-    desc: "Ensure seamless transit for visiting executives, VIP guests, and business partners with premium executive sedans and SUVs.",
+    title: "3. Business Travel",
+    desc: "Business travellers often prefer comfortable vehicles with spacious seating, modern technology and smooth handling. A BMW, Mercedes-Benz or Audi can make travel between meetings more convenient.",
   },
   {
-    name: "4. Sydney Airport Transfers",
-    desc: "Enjoy quiet comfort and dedicated luggage room between Sydney Kingsford Smith Airport, city hotels, and regional corporate hubs.",
+    title: "4. Airport Transfers",
+    desc: "Choose a premium vehicle for comfortable travel between Sydney Airport, hotels, offices and other destinations. Confirm whether the provider offers airport delivery or chauffeur services.",
   },
   {
-    name: "5. Scenic Weekend Getaways",
-    desc: "Experience premier Australian routes—from the Grand Pacific Drive to the Blue Mountains—in a responsive performance coupe or refined luxury SUV.",
+    title: "5. Road Trips and Holidays",
+    desc: "Planning a weekend away from Sydney? A luxury SUV or comfortable executive car can make longer journeys more enjoyable. Consider luggage space, fuel economy and kilometre limits before selecting your vehicle.",
   },
 ];
 
 const POLICIES = [
-  { label: "Valid Driver's Licence", text: "Drivers must hold a valid, full driver's licence. International visitors require a valid overseas licence accompanied by an International Driving Permit (IDP) or certified English translation if not in English." },
-  { label: "Identification", text: "A valid passport or Australian government-issued photo ID is required at vehicle collection." },
-  { label: "Security Deposit", text: "Prestige rentals require a refundable security deposit or credit card pre-authorisation prior to vehicle release." },
-  { label: "Insurance & Excess", text: "Review included insurance coverage, excess amounts, and optional reduction waivers before signing the rental agreement." },
-  { label: "Kilometre Allowances", text: "Verify the included daily kilometre limit and the per-kilometre surcharge for excess travel." },
-  { label: "Vehicle Inspection", text: "Complete a joint vehicle inspection and photograph any pre-existing imperfections before departing the pickup location." },
-  { label: "Return Deadlines", text: "Adhere to the agreed return schedule to avoid late return surcharges or extended insurance daily charges." },
-  { label: "Cancellation Terms", text: "Review the provider's cancellation window and refund eligibility policy before booking." },
-  { label: "Authorized Drivers", text: "Only drivers explicitly registered on the rental agreement are legally permitted and insured to operate the vehicle." },
+  {
+    label: "Valid Driving Licence",
+    text: "Provide a current and valid driving licence. International visitors may need an International Driving Permit or an approved English translation, depending on their licence and circumstances.",
+  },
+  {
+    label: "Identification",
+    text: "Provide suitable identification, such as a passport or another accepted identity document.",
+  },
+  {
+    label: "Security Deposit",
+    text: "Most premium rentals require a refundable security deposit or card pre-authorisation.",
+  },
+  {
+    label: "Insurance",
+    text: "Review the included insurance, damage excess, exclusions and optional protection before signing the agreement.",
+  },
+  {
+    label: "Kilometre Limits",
+    text: "Check the daily kilometre allowance and additional charges for exceeding it.",
+  },
+  {
+    label: "Vehicle Inspection",
+    text: "Photograph the vehicle before departure and report any existing damage to the rental provider.",
+  },
+  {
+    label: "Late Returns",
+    text: "Check the return deadline and any additional charges for late drop-offs.",
+  },
+  {
+    label: "Cancellation Policy",
+    text: "Review cancellation deadlines, refund conditions and booking changes.",
+  },
+  {
+    label: "Vehicle Usage",
+    text: "Follow the rental agreement regarding authorised drivers, travel areas and prohibited activities.",
+  },
 ];
 
 export function SydneyLuxuryContent() {
@@ -235,10 +278,10 @@ export function SydneyLuxuryContent() {
           Looking for cheap luxury car hire in Sydney? Whether you want a stylish car for your wedding, a grand entrance at a special event, a premium vehicle for an airport transfer or a comfortable car for a weekend getaway, Hire Car Marketplace can help you find a suitable option within your budget and make your journey more enjoyable.
         </p>
         <p>
-          Our luxury and premium vehicle listings include prestigious brands such as Ferrari, Lamborghini, Mercedes-Benz, Audi, and BMW. You can explore a range of sports cars, luxury vehicles, and exotic supercars to find the one that matches your style and requirements. Both self-drive and professional chauffeur-driven rental options are available through participating providers.
+          Our luxury and premium vehicle listings include prestigious brands such as Ferrari, Lamborghini, Mercedes-Benz, AUDI and BMW. You can explore a range of sports cars, luxury vehicles and exotic supercars to find the one that matches your style and requirements. Both self-drive and professional chauffeur-driven rental options are available through participating providers.
         </p>
         <p>
-          A good car rental company should offer more than just an impressive vehicle. It should also provide transparent pricing, flexible booking options, reliable customer support, and suitable insurance arrangements. With Hire Car Marketplace, you can explore different car rental options across Sydney, compare vehicles, and connect directly with rental providers. Whether you are looking for an affordable premium car or a high-performance supercar, comparing your options can help you find the right luxury vehicle for your journey without unnecessarily stretching your budget.
+          A good car rental company should offer more than just an impressive vehicle. It should also provide transparent pricing, flexible booking options, reliable customer support and suitable insurance arrangements. With Hire Car Marketplace, you can explore different car rental options across Sydney, compare vehicles and connect directly with rental providers. Whether you are looking for an affordable premium car or a high-performance supercar, comparing your options can help you find the right luxury vehicle for your journey without unnecessarily stretching your budget.
         </p>
       </section>
 
@@ -246,7 +289,9 @@ export function SydneyLuxuryContent() {
       <section>
         <h2 className="text-2xl font-bold text-slate-900 mb-4">Sydney Luxury Car Rental Options</h2>
         <p className="text-slate-600 mb-6 leading-relaxed">
-          Sydney has a wide selection of luxury vehicles, from comfortable executive sedans to powerful sports cars. Your choice should depend on passenger numbers, luggage space, driving preferences, and the purpose of your trip. Here are some popular luxury vehicle options worth considering:
+          Sydney has a wide selection of luxury vehicles, from comfortable executive sedans to powerful sports cars. Your choice should depend on passenger numbers, luggage space, driving preferences and the purpose of your trip.
+          <br />
+          Here are some popular luxury vehicle options worth considering:
         </p>
 
         <div className="overflow-x-auto rounded-xl border border-slate-200 mb-4">
@@ -296,8 +341,11 @@ export function SydneyLuxuryContent() {
       {/* Why Choose Section */}
       <section>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">Why Choose Hire Car Marketplace for Luxury Car Hire?</h2>
+        <p className="text-slate-600 mb-4 leading-relaxed">
+          Finding a suitable luxury rental should not involve spending hours contacting different providers. Hire Car Marketplace helps customers explore rental options and connect with vehicle providers across Australia, including Sydney.
+        </p>
         <p className="text-slate-600 mb-6 leading-relaxed">
-          Finding a suitable luxury rental should not involve spending hours contacting different providers. Hire Car Marketplace helps customers explore rental options and connect with vehicle providers across Australia, including Sydney. Here are some useful reasons to consider the platform:
+          Here are some useful reasons to consider the platform.
         </p>
         <div className="space-y-4">
           {WHY_CHOOSE.map((item, i) => (
@@ -312,14 +360,21 @@ export function SydneyLuxuryContent() {
       {/* Top Companies Section */}
       <section>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">Top Luxury Car Rental Companies in Sydney</h2>
+        <p className="text-slate-600 mb-4 leading-relaxed">
+          Sydney has several luxury vehicle rental providers. Each company offers different vehicles, booking arrangements and rental experiences.
+        </p>
         <p className="text-slate-600 mb-6 leading-relaxed">
-          Sydney has several luxury vehicle rental providers. Each company offers different vehicles, booking arrangements, and rental experiences. Here are four options worth exploring:
+          Here are four options worth exploring.
         </p>
         <div className="space-y-5">
           {TOP_COMPANIES.map((item, i) => (
-            <div key={i} className="rounded-xl border border-slate-200 p-5 bg-white space-y-2">
+            <div key={i} className="rounded-xl border border-slate-200 p-5 bg-white space-y-3">
               <h3 className="font-bold text-slate-900 text-base">{item.name}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+              {item.paragraphs.map((p, pIdx) => (
+                <p key={pIdx} className="text-sm text-slate-600 leading-relaxed">
+                  {p}
+                </p>
+              ))}
             </div>
           ))}
         </div>
@@ -329,12 +384,12 @@ export function SydneyLuxuryContent() {
       <section>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">Luxury Car Rentals for Any Occasion</h2>
         <p className="text-slate-600 mb-6 leading-relaxed">
-          A luxury vehicle can make everyday travel feel more special. It can also provide practical benefits when comfort, presentation, and reliability matter:
+          A luxury vehicle can make everyday travel feel more special. It can also provide practical benefits when comfort, presentation and reliability matter.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           {OCCASIONS.map((item, i) => (
             <div key={i} className="rounded-xl border border-slate-200 bg-slate-50/50 p-5 space-y-2">
-              <h3 className="font-semibold text-slate-900 text-base">{item.name}</h3>
+              <h3 className="font-semibold text-slate-900 text-base">{item.title}</h3>
               <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
             </div>
           ))}
@@ -344,8 +399,11 @@ export function SydneyLuxuryContent() {
       {/* Requirements Section */}
       <section>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">Rental Requirements and Policies</h2>
+        <p className="text-slate-600 mb-2 leading-relaxed">
+          Before booking a luxury car in Sydney, understand the rental company&apos;s terms and conditions.
+        </p>
         <p className="text-slate-600 mb-6 leading-relaxed">
-          Before booking a luxury car in Sydney, understand the rental company&apos;s terms and conditions. Most premium rental providers ask customers to meet the following requirements:
+          Most premium rental providers ask customers to meet the following requirements:
         </p>
         <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100">
           {POLICIES.map((p, i) => (
@@ -369,7 +427,7 @@ export function SydneyLuxuryContent() {
             <details key={i} className="group py-4">
               <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
                 <span className="text-base font-semibold text-slate-900 leading-snug">
-                  {i + 1}. {faq.question}
+                  {faq.question}
                 </span>
                 <ChevronDown className="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-180 mt-0.5" />
               </summary>

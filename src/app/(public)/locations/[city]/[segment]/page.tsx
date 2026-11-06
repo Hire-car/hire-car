@@ -58,20 +58,22 @@ export async function generateMetadata({
     const metaTitle =
       city.toLowerCase() === "sydney" && category === "Sports car"
         ? "Sports Car Hire Sydney, Compare Prices & Features (2026)"
-        : isSydneyLuxury
-        ? "Luxury Car Hire Sydney | Premium BMW, Ferrari & Audi Rentals"
         : defaultTitle;
 
-    const metaDescription = isSydneyLuxury
-      ? "Hire premium and luxury cars in Sydney. Explore a fleet of Mercedes, BMW, Audi, Ferrari and more for travel, special events, airport transfers and weddings."
-      : cityCategoryDescription(city, category, total, meta.state);
+    const exactClientTitle = "Premium & Luxury Car Hire Sydney - BMW,Ferrari , AUDI";
+    const exactClientDesc = "Hire premium and luxury cars in Sydney . Explore fleet of Mercedes, BMW, Audi, Ferrari and more for travel,  special event, airport transfer and weddings.";
 
     return {
-      title: metaTitle,
-      description: metaDescription,
+      title: isSydneyLuxury ? { absolute: exactClientTitle } : metaTitle,
+      description: isSydneyLuxury ? exactClientDesc : cityCategoryDescription(city, category, total, meta.state),
       openGraph: {
-        title: metaTitle,
-        description: metaDescription,
+        title: isSydneyLuxury ? exactClientTitle : metaTitle,
+        description: isSydneyLuxury ? exactClientDesc : cityCategoryDescription(city, category, total, meta.state),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: isSydneyLuxury ? exactClientTitle : metaTitle,
+        description: isSydneyLuxury ? exactClientDesc : cityCategoryDescription(city, category, total, meta.state),
       },
       alternates: { canonical: `/locations/${city}/${segment}` },
       robots: cityCategoryRobots(total),
