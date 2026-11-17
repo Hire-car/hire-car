@@ -7,6 +7,7 @@ import {
   isIndexableCityCategory,
   isIndexableCategoryNational,
 } from "./guards";
+import { getAllCuratedSuburbs } from "./suburbs";
 
 type VehicleRow = {
   category: string;
@@ -186,11 +187,10 @@ export async function getIndexableSitemapUrls() {
     (intent) => `/car-hire/${intent}`
   );
 
-  // Suburb URLs disabled — the previous implementation generated fake suburb
-  // slugs (e.g. "sydney-central") that aren't real Australian suburbs. These
-  // served identical content to the parent city page, creating doorway pages.
-  // Re-enable only when real suburb data is sourced from branch addresses.
-  const suburbUrls: string[] = [];
+  // Curated metropolitan suburb URLs for Sydney, Melbourne, and Perth
+  const suburbUrls: string[] = getAllCuratedSuburbs().map(
+    (sub) => `/locations/${sub.parentCitySlug}/suburbs/${sub.slug}`,
+  );
 
   return {
     cityUrls,

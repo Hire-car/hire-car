@@ -6,6 +6,9 @@ import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
 import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
 import { verifyTurnstile } from "@/lib/security/turnstile";
 import { leadSchema } from "@/lib/validation/schemas";
+import { normalizeAustralianPhone } from "@/lib/phone/normalize";
+import { verifyVerificationToken } from "@/lib/security/otp";
+import { assignLeadToLocationVendors } from "@/lib/leads/location-matching";
 
 export async function POST(request: NextRequest) {
   const ip = clientIp(request.headers);
@@ -80,10 +83,26 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient();
 
+  // Validate phone format & optional OTP verification token
+  const normalizedPhone = normalizeAustralianPhone(payload.data.phone) || payload.data.phone;
+  let isPhoneVerified = false;
+
+  if (payload.data.verificationToken) {
+    const tokenResult = verifyVerificationToken(
+      payload.data.verificationToken,
+      payload.data.vehicleId,
+    );
+    if (tokenResult.valid) {
+      isPhoneVerified = true;
+    } else {
+      console.warn(`[Lead API] Invalid or expired verification token: ${tokenResult.error}`);
+    }
+  }
+
   // Validate vehicle exists and is approved
   const { data: vehicle, error: vehicleError } = await supabase
     .from("vehicles")
-    .select("id, title, organization_id, status, branch_id")
+    .select("id, title, organization_id, status, branch_id, price_per_day_aud, offer_price_aud")
     .eq("id", payload.data.vehicleId)
     .eq("organization_id", payload.data.vendorId)
     .eq("status", "approved")
@@ -166,7 +185,7 @@ export async function POST(request: NextRequest) {
       vendor_id: payload.data.vendorId,
       customer_name: payload.data.name,
       customer_email: payload.data.email,
-      customer_phone: payload.data.phone,
+      customer_phone: normalizedPhone,
       customer_user_id: customerUserId,
       pickup_city: payload.data.pickupCity,
       start_date: payload.data.startDate,
@@ -174,6 +193,9 @@ export async function POST(request: NextRequest) {
       message: payload.data.message,
       ip_hash: ipHash,
       status: "new",
+      phone_verified: isPhoneVerified,
+      snapshot_price_per_day_aud: vehicle.price_per_day_aud,
+      snapshot_offer_price_aud: vehicle.offer_price_aud || null,
     })
     .select("id")
     .single();
@@ -181,6 +203,21 @@ export async function POST(request: NextRequest) {
   if (error) {
     console.error(`[Lead API] Failed to save lead: ${error.message}`);
     return NextResponse.json({ error: "Unable to save lead" }, { status: 500 });
+  }
+
+  // Location-based lead distribution to eligible local vendors (Requirement 2)
+  try {
+    await assignLeadToLocationVendors({
+      leadId: lead.id,
+      pickupCity: payload.data.pickupCity,
+      primaryVendorId: payload.data.vendorId,
+      customerName: payload.data.name,
+      vehicleTitle: vehicle.title,
+      startDate: payload.data.startDate,
+      endDate: payload.data.endDate,
+    });
+  } catch (assignErr) {
+    console.warn("[Lead API] Location lead distribution failed (non-fatal):", assignErr);
   }
 
   // If user is authenticated, also create initial message in chat thread

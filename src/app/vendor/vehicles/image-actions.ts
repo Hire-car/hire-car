@@ -73,19 +73,34 @@ export async function uploadTempVehicleImage(
 
   // Upload to Supabase Storage
   const buffer = await file.arrayBuffer();
-  const { error: uploadError } = await supabase.storage
+  let { error: uploadError } = await supabase.storage
     .from(bucketName)
     .upload(storagePath, buffer, {
       contentType: file.type,
       cacheControl: "3600",
     });
 
+  let resolvedBucket = bucketName;
+  // Resilient fallback: If pending-vehicle-images bucket fails or is inaccessible, attempt upload to vehicle-images
+  if (uploadError && bucketName !== "vehicle-images") {
+    const retry = await supabase.storage
+      .from("vehicle-images")
+      .upload(storagePath, buffer, {
+        contentType: file.type,
+        cacheControl: "3600",
+      });
+    if (!retry.error) {
+      uploadError = null;
+      resolvedBucket = "vehicle-images";
+    }
+  }
+
   if (uploadError) {
     return { success: false, error: `Upload failed: ${uploadError.message}` };
   }
 
   // Get signed URL for instant preview
-  const { data } = await supabase.storage.from(bucketName).createSignedUrl(storagePath, 3600);
+  const { data } = await supabase.storage.from(resolvedBucket).createSignedUrl(storagePath, 3600);
 
   return {
     success: true,
@@ -161,9 +176,11 @@ export async function deleteVehicleImage(formData: FormData): Promise<ImageActio
     return { success: false, error: "Access denied" };
   }
 
-  // Delete from storage
+  // Delete from storage (clean up from both primary and alternate buckets safely)
   const bucket = image.approved ? "vehicle-images" : "pending-vehicle-images";
+  const alternateBucket = image.approved ? "pending-vehicle-images" : "vehicle-images";
   await supabase.storage.from(bucket).remove([image.storage_path]);
+  await supabase.storage.from(alternateBucket).remove([image.storage_path]);
 
   // Delete database record
   const { error: deleteError } = await supabase.from("vehicle_images").delete().eq("id", imageId);
@@ -226,7 +243,14 @@ export async function getVehicleImages(vehicleId: string, organizationId: string
   const imagesWithUrls = await Promise.all(
     (images ?? []).map(async (img) => {
       const bucket = img.approved ? "vehicle-images" : "pending-vehicle-images";
-      const { data } = await supabase.storage.from(bucket).createSignedUrl(img.storage_path, 3600);
+      let { data } = await supabase.storage.from(bucket).createSignedUrl(img.storage_path, 3600);
+      if (!data?.signedUrl) {
+        const fallbackBucket = img.approved ? "pending-vehicle-images" : "vehicle-images";
+        const retry = await supabase.storage.from(fallbackBucket).createSignedUrl(img.storage_path, 3600);
+        if (retry.data?.signedUrl) {
+          data = retry.data;
+        }
+      }
 
       return {
         ...img,

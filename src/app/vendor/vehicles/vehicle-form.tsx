@@ -32,6 +32,8 @@ interface VehicleFormProps {
     transmission: string;
     category: string;
     price_per_day_aud: number;
+    offer_price_aud?: number | null;
+    offer_label?: string | null;
     daily_distance_limit_km?: number | null;
     extra_distance_fee_aud?: number | null;
     instant_book?: boolean;
@@ -269,6 +271,7 @@ export default function VehicleForm({
         if (formEl) formEl.reset();
       }
       
+      router.refresh();
       router.push(`/vendor/vehicles?org=${organizationId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -407,12 +410,25 @@ export default function VehicleForm({
             </label>
           </div>
           <div className="p-6 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <label className="grid gap-2 text-sm font-medium text-slate-900 lg:col-span-2">
+            <label className="grid gap-2 text-sm font-medium text-slate-900">
               Daily Price (AUD)
               <div className="relative">
                 <span className="absolute left-3 top-2.5 text-slate-400">$</span>
                 <input name="pricePerDayAud" type="number" defaultValue={editVehicle?.price_per_day_aud || ""} required min={20} max={2000} className="w-full rounded-lg border-slate-200 bg-white pl-7 pr-3 py-2.5 font-normal text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-brand-500 shadow-sm transition-all" placeholder="75" />
               </div>
+            </label>
+
+            <label className="grid gap-2 text-sm font-medium text-slate-900">
+              Discounted Offer Price (AUD)
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-slate-400">$</span>
+                <input name="offerPriceAud" type="number" defaultValue={editVehicle?.offer_price_aud || ""} min={10} max={2000} placeholder="Optional discounted rate" className="w-full rounded-lg border-slate-200 bg-white pl-7 pr-3 py-2.5 font-normal text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-brand-500 shadow-sm transition-all" />
+              </div>
+            </label>
+
+            <label className="grid gap-2 text-sm font-medium text-slate-900 lg:col-span-2">
+              Offer Label / Badge
+              <input name="offerLabel" type="text" defaultValue={editVehicle?.offer_label || ""} maxLength={80} placeholder="e.g. Special Deal, Weekend Promo, Save $20/day" className="w-full rounded-lg border-slate-200 bg-white px-3 py-2.5 font-normal text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-brand-500 shadow-sm transition-all" />
             </label>
 
             <label className="grid gap-2 text-sm font-medium text-slate-900">
