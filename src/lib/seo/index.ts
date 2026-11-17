@@ -5,5 +5,6 @@ export * from "./guards";
 export * from "./templates";
 export * from "./schema";
 export * from "./discovery";
+export * from "./suburbs";
 export * from "./invalidate";
 export * from "./vehicle-invalidation";

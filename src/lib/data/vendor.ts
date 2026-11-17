@@ -195,6 +195,8 @@ export type LeadWithVehicle = {
   message: string | null;
   status: "new" | "contacted" | "converted" | "lost";
   createdAt: string;
+  assignedViaLocation?: boolean;
+  phoneVerified?: boolean;
   events: Array<{
     id: string;
     eventType: string;
@@ -217,11 +219,20 @@ export async function getOrganizationLeads(
   const supabase = createAdminClient();
   const { status, limit = 50, offset = 0 } = options;
 
+  // Retrieve any leads assigned to this organization via location matching
+  const { data: assignments } = await supabase
+    .from("lead_vendor_assignments")
+    .select("lead_id, status")
+    .eq("organization_id", organizationId);
+
+  const assignedLeadIds = assignments?.map((a) => a.lead_id) ?? [];
+
   let query = supabase
     .from("leads")
     .select(
       `
       id,
+      vendor_id,
       vehicle_id,
       vehicles(title),
       customer_name,
@@ -232,12 +243,20 @@ export async function getOrganizationLeads(
       end_date,
       message,
       status,
+      phone_verified,
       created_at,
       lead_events(id, event_type, created_at, profiles(full_name))
     `,
       { count: "exact" },
-    )
-    .eq("vendor_id", organizationId)
+    );
+
+  if (assignedLeadIds.length > 0) {
+    query = query.or(`vendor_id.eq.${organizationId},id.in.(${assignedLeadIds.join(",")})`);
+  } else {
+    query = query.eq("vendor_id", organizationId);
+  }
+
+  query = query
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
@@ -274,6 +293,8 @@ export async function getOrganizationLeads(
         message: lead.message,
         status: lead.status as LeadWithVehicle["status"],
         createdAt: lead.created_at,
+        assignedViaLocation: lead.vendor_id !== organizationId,
+        phoneVerified: Boolean(lead.phone_verified),
         events: events.map((e) => ({
           id: e.id,
           eventType: e.event_type,
@@ -291,10 +312,23 @@ export async function getLeadStats(organizationId: string, userId: string) {
 
   const supabase = createAdminClient();
 
-  const { data, error } = await supabase
-    .from("leads")
-    .select("status")
-    .eq("vendor_id", organizationId);
+  // Include location assigned leads
+  const { data: assignments } = await supabase
+    .from("lead_vendor_assignments")
+    .select("lead_id")
+    .eq("organization_id", organizationId);
+
+  const assignedLeadIds = assignments?.map((a) => a.lead_id) ?? [];
+
+  let query = supabase.from("leads").select("status");
+
+  if (assignedLeadIds.length > 0) {
+    query = query.or(`vendor_id.eq.${organizationId},id.in.(${assignedLeadIds.join(",")})`);
+  } else {
+    query = query.eq("vendor_id", organizationId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to fetch lead stats: ${error.message}`);

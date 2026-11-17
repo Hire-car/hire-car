@@ -59,6 +59,8 @@ export const vehicleSchema = z.object({
   transmission: z.enum(["Automatic", "Manual"]),
   category: z.enum(VEHICLE_CATEGORIES),
   pricePerDayAud: z.coerce.number().int().min(20).max(2000),
+  offerPriceAud: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().int().min(10).max(2000).nullable().optional()),
+  offerLabel: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : String(val)), z.string().trim().max(100).nullable().optional()),
   dailyDistanceLimitKm: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().int().min(50).max(1000).nullable().optional()),
   extraDistanceFeeAud: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().min(0.1).max(5.0).nullable().optional()),
   instantBook: z.boolean().default(false),
@@ -119,6 +121,8 @@ export const leadSchema = z
     message: z.string().trim().max(1000).optional().default(""),
     consent: z.literal(true),
     turnstileToken: z.string().optional(),
+    verificationToken: z.string().optional(),
+    honeypot: z.string().optional().default(""),
   })
   .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
     message: "End date must be on or after start date",
@@ -166,6 +170,8 @@ export const apiVehicleCreateSchema = z.object({
     .enum(["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury"])
     .default("Sedan"),
   pricePerDayAud: z.coerce.number().int().min(20).max(2000),
+  offerPriceAud: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().int().min(10).max(2000).nullable().optional()),
+  offerLabel: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : String(val)), z.string().trim().max(100).nullable().optional()),
 });
 
 /**

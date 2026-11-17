@@ -178,11 +178,23 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                   {/* Left: Lead Info */}
                   <div className="flex-1 space-y-3">
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2.5 flex-wrap">
                       <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${sc.bg}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
                         {sc.label}
                       </span>
+                      {lead.assignedViaLocation && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-2.5 py-0.5 text-xs font-semibold text-purple-700">
+                          <MapPin className="h-3 w-3" />
+                          Location Lead
+                        </span>
+                      )}
+                      {lead.phoneVerified && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                          <Phone className="h-3 w-3" />
+                          Verified Mobile
+                        </span>
+                      )}
                       <span className="text-xs text-slate-400">
                         {new Date(lead.createdAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
                       </span>
