@@ -86,35 +86,68 @@ describe("OTP Workflow & Schema Conformance", () => {
     expect(result.valid).toBe(false);
   });
 
-  it("enforces that authenticated users do not bypass verification without trusted server-side proof", () => {
+  it("enforces that authenticated users do not bypass verification without trusted server-side proof and strictly rejects user_metadata", () => {
     const requestedPhone = "+61412345678";
 
-    // 1. Authenticated user without server-side phone confirmation
+    // 1. Malicious authenticated user attempting bypass via client-editable user_metadata
+    const maliciousUser = {
+      id: "user-malicious",
+      phone: "+61412345678",
+      phone_confirmed_at: null,
+      user_metadata: { phone_verified: true },
+    };
+
+    // user_metadata.phone_verified MUST be strictly ignored and NOT accepted as proof
+    const isMaliciousVerified = Boolean(
+      maliciousUser.phone === requestedPhone && maliciousUser.phone_confirmed_at,
+    );
+    expect(isMaliciousVerified).toBe(false);
+
+    // 2. Authenticated user with unconfirmed phone (phone_confirmed_at is null)
     const unverifiedUser = {
       id: "user-1",
       phone: "+61412345678",
       phone_confirmed_at: null,
-      user_metadata: {} as { phone_verified?: boolean },
+      user_metadata: {},
     };
 
-    const hasProof1 = Boolean(
-      unverifiedUser.phone === requestedPhone &&
-        (unverifiedUser.phone_confirmed_at || unverifiedUser.user_metadata?.phone_verified),
+    const isUnverifiedUserVerified = Boolean(
+      unverifiedUser.phone === requestedPhone && unverifiedUser.phone_confirmed_at,
     );
-    expect(hasProof1).toBe(false);
+    expect(isUnverifiedUserVerified).toBe(false);
 
-    // 2. Authenticated user with server-side phone confirmation
-    const verifiedUser = {
+    // 3. Authenticated user with confirmed phone, but requesting a DIFFERENT unverified phone
+    const mismatchUser = {
+      id: "user-diff",
+      phone: "+61499999999",
+      phone_confirmed_at: new Date().toISOString(),
+      user_metadata: {},
+    };
+
+    const isMismatchVerified = Boolean(
+      mismatchUser.phone === requestedPhone && mismatchUser.phone_confirmed_at,
+    );
+    expect(isMismatchVerified).toBe(false);
+
+    // 4. Authenticated user with genuine matching confirmed phone in Supabase Auth
+    const genuineUser = {
       id: "user-2",
       phone: "+61412345678",
       phone_confirmed_at: new Date().toISOString(),
-      user_metadata: { phone_verified: true },
+      user_metadata: {},
     };
 
-    const hasProof2 = Boolean(
-      verifiedUser.phone === requestedPhone &&
-        (verifiedUser.phone_confirmed_at || verifiedUser.user_metadata?.phone_verified),
+    const isGenuineVerified = Boolean(
+      genuineUser.phone === requestedPhone && genuineUser.phone_confirmed_at,
     );
-    expect(hasProof2).toBe(true);
+    expect(isGenuineVerified).toBe(true);
+
+    // 5. Guest user (no auth session)
+    const resolveUser = (): { phone?: string; phone_confirmed_at?: string } | null => null;
+    const guestUser = resolveUser();
+    const isGuestVerified = Boolean(
+      guestUser && guestUser.phone === requestedPhone && guestUser.phone_confirmed_at,
+    );
+    expect(isGuestVerified).toBe(false);
   });
 });

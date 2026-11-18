@@ -43,6 +43,33 @@ export const AUSTRALIAN_CITY_STATE_MAP: Record<string, string> = {
   canberra: "ACT",
 };
 
+export const SUBURB_TO_METRO_MAP: Record<string, string> = {
+  parramatta: "sydney",
+  bondi: "sydney",
+  blacktown: "sydney",
+  chatswood: "sydney",
+  "north sydney": "sydney",
+  manly: "sydney",
+  penrith: "sydney",
+  "surry hills": "sydney",
+  mascot: "sydney",
+  "melbourne cbd": "melbourne",
+  southbank: "melbourne",
+  richmond: "melbourne",
+  "st kilda": "melbourne",
+  carlton: "melbourne",
+  footscray: "melbourne",
+  dandenong: "melbourne",
+  "box hill": "melbourne",
+  "perth cbd": "perth",
+  fremantle: "perth",
+  joondalup: "perth",
+  scarborough: "perth",
+  subiaco: "perth",
+  cannington: "perth",
+  midland: "perth",
+};
+
 export interface MatchingVendor {
   organizationId: string;
   name: string;
@@ -238,5 +265,82 @@ export async function assignLeadToLocationVendors(params: {
     primaryAssigned: !primaryError,
     locationAssignedCount,
     assignedOrgIds,
+  };
+}
+
+/**
+ * Distribute a general location enquiry (without a selected vehicle) to all eligible vendors
+ * whose approved branches match the requested location.
+ * Ensures:
+ * - Correct location matching
+ * - Correct vendor eligibility (only approved organizations with approved branches)
+ * - Zero duplicate assignments per vendor
+ * - Notifications sent to each assigned vendor
+ */
+export async function distributeGeneralLocationLead(params: {
+  leadId: string;
+  pickupCity: string;
+  customerName: string;
+  startDate?: string;
+  endDate?: string;
+  message?: string;
+}): Promise<{ matchedVendors: MatchingVendor[]; assignedCount: number }> {
+  const { leadId, pickupCity, customerName, startDate, endDate } = params;
+  const supabase = createAdminClient();
+
+  const eligibleVendors = await findEligibleVendorsForLocation(pickupCity);
+  const assignmentsTable = supabase.from("lead_vendor_assignments");
+
+  let assignedCount = 0;
+  const assignedOrgIds = new Set<string>();
+
+  for (const vendor of eligibleVendors) {
+    if (assignedOrgIds.has(vendor.organizationId)) continue;
+    assignedOrgIds.add(vendor.organizationId);
+
+    try {
+      let assignError: { message: string } | null = null;
+      if (typeof assignmentsTable.upsert === "function") {
+        const res = await assignmentsTable.upsert(
+          {
+            lead_id: leadId,
+            organization_id: vendor.organizationId,
+            status: "new",
+          },
+          { onConflict: "lead_id,organization_id" },
+        );
+        assignError = res.error;
+      } else if (typeof assignmentsTable.insert === "function") {
+        const res = await assignmentsTable.insert({
+          lead_id: leadId,
+          organization_id: vendor.organizationId,
+          status: "new",
+        });
+        assignError = res.error;
+      }
+
+      if (!assignError) {
+        assignedCount++;
+
+        // Dashboard notification for matching vendor
+        const dateRange = startDate && endDate ? ` (${startDate} to ${endDate})` : "";
+        await supabase.from("notifications").insert({
+          organization_id: vendor.organizationId,
+          title: "New Location Lead",
+          message: `${customerName} is looking for a rental vehicle in ${pickupCity}${dateRange}.`,
+          type: "info",
+          link: `/vendor/leads`,
+        }).then(({ error: notifErr }) => {
+          if (notifErr) console.warn("[Location Distribution] Notification error:", notifErr.message);
+        });
+      }
+    } catch (err) {
+      console.warn("[Location Distribution] Error assigning vendor:", err);
+    }
+  }
+
+  return {
+    matchedVendors: eligibleVendors,
+    assignedCount,
   };
 }
