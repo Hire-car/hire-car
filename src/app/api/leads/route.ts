@@ -133,13 +133,30 @@ export async function POST(request: NextRequest) {
     isPhoneVerified = true;
   }
 
-  // In production, unauthenticated guest enquiries must complete phone verification
+  // Phone verification check:
+  // An authenticated customer must not bypass phone verification simply because they are logged in.
+  // An existing authenticated phone verification can be accepted only where a trusted server-side verification record proves ownership of that number.
   const currentUser = await getCurrentUser();
-  if (process.env.NODE_ENV === "production" && !currentUser && !isPhoneVerified) {
-    return NextResponse.json(
-      { error: "Mobile number verification is required before submitting an enquiry." },
-      { status: 403 },
-    );
+  if (!isPhoneVerified) {
+    let hasTrustedServerVerification = false;
+    if (currentUser) {
+      const userPhone = currentUser.phone ? normalizeAustralianPhone(currentUser.phone) : null;
+      const isAuthPhoneConfirmed = Boolean(
+        currentUser.phone_confirmed_at ||
+          (currentUser as unknown as { user_metadata?: { phone_verified?: boolean } }).user_metadata?.phone_verified,
+      );
+      if (userPhone && userPhone === normalizedPhone && isAuthPhoneConfirmed) {
+        hasTrustedServerVerification = true;
+        isPhoneVerified = true;
+      }
+    }
+
+    if (process.env.NODE_ENV === "production" && !hasTrustedServerVerification) {
+      return NextResponse.json(
+        { error: "Mobile number verification is required before submitting an enquiry." },
+        { status: 403 },
+      );
+    }
   }
 
   // Validate vehicle exists and is approved
