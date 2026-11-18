@@ -113,11 +113,28 @@ export async function POST(request: NextRequest) {
       isPhoneVerified = true;
     }
 
-    if (process.env.NODE_ENV === "production" && !user && !isPhoneVerified) {
-      return NextResponse.json(
-        { error: "Mobile number verification is required before submitting an enquiry." },
-        { status: 403 },
-      );
+    // An authenticated customer must not bypass phone verification simply because they are logged in.
+    // An existing authenticated phone verification can be accepted only where a trusted server-side verification record proves ownership of that number.
+    if (!isPhoneVerified) {
+      let hasTrustedServerVerification = false;
+      if (user) {
+        const userPhone = user.phone ? normalizeAustralianPhone(user.phone) : null;
+        const isAuthPhoneConfirmed = Boolean(
+          user.phone_confirmed_at ||
+            (user as unknown as { user_metadata?: { phone_verified?: boolean } }).user_metadata?.phone_verified,
+        );
+        if (userPhone && userPhone === normalizedPhone && isAuthPhoneConfirmed) {
+          hasTrustedServerVerification = true;
+          isPhoneVerified = true;
+        }
+      }
+
+      if (process.env.NODE_ENV === "production" && !hasTrustedServerVerification) {
+        return NextResponse.json(
+          { error: "Mobile number verification is required before submitting an enquiry." },
+          { status: 403 },
+        );
+      }
     }
 
     // 2. Validate vehicle and vendor

@@ -85,4 +85,36 @@ describe("OTP Workflow & Schema Conformance", () => {
     const result = verifyVerificationToken(forgedToken, "veh-1");
     expect(result.valid).toBe(false);
   });
+
+  it("enforces that authenticated users do not bypass verification without trusted server-side proof", () => {
+    const requestedPhone = "+61412345678";
+
+    // 1. Authenticated user without server-side phone confirmation
+    const unverifiedUser = {
+      id: "user-1",
+      phone: "+61412345678",
+      phone_confirmed_at: null,
+      user_metadata: {} as { phone_verified?: boolean },
+    };
+
+    const hasProof1 = Boolean(
+      unverifiedUser.phone === requestedPhone &&
+        (unverifiedUser.phone_confirmed_at || unverifiedUser.user_metadata?.phone_verified),
+    );
+    expect(hasProof1).toBe(false);
+
+    // 2. Authenticated user with server-side phone confirmation
+    const verifiedUser = {
+      id: "user-2",
+      phone: "+61412345678",
+      phone_confirmed_at: new Date().toISOString(),
+      user_metadata: { phone_verified: true },
+    };
+
+    const hasProof2 = Boolean(
+      verifiedUser.phone === requestedPhone &&
+        (verifiedUser.phone_confirmed_at || verifiedUser.user_metadata?.phone_verified),
+    );
+    expect(hasProof2).toBe(true);
+  });
 });

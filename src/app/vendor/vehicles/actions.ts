@@ -32,13 +32,8 @@ export async function syncVehicleCompletenessStatus(vehicleId: string, supabase:
     if (vehicle.status !== newStatus) {
       await supabase.from("vehicles").update({ status: newStatus }).eq("id", vehicleId);
 
-      if (newStatus === "approved") {
-        // When vehicle is approved, ensure its images are marked approved so they render publicly
-        await supabase.from("vehicle_images").update({ approved: true }).eq("vehicle_id", vehicleId);
-      } else {
-        // When vehicle is not approved (pending or suspended), ensure images are not publicly approved
-        await supabase.from("vehicle_images").update({ approved: false }).eq("vehicle_id", vehicleId);
-      }
+      // Vehicle approval and individual image approval are treated strictly independently.
+      // Changing vehicle completeness status must not overwrite independent image moderation decisions.
 
       // Create search index job since status changed
       await supabase.from("search_index_jobs").insert({
