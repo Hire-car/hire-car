@@ -2,14 +2,16 @@ import { NextResponse, type NextRequest } from "next/server";
 import { readJsonBody } from "@/lib/api/request";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/ses";
-import { requireApiUser } from "@/lib/security/auth";
+import { getCurrentUser } from "@/lib/security/auth";
 import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
+import { verifyTurnstile } from "@/lib/security/turnstile";
+import { normalizeAustralianPhone } from "@/lib/phone/normalize";
+import { verifyVerificationToken } from "@/lib/security/otp";
+import { assignLeadToLocationVendors } from "@/lib/leads/location-matching";
 
 export async function POST(request: NextRequest) {
   try {
-    const { user, response } = await requireApiUser();
-    if (!user) return response;
-
+    const user = await getCurrentUser();
     const ip = clientIp(request.headers);
     const ipHash = hashIpForStorage(ip);
     const { data: body, response: jsonError } = await readJsonBody(request);
@@ -23,26 +25,98 @@ export async function POST(request: NextRequest) {
 
     const supabase = createAdminClient();
 
-    // 1. Get user profile
-    const { data: profile, error: profileErr } = await supabase
-      .from("profiles")
-      .select("full_name, email, phone")
-      .eq("id", user.id)
-      .maybeSingle();
+    // 1. Resolve customer contact details (authenticated profile or guest body parameters)
+    let customerName = "";
+    let customerEmail = "";
+    let customerPhone = "";
+    const customerUserId = user?.id || null;
 
-    if (profileErr) {
-      console.error("[quick lead] User profile query error:", profileErr);
+    if (user) {
+      const { data: profile, error: profileErr } = await supabase
+        .from("profiles")
+        .select("full_name, email, phone")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (profileErr) {
+        console.error("[quick lead] User profile query error:", profileErr);
+      }
+
+      customerName = profile?.full_name || body.name || body.customerName || "Customer";
+      customerEmail = profile?.email || body.email || body.customerEmail || "";
+      customerPhone = profile?.phone || body.phone || body.customerPhone || "Not provided";
+    } else {
+      customerName = body.name || body.customerName || "";
+      customerEmail = body.email || body.customerEmail || "";
+      customerPhone = body.phone || body.customerPhone || "Not provided";
     }
 
-    if (!profile || !profile.email) {
-      console.warn("[quick lead] User profile or email not found for ID:", user.id);
-      return NextResponse.json({ error: "Complete your profile first" }, { status: 400 });
+    if (!customerEmail) {
+      return NextResponse.json(
+        { error: "Please enter your contact details to submit your booking request." },
+        { status: 400 }
+      );
+    }
+
+    // Turnstile & Anti-bot protection for guest enquiries
+    if (!user) {
+      if (body.turnstileToken) {
+        const challenge = await verifyTurnstile(body.turnstileToken, ip);
+        if (!challenge.ok) {
+          return NextResponse.json({ error: "Security challenge failed" }, { status: 403 });
+        }
+      } else if (process.env.TURNSTILE_SECRET_KEY && process.env.TURNSTILE_OPTIONAL !== "true") {
+        const challenge = await verifyTurnstile(undefined, ip);
+        if (!challenge.ok) {
+          return NextResponse.json({ error: "Security challenge required" }, { status: 403 });
+        }
+      }
+    }
+
+    // Phone normalization and OTP verification
+    const normalizedPhone = normalizeAustralianPhone(customerPhone) || customerPhone;
+    let isPhoneVerified = false;
+
+    if (body.verificationToken) {
+      const tokenResult = verifyVerificationToken(body.verificationToken, vehicleId);
+      if (!tokenResult.valid) {
+        return NextResponse.json(
+          { error: "Invalid or expired verification token. Please verify your phone number." },
+          { status: 403 },
+        );
+      }
+      if (tokenResult.challengeId) {
+        const { data: consumedChallenge, error: consumeError } = await supabase
+          .from("phone_otp_challenges")
+          .update({ consumed_at: new Date().toISOString() })
+          .eq("id", tokenResult.challengeId)
+          .eq("verified", true)
+          .is("consumed_at", null)
+          .gt("expires_at", new Date().toISOString())
+          .select("id")
+          .maybeSingle();
+
+        if (consumeError || !consumedChallenge) {
+          return NextResponse.json(
+            { error: "Verification session has expired or already been submitted." },
+            { status: 403 },
+          );
+        }
+      }
+      isPhoneVerified = true;
+    }
+
+    if (process.env.NODE_ENV === "production" && !user && !isPhoneVerified) {
+      return NextResponse.json(
+        { error: "Mobile number verification is required before submitting an enquiry." },
+        { status: 403 },
+      );
     }
 
     // 2. Validate vehicle and vendor
     const { data: vehicle, error: vehicleErr } = await supabase
       .from("vehicles")
-      .select("id, branch_id, title")
+      .select("id, branch_id, title, price_per_day_aud, offer_price_aud")
       .eq("id", vehicleId)
       .eq("organization_id", vendorId)
       .eq("status", "approved")
@@ -83,7 +157,7 @@ export async function POST(request: NextRequest) {
       .from("leads")
       .select("id")
       .eq("vehicle_id", vehicleId)
-      .eq("customer_email", profile.email)
+      .eq("customer_email", customerEmail)
       .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString())
       .maybeSingle();
 
@@ -112,16 +186,19 @@ export async function POST(request: NextRequest) {
     const ed = body.endDate || defaultEnd.toISOString().split('T')[0];
     const msg = body.message || "I am interested in this vehicle. Please contact me via chat.";
 
-    console.info("[quick lead] Creating lead record for user:", user.id);
+    console.info("[quick lead] Creating lead record for customer:", customerEmail);
     const { data: lead, error: leadError } = await supabase
       .from("leads")
       .insert({
         vehicle_id: vehicleId,
         vendor_id: vendorId,
-        customer_name: profile.full_name || "Interested User",
-        customer_email: profile.email,
-        customer_user_id: user.id,
-        customer_phone: profile.phone || "Not provided",
+        customer_name: customerName || "Customer",
+        customer_email: customerEmail,
+        customer_user_id: customerUserId,
+        customer_phone: normalizedPhone || customerPhone || "Not provided",
+        phone_verified: isPhoneVerified,
+        snapshot_price_per_day_aud: vehicle.price_per_day_aud || null,
+        snapshot_offer_price_aud: vehicle.offer_price_aud || null,
         pickup_city: branch?.city || "Unknown",
         start_date: sd,
         end_date: ed,
@@ -144,24 +221,43 @@ export async function POST(request: NextRequest) {
 
     console.info("[quick lead] Lead created successfully with ID:", lead.id);
 
-    // 5. Auto-create the first message in the chat thread
-    const { error: messageError } = await supabase.from("messages").insert({
-      lead_id: lead.id,
-      sender_user_id: user.id,
-      body: "I am interested in this vehicle. Is it still available?",
-    });
+    // Multi-vendor location lead distribution
+    if (branch?.city) {
+      try {
+        await assignLeadToLocationVendors({
+          leadId: lead.id,
+          pickupCity: branch.city,
+          primaryVendorId: vendorId,
+          customerName: customerName || "Customer",
+          vehicleTitle: vehicle.title,
+          startDate: sd,
+          endDate: ed,
+        });
+      } catch (locErr) {
+        console.error("[quick lead] Location lead assignment error:", locErr);
+      }
+    }
 
-    if (messageError) {
-      console.error("[quick lead] Initial message creation failed:", messageError);
-    } else {
-      console.info("[quick lead] Initial message created successfully for lead:", lead.id);
+    // 5. If customer is authenticated, auto-create the first message in the chat thread
+    if (customerUserId) {
+      const { error: messageError } = await supabase.from("messages").insert({
+        lead_id: lead.id,
+        sender_user_id: customerUserId,
+        body: "I am interested in this vehicle. Is it still available?",
+      });
+
+      if (messageError) {
+        console.error("[quick lead] Initial message creation failed:", messageError);
+      } else {
+        console.info("[quick lead] Initial message created successfully for lead:", lead.id);
+      }
     }
 
     const { error: eventError } = await supabase.from("lead_events").insert({
       lead_id: lead.id,
       event_type: "quick_interest_submitted",
-      metadata: { ip_hash: ipHash, user_id: user.id },
-      actor_user_id: user.id,
+      metadata: { ip_hash: ipHash, user_id: customerUserId, guest: !customerUserId },
+      actor_user_id: customerUserId,
     });
 
     if (eventError) {
@@ -173,7 +269,7 @@ export async function POST(request: NextRequest) {
         await sendLeadAlert({
           to: organization.billing_email,
           vehicleTitle: vehicle.title,
-          customerName: profile.full_name || "Interested User",
+          customerName: customerName || "Customer",
         });
       } catch (emailErr) {
         console.error("[quick lead] vendor alert failed:", emailErr);
@@ -182,8 +278,8 @@ export async function POST(request: NextRequest) {
 
     try {
       await sendCustomerEnquiryConfirmation({
-        to: profile.email,
-        customerName: profile.full_name || "Customer",
+        to: customerEmail,
+        customerName: customerName || "Customer",
         vehicleTitle: vehicle.title,
         leadId: lead.id,
       });

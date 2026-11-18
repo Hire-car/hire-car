@@ -41,9 +41,14 @@ export async function generateMetadata({
     curated?.metaDescription ||
     `Looking for car hire in ${displaySuburb}, ${displayCity}? Compare verified local Australian rental operators and book direct with zero marketplace fees.`;
 
+  // Apply noindex if this metropolitan area currently has no available vehicles
+  const { total } = await searchVehicles("", { city: displayCity }, { page: 1, perPage: 1 });
+  const robots = total > 0 ? { index: true, follow: true } : { index: false, follow: true };
+
   return {
     title,
     description,
+    robots,
     alternates: { canonical: `/locations/${city}/suburbs/${suburb}` },
     openGraph: {
       title,

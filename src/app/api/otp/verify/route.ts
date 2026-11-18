@@ -1,10 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clientIp } from "@/lib/security/rate-limit";
-import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
+import { rateLimitSlidingWindow, getRedisClient } from "@/lib/security/rate-limit-redis";
 import { verifyOtpHash, createVerificationToken } from "@/lib/security/otp";
 
 export async function POST(request: NextRequest) {
+  // In production, shared Redis infrastructure is strictly required for distributed abuse protection
+  if (process.env.NODE_ENV === "production" && !getRedisClient()) {
+    console.error("[OTP Security] REDIS_URL is required for distributed OTP rate limiting in production.");
+    return NextResponse.json(
+      { error: "Verification service temporarily unavailable (rate limiting infrastructure unconfigured)." },
+      { status: 503 },
+    );
+  }
+
   const ip = clientIp(request.headers);
 
   // Rate limit OTP verification attempts by IP: 15 per minute to prevent brute-force
@@ -103,7 +112,7 @@ export async function POST(request: NextRequest) {
   // Success: mark verified atomically
   const { error: updateError } = await supabase
     .from("phone_otp_challenges")
-    .update({ verified: true })
+    .update({ verified: true, verified_at: new Date().toISOString() })
     .eq("id", challengeId);
 
   if (updateError) {

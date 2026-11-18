@@ -5,6 +5,7 @@ import {
   verifyOtpHash,
   createVerificationToken,
   verifyVerificationToken,
+  getOtpSigningSecret,
 } from "../otp";
 
 describe("OTP Generation & Security", () => {
@@ -72,5 +73,31 @@ describe("OTP Generation & Security", () => {
     const tampered = validToken.slice(0, -4) + "XXXX";
     const result2 = verifyVerificationToken(tampered);
     expect(result2.valid).toBe(false);
+  });
+
+  it("enforces mandatory OTP_SIGNING_SECRET in production", () => {
+    const prevEnv = process.env.NODE_ENV;
+    const prevSecret = process.env.OTP_SIGNING_SECRET;
+
+    try {
+      // @ts-expect-error mutating for test
+      process.env.NODE_ENV = "production";
+      delete process.env.OTP_SIGNING_SECRET;
+      expect(() => getOtpSigningSecret()).toThrow(/OTP_SIGNING_SECRET is mandatory/);
+
+      process.env.OTP_SIGNING_SECRET = "too-short";
+      expect(() => getOtpSigningSecret()).toThrow(/must be at least 32 characters/);
+
+      process.env.OTP_SIGNING_SECRET = "this-is-a-valid-cryptographically-secure-secret-32-chars";
+      expect(getOtpSigningSecret()).toBe("this-is-a-valid-cryptographically-secure-secret-32-chars");
+    } finally {
+      // @ts-expect-error restoring
+      process.env.NODE_ENV = prevEnv;
+      if (prevSecret) {
+        process.env.OTP_SIGNING_SECRET = prevSecret;
+      } else {
+        delete process.env.OTP_SIGNING_SECRET;
+      }
+    }
   });
 });

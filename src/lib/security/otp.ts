@@ -1,9 +1,30 @@
 import crypto from "crypto";
 
-const OTP_SECRET =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.TURNSTILE_SECRET_KEY ||
-  "hirecar-otp-secret-salt-key-2026";
+/**
+ * Retrieve the OTP signing secret.
+ * In production (NODE_ENV === "production"), OTP_SIGNING_SECRET is strictly mandatory
+ * and must be at least 32 characters long.
+ */
+export function getOtpSigningSecret(): string {
+  const secret = process.env.OTP_SIGNING_SECRET;
+  if (secret) {
+    if (secret.length < 32 && process.env.NODE_ENV === "production") {
+      throw new Error("OTP_SIGNING_SECRET must be at least 32 characters in production.");
+    }
+    return secret;
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "OTP_SIGNING_SECRET is mandatory in production environment. " +
+        "Configure a stable, cryptographically random secret of at least 32 characters.",
+    );
+  }
+  return (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.TURNSTILE_SECRET_KEY ||
+    "hirecar-dev-otp-signing-secret-minimum-32-chars-long"
+  );
+}
 
 /**
  * Generate a cryptographically secure 6-digit numeric OTP.
@@ -20,7 +41,7 @@ export function generateSecureOtp(): string {
 export function hashOtp(code: string, salt: string = ""): string {
   return crypto
     .createHash("sha256")
-    .update(`${OTP_SECRET}:${salt}:${code.trim()}`)
+    .update(`${getOtpSigningSecret()}:${salt}:${code.trim()}`)
     .digest("hex");
 }
 
@@ -62,7 +83,7 @@ export function createVerificationToken(params: {
   ).toString("base64url");
 
   const signature = crypto
-    .createHmac("sha256", OTP_SECRET)
+    .createHmac("sha256", getOtpSigningSecret())
     .update(payload)
     .digest("base64url");
 
@@ -85,7 +106,7 @@ export function verifyVerificationToken(
 
     const [payloadB64, signature] = parts;
     const expectedSig = crypto
-      .createHmac("sha256", OTP_SECRET)
+      .createHmac("sha256", getOtpSigningSecret())
       .update(payloadB64)
       .digest("base64url");
 
