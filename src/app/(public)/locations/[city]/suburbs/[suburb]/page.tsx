@@ -13,7 +13,15 @@ import {
   buildFaqSchema,
   serializeSchemas,
 } from "@/lib/seo";
-import { getSuburbMeta, getSuburbsForCity } from "@/lib/seo/suburbs";
+import {
+  getSuburbMeta,
+  getSuburbsForCity,
+  evaluateSuburbIndexing,
+  checkVerifiedVendorCoverage,
+  getSuburbInventoryDescription,
+  getSuburbLocalContext,
+  getSuburbFaqs,
+} from "@/lib/seo/suburbs";
 import { MapPin, ShieldCheck, Compass, CheckCircle2, ChevronRight, Car } from "lucide-react";
 
 function formatFallbackSuburbName(slug: string) {
@@ -41,9 +49,31 @@ export async function generateMetadata({
     curated?.metaDescription ||
     `Looking for car hire in ${displaySuburb}, ${displayCity}? Compare verified local Australian rental operators and book direct with zero marketplace fees.`;
 
-  // Apply noindex if this metropolitan area currently has no available vehicles
-  const { total } = await searchVehicles("", { city: displayCity }, { page: 1, perPage: 1 });
-  const robots = total > 0 ? { index: true, follow: true } : { index: false, follow: true };
+  // Evaluate local inventory and verified service coverage separately from metropolitan inventory
+  const coverage = await checkVerifiedVendorCoverage({
+    city,
+    suburbName: displaySuburb,
+    postcode: curated?.postcode,
+  });
+
+  const localSearch = await searchVehicles(
+    displaySuburb,
+    { city: displayCity },
+    { page: 1, perPage: 1 },
+  );
+
+  const metroSearch = await searchVehicles(
+    "",
+    { city: displayCity },
+    { page: 1, perPage: 1 },
+  );
+
+  // Do not index an empty suburb page merely because other vehicles exist elsewhere in the city
+  const robots = evaluateSuburbIndexing({
+    localInventoryCount: localSearch.total,
+    hasVerifiedCoverage: coverage.hasVerifiedCoverage,
+    metroInventoryCount: metroSearch.total,
+  });
 
   return {
     title,
@@ -72,6 +102,13 @@ export default async function SuburbCarHirePage({
   const displaySuburb = curated?.name || formatFallbackSuburbName(suburb);
   const state = curated?.state || cityMeta.state || "Australia";
 
+  // Verify branch coverage and prioritize local inventory
+  const coverage = await checkVerifiedVendorCoverage({
+    city,
+    suburbName: displaySuburb,
+    postcode: curated?.postcode,
+  });
+
   // Prioritize inventory matching this specific suburb; fall back to metropolitan fleet
   const localSearch = await searchVehicles(
     displaySuburb,
@@ -84,14 +121,35 @@ export default async function SuburbCarHirePage({
     ? localSearch
     : await searchVehicles("", { city: displayCity }, { page: 1, perPage: 24 });
 
+  const inventoryDescription = getSuburbInventoryDescription({
+    hasDirectLocalInventory,
+    hasVerifiedCoverage: coverage.hasVerifiedCoverage,
+    displayCity,
+    displaySuburb,
+    total,
+  });
+
   const h1 = curated?.h1 || `Car Hire in ${displaySuburb}, ${displayCity} ${state}`;
   const introCopy =
     curated?.introCopy ||
-    `Find the perfect rental vehicle near ${displaySuburb} in Greater ${displayCity}. Book directly with verified local Australian operators and avoid hidden broker markups.`;
+    (coverage.hasVerifiedCoverage
+      ? `Find the perfect rental vehicle near ${displaySuburb} in Greater ${displayCity}. Book directly with verified local Australian operators and avoid hidden broker markups.`
+      : `Browse rental vehicles available across Greater ${displayCity} near ${displaySuburb}. Book directly with verified Australian operators with zero marketplace fees.`);
 
-  const localContext =
-    curated?.localContext ||
-    `Why travel across ${displayCity} when you can pick up your rental car right near ${displaySuburb}? We connect you directly with Australian fleet operators servicing the ${displaySuburb} area. Whether you need an economical compact car or a spacious SUV, discover competitive local rates here.`;
+  const localContext = getSuburbLocalContext({
+    curatedContext: curated?.localContext,
+    displayCity,
+    displaySuburb,
+    state,
+    hasVerifiedCoverage: coverage.hasVerifiedCoverage,
+  });
+
+  const faqs = getSuburbFaqs({
+    displaySuburb,
+    displayCity,
+    state,
+    hasVerifiedCoverage: coverage.hasVerifiedCoverage,
+  });
 
   const nearbySuburbs = getSuburbsForCity(city).filter((s) => s.slug !== suburb);
 
@@ -103,20 +161,7 @@ export default async function SuburbCarHirePage({
       { name: displaySuburb, path: `/locations/${city}/suburbs/${suburb}` },
     ]),
     buildItemListSchema(vehicles.map((v) => v.slug)),
-    buildFaqSchema([
-      {
-        question: `How does car hire in ${displaySuburb} work?`,
-        answer: `Hire Car connects you directly with verified Australian rental operators servicing ${displaySuburb} and ${displayCity}. Search listings, verify your mobile number, and submit a direct enquiry with zero middleman booking fees.`,
-      },
-      {
-        question: `Can I pick up my rental vehicle in ${displaySuburb}?`,
-        answer: `Yes, participating operators provide pickups and local deliveries in and around ${displaySuburb}. Check each vehicle listing for branch locations and delivery options.`,
-      },
-      {
-        question: `What driver license is required for car hire in ${displaySuburb}, ${state}?`,
-        answer: `You must hold a valid, unrestricted Australian driver's license (or an accepted international license with English translation) upon pickup.`,
-      },
-    ]),
+    buildFaqSchema(faqs),
   ];
 
   return (
@@ -150,7 +195,11 @@ export default async function SuburbCarHirePage({
             <div className="flex flex-col gap-4 max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 border border-orange-500/20 px-3.5 py-1 text-xs font-semibold text-orange-400 w-fit">
                 <MapPin className="h-3.5 w-3.5" />
-                <span>Local Australian Operators · {displaySuburb}, {state}</span>
+                <span>
+                  {coverage.hasVerifiedCoverage
+                    ? `Verified Local Operators · ${displaySuburb}, ${state}`
+                    : `Greater ${displayCity} Fleet · ${state}`}
+                </span>
               </div>
               <h1 className="text-3xl font-black text-white sm:text-5xl tracking-tight leading-tight">
                 {h1}
@@ -185,11 +234,7 @@ export default async function SuburbCarHirePage({
                 Available Vehicles near {displaySuburb}
               </h2>
               <p className="text-sm text-slate-500 mt-0.5">
-                {total > 0
-                  ? hasDirectLocalInventory
-                    ? `Showing verified vehicles directly servicing ${displaySuburb}.`
-                    : `Showing approved vehicles available across Greater ${displayCity} with service to ${displaySuburb}.`
-                  : "No vehicles currently listed in this specific area."}
+                {inventoryDescription}
               </p>
             </div>
             {total > 0 && (
@@ -247,9 +292,13 @@ export default async function SuburbCarHirePage({
 
               <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/50">
                 <CheckCircle2 className="h-5 w-5 text-blue-600 mb-2" />
-                <h3 className="font-bold text-slate-900 text-sm">Flexible Suburb Pickup</h3>
+                <h3 className="font-bold text-slate-900 text-sm">
+                  {coverage.hasVerifiedCoverage ? "Flexible Suburb Pickup" : "Metropolitan Fleet Range"}
+                </h3>
                 <p className="text-xs text-slate-600 mt-1">
-                  Save travel time across {displayCity} by hiring right in or around {displaySuburb}.
+                  {coverage.hasVerifiedCoverage
+                    ? `Save travel time across ${displayCity} with verified local pickup in ${displaySuburb}.`
+                    : `Wide selection of verified fleet vehicles across Greater ${displayCity} with direct owner handover.`}
                 </p>
               </div>
             </div>
