@@ -1,3 +1,5 @@
+import { createAdminClient } from "@/lib/supabase/admin";
+
 export interface SuburbInfo {
   slug: string;
   name: string;
@@ -456,4 +458,161 @@ export function getSuburbsForCity(citySlug: string): SuburbInfo[] {
 
 export function isKnownSuburb(citySlug: string, suburbSlug: string): boolean {
   return getSuburbMeta(citySlug, suburbSlug) !== null;
+}
+
+export interface SuburbIndexingParams {
+  localInventoryCount: number;
+  hasVerifiedCoverage: boolean;
+  metroInventoryCount?: number;
+}
+
+/**
+ * Evaluates whether a suburb page is indexable.
+ * Crucial rule: Evaluates local inventory and verified service coverage separately from metropolitan inventory.
+ * A suburb page MUST NOT be indexed merely because other vehicles exist elsewhere in the city.
+ */
+export function evaluateSuburbIndexing(params: SuburbIndexingParams): { index: boolean; follow: boolean } {
+  const hasLocalPresence = params.localInventoryCount > 0 || params.hasVerifiedCoverage;
+  return {
+    index: hasLocalPresence,
+    follow: true,
+  };
+}
+
+/**
+ * Checks if the database confirms approved branch presence or verified coverage for a specific suburb.
+ * Never claims service coverage unless confirmed by an approved branch.
+ */
+export async function checkVerifiedVendorCoverage(params: {
+  city: string;
+  suburbName: string;
+  postcode?: string;
+}): Promise<{ hasVerifiedCoverage: boolean; branchCount: number; vendorNames: string[] }> {
+  try {
+    const supabase = createAdminClient();
+    const { data: branches, error } = await supabase
+      .from("branches")
+      .select(`
+        id,
+        name,
+        city,
+        address,
+        status,
+        organizations!inner(id, name, status)
+      `)
+      .eq("status", "approved");
+
+    if (error || !branches) {
+      return { hasVerifiedCoverage: false, branchCount: 0, vendorNames: [] };
+    }
+
+    const term = params.suburbName.toLowerCase().trim();
+    const postcode = params.postcode?.trim();
+
+    const matching = branches.filter((b) => {
+      const org = b.organizations as unknown as { id: string; name: string; status: string } | null;
+      if (!org || org.status !== "approved") return false;
+
+      const branchCity = (b.city || "").toLowerCase();
+      const branchName = (b.name || "").toLowerCase();
+      const branchAddress = (b.address || "").toLowerCase();
+
+      const matchesCity = branchCity === term || branchCity.includes(term);
+      const matchesName = branchName.includes(term);
+      const matchesAddress = branchAddress.includes(term) || (postcode ? branchAddress.includes(postcode) : false);
+
+      return matchesCity || matchesName || matchesAddress;
+    });
+
+    const vendorNames = Array.from(
+      new Set(
+        matching
+          .map((b) => (b.organizations as unknown as { name: string } | null)?.name)
+          .filter(Boolean) as string[],
+      ),
+    );
+
+    return {
+      hasVerifiedCoverage: matching.length > 0,
+      branchCount: matching.length,
+      vendorNames,
+    };
+  } catch {
+    return { hasVerifiedCoverage: false, branchCount: 0, vendorNames: [] };
+  }
+}
+
+/**
+ * Accurately describes the displayed inventory without false service-area claims.
+ * If metropolitan-wide inventory is used as fallback, clearly describes it as vehicles
+ * available across the greater metropolitan area.
+ */
+export function getSuburbInventoryDescription(params: {
+  hasDirectLocalInventory: boolean;
+  hasVerifiedCoverage: boolean;
+  displayCity: string;
+  displaySuburb: string;
+  total: number;
+}): string {
+  if (params.total === 0) {
+    return "No vehicles currently listed in this specific area.";
+  }
+  if (params.hasDirectLocalInventory) {
+    return `Showing verified vehicles directly servicing ${params.displaySuburb}.`;
+  }
+  if (params.hasVerifiedCoverage) {
+    return `Showing approved vehicles available across Greater ${params.displayCity} with verified operator coverage in ${params.displaySuburb}.`;
+  }
+  // When no verified coverage in this suburb, describe as vehicles available across the greater metropolitan area.
+  // Never claim that a vendor services a suburb unless the database confirms its branch or service-area coverage.
+  return `Showing approved vehicles available across the Greater ${params.displayCity} metropolitan area.`;
+}
+
+/**
+ * Returns localized driving and context copy.
+ * Never makes unconfirmed claims of local operator presence when coverage is unverified.
+ */
+export function getSuburbLocalContext(params: {
+  curatedContext?: string;
+  displayCity: string;
+  displaySuburb: string;
+  state: string;
+  hasVerifiedCoverage: boolean;
+}): string {
+  if (params.hasVerifiedCoverage && params.curatedContext) {
+    return params.curatedContext;
+  }
+  if (params.hasVerifiedCoverage) {
+    return `Why travel across ${params.displayCity} when you can pick up your rental car right near ${params.displaySuburb}? We connect you directly with Australian fleet operators with verified service coverage in the ${params.displaySuburb} area. Whether you need an economical compact car or a spacious SUV, discover competitive local rates here.`;
+  }
+  return `Looking for car hire near ${params.displaySuburb}? Browse rental vehicles available across Greater ${params.displayCity}. Transact directly with verified Australian fleet operators and inquire about vehicle delivery or convenient pickup points across the metropolitan area.`;
+}
+
+/**
+ * Generates accurate FAQs based on whether confirmed local coverage exists.
+ */
+export function getSuburbFaqs(params: {
+  displaySuburb: string;
+  displayCity: string;
+  state: string;
+  hasVerifiedCoverage: boolean;
+}) {
+  return [
+    {
+      question: `How does car hire in ${params.displaySuburb} work?`,
+      answer: params.hasVerifiedCoverage
+        ? `Hire Car connects you directly with verified Australian rental operators with branch presence and service coverage in ${params.displaySuburb} and ${params.displayCity}. Search listings, verify your mobile number, and submit a direct enquiry with zero middleman booking fees.`
+        : `Hire Car connects you directly with verified Australian rental operators across Greater ${params.displayCity}. Search available metropolitan fleet listings, verify your mobile number, and connect directly with operators regarding vehicle availability and pickup options near ${params.displaySuburb}.`,
+    },
+    {
+      question: `Can I pick up my rental vehicle in ${params.displaySuburb}?`,
+      answer: params.hasVerifiedCoverage
+        ? `Yes, participating operators provide confirmed branch pickups or local deliveries in and around ${params.displaySuburb}. Check each vehicle listing for branch locations and handover options.`
+        : `Pickup availability in ${params.displaySuburb} depends on individual operator fleet locations and delivery terms. Vehicles listed are based in the Greater ${params.displayCity} metropolitan area; check listing details and enquire with operators regarding pickup or delivery arrangements.`,
+    },
+    {
+      question: `What driver license is required for car hire in ${params.displaySuburb}, ${params.state}?`,
+      answer: `You must hold a valid, unrestricted Australian driver's license (or an accepted international license with English translation) upon pickup.`,
+    },
+  ];
 }
