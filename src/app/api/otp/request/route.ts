@@ -1,12 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
-import { rateLimitSlidingWindow } from "@/lib/security/rate-limit-redis";
+import { rateLimitSlidingWindow, getRedisClient } from "@/lib/security/rate-limit-redis";
 import { normalizeAustralianPhone } from "@/lib/phone/normalize";
 import { generateSecureOtp, hashOtp } from "@/lib/security/otp";
 import { sendOtpSms } from "@/lib/sms/sender";
 
 export async function POST(request: NextRequest) {
+  // In production, shared Redis infrastructure is strictly required for distributed abuse protection
+  if (process.env.NODE_ENV === "production" && !getRedisClient()) {
+    console.error("[OTP Security] REDIS_URL is required for distributed OTP rate limiting in production.");
+    return NextResponse.json(
+      { error: "Verification service temporarily unavailable (rate limiting infrastructure unconfigured)." },
+      { status: 503 },
+    );
+  }
+
   const ip = clientIp(request.headers);
   const ipHash = hashIpForStorage(ip);
 
@@ -126,7 +135,16 @@ export async function POST(request: NextRequest) {
     vehicleTitle,
   });
 
-  const isDev = process.env.NODE_ENV !== "production";
+  // In production, real SMS delivery is mandatory. Fail securely with 503 if credentials/delivery fail.
+  if (process.env.NODE_ENV === "production" && !smsResult.delivered) {
+    console.error("[OTP API] Production SMS delivery failed:", smsResult.error);
+    return NextResponse.json(
+      { error: "SMS verification service is currently unavailable. Please contact support or try again later." },
+      { status: 503 },
+    );
+  }
+
+  const isDev = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
 
   return NextResponse.json(
     {

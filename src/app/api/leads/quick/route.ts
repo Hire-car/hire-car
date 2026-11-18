@@ -4,6 +4,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/ses";
 import { getCurrentUser } from "@/lib/security/auth";
 import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
+import { verifyTurnstile } from "@/lib/security/turnstile";
+import { normalizeAustralianPhone } from "@/lib/phone/normalize";
+import { verifyVerificationToken } from "@/lib/security/otp";
+import { assignLeadToLocationVendors } from "@/lib/leads/location-matching";
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,10 +58,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Turnstile & Anti-bot protection for guest enquiries
+    if (!user) {
+      if (body.turnstileToken) {
+        const challenge = await verifyTurnstile(body.turnstileToken, ip);
+        if (!challenge.ok) {
+          return NextResponse.json({ error: "Security challenge failed" }, { status: 403 });
+        }
+      } else if (process.env.TURNSTILE_SECRET_KEY && process.env.TURNSTILE_OPTIONAL !== "true") {
+        const challenge = await verifyTurnstile(undefined, ip);
+        if (!challenge.ok) {
+          return NextResponse.json({ error: "Security challenge required" }, { status: 403 });
+        }
+      }
+    }
+
+    // Phone normalization and OTP verification
+    const normalizedPhone = normalizeAustralianPhone(customerPhone) || customerPhone;
+    let isPhoneVerified = false;
+
+    if (body.verificationToken) {
+      const tokenResult = verifyVerificationToken(body.verificationToken, vehicleId);
+      if (!tokenResult.valid) {
+        return NextResponse.json(
+          { error: "Invalid or expired verification token. Please verify your phone number." },
+          { status: 403 },
+        );
+      }
+      if (tokenResult.challengeId) {
+        const { data: consumedChallenge, error: consumeError } = await supabase
+          .from("phone_otp_challenges")
+          .update({ consumed_at: new Date().toISOString() })
+          .eq("id", tokenResult.challengeId)
+          .eq("verified", true)
+          .is("consumed_at", null)
+          .gt("expires_at", new Date().toISOString())
+          .select("id")
+          .maybeSingle();
+
+        if (consumeError || !consumedChallenge) {
+          return NextResponse.json(
+            { error: "Verification session has expired or already been submitted." },
+            { status: 403 },
+          );
+        }
+      }
+      isPhoneVerified = true;
+    }
+
+    if (process.env.NODE_ENV === "production" && !user && !isPhoneVerified) {
+      return NextResponse.json(
+        { error: "Mobile number verification is required before submitting an enquiry." },
+        { status: 403 },
+      );
+    }
+
     // 2. Validate vehicle and vendor
     const { data: vehicle, error: vehicleErr } = await supabase
       .from("vehicles")
-      .select("id, branch_id, title")
+      .select("id, branch_id, title, price_per_day_aud, offer_price_aud")
       .eq("id", vehicleId)
       .eq("organization_id", vendorId)
       .eq("status", "approved")
@@ -136,7 +195,10 @@ export async function POST(request: NextRequest) {
         customer_name: customerName || "Customer",
         customer_email: customerEmail,
         customer_user_id: customerUserId,
-        customer_phone: customerPhone || "Not provided",
+        customer_phone: normalizedPhone || customerPhone || "Not provided",
+        phone_verified: isPhoneVerified,
+        snapshot_price_per_day_aud: vehicle.price_per_day_aud || null,
+        snapshot_offer_price_aud: vehicle.offer_price_aud || null,
         pickup_city: branch?.city || "Unknown",
         start_date: sd,
         end_date: ed,
@@ -158,6 +220,23 @@ export async function POST(request: NextRequest) {
     }
 
     console.info("[quick lead] Lead created successfully with ID:", lead.id);
+
+    // Multi-vendor location lead distribution
+    if (branch?.city) {
+      try {
+        await assignLeadToLocationVendors({
+          leadId: lead.id,
+          pickupCity: branch.city,
+          primaryVendorId: vendorId,
+          customerName: customerName || "Customer",
+          vehicleTitle: vehicle.title,
+          startDate: sd,
+          endDate: ed,
+        });
+      } catch (locErr) {
+        console.error("[quick lead] Location lead assignment error:", locErr);
+      }
+    }
 
     // 5. If customer is authenticated, auto-create the first message in the chat thread
     if (customerUserId) {

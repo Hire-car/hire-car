@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Validate phone format & optional OTP verification token
+  // Validate phone format & OTP verification token
   const normalizedPhone = normalizeAustralianPhone(payload.data.phone) || payload.data.phone;
   let isPhoneVerified = false;
 
@@ -92,11 +92,54 @@ export async function POST(request: NextRequest) {
       payload.data.verificationToken,
       payload.data.vehicleId,
     );
-    if (tokenResult.valid) {
-      isPhoneVerified = true;
-    } else {
+    if (!tokenResult.valid) {
       console.warn(`[Lead API] Invalid or expired verification token: ${tokenResult.error}`);
+      return NextResponse.json(
+        { error: "Invalid or expired verification token. Please verify your phone number." },
+        { status: 403 },
+      );
     }
+
+    if (tokenResult.phone && tokenResult.phone !== normalizedPhone) {
+      console.warn(`[Lead API] Verification token phone mismatch: ${tokenResult.phone} vs ${normalizedPhone}`);
+      return NextResponse.json(
+        { error: "Verification token does not match the provided phone number." },
+        { status: 403 },
+      );
+    }
+
+    // Atomic challenge consumption from phone_otp_challenges to prevent replay attacks
+    if (tokenResult.challengeId) {
+      const { data: consumedChallenge, error: consumeError } = await supabase
+        .from("phone_otp_challenges")
+        .update({ consumed_at: new Date().toISOString() })
+        .eq("id", tokenResult.challengeId)
+        .eq("phone_e164", normalizedPhone)
+        .eq("verified", true)
+        .is("consumed_at", null)
+        .gt("expires_at", new Date().toISOString())
+        .select("id")
+        .maybeSingle();
+
+      if (consumeError || !consumedChallenge) {
+        console.warn(`[Lead API] Challenge already consumed or expired: ${consumeError?.message}`);
+        return NextResponse.json(
+          { error: "Verification session has expired or already been submitted. Please request a new code." },
+          { status: 403 },
+        );
+      }
+    }
+
+    isPhoneVerified = true;
+  }
+
+  // In production, unauthenticated guest enquiries must complete phone verification
+  const currentUser = await getCurrentUser();
+  if (process.env.NODE_ENV === "production" && !currentUser && !isPhoneVerified) {
+    return NextResponse.json(
+      { error: "Mobile number verification is required before submitting an enquiry." },
+      { status: 403 },
+    );
   }
 
   // Validate vehicle exists and is approved

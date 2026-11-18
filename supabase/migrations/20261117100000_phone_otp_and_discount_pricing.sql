@@ -10,6 +10,8 @@ create table if not exists public.phone_otp_challenges (
   vehicle_id uuid references public.vehicles(id) on delete cascade,
   vendor_id uuid references public.organizations(id) on delete cascade,
   verified boolean not null default false,
+  verified_at timestamptz default null,
+  consumed_at timestamptz default null,
   attempt_count integer not null default 0,
   ip_hash text,
   expires_at timestamptz not null,
@@ -22,6 +24,9 @@ create index if not exists idx_phone_otp_challenges_phone_vehicle
 
 create index if not exists idx_phone_otp_challenges_expires_at
   on public.phone_otp_challenges (expires_at);
+
+create index if not exists idx_phone_otp_challenges_consumed
+  on public.phone_otp_challenges (id, consumed_at);
 
 -- Enable RLS (Service role only access via admin client)
 alter table public.phone_otp_challenges enable row level security;

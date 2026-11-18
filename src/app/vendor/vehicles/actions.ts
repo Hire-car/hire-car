@@ -35,6 +35,9 @@ export async function syncVehicleCompletenessStatus(vehicleId: string, supabase:
       if (newStatus === "approved") {
         // When vehicle is approved, ensure its images are marked approved so they render publicly
         await supabase.from("vehicle_images").update({ approved: true }).eq("vehicle_id", vehicleId);
+      } else {
+        // When vehicle is not approved (pending or suspended), ensure images are not publicly approved
+        await supabase.from("vehicle_images").update({ approved: false }).eq("vehicle_id", vehicleId);
       }
 
       // Create search index job since status changed
