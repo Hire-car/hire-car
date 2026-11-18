@@ -85,11 +85,18 @@ export async function POST(request: NextRequest) {
           { status: 403 },
         );
       }
+      if (tokenResult.phone && tokenResult.phone !== normalizedPhone) {
+        return NextResponse.json(
+          { error: "Verification token does not match the provided phone number." },
+          { status: 403 },
+        );
+      }
       if (tokenResult.challengeId) {
         const { data: consumedChallenge, error: consumeError } = await supabase
           .from("phone_otp_challenges")
           .update({ consumed_at: new Date().toISOString() })
           .eq("id", tokenResult.challengeId)
+          .eq("phone_e164", normalizedPhone)
           .eq("verified", true)
           .is("consumed_at", null)
           .gt("expires_at", new Date().toISOString())

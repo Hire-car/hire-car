@@ -72,12 +72,17 @@ export default async function SuburbCarHirePage({
   const displaySuburb = curated?.name || formatFallbackSuburbName(suburb);
   const state = curated?.state || cityMeta.state || "Australia";
 
-  // Search real inventory in this metropolitan area
-  const { vehicles, total } = await searchVehicles(
-    "",
+  // Prioritize inventory matching this specific suburb; fall back to metropolitan fleet
+  const localSearch = await searchVehicles(
+    displaySuburb,
     { city: displayCity },
     { page: 1, perPage: 24 },
   );
+
+  const hasDirectLocalInventory = localSearch.total > 0;
+  const { vehicles, total } = hasDirectLocalInventory
+    ? localSearch
+    : await searchVehicles("", { city: displayCity }, { page: 1, perPage: 24 });
 
   const h1 = curated?.h1 || `Car Hire in ${displaySuburb}, ${displayCity} ${state}`;
   const introCopy =
@@ -181,7 +186,9 @@ export default async function SuburbCarHirePage({
               </h2>
               <p className="text-sm text-slate-500 mt-0.5">
                 {total > 0
-                  ? `Showing approved vehicles available in the ${displayCity} metropolitan area.`
+                  ? hasDirectLocalInventory
+                    ? `Showing verified vehicles directly servicing ${displaySuburb}.`
+                    : `Showing approved vehicles available across Greater ${displayCity} with service to ${displaySuburb}.`
                   : "No vehicles currently listed in this specific area."}
               </p>
             </div>

@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   // Fetch challenge
   const { data: challenge, error: fetchError } = await supabase
     .from("phone_otp_challenges")
-    .select("id, phone_e164, code_hash, vehicle_id, verified, attempt_count, expires_at")
+    .select("id, phone_e164, code_hash, vehicle_id, verified, verified_at, consumed_at, attempt_count, expires_at")
     .eq("id", challengeId)
     .single();
 
@@ -69,8 +69,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Check if already used
-  if (challenge.verified) {
+  // Check if already used or consumed
+  if (challenge.verified || challenge.verified_at || challenge.consumed_at) {
     return NextResponse.json(
       { error: "This verification code has already been used. Please request a new code." },
       { status: 400 },
