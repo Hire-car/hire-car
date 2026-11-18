@@ -7,6 +7,11 @@ alter table public.leads
   alter column vehicle_id drop not null,
   alter column vendor_id drop not null;
 
+-- Align leads_archive columns so general location leads can be archived without constraint failure
+alter table public.leads_archive
+  alter column vehicle_id drop not null,
+  alter column vendor_id drop not null;
+
 create table if not exists public.lead_vendor_assignments (
   id uuid primary key default gen_random_uuid(),
   lead_id uuid not null references public.leads(id) on delete cascade,
