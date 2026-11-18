@@ -113,16 +113,37 @@ export async function POST(request: NextRequest) {
       isPhoneVerified = true;
     }
 
+    // Phone verification check:
     // An authenticated customer must not bypass phone verification simply because they are logged in.
-    // An existing authenticated phone verification can be accepted only where a trusted server-side verification record proves ownership of that number.
+    // Accept verification only through:
+    // 1. Genuine matching phone confirmation from trusted Supabase Auth data; or
+    // 2. A server-controlled, securely verified phone verification record.
+    // Supabase user_metadata is user-editable and must not be accepted as trusted proof of phone ownership.
     if (!isPhoneVerified) {
       let hasTrustedServerVerification = false;
-      if (user) {
+
+      // Check server-controlled, securely verified challenge record
+      const challengesTable = supabase.from("phone_otp_challenges");
+      if (typeof challengesTable.update === "function") {
+        const { data: serverChallenge } = await challengesTable
+          .update({ consumed_at: new Date().toISOString() })
+          .eq("phone_e164", normalizedPhone)
+          .eq("verified", true)
+          .is("consumed_at", null)
+          .gt("expires_at", new Date().toISOString())
+          .select("id")
+          .maybeSingle();
+
+        if (serverChallenge) {
+          hasTrustedServerVerification = true;
+          isPhoneVerified = true;
+        }
+      }
+
+      // Check genuine matching phone confirmation from trusted Supabase Auth data
+      if (!hasTrustedServerVerification && user) {
         const userPhone = user.phone ? normalizeAustralianPhone(user.phone) : null;
-        const isAuthPhoneConfirmed = Boolean(
-          user.phone_confirmed_at ||
-            (user as unknown as { user_metadata?: { phone_verified?: boolean } }).user_metadata?.phone_verified,
-        );
+        const isAuthPhoneConfirmed = Boolean(user.phone_confirmed_at);
         if (userPhone && userPhone === normalizedPhone && isAuthPhoneConfirmed) {
           hasTrustedServerVerification = true;
           isPhoneVerified = true;

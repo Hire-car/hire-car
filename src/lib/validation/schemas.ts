@@ -110,8 +110,8 @@ export const transferBranchSchema = z.object({
 
 export const leadSchema = z
   .object({
-    vehicleId: z.string().uuid(),
-    vendorId: z.string().uuid(),
+    vehicleId: z.string().uuid().optional(),
+    vendorId: z.string().uuid().optional(),
     name: z.string().trim().min(2).max(120),
     email: z.string().trim().email().max(160),
     phone: z.string().trim().min(8).max(30),

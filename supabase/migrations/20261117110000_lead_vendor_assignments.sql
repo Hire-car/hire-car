@@ -2,6 +2,11 @@
 -- Purpose: Support multi-vendor location-based lead distribution without duplicating leads.
 -- All changes are forward-only, additive, and safe for existing records.
 
+-- Allow general location leads without a specific vehicle or primary vendor
+alter table public.leads
+  alter column vehicle_id drop not null,
+  alter column vendor_id drop not null;
+
 create table if not exists public.lead_vendor_assignments (
   id uuid primary key default gen_random_uuid(),
   lead_id uuid not null references public.leads(id) on delete cascade,
