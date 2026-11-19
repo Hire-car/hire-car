@@ -86,6 +86,58 @@ export function normalizeCityName(raw: string): string {
 }
 
 /**
+ * Resolves any raw location string (suburb, airport, CBD, metro) to its canonical metropolitan city.
+ */
+export function resolveMetropolitanArea(rawLocation: string): string | null {
+  const normalized = normalizeCityName(rawLocation);
+  if (!normalized) return null;
+
+  // 1. Direct or normalized lookup in SUBURB_TO_METRO_MAP
+  if (SUBURB_TO_METRO_MAP[normalized]) {
+    return SUBURB_TO_METRO_MAP[normalized];
+  }
+
+  // 2. Direct metro cities or compound strings (e.g. "Sydney CBD", "Sydney Airport", "Melbourne Airport", "Perth Airport")
+  const METRO_CITIES = [
+    "sydney",
+    "melbourne",
+    "perth",
+    "brisbane",
+    "adelaide",
+    "hobart",
+    "darwin",
+    "canberra",
+    "gold coast",
+    "cairns",
+    "newcastle",
+    "wollongong",
+    "geelong",
+  ];
+
+  for (const metro of METRO_CITIES) {
+    if (
+      normalized === metro ||
+      normalized.startsWith(`${metro} `) ||
+      normalized.endsWith(` ${metro}`) ||
+      normalized.includes(`${metro} `) ||
+      normalized.includes(` ${metro}`)
+    ) {
+      return metro;
+    }
+  }
+
+  // 3. Suburb keyword inside the string (e.g. "Parramatta station", "Mascot terminal", "Fremantle port")
+  for (const [suburb, metro] of Object.entries(SUBURB_TO_METRO_MAP)) {
+    const regex = new RegExp(`\\b${suburb}\\b`, "i");
+    if (regex.test(normalized)) {
+      return metro;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Returns state abbreviation for known Australian metro cities.
  */
 export function getStateForCity(city: string): string | null {
@@ -106,22 +158,21 @@ export async function findEligibleVendorsForLocation(
 
   if (!normalizedCity) return [];
 
+  const targetMetro = resolveMetropolitanArea(normalizedCity);
+
   // Query branches matching city
-  let branchQuery = supabase
+  const branchQuery = supabase
     .from("branches")
     .select(`
       organization_id,
+      name,
       city,
       state,
+      address,
       status,
       organizations!inner(id, name, status)
     `)
     .eq("status", "approved");
-
-  type QueryWithIlike = { ilike: (column: string, pattern: string) => typeof branchQuery };
-  if ("ilike" in branchQuery && typeof (branchQuery as unknown as QueryWithIlike).ilike === "function") {
-    branchQuery = (branchQuery as unknown as QueryWithIlike).ilike("city", `%${normalizedCity}%`);
-  }
 
   const { data: branches, error } = await branchQuery;
 
@@ -141,13 +192,29 @@ export async function findEligibleVendorsForLocation(
     if (excludeOrgId && org.id === excludeOrgId) continue;
     if (seenOrgs.has(org.id)) continue;
 
-    seenOrgs.add(org.id);
-    matches.push({
-      organizationId: org.id,
-      name: org.name,
-      city: b.city,
-      state: b.state,
-    });
+    const branchCity = (b.city || "").toLowerCase().trim();
+    const branchName = (b.name || "").toLowerCase().trim();
+    const branchAddress = (b.address || "").toLowerCase().trim();
+
+    // Matching conditions:
+    // 1. Target metropolitan match (e.g. Parramatta/Bondi/Mascot -> Sydney; Fremantle -> Perth; St Kilda -> Melbourne)
+    const matchesMetro = Boolean(targetMetro && (branchCity === targetMetro || branchCity.includes(targetMetro)));
+    // 2. Direct city match (case-insensitive substring in either direction)
+    const matchesDirectCity = branchCity === normalizedCity || branchCity.includes(normalizedCity) || normalizedCity.includes(branchCity);
+    // 3. Branch name contains the location query (e.g. "Sydney Airport Branch", "Perth Airport & CBD")
+    const matchesBranchName = branchName.includes(normalizedCity);
+    // 4. Branch address contains the location query (e.g. "50 Mascot Dr" matches "Mascot")
+    const matchesAddress = branchAddress.includes(normalizedCity);
+
+    if (matchesMetro || matchesDirectCity || matchesBranchName || matchesAddress) {
+      seenOrgs.add(org.id);
+      matches.push({
+        organizationId: org.id,
+        name: org.name,
+        city: b.city,
+        state: b.state,
+      });
+    }
   }
 
   return matches;

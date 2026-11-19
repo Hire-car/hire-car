@@ -182,7 +182,7 @@ export default function VehicleForm({
         setPendingUploads(prev => prev.map(p => {
           if (p.id === pending.id) {
             if (res.success) {
-              return { ...p, uploading: false, serverPath: res.path, previewUrl: res.url || p.previewUrl };
+              return { ...p, uploading: false, serverPath: res.path, previewUrl: p.previewUrl || res.url };
             } else {
               toast.error(`Upload failed: ${res.error}`);
               return { ...p, uploading: false, error: res.error };
@@ -618,7 +618,7 @@ export default function VehicleForm({
                 {/* Newly Dropped & Uploading Images */}
                 {pendingUploads.map((pending) => (
                   <div key={pending.id} className={`group relative aspect-square rounded-xl overflow-hidden border shadow-sm ${pending.error ? "border-red-300" : "border-slate-200"} bg-slate-50`}>
-                    <Image src={pending.previewUrl} alt="Pending upload" fill className={`object-cover transition-all ${pending.uploading ? "opacity-40 scale-105 blur-sm" : ""}`} />
+                    <Image src={pending.previewUrl} alt="Pending upload" fill unoptimized className={`object-cover transition-all ${pending.uploading ? "opacity-40 scale-105 blur-sm" : ""}`} />
                     
                     {pending.uploading && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">

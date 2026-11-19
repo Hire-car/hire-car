@@ -17,7 +17,7 @@ create table if not exists public.lead_vendor_assignments (
   lead_id uuid not null references public.leads(id) on delete cascade,
   organization_id uuid not null references public.organizations(id) on delete cascade,
   assigned_at timestamptz not null default now(),
-  status text not null default 'new' check (status in ('new', 'viewed', 'contacted', 'closed')),
+  status text not null default 'new' check (status in ('new', 'viewed', 'contacted', 'converted', 'closed')),
   created_at timestamptz not null default now(),
   constraint lead_vendor_assignments_lead_org_unique unique (lead_id, organization_id)
 );
@@ -56,3 +56,51 @@ create policy "members read own leads" on public.leads
         and app_private.is_org_member(lva.organization_id)
     )
   );
+
+-- Update messages policies so vendors assigned via location can read and post chat messages
+drop policy if exists "users can read messages for their leads" on public.messages;
+drop policy if exists "users can insert messages for their leads" on public.messages;
+
+create policy "users can read messages for their leads"
+on public.messages
+for select
+to public
+using (
+  exists (
+    select 1 from public.leads l
+    where l.id = messages.lead_id
+      and (
+        l.customer_user_id = auth.uid()
+        or lower(l.customer_email) = (select lower(profiles.email) from public.profiles where profiles.id = auth.uid())
+        or app_private.is_org_member(l.vendor_id)
+        or exists (
+          select 1 from public.lead_vendor_assignments lva
+          where lva.lead_id = l.id
+            and app_private.is_org_member(lva.organization_id)
+        )
+        or app_private.is_platform_admin()
+      )
+  )
+);
+
+create policy "users can insert messages for their leads"
+on public.messages
+for insert
+to public
+with check (
+  sender_user_id = auth.uid()
+  and exists (
+    select 1 from public.leads l
+    where l.id = messages.lead_id
+      and (
+        l.customer_user_id = auth.uid()
+        or lower(l.customer_email) = (select lower(profiles.email) from public.profiles where profiles.id = auth.uid())
+        or app_private.is_org_member(l.vendor_id)
+        or exists (
+          select 1 from public.lead_vendor_assignments lva
+          where lva.lead_id = l.id
+            and app_private.is_org_member(lva.organization_id)
+        )
+      )
+  )
+);

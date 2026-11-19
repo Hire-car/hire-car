@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -12,6 +13,7 @@ import {
   buildItemListSchema,
   buildFaqSchema,
   serializeSchemas,
+  CITY_META_OVERRIDES,
 } from "@/lib/seo";
 import {
   getSuburbMeta,
@@ -37,6 +39,10 @@ export async function generateMetadata({
   params: Promise<{ city: string; suburb: string }>;
 }): Promise<Metadata> {
   const { city, suburb } = await params;
+  const isCityValid = Boolean(CITY_META_OVERRIDES[city.toLowerCase()]);
+  if (!isCityValid) {
+    return {};
+  }
   const cityMeta = getCityMeta(city);
   const curated = getSuburbMeta(city, suburb);
 
@@ -44,17 +50,21 @@ export async function generateMetadata({
   const displayCity = cityMeta.title;
   const state = curated?.state || cityMeta.state || "Australia";
 
-  const title = curated?.title || `Car Hire ${displaySuburb} (${displayCity}, ${state}) | Hire Car Marketplace`;
-  const description =
-    curated?.metaDescription ||
-    `Looking for car hire in ${displaySuburb}, ${displayCity}? Compare verified local Australian rental operators and book direct with zero marketplace fees.`;
-
   // Evaluate local inventory and verified service coverage separately from metropolitan inventory
   const coverage = await checkVerifiedVendorCoverage({
     city,
     suburbName: displaySuburb,
     postcode: curated?.postcode,
   });
+
+  if (!curated && !coverage.hasVerifiedCoverage) {
+    return {};
+  }
+
+  const title = curated?.title || `Car Hire ${displaySuburb} (${displayCity}, ${state}) | Hire Car Marketplace`;
+  const description =
+    curated?.metaDescription ||
+    `Looking for car hire in ${displaySuburb}, ${displayCity}? Compare verified local Australian rental operators and book direct with zero marketplace fees.`;
 
   const localSearch = await searchVehicles(
     displaySuburb,
@@ -95,12 +105,9 @@ export default async function SuburbCarHirePage({
   params: Promise<{ city: string; suburb: string }>;
 }) {
   const { city, suburb } = await params;
-  const cityMeta = getCityMeta(city);
+  const isCityValid = Boolean(CITY_META_OVERRIDES[city.toLowerCase()]);
   const curated = getSuburbMeta(city, suburb);
-
-  const displayCity = cityMeta.title;
   const displaySuburb = curated?.name || formatFallbackSuburbName(suburb);
-  const state = curated?.state || cityMeta.state || "Australia";
 
   // Verify branch coverage and prioritize local inventory
   const coverage = await checkVerifiedVendorCoverage({
@@ -108,6 +115,14 @@ export default async function SuburbCarHirePage({
     suburbName: displaySuburb,
     postcode: curated?.postcode,
   });
+
+  if (!isCityValid || (!curated && !coverage.hasVerifiedCoverage)) {
+    notFound();
+  }
+
+  const cityMeta = getCityMeta(city);
+  const displayCity = cityMeta.title;
+  const state = curated?.state || cityMeta.state || "Australia";
 
   // Prioritize inventory matching this specific suburb; fall back to metropolitan fleet
   const localSearch = await searchVehicles(

@@ -1,4 +1,3 @@
-import { ensureUserCanManageOrganization } from "@/lib/data/vendor";
 import { requireUser } from "@/lib/security/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ChatInterface } from "@/components/chat-interface";
@@ -15,7 +14,7 @@ export default async function VendorChatRoomPage({
   const user = await requireUser();
   const supabase = createAdminClient();
 
-  // Fetch lead and verify vendor ownership
+  // Fetch lead and verify vendor ownership or assignment
   const { data: lead } = await supabase
     .from("leads")
     .select(`
@@ -29,9 +28,40 @@ export default async function VendorChatRoomPage({
     notFound();
   }
 
-  try {
-    await ensureUserCanManageOrganization(user.id, lead.vendor_id);
-  } catch {
+  // Get all organizations the current user can manage
+  const { data: userMemberships } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .in("role", ["owner", "admin", "manager"]);
+
+  const userOrgIds = userMemberships?.map((m) => m.organization_id) ?? [];
+  if (userOrgIds.length === 0) {
+    notFound();
+  }
+
+  // Check if any of user's organizations is primary vendor or assigned via location
+  let authorizedOrgId: string | null = null;
+  let assignmentStatus: string | null = null;
+
+  const { data: assignments } = await supabase
+    .from("lead_vendor_assignments")
+    .select("organization_id, status")
+    .eq("lead_id", lead.id)
+    .in("organization_id", userOrgIds);
+
+  if (lead.vendor_id && userOrgIds.includes(lead.vendor_id)) {
+    authorizedOrgId = lead.vendor_id;
+    const primaryAssignment = assignments?.find((a) => a.organization_id === authorizedOrgId);
+    if (primaryAssignment) {
+      assignmentStatus = primaryAssignment.status;
+    }
+  } else if (assignments && assignments.length > 0) {
+    authorizedOrgId = assignments[0].organization_id;
+    assignmentStatus = assignments[0].status;
+  }
+
+  if (!authorizedOrgId) {
     notFound();
   }
 
@@ -45,10 +75,11 @@ export default async function VendorChatRoomPage({
   const { data: vendorMembers } = await supabase
     .from("organization_members")
     .select("user_id")
-    .eq("organization_id", lead.vendor_id);
-  const vendorUserIds = vendorMembers?.map(m => m.user_id) || [];
+    .eq("organization_id", authorizedOrgId);
+  const vendorUserIds = vendorMembers?.map((m) => m.user_id) || [];
 
   const vehicle = lead.vehicles as unknown as { title: string; price_per_day_aud: number } | null;
+  const displayStatus = (assignmentStatus === "closed" ? "lost" : assignmentStatus) || lead.status;
 
   return (
     <div className="space-y-6">
@@ -62,11 +93,11 @@ export default async function VendorChatRoomPage({
             Back to Leads
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">
-            Lead: {vehicle?.title}
+            Lead: {vehicle?.title || "General Enquiry"}
           </h1>
         </div>
         <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide border-emerald-200 bg-emerald-50 text-emerald-600">
-          {lead.status}
+          {displayStatus}
         </span>
       </div>
 
