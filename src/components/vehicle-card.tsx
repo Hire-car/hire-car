@@ -86,9 +86,8 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               alt={vehicle.title}
               fill
               priority={priority}
-              loading={priority ? "eager" : "lazy"}
               fetchPriority={priority ? "high" : "auto"}
-              sizes="(max-width: 1024px) 100vw, 1024px"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
             />
           </Link>

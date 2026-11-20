@@ -130,8 +130,6 @@ export default async function BlogArticlePage({ params }: Props) {
                 alt={article.featured_image_alt ?? article.title}
                 fill
                 className="object-cover"
-                loading="eager"
-                fetchPriority="high"
                 priority={true}
                 sizes="(max-width: 768px) 100vw, 768px"
               />
@@ -184,7 +182,7 @@ export default async function BlogArticlePage({ params }: Props) {
                         alt={post.featured_image_alt ?? post.title}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform"
-                        sizes="200px"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 250px"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-orange-100 to-amber-50" />

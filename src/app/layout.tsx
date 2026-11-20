@@ -121,6 +121,9 @@ export default function RootLayout({
     >
       <head>
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://nympjldhwuozfjawwwfy.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://nympjldhwuozfjawwwfy.supabase.co" />
+        <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
       </head>
       <body className="min-h-full bg-slate-50 text-slate-950 font-sans tracking-tight overflow-x-hidden">
         <NextTopLoader color="#ea580c" showSpinner={false} />

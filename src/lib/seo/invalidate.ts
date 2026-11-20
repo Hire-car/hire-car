@@ -1,6 +1,14 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag as nextRevalidateTag } from "next/cache";
 import { categoryToSlug } from "./categories";
 import { cityToSlug } from "./slugs";
+
+const revalidateTag = (tag: string) => {
+  try {
+    (nextRevalidateTag as unknown as (t: string) => void)(tag);
+  } catch {
+    // revalidateTag only functions within a Next.js request context; catch safely in standalone scripts
+  }
+};
 
 export type PseoInvalidationInput = {
   city?: string | null;
@@ -10,6 +18,7 @@ export type PseoInvalidationInput = {
 };
 
 export async function invalidatePseo(input: PseoInvalidationInput = {}) {
+  // Purge path caches
   revalidatePath("/locations");
   revalidatePath("/");
 
@@ -34,6 +43,11 @@ export async function invalidatePseo(input: PseoInvalidationInput = {}) {
   }
 
   revalidatePath("/sitemap.xml");
+
+  // Purge data cache tags (unstable_cache)
+  revalidateTag("vehicles");
+  revalidateTag("featured");
+  revalidateTag("stats");
 }
 
 export async function invalidateBlog(slug?: string) {
@@ -42,6 +56,9 @@ export async function invalidateBlog(slug?: string) {
     revalidatePath(`/blog/${slug}`);
   }
   revalidatePath("/sitemap.xml");
+
+  // Purge data cache tag for blog
+  revalidateTag("blog");
 }
 
 /** Resolve branch city from branch id for invalidation hooks. */

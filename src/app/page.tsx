@@ -8,7 +8,7 @@ import { TrustSignals } from "@/components/trust-signals";
 import { HowItWorks } from "@/components/how-it-works";
 import { TestimonialCard } from "@/components/testimonial-card";
 import { SiteFooter } from "@/components/site-footer";
-import { getActiveFeaturedVehicles, getApprovedTestimonials, getMarketplaceStats } from "@/lib/data/featured";
+import { getActiveFeaturedVehicles, getApprovedTestimonials, getMarketplaceStats, getCachedHomepageCityStats } from "@/lib/data/featured";
 import { searchVehicles } from "@/lib/search/typesense";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MotionScroll } from "@/components/motion-scroll";
@@ -58,34 +58,27 @@ const browseCategories = [
 
 
 export default async function Home() {
-  const supabase = createAdminClient();
-  
   const [
     featuredFromDb,
     testimonials,
     stats,
-    { vehicles: searchFallback },
-    cityStatsRes
+    cityDataMap,
   ] = await Promise.all([
     getActiveFeaturedVehicles(),
     getApprovedTestimonials(4),
     getMarketplaceStats(),
-    searchVehicles("", {}, { page: 1, perPage: 6 }),
-    supabase.rpc("get_homepage_city_stats")
+    getCachedHomepageCityStats(),
   ]);
 
-  const cityDataMap: Record<string, { count: number; minPrice: number }> = {};
-  
-  const featuredVehicles = (
-    featuredFromDb.length > 0 ? featuredFromDb : searchFallback
-  ).slice(0, 6);
-  
-  type CityStatRow = { city: string; vehicle_count: number; min_price: number };
-  (cityStatsRes.data as CityStatRow[] | null)?.forEach((row) => {
-    if (row.city) {
-      cityDataMap[row.city] = { count: row.vehicle_count, minPrice: row.min_price };
+  let featuredVehicles = featuredFromDb.slice(0, 6);
+  if (featuredVehicles.length === 0) {
+    try {
+      const { vehicles: searchFallback } = await searchVehicles("", {}, { page: 1, perPage: 6 });
+      featuredVehicles = searchFallback.slice(0, 6);
+    } catch {
+      featuredVehicles = [];
     }
-  });
+  }
 
   // Merge live data with location configs
   const locationsWithData = popularLocations.map((loc) => ({

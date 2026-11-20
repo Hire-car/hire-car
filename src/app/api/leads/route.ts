@@ -367,7 +367,6 @@ export async function POST(request: NextRequest) {
   } catch (assignErr) {
     console.warn("[Lead API] Location lead distribution failed (non-fatal):", assignErr);
   }
-
   // If user is authenticated, also create initial message in chat thread
   if (customerUserId) {
     await supabase.from("messages").insert({

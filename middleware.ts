@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
 
   // Strict SEO canonical lowercasing for programmatic routes
   if (
-    (path.startsWith("/locations/") || path.startsWith("/categories/")) &&
+    (path.startsWith("/locations/") || path.startsWith("/categories/") || path.startsWith("/cars/")) &&
     path !== path.toLowerCase()
   ) {
     const redirectUrl = request.nextUrl.clone();
@@ -49,7 +49,8 @@ export async function middleware(request: NextRequest) {
 
   const isProtectedRoute =
     path.startsWith("/customer") ||
-    path.startsWith("/vendor") ||
+    path === "/vendor" ||
+    path.startsWith("/vendor/") ||
     path.startsWith("/messages") ||
     isAdminRoute;
 

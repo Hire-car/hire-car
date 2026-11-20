@@ -234,3 +234,26 @@ export const getMarketplaceStats = unstable_cache(
     vehicleCount: stats.vehicle_count,
   };
 }, ["marketplace-stats"], { revalidate: 3600, tags: ["stats", "vehicles", "organizations"] });
+
+
+export type CityStatRow = { city: string; vehicle_count: number; min_price: number };
+
+/**
+ * Returns cached city aggregates for the homepage location cards.
+ * Avoids executing an uncached RPC query on every homepage hit.
+ */
+export const getCachedHomepageCityStats = unstable_cache(
+  async function getCachedHomepageCityStats(): Promise<Record<string, { count: number; minPrice: number }>> {
+    const supabase = createAdminClient();
+    const cityStatsRes = await supabase.rpc("get_homepage_city_stats");
+    const cityDataMap: Record<string, { count: number; minPrice: number }> = {};
+    (cityStatsRes.data as CityStatRow[] | null)?.forEach((row) => {
+      if (row.city) {
+        cityDataMap[row.city] = { count: row.vehicle_count, minPrice: row.min_price };
+      }
+    });
+    return cityDataMap;
+  },
+  ["homepage-city-stats"],
+  { revalidate: 3600, tags: ["stats", "vehicles", "public"] }
+);
