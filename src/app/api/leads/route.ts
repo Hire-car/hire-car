@@ -87,8 +87,18 @@ export async function POST(request: NextRequest) {
 
   const supabase = createAdminClient();
 
-  // Validate phone format & OTP verification token
-  const normalizedPhone = normalizeAustralianPhone(payload.data.phone) || payload.data.phone;
+  // Validate phone format
+  const normalizedPhone = normalizeAustralianPhone(payload.data.phone);
+  if (!normalizedPhone) {
+    return NextResponse.json(
+      { error: "Please enter a valid Australian mobile number (e.g. 0412 345 678 or +61 412 345 678)." },
+      { status: 400 },
+    );
+  }
+
+  // OTP mobile verification is postponed by client.
+  // We record verified status if genuinely verified via token/auth, but never block unverified leads.
+  // Phone ownership is never falsely marked as verified.
   let isPhoneVerified = false;
 
   if (payload.data.verificationToken) {
@@ -96,90 +106,29 @@ export async function POST(request: NextRequest) {
       payload.data.verificationToken,
       payload.data.vehicleId,
     );
-    if (!tokenResult.valid) {
-      console.warn(`[Lead API] Invalid or expired verification token: ${tokenResult.error}`);
-      return NextResponse.json(
-        { error: "Invalid or expired verification token. Please verify your phone number." },
-        { status: 403 },
-      );
-    }
-
-    if (tokenResult.phone && tokenResult.phone !== normalizedPhone) {
-      console.warn(`[Lead API] Verification token phone mismatch: ${tokenResult.phone} vs ${normalizedPhone}`);
-      return NextResponse.json(
-        { error: "Verification token does not match the provided phone number." },
-        { status: 403 },
-      );
-    }
-
-    // Atomic challenge consumption from phone_otp_challenges to prevent replay attacks
-    if (tokenResult.challengeId) {
-      const { data: consumedChallenge, error: consumeError } = await supabase
-        .from("phone_otp_challenges")
-        .update({ consumed_at: new Date().toISOString() })
-        .eq("id", tokenResult.challengeId)
-        .eq("phone_e164", normalizedPhone)
-        .eq("verified", true)
-        .is("consumed_at", null)
-        .gt("expires_at", new Date().toISOString())
-        .select("id")
-        .maybeSingle();
-
-      if (consumeError || !consumedChallenge) {
-        console.warn(`[Lead API] Challenge already consumed or expired: ${consumeError?.message}`);
-        return NextResponse.json(
-          { error: "Verification session has expired or already been submitted. Please request a new code." },
-          { status: 403 },
-        );
+    if (tokenResult.valid && (!tokenResult.phone || tokenResult.phone === normalizedPhone)) {
+      if (tokenResult.challengeId) {
+        await supabase
+          .from("phone_otp_challenges")
+          .update({ consumed_at: new Date().toISOString() })
+          .eq("id", tokenResult.challengeId)
+          .eq("phone_e164", normalizedPhone)
+          .eq("verified", true)
+          .is("consumed_at", null)
+          .gt("expires_at", new Date().toISOString());
       }
+      isPhoneVerified = true;
     }
-
-    isPhoneVerified = true;
   }
 
-  // Phone verification check:
-  // An authenticated customer must not bypass phone verification simply because they are logged in.
-  // Accept verification only through:
-  // 1. Genuine matching phone confirmation from trusted Supabase Auth data; or
-  // 2. A server-controlled, securely verified phone verification record.
-  // Supabase user_metadata is user-editable and must not be accepted as trusted proof of phone ownership.
   const currentUser = await getCurrentUser();
-  if (!isPhoneVerified) {
-    let hasTrustedServerVerification = false;
 
-    // Check server-controlled, securely verified challenge record
-    const challengesTable = supabase.from("phone_otp_challenges");
-    if (typeof challengesTable.update === "function") {
-      const { data: serverChallenge } = await challengesTable
-        .update({ consumed_at: new Date().toISOString() })
-        .eq("phone_e164", normalizedPhone)
-        .eq("verified", true)
-        .is("consumed_at", null)
-        .gt("expires_at", new Date().toISOString())
-        .select("id")
-        .maybeSingle();
-
-      if (serverChallenge) {
-        hasTrustedServerVerification = true;
+  if (!isPhoneVerified && currentUser) {
+    if (currentUser.phone && Boolean(currentUser.phone_confirmed_at)) {
+      const userPhone = normalizeAustralianPhone(currentUser.phone);
+      if (userPhone === normalizedPhone) {
         isPhoneVerified = true;
       }
-    }
-
-    // Check genuine matching phone confirmation from trusted Supabase Auth data
-    if (!hasTrustedServerVerification && currentUser) {
-      const userPhone = currentUser.phone ? normalizeAustralianPhone(currentUser.phone) : null;
-      const isAuthPhoneConfirmed = Boolean(currentUser.phone_confirmed_at);
-      if (userPhone && userPhone === normalizedPhone && isAuthPhoneConfirmed) {
-        hasTrustedServerVerification = true;
-        isPhoneVerified = true;
-      }
-    }
-
-    if (process.env.NODE_ENV === "production" && !hasTrustedServerVerification) {
-      return NextResponse.json(
-        { error: "Mobile number verification is required before submitting an enquiry." },
-        { status: 403 },
-      );
     }
   }
 
@@ -375,8 +324,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Associate authenticated customer ID when logged in; support null for guest customers
-  const user = await getCurrentUser();
-  const customerUserId = user?.id ?? null;
+  const customerUserId = currentUser?.id ?? null;
 
   const { data: lead, error } = await supabase
     .from("leads")

@@ -197,6 +197,8 @@ export type LeadWithVehicle = {
   createdAt: string;
   assignedViaLocation?: boolean;
   phoneVerified?: boolean;
+  snapshotPricePerDayAud?: number | null;
+  snapshotOfferPriceAud?: number | null;
   events: Array<{
     id: string;
     eventType: string;
@@ -249,6 +251,8 @@ export async function getOrganizationLeads(
       message,
       status,
       phone_verified,
+      snapshot_price_per_day_aud,
+      snapshot_offer_price_aud,
       created_at,
       lead_events(id, event_type, created_at, profiles(full_name))
     `,
@@ -307,6 +311,8 @@ export async function getOrganizationLeads(
       createdAt: lead.created_at,
       assignedViaLocation: lead.vendor_id !== organizationId,
       phoneVerified: Boolean(lead.phone_verified),
+      snapshotPricePerDayAud: lead.snapshot_price_per_day_aud ?? null,
+      snapshotOfferPriceAud: lead.snapshot_offer_price_aud ?? null,
       events: events.map((e) => ({
         id: e.id,
         eventType: e.event_type,

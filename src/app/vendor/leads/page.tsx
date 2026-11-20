@@ -204,6 +204,15 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
                       <h3 className="text-base font-semibold text-slate-900">{lead.customerName}</h3>
                       <p className="text-sm text-slate-500 mt-0.5">
                         Interested in: <span className="font-medium text-slate-700">{lead.vehicleTitle}</span>
+                        {lead.snapshotOfferPriceAud ? (
+                          <span className="ml-2 inline-flex items-center gap-1 rounded bg-orange-100 px-2 py-0.5 text-xs font-bold text-[#ea580c]">
+                            ${lead.snapshotOfferPriceAud}/day (Special Offer)
+                          </span>
+                        ) : lead.snapshotPricePerDayAud ? (
+                          <span className="ml-2 text-xs font-semibold text-slate-600">
+                            ${lead.snapshotPricePerDayAud}/day
+                          </span>
+                        ) : null}
                       </p>
                     </div>
 
