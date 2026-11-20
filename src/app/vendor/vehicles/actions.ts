@@ -3,7 +3,6 @@
 import { revalidatePath, revalidateTag as nextRevalidateTag } from "next/cache";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const revalidateTag = (tag: string) => (nextRevalidateTag as any)(tag);
-import { unstable_cache } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/security/auth";
 import {
@@ -32,6 +31,9 @@ export async function syncVehicleCompletenessStatus(vehicleId: string, supabase:
     const newStatus = missing.length === 0 ? "approved" : "pending";
     if (vehicle.status !== newStatus) {
       await supabase.from("vehicles").update({ status: newStatus }).eq("id", vehicleId);
+
+      // Vehicle approval and individual image approval are treated strictly independently.
+      // Changing vehicle completeness status must not overwrite independent image moderation decisions.
 
       // Create search index job since status changed
       await supabase.from("search_index_jobs").insert({
@@ -84,6 +86,8 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       transmission: formData.get("transmission"),
       category: formData.get("category"),
       pricePerDayAud: formData.get("pricePerDayAud"),
+      offerPriceAud: formData.get("offerPriceAud") || null,
+      offerLabel: formData.get("offerLabel") || null,
       dailyDistanceLimitKm: formData.get("dailyDistanceLimitKm") || null,
       extraDistanceFeeAud: formData.get("extraDistanceFeeAud") || null,
       instantBook: formData.get("instantBook") === "true" || formData.get("instantBook") === "on",
@@ -163,6 +167,8 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
         transmission: data.transmission,
         category: data.category,
         price_per_day_aud: data.pricePerDayAud,
+        offer_price_aud: data.offerPriceAud ?? null,
+        offer_label: data.offerLabel ?? null,
         daily_distance_limit_km: data.dailyDistanceLimitKm,
         extra_distance_fee_aud: data.extraDistanceFeeAud,
         instant_book: data.instantBook,
@@ -174,6 +180,9 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
         monthly_rate_aud: data.monthlyRateAud,
         weekend_rate_aud: data.weekendRateAud,
         notes: data.notes,
+        free_delivery: data.freeDelivery ?? false,
+        free_cancellation: data.freeCancellation ?? false,
+        no_hidden_fees: data.noHiddenFees ?? false,
         status: vehicleStatus,
       })
       .select("id")
@@ -302,6 +311,8 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
     transmission: formData.get("transmission") || undefined,
     category: formData.get("category") || undefined,
     pricePerDayAud: formData.get("pricePerDayAud") || undefined,
+    offerPriceAud: formData.get("offerPriceAud") || null,
+    offerLabel: formData.get("offerLabel") || null,
     dailyDistanceLimitKm: formData.get("dailyDistanceLimitKm") || null,
     extraDistanceFeeAud: formData.get("extraDistanceFeeAud") || null,
     instantBook: formData.has("instantBook") ? (formData.get("instantBook") === "true" || formData.get("instantBook") === "on") : undefined,
@@ -353,6 +364,8 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
   if (data.transmission) updateData.transmission = data.transmission;
   if (data.category) updateData.category = data.category;
   if (data.pricePerDayAud) updateData.price_per_day_aud = data.pricePerDayAud;
+  if (data.offerPriceAud !== undefined) updateData.offer_price_aud = data.offerPriceAud;
+  if (data.offerLabel !== undefined) updateData.offer_label = data.offerLabel;
   if (data.dailyDistanceLimitKm !== undefined) updateData.daily_distance_limit_km = data.dailyDistanceLimitKm;
   if (data.extraDistanceFeeAud !== undefined) updateData.extra_distance_fee_aud = data.extraDistanceFeeAud;
   if (data.instantBook !== undefined) updateData.instant_book = data.instantBook;
@@ -364,6 +377,9 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
   if (data.monthlyRateAud !== undefined) updateData.monthly_rate_aud = data.monthlyRateAud;
   if (data.weekendRateAud !== undefined) updateData.weekend_rate_aud = data.weekendRateAud;
   if (data.notes !== undefined) updateData.notes = data.notes;
+  if (data.freeDelivery !== undefined) updateData.free_delivery = data.freeDelivery;
+  if (data.freeCancellation !== undefined) updateData.free_cancellation = data.freeCancellation;
+  if (data.noHiddenFees !== undefined) updateData.no_hidden_fees = data.noHiddenFees;
   if (data.branchId) {
     // Verify new branch belongs to organization
     const { data: branch } = await supabase
@@ -624,29 +640,22 @@ export async function getOrganizationVehicles(organizationId: string, page: numb
   const user = await requireUser();
   await ensureUserCanManageOrganization(user.id, organizationId);
 
-  return unstable_cache(
-    async (orgId: string, p: number, pSize: number) => {
-      const supabase = createAdminClient();
-      
-      const start = (p - 1) * pSize;
-      const end = start + pSize - 1;
+  const supabase = createAdminClient();
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize - 1;
 
-      const { data: vehicles, error, count } = await supabase
-        .from("vehicles")
-        .select("*, branches(name, city, state)", { count: "exact" })
-        .eq("organization_id", orgId)
-        .order("created_at", { ascending: false })
-        .range(start, end);
+  const { data: vehicles, error, count } = await supabase
+    .from("vehicles")
+    .select("*, branches(name, city, state)", { count: "exact" })
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false })
+    .range(start, end);
 
-      if (error) {
-        throw new Error(`Failed to fetch vehicles: ${error.message}`);
-      }
+  if (error) {
+    throw new Error(`Failed to fetch vehicles: ${error.message}`);
+  }
 
-      return { vehicles: vehicles ?? [], totalCount: count ?? 0, page: p, pageSize: pSize };
-    },
-    [`vendor-vehicles-${organizationId}-${page}-${pageSize}`],
-    { tags: [`vendor-vehicles-${organizationId}`], revalidate: 3600 }
-  )(organizationId, page, pageSize);
+  return { vehicles: vehicles ?? [], totalCount: count ?? 0, page, pageSize };
 }
 
 export async function getVehicleImageCounts(vehicleIds: string[]): Promise<Record<string, number>> {

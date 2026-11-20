@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { syncProfile } from "@/app/actions/auth-sync";
 import {
   isSafeRedirectPath,
@@ -46,8 +45,6 @@ export interface UseAuthRedirect {
  * unsafe targets reaching `router.replace`.
  */
 export function useAuthRedirect(): UseAuthRedirect {
-  const router = useRouter();
-
   const redirectToDestination = useCallback(
     async (destination: string) => {
       await syncProfile();
@@ -57,10 +54,9 @@ export function useAuthRedirect(): UseAuthRedirect {
         ? destination
         : resolvePostAuthDestination(null);
 
-      router.replace(safeDestination);
-      router.refresh();
+      window.location.href = safeDestination;
     },
-    [router],
+    [],
   );
 
   const redirectByRole = useCallback(

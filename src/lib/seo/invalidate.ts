@@ -16,6 +16,7 @@ export async function invalidatePseo(input: PseoInvalidationInput = {}) {
   if (input.city) {
     const citySlug = cityToSlug(input.city);
     revalidatePath(`/locations/${citySlug}`);
+    revalidatePath(`/locations/${citySlug}/suburbs/[suburb]`, "page");
     if (input.category) {
       revalidatePath(`/locations/${citySlug}/${categoryToSlug(input.category)}`);
     }

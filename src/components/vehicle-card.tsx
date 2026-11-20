@@ -233,7 +233,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
 
         {/* Primary CTA */}
         <Link
-          href={`/cars/${vehicle.slug}`}
+          href={`/cars/${vehicle.slug}#enquiry-section`}
           className="w-full flex items-center justify-center gap-2 bg-[#FF4D00] hover:bg-[#E64500] text-white py-3 rounded-xl font-bold text-[15px] shadow-[0_4px_14px_rgba(255,77,0,0.25)] transition-all group/btn mt-auto"
         >
           <CalendarCheck className="h-4 w-4" />

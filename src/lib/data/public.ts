@@ -8,8 +8,8 @@ export const getCachedVehicleDetails = unstable_cache(
     const { data: vehicle } = await supabase
       .from("vehicles")
       .select(`
-        id, slug, title, make, model, year, seats, fuel, transmission, category,
-        price_per_day_aud, daily_distance_limit_km, extra_distance_fee_aud, instant_book, status, organization_id, views_count,
+        id, slug, title, notes, make, model, year, seats, fuel, transmission, category,
+        price_per_day_aud, offer_price_aud, offer_label, daily_distance_limit_km, extra_distance_fee_aud, instant_book, status, organization_id, views_count,
         organizations(id, name, slug, status, verified_at),
         branches(name, city, state, status, phone, whatsapp),
         vehicle_images(id, storage_path, alt_text, sort_order, approved),

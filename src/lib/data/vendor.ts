@@ -95,7 +95,7 @@ export async function enforceVehicleLimit(organizationId: string): Promise<void>
   if (!limitInfo.canAddMore) {
     throw new Error(
       `Vehicle limit reached. Your ${limitInfo.planCode} plan allows ${limitInfo.limit} vehicles. ` +
-        `Please upgrade your plan to add more vehicles.`,
+      `Please upgrade your plan to add more vehicles.`,
     );
   }
 }
@@ -107,60 +107,60 @@ export const getVendorContext = cache(async function getVendorContext(userId: st
 
       const { data, error } = await supabase
         .from("organization_members")
-    .select(`
+        .select(`
       role,
       organizations (
         id, name, slug, status, abn,
         branches (id, name, city, state, address, status, phone, whatsapp)
       )
     `)
-    .eq("user_id", userId);
+        .eq("user_id", userId);
 
-  if (error) {
-    return {
-      organizations: [],
-      setupError:
-        "Database tables are not available yet. Apply the Supabase migration before using vendor workflows.",
-    };
-  }
+      if (error) {
+        return {
+          organizations: [],
+          setupError:
+            "Database tables are not available yet. Apply the Supabase migration before using vendor workflows.",
+        };
+      }
 
-  if (!data || data.length === 0) {
-    return { organizations: [] };
-  }
+      if (!data || data.length === 0) {
+        return { organizations: [] };
+      }
 
-  // Filter out any members that don't have an associated organization (shouldn't happen, but safe)
-  // and map to the required structure
-  const organizations = data
-    .filter(row => row.organizations != null)
-    .map(row => {
-      // Cast because Supabase nested queries typing can be strict
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const org = row.organizations as any;
-      return {
-        id: org.id,
-        name: org.name,
-        slug: org.slug,
-        status: org.status,
-        abn: org.abn,
-        // Ensure branches is an array
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        branches: Array.isArray(org.branches) ? org.branches.map((b: any) => ({
-          id: b.id,
-          name: b.name,
-          city: b.city,
-          state: b.state,
-          address: b.address,
-          status: b.status,
-          phone: b.phone,
-          whatsapp: b.whatsapp,
-        })) : [],
-      };
-    });
+      // Filter out any members that don't have an associated organization (shouldn't happen, but safe)
+      // and map to the required structure
+      const organizations = data
+        .filter(row => row.organizations != null)
+        .map(row => {
+          // Cast because Supabase nested queries typing can be strict
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const org = row.organizations as any;
+          return {
+            id: org.id,
+            name: org.name,
+            slug: org.slug,
+            status: org.status,
+            abn: org.abn,
+            // Ensure branches is an array
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            branches: Array.isArray(org.branches) ? org.branches.map((b: any) => ({
+              id: b.id,
+              name: b.name,
+              city: b.city,
+              state: b.state,
+              address: b.address,
+              status: b.status,
+              phone: b.phone,
+              whatsapp: b.whatsapp,
+            })) : [],
+          };
+        });
 
-    return { organizations };
-  },
-  [`vendor-context-${userId}`],
-  { tags: [`vendor-context-${userId}`], revalidate: 3600 }
+      return { organizations };
+    },
+    [`vendor-context-${userId}`],
+    { tags: [`vendor-context-${userId}`], revalidate: 3600 }
   )(userId);
 });
 
@@ -195,6 +195,10 @@ export type LeadWithVehicle = {
   message: string | null;
   status: "new" | "contacted" | "converted" | "lost";
   createdAt: string;
+  assignedViaLocation?: boolean;
+  phoneVerified?: boolean;
+  snapshotPricePerDayAud?: number | null;
+  snapshotOfferPriceAud?: number | null;
   events: Array<{
     id: string;
     eventType: string;
@@ -217,11 +221,25 @@ export async function getOrganizationLeads(
   const supabase = createAdminClient();
   const { status, limit = 50, offset = 0 } = options;
 
+  // Retrieve any leads assigned to this organization via location matching
+  const { data: assignments } = await supabase
+    .from("lead_vendor_assignments")
+    .select("lead_id, status")
+    .eq("organization_id", organizationId);
+
+  const assignmentStatusMap = new Map<string, string>();
+  for (const a of assignments ?? []) {
+    assignmentStatusMap.set(a.lead_id, a.status);
+  }
+
+  const assignedLeadIds = assignments?.map((a) => a.lead_id) ?? [];
+
   let query = supabase
     .from("leads")
     .select(
       `
       id,
+      vendor_id,
       vehicle_id,
       vehicles(title),
       customer_name,
@@ -232,58 +250,79 @@ export async function getOrganizationLeads(
       end_date,
       message,
       status,
+      phone_verified,
+      snapshot_price_per_day_aud,
+      snapshot_offer_price_aud,
       created_at,
       lead_events(id, event_type, created_at, profiles(full_name))
     `,
-      { count: "exact" },
-    )
-    .eq("vendor_id", organizationId)
-    .order("created_at", { ascending: false })
-    .range(offset, offset + limit - 1);
+    );
 
-  if (status) {
-    query = query.eq("status", status);
+  if (assignedLeadIds.length > 0) {
+    query = query.or(`vendor_id.eq.${organizationId},id.in.(${assignedLeadIds.join(",")})`);
+  } else {
+    query = query.eq("vendor_id", organizationId);
   }
 
-  const { data, error, count } = await query;
+  query = query.order("created_at", { ascending: false });
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to fetch leads: ${error.message}`);
   }
 
-  const leads: LeadWithVehicle[] =
-    data?.map((lead) => {
-      const vehicle = lead.vehicles as unknown as { title: string } | null;
-      const events = (lead.lead_events as unknown as Array<{
-        id: string;
-        event_type: string;
-        created_at: string;
-        profiles: { full_name: string } | null;
-      }>) ?? [];
+  // Map each lead to its organization-specific effective status
+  const allLeads = (data ?? []).map((lead) => {
+    const raw = assignmentStatusMap.get(lead.id);
+    const effectiveStatus = ((raw === "closed" ? "lost" : raw) || lead.status) as LeadWithVehicle["status"];
+    return { lead, effectiveStatus };
+  });
 
-      return {
-        id: lead.id,
-        vehicleId: lead.vehicle_id,
-        vehicleTitle: vehicle?.title ?? "Unknown Vehicle",
-        customerName: lead.customer_name,
-        customerEmail: lead.customer_email,
-        customerPhone: lead.customer_phone,
-        pickupCity: lead.pickup_city,
-        startDate: lead.start_date,
-        endDate: lead.end_date,
-        message: lead.message,
-        status: lead.status as LeadWithVehicle["status"],
-        createdAt: lead.created_at,
-        events: events.map((e) => ({
-          id: e.id,
-          eventType: e.event_type,
-          createdAt: e.created_at,
-          actorName: e.profiles?.full_name ?? undefined,
-        })),
-      };
-    }) ?? [];
+  // Filter by isolated status if requested
+  const filtered = status
+    ? allLeads.filter((item) => item.effectiveStatus === status)
+    : allLeads;
 
-  return { leads, total: count ?? 0 };
+  const total = filtered.length;
+  const paginated = filtered.slice(offset, offset + limit);
+
+  const leads: LeadWithVehicle[] = paginated.map(({ lead, effectiveStatus }) => {
+    const vehicle = lead.vehicles as unknown as { title: string } | null;
+    const events = (lead.lead_events as unknown as Array<{
+      id: string;
+      event_type: string;
+      created_at: string;
+      profiles: { full_name: string } | null;
+    }>) ?? [];
+
+    return {
+      id: lead.id,
+      vehicleId: lead.vehicle_id,
+      vehicleTitle: vehicle?.title ?? "General Enquiry",
+      customerName: lead.customer_name,
+      customerEmail: lead.customer_email,
+      customerPhone: lead.customer_phone,
+      pickupCity: lead.pickup_city,
+      startDate: lead.start_date,
+      endDate: lead.end_date,
+      message: lead.message,
+      status: effectiveStatus,
+      createdAt: lead.created_at,
+      assignedViaLocation: lead.vendor_id !== organizationId,
+      phoneVerified: Boolean(lead.phone_verified),
+      snapshotPricePerDayAud: lead.snapshot_price_per_day_aud ?? null,
+      snapshotOfferPriceAud: lead.snapshot_offer_price_aud ?? null,
+      events: events.map((e) => ({
+        id: e.id,
+        eventType: e.event_type,
+        createdAt: e.created_at,
+        actorName: e.profiles?.full_name ?? undefined,
+      })),
+    };
+  });
+
+  return { leads, total };
 }
 
 export async function getLeadStats(organizationId: string, userId: string) {
@@ -291,21 +330,44 @@ export async function getLeadStats(organizationId: string, userId: string) {
 
   const supabase = createAdminClient();
 
-  const { data, error } = await supabase
-    .from("leads")
-    .select("status")
-    .eq("vendor_id", organizationId);
+  // Include location assigned leads
+  const { data: assignments } = await supabase
+    .from("lead_vendor_assignments")
+    .select("lead_id, status")
+    .eq("organization_id", organizationId);
+
+  const assignmentStatusMap = new Map<string, string>();
+  for (const a of assignments ?? []) {
+    assignmentStatusMap.set(a.lead_id, a.status);
+  }
+
+  const assignedLeadIds = assignments?.map((a) => a.lead_id) ?? [];
+
+  let query = supabase.from("leads").select("id, status");
+
+  if (assignedLeadIds.length > 0) {
+    query = query.or(`vendor_id.eq.${organizationId},id.in.(${assignedLeadIds.join(",")})`);
+  } else {
+    query = query.eq("vendor_id", organizationId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(`Failed to fetch lead stats: ${error.message}`);
   }
 
+  const effectiveLeads = (data ?? []).map((l) => {
+    const raw = assignmentStatusMap.get(l.id);
+    return (raw === "closed" ? "lost" : raw) || l.status;
+  });
+
   const stats = {
-    total: data?.length ?? 0,
-    new: data?.filter((l) => l.status === "new").length ?? 0,
-    contacted: data?.filter((l) => l.status === "contacted").length ?? 0,
-    converted: data?.filter((l) => l.status === "converted").length ?? 0,
-    lost: data?.filter((l) => l.status === "lost").length ?? 0,
+    total: effectiveLeads.length,
+    new: effectiveLeads.filter((s) => s === "new").length,
+    contacted: effectiveLeads.filter((s) => s === "contacted").length,
+    converted: effectiveLeads.filter((s) => s === "converted").length,
+    lost: effectiveLeads.filter((s) => s === "lost").length,
   };
 
   return stats;
@@ -350,43 +412,43 @@ export async function getDashboardMetrics(
         supabase.from("branches").select("id", { count: "exact", head: true }).eq("organization_id", orgId),
       ]);
 
-  if (metricsRes.error) throw new Error(`Failed to fetch metrics: ${metricsRes.error.message}`);
-  if (branchRes.error) throw new Error(`Failed to fetch branches: ${branchRes.error.message}`);
+      if (metricsRes.error) throw new Error(`Failed to fetch metrics: ${metricsRes.error.message}`);
+      if (branchRes.error) throw new Error(`Failed to fetch branches: ${branchRes.error.message}`);
 
-  const metrics = metricsRes.data as {
-    total_views: number;
-    active_listings: number;
-    pending_listings: number;
-    total_vehicles: number;
-    new_leads: number;
-    total_leads: number;
-    phone_clicks_30d: number;
-    whatsapp_clicks_30d: number;
-    total_clicks_30d: number;
-  };
-  const branchCount = branchRes.count;
+      const metrics = metricsRes.data as {
+        total_views: number;
+        active_listings: number;
+        pending_listings: number;
+        total_vehicles: number;
+        new_leads: number;
+        total_leads: number;
+        phone_clicks_30d: number;
+        whatsapp_clicks_30d: number;
+        total_clicks_30d: number;
+      };
+      const branchCount = branchRes.count;
 
-  return {
-    vehicleCount: metrics.total_vehicles,
-    activeListings: metrics.active_listings,
-    pendingListings: metrics.pending_listings,
-    newLeads: metrics.new_leads,
-    totalLeads: metrics.total_leads,
-    planLimit: limitInfo.limit,
-    planCode: limitInfo.planCode,
-    planUsage: limitInfo.hasLimit
-      ? `${limitInfo.currentCount} / ${limitInfo.limit}`
-      : `${limitInfo.currentCount} / ∞`,
-    branchCount: branchCount ?? 0,
-      clickStats: {
-        phone: metrics.phone_clicks_30d,
-        whatsapp: metrics.whatsapp_clicks_30d,
-        total: metrics.total_clicks_30d,
-      },
-      totalViews: metrics.total_views,
-    };
-  },
-  [`vendor-metrics-${organizationId}`],
-  { tags: [`vendor-metrics-${organizationId}`], revalidate: 3600 }
+      return {
+        vehicleCount: metrics.total_vehicles,
+        activeListings: metrics.active_listings,
+        pendingListings: metrics.pending_listings,
+        newLeads: metrics.new_leads,
+        totalLeads: metrics.total_leads,
+        planLimit: limitInfo.limit,
+        planCode: limitInfo.planCode,
+        planUsage: limitInfo.hasLimit
+          ? `${limitInfo.currentCount} / ${limitInfo.limit}`
+          : `${limitInfo.currentCount} / ∞`,
+        branchCount: branchCount ?? 0,
+        clickStats: {
+          phone: metrics.phone_clicks_30d,
+          whatsapp: metrics.whatsapp_clicks_30d,
+          total: metrics.total_clicks_30d,
+        },
+        totalViews: metrics.total_views,
+      };
+    },
+    [`vendor-metrics-${organizationId}`],
+    { tags: [`vendor-metrics-${organizationId}`], revalidate: 3600 }
   )(organizationId);
 }
