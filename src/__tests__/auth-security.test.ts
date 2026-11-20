@@ -50,7 +50,7 @@ describe("Authentication Security Verification", () => {
 
   it("returns null immediately when no cookies exist (guest fast path without network overhead)", async () => {
     mockCookieStore.getAll.mockReturnValue([]);
-    
+
     // Import fresh
     const { getCurrentUser } = await import("@/lib/security/auth");
     const user = await getCurrentUser();

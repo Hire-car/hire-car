@@ -35,31 +35,79 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
 
   const supabase = createAdminClient();
 
-  // Verify lead belongs to organization
-  const { data: lead, error: leadError } = await supabase
+  // Verify lead belongs to organization or is assigned via lead_vendor_assignments
+  let { data: lead } = await supabase
     .from("leads")
-    .select("id, status, customer_email, customer_name, vehicles(title), organizations(name)")
+    .select("id, status, vendor_id, customer_email, customer_name, vehicles(title), organizations(name)")
     .eq("id", leadId)
     .eq("vendor_id", organizationId)
-    .single();
+    .maybeSingle();
 
-  if (leadError || !lead) {
+  if (!lead) {
+    const { data: assignment } = await supabase
+      .from("lead_vendor_assignments")
+      .select("id, status")
+      .eq("lead_id", leadId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (assignment) {
+      const { data: assignedLead } = await supabase
+        .from("leads")
+        .select("id, status, vendor_id, customer_email, customer_name, vehicles(title), organizations(name)")
+        .eq("id", leadId)
+        .maybeSingle();
+      lead = assignedLead;
+    }
+  }
+
+  if (!lead) {
     throw new Error("Lead not found or access denied");
   }
 
-  const oldStatus = lead.status;
+  // Get current assignment status for this organization if it exists
+  const { data: currentAssignment } = await supabase
+    .from("lead_vendor_assignments")
+    .select("status")
+    .eq("lead_id", leadId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
 
-  // Update lead status
-  const { error: updateError } = await supabase
-    .from("leads")
-    .update({
-      status,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", leadId);
+  const oldOrgRawStatus = currentAssignment?.status;
+  const oldStatus = oldOrgRawStatus
+    ? (oldOrgRawStatus === "closed" ? "lost" : oldOrgRawStatus)
+    : lead.status;
 
-  if (updateError) {
-    throw new Error(`Failed to update lead: ${updateError.message}`);
+  // Always update this organization's isolated status in lead_vendor_assignments
+  const assignmentStatus = status === "lost" ? "closed" : status;
+  const { error: assignmentError } = await supabase
+    .from("lead_vendor_assignments")
+    .upsert(
+      {
+        lead_id: leadId,
+        organization_id: organizationId,
+        status: assignmentStatus,
+      },
+      { onConflict: "lead_id,organization_id" },
+    );
+
+  if (assignmentError) {
+    throw new Error(`Failed to update assignment status: ${assignmentError.message}`);
+  }
+
+  // Only update public.leads status if this organization is the primary vendor
+  if (lead.vendor_id === organizationId) {
+    const { error: updateError } = await supabase
+      .from("leads")
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", leadId);
+
+    if (updateError) {
+      throw new Error(`Failed to update lead: ${updateError.message}`);
+    }
   }
 
   // Etiquette: Send confirmation email if newly converted
@@ -113,5 +161,6 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/vendor/leads");
+  revalidatePath(`/vendor/leads/${leadId}`);
   revalidatePath("/vendor/dashboard");
 }

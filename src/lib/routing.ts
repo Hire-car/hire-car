@@ -48,7 +48,10 @@ export function defaultDashboardForRole(
   plan?: string | null,
 ): string {
   if (role === "vendor") {
-    return buildVendorUpgradeHref({ plan });
+    if (plan) {
+      return buildVendorUpgradeHref({ plan });
+    }
+    return "/vendor/dashboard";
   }
   return "/customer/dashboard";
 }

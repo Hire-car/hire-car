@@ -177,4 +177,3 @@ describe("POST /api/leads - Guest and Authenticated Booking", () => {
     expect(res.status).toBe(400);
   });
 });
-

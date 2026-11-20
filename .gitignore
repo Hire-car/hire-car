@@ -47,6 +47,9 @@ supabase/.temp/
 .vercel
 .env*
 
+# local scratch
+scratch/
+
 .playwright-mcp/
 check_typesense.ts
 

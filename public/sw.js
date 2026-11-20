@@ -212,6 +212,7 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(request.url);
   const sameOrigin = url.origin === self.location.origin;
+  if (!sameOrigin) return;
 
   // API calls: network-first.
   if (sameOrigin && isApiRequest(url)) {

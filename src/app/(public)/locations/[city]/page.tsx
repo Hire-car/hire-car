@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
-// notFound removed
+import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { VehicleCard } from "@/components/vehicle-card";
@@ -20,6 +20,7 @@ import {
   buildFaqSchema,
   buildItemListSchema,
   serializeSchemas,
+  CITY_META_OVERRIDES,
 } from "@/lib/seo";
 import { getCityFaqs } from "@/lib/seo/city-faqs";
 import { getCitySeoParagraphs } from "@/lib/seo/city-content";
@@ -43,10 +44,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { city } = await params;
   const slug = city.toLowerCase();
+  const isCuratedCity = Boolean(CITY_META_OVERRIDES[slug]);
   const meta = getCityMeta(slug);
   const searchCity = meta.title;
 
   const { total, vehicles } = await searchVehicles("", { city: searchCity }, { page: 1, perPage: 24 });
+  if (!isCuratedCity && total === 0) {
+    return {};
+  }
   const lowestPrice = vehicles.length > 0 ? Math.min(...vehicles.map(v => v.pricePerDayAud)) : undefined;
 
   return {
@@ -68,6 +73,7 @@ export default async function LocationPage({
 }) {
   const { city } = await params;
   const slug = city.toLowerCase();
+  const isCuratedCity = Boolean(CITY_META_OVERRIDES[slug]);
   const meta = getCityMeta(slug);
   const searchCity = meta.title;
 
@@ -76,6 +82,11 @@ export default async function LocationPage({
     searchVehicles("", { city: searchCity }, { page: 1, perPage: 24 }),
     getCitiesWithCounts()
   ]);
+
+  const hasInventoryOrBranch = total > 0 || allCities.some((c) => c.slug === slug);
+  if (!isCuratedCity && !hasInventoryOrBranch) {
+    notFound();
+  }
 
   const displayCity = meta.title;
   const state = meta.state;

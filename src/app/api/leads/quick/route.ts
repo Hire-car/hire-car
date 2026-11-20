@@ -4,6 +4,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/ses";
 import { getCurrentUser } from "@/lib/security/auth";
 import { clientIp, hashIpForStorage } from "@/lib/security/rate-limit";
+import { verifyTurnstile } from "@/lib/security/turnstile";
+import { normalizeAustralianPhone } from "@/lib/phone/normalize";
+import { verifyVerificationToken } from "@/lib/security/otp";
+import { assignLeadToLocationVendors } from "@/lib/leads/location-matching";
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,10 +58,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Turnstile & Anti-bot protection for guest enquiries
+    if (!user) {
+      if (body.turnstileToken) {
+        const challenge = await verifyTurnstile(body.turnstileToken, ip);
+        if (!challenge.ok) {
+          return NextResponse.json({ error: "Security challenge failed" }, { status: 403 });
+        }
+      } else if (process.env.TURNSTILE_SECRET_KEY && process.env.TURNSTILE_OPTIONAL !== "true") {
+        const challenge = await verifyTurnstile(undefined, ip);
+        if (!challenge.ok) {
+          return NextResponse.json({ error: "Security challenge required" }, { status: 403 });
+        }
+      }
+    }
+
+    // Phone normalization (OTP postponed by client)
+    const normalizedPhone = normalizeAustralianPhone(customerPhone) || customerPhone;
+    let isPhoneVerified = false;
+
+    if (body.verificationToken) {
+      const tokenResult = verifyVerificationToken(body.verificationToken, vehicleId);
+      if (tokenResult.valid && (!tokenResult.phone || tokenResult.phone === normalizedPhone)) {
+        if (tokenResult.challengeId) {
+          await supabase
+            .from("phone_otp_challenges")
+            .update({ consumed_at: new Date().toISOString() })
+            .eq("id", tokenResult.challengeId)
+            .eq("phone_e164", normalizedPhone)
+            .eq("verified", true)
+            .is("consumed_at", null)
+            .gt("expires_at", new Date().toISOString());
+        }
+        isPhoneVerified = true;
+      }
+    }
+
+    if (!isPhoneVerified && user) {
+      const u = user;
+      const userPhone = u.phone ? normalizeAustralianPhone(u.phone) : null;
+      const isAuthPhoneConfirmed = Boolean(u.phone_confirmed_at);
+      if (userPhone && userPhone === normalizedPhone && isAuthPhoneConfirmed) {
+        isPhoneVerified = true;
+      }
+    }
+
     // 2. Validate vehicle and vendor
     const { data: vehicle, error: vehicleErr } = await supabase
       .from("vehicles")
-      .select("id, branch_id, title")
+      .select("id, branch_id, title, price_per_day_aud, offer_price_aud")
       .eq("id", vehicleId)
       .eq("organization_id", vendorId)
       .eq("status", "approved")
@@ -136,7 +185,10 @@ export async function POST(request: NextRequest) {
         customer_name: customerName || "Customer",
         customer_email: customerEmail,
         customer_user_id: customerUserId,
-        customer_phone: customerPhone || "Not provided",
+        customer_phone: normalizedPhone || customerPhone || "Not provided",
+        phone_verified: isPhoneVerified,
+        snapshot_price_per_day_aud: vehicle.price_per_day_aud || null,
+        snapshot_offer_price_aud: vehicle.offer_price_aud || null,
         pickup_city: branch?.city || "Unknown",
         start_date: sd,
         end_date: ed,
@@ -159,6 +211,23 @@ export async function POST(request: NextRequest) {
 
     console.info("[quick lead] Lead created successfully with ID:", lead.id);
 
+    // Multi-vendor location lead distribution
+    if (branch?.city) {
+      try {
+        await assignLeadToLocationVendors({
+          leadId: lead.id,
+          pickupCity: branch.city,
+          primaryVendorId: vendorId,
+          customerName: customerName || "Customer",
+          vehicleTitle: vehicle.title,
+          startDate: sd,
+          endDate: ed,
+        });
+      } catch (locErr) {
+        console.error("[quick lead] Location lead assignment error:", locErr);
+      }
+    }
+
     // 5. If customer is authenticated, auto-create the first message in the chat thread
     if (customerUserId) {
       const { error: messageError } = await supabase.from("messages").insert({
@@ -166,7 +235,6 @@ export async function POST(request: NextRequest) {
         sender_user_id: customerUserId,
         body: "I am interested in this vehicle. Is it still available?",
       });
-
       if (messageError) {
         console.error("[quick lead] Initial message creation failed:", messageError);
       } else {

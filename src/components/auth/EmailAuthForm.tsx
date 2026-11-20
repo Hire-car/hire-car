@@ -2,7 +2,7 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars, react/no-unescaped-entities */
 import { useState } from "react";
-import { ArrowRight, Loader2, Mail, KeyRound, Lock, Key } from "lucide-react";
+import { ArrowRight, Loader2, Mail, KeyRound, Lock, Key, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { validateEmail, validatePassword } from "@/lib/auth/validation";
 import { toFriendlyAuthError } from "@/lib/auth/errors";
@@ -47,6 +47,8 @@ export function EmailAuthForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otp, setOtp] = useState("");
   
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -378,17 +380,34 @@ export function EmailAuthForm({
                   </button>
                 )}
               </div>
-              <Input
-                id="email-auth-password"
-                type="password"
-                name="password"
-                autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                disabled={disabled || isSubmitting}
-                aria-invalid={Boolean(fieldErrors.password)}
-              />
+              <div className="relative">
+                <Input
+                  id="email-auth-password"
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  disabled={disabled || isSubmitting}
+                  aria-invalid={Boolean(fieldErrors.password)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  disabled={disabled || isSubmitting}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-r-lg transition-colors flex items-center justify-center cursor-pointer disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Eye className="h-4 w-4" aria-hidden="true" />
+                  )}
+                </button>
+              </div>
               {fieldErrors.password && (
                 <p className="text-sm text-destructive" role="alert">{fieldErrors.password}</p>
               )}
@@ -397,17 +416,34 @@ export function EmailAuthForm({
             {mode === "sign-up" && (
               <div className="space-y-2">
                 <Label htmlFor="email-auth-confirm-password">Confirm Password</Label>
-                <Input
-                  id="email-auth-confirm-password"
-                  type="password"
-                  name="confirmPassword"
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(event) => setConfirmPassword(event.target.value)}
-                  disabled={disabled || isSubmitting}
-                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
-                />
+                <div className="relative">
+                  <Input
+                    id="email-auth-confirm-password"
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    autoComplete="new-password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    disabled={disabled || isSubmitting}
+                    aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    disabled={disabled || isSubmitting}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    title={showConfirmPassword ? "Hide password" : "Show password"}
+                    className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-r-lg transition-colors flex items-center justify-center cursor-pointer disabled:pointer-events-none disabled:opacity-50"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-4 w-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
                 {fieldErrors.confirmPassword && (
                   <p className="text-sm text-destructive" role="alert">{fieldErrors.confirmPassword}</p>
                 )}

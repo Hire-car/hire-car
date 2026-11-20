@@ -416,33 +416,64 @@ export default async function VehicleDetailPage({
             </div>
 
             {/* Pricing Panel */}
-            <Card variant="elevated">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1">Price per day</p>
-                  <p className="text-4xl font-black text-foreground leading-none">${vehicle.price_per_day_aud}</p>
-                  <p className="text-xs font-semibold text-muted-foreground mt-1 uppercase tracking-wider">AUD / day</p>
-                </div>
-                {vehicle.instant_book && (
-                  <Badge variant="success" className="mx-auto mt-3 flex w-fit">
-                    Instant Book Available
-                  </Badge>
-                )}
-              </CardContent>
-            </Card>
+            {(() => {
+              const offerInfo = vehicle as unknown as { offer_price_aud?: number | null; offer_label?: string | null };
+              const offerPrice = offerInfo.offer_price_aud ?? null;
+              const offerLabel = offerInfo.offer_label ?? null;
+              const hasDiscount = offerPrice !== null && offerPrice < vehicle.price_per_day_aud;
 
-            {/* Enquiry Form */}
-            <Card variant="elevated" className="overflow-hidden">
-              <EnquiryWidget
-                vehicleId={vehicle.id}
-                vendorId={vehicle.organization_id}
-                isLoggedIn={!!user}
-                userProfile={userProfile}
-                instantBook={vehicle.instant_book}
-                pricePerDay={vehicle.price_per_day_aud}
-                defaultCity={branch?.city}
-              />
-            </Card>
+              return (
+                <>
+                  <Card variant="elevated">
+                    <CardContent className="p-6">
+                      <div className="text-center">
+                        <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-1">Price per day</p>
+                        {hasDiscount ? (
+                          <div>
+                            <div className="flex items-center justify-center gap-2">
+                              <span className="text-xl font-bold text-muted-foreground line-through">
+                                ${vehicle.price_per_day_aud}
+                              </span>
+                              <span className="text-4xl font-black text-[#ea580c] leading-none">
+                                ${offerPrice}
+                              </span>
+                            </div>
+                            <Badge variant="outline" className="mx-auto mt-2 border-orange-200 bg-orange-50 text-[#ea580c] font-bold">
+                              {offerLabel || `Save $${vehicle.price_per_day_aud - offerPrice}/day`}
+                            </Badge>
+                          </div>
+                        ) : (
+                          <p className="text-4xl font-black text-foreground leading-none">${vehicle.price_per_day_aud}</p>
+                        )}
+                        <p className="text-xs font-semibold text-muted-foreground mt-1 uppercase tracking-wider">AUD / day</p>
+                      </div>
+                      {vehicle.instant_book && (
+                        <Badge variant="success" className="mx-auto mt-3 flex w-fit">
+                          Instant Book Available
+                        </Badge>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Enquiry Form */}
+                  <Card variant="elevated" className="overflow-hidden">
+                    <EnquiryWidget
+                      vehicleId={vehicle.id}
+                      vendorId={vehicle.organization_id}
+                      isLoggedIn={!!user}
+                      userProfile={userProfile}
+                      instantBook={vehicle.instant_book}
+                      pricePerDay={vehicle.price_per_day_aud}
+                      offerPrice={offerPrice}
+                      offerLabel={offerLabel}
+                      defaultCity={branch?.city}
+                      vehicleTitle={vehicle.title}
+                      vendorName={org?.name}
+                    />
+                  </Card>
+                </>
+              );
+            })()}
 
             {/* Vendor Contact Widget */}
             <Card variant="default">

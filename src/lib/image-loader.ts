@@ -7,6 +7,16 @@ export default function customImageLoader({
   width: number;
   quality?: number;
 }) {
+  // Bypass rewriting for signed Supabase Storage URLs (preserves valid HMAC signatures and tokens)
+  if (src.includes("/storage/v1/object/sign/") || src.includes("/storage/v1/object/authenticated/")) {
+    return src;
+  }
+
+  // Bypass rewriting for client-generated blob/data URLs
+  if (src.startsWith("blob:") || src.startsWith("data:")) {
+    return src;
+  }
+
   // If it's a Supabase storage URL, rewrite to the render (transformation) endpoint
   if (src.includes("/storage/v1/object/public/")) {
     try {
