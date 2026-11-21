@@ -147,6 +147,7 @@ export const checkoutSchema = z.object({
   plan: z.enum(["starter", "growth", "pro"]),
   interval: z.enum(["monthly", "annual"]).optional(),
   organizationId: z.string().uuid(),
+  attemptId: z.string().min(1).max(100).optional(),
 });
 
 /**

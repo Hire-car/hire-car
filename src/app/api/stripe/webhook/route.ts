@@ -4,6 +4,7 @@ import {
   describeClaimError,
 } from "@/lib/billing/claim-webhook-event";
 import { getStripe } from "@/lib/billing/stripe";
+import { enqueueFailedCancellation } from "@/lib/billing/cancellation-recovery";
 import {
   approveOrganizationIfEligible,
   getInvoiceSubscriptionId,
@@ -176,6 +177,125 @@ async function processStripeEvent(
         );
       }
 
+      // Check current subscription state to protect against out-of-order stale events
+      const { data: existingSub } = await supabase
+        .from("subscriptions")
+        .select("id, updated_at, status, stripe_subscription_id, plan_code")
+        .eq("organization_id", organizationId)
+        .maybeSingle();
+
+      if (
+        existingSub?.updated_at &&
+        event.created * 1000 < new Date(existingSub.updated_at).getTime() - 5000
+      ) {
+        console.warn(
+          `[stripe-webhook] Skipping stale checkout.session.completed event ${event.id} for organization ${organizationId}`,
+        );
+        break;
+      }
+
+      // Multiple active subscription guard:
+      // If organization ALREADY has an active primary subscription with a DIFFERENT Stripe ID:
+      const hasActivePrimary =
+        Boolean(existingSub?.stripe_subscription_id) &&
+        existingSub?.stripe_subscription_id !== subscriptionId &&
+        (existingSub?.status === "active" || existingSub?.status === "trialing");
+
+      if (hasActivePrimary && existingSub?.stripe_subscription_id) {
+        const currentPrimarySubId = existingSub.stripe_subscription_id;
+        // Verify whether this checkout was authorized to replace the existing active subscription
+        const authorizedOldSubId = session.metadata?.existing_stripe_subscription_id;
+        const isAuthorizedReplacement =
+          Boolean(authorizedOldSubId) && authorizedOldSubId === currentPrimarySubId;
+
+        if (!isAuthorizedReplacement) {
+          // Unintended secondary or unauthorized duplicate checkout completed:
+          // Protect the active primary subscription from being overwritten!
+          console.warn(
+            `[stripe-webhook] Unauthorized secondary checkout ${subscriptionId} for organization ${organizationId}. Primary subscription ${currentPrimarySubId} is active. Canceling secondary subscription in Stripe to prevent duplicate billing.`,
+          );
+
+          try {
+            await getStripe().subscriptions.cancel(subscriptionId, { prorate: true });
+          } catch (cancelErr) {
+            console.error(
+              `[stripe-webhook] Failed to cancel unauthorized secondary subscription ${subscriptionId}:`,
+              cancelErr,
+            );
+            await enqueueFailedCancellation(supabase, {
+              organizationId,
+              stripeSubscriptionId: subscriptionId,
+              reason: "unauthorized_secondary",
+              error: cancelErr,
+            });
+          }
+
+          await supabase.from("audit_logs").insert({
+            action: "duplicate_checkout_canceled",
+            resource_type: "subscription",
+            resource_id: organizationId,
+            metadata: {
+              rejected_subscription_id: subscriptionId,
+              preserved_subscription_id: currentPrimarySubId,
+              reason: "unauthorized_secondary_checkout",
+            },
+          });
+          break;
+        }
+
+        // It is an authorized replacement!
+        // 1. Confirm and upsert replacement subscription FIRST
+        await upsertSubscriptionRecord(supabase, {
+          organizationId,
+          plan,
+          interval,
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
+          status: "active",
+          periodFields: {
+            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          },
+          eventCreated: event.created,
+          isReplacement: true,
+        });
+
+        await approveOrganizationIfEligible(supabase, organizationId);
+
+        // 2. Only AFTER replacement subscription is confirmed, safely cancel superseded subscription in Stripe
+        const supersededSubId = currentPrimarySubId;
+        try {
+          await getStripe().subscriptions.cancel(supersededSubId, { prorate: true });
+          await supabase.from("audit_logs").insert({
+            action: "superseded_subscription_canceled",
+            resource_type: "subscription",
+            resource_id: organizationId,
+            metadata: {
+              superseded_subscription_id: supersededSubId,
+              replacement_subscription_id: subscriptionId,
+            },
+          });
+        } catch (supersededCancelErr) {
+          console.error(
+            `[stripe-webhook] Failed to cancel superseded subscription ${supersededSubId}:`,
+            supersededCancelErr,
+          );
+          await enqueueFailedCancellation(supabase, {
+            organizationId,
+            stripeSubscriptionId: supersededSubId,
+            reason: "superseded_replacement",
+            error: supersededCancelErr,
+          });
+        }
+
+        await supabase.from("audit_logs").insert({
+          action: "subscription_activated",
+          resource_type: "subscription",
+          resource_id: organizationId,
+          metadata: { plan, stripe_subscription_id: subscriptionId, replaced_subscription_id: supersededSubId },
+        });
+        break;
+      }
+
       await upsertSubscriptionRecord(supabase, {
         organizationId,
         plan,
@@ -186,6 +306,8 @@ async function processStripeEvent(
         periodFields: {
           current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         },
+        eventCreated: event.created,
+        isReplacement: true,
       });
 
       await approveOrganizationIfEligible(supabase, organizationId);
@@ -208,11 +330,18 @@ async function processStripeEvent(
       if (subscriptionId) {
         const { data: subscription } = await supabase
           .from("subscriptions")
-          .select("organization_id")
+          .select("organization_id, updated_at")
           .eq("stripe_subscription_id", subscriptionId)
           .maybeSingle();
 
-        if (subscription) {
+        if (
+          subscription?.updated_at &&
+          event.created * 1000 < new Date(subscription.updated_at).getTime() - 5000
+        ) {
+          console.warn(
+            `[stripe-webhook] Skipping stale invoice event ${event.id} for subscription ${subscriptionId}`,
+          );
+        } else if (subscription) {
           await supabase
             .from("subscriptions")
             .update({
@@ -242,13 +371,32 @@ async function processStripeEvent(
       const subscriptionId = getInvoiceSubscriptionId(invoice);
 
       if (subscriptionId) {
-        await supabase
+        const { data: subscription } = await supabase
           .from("subscriptions")
-          .update({
-            status: "past_due",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("stripe_subscription_id", subscriptionId);
+          .select("organization_id, updated_at")
+          .eq("stripe_subscription_id", subscriptionId)
+          .maybeSingle();
+
+        // Stale event guard: do not overwrite newer subscription state with older payment failure
+        if (
+          subscription?.updated_at &&
+          event.created * 1000 < new Date(subscription.updated_at).getTime() - 5000
+        ) {
+          console.warn(
+            `[stripe-webhook] Skipping stale payment_failed event ${event.id} for subscription ${subscriptionId}`,
+          );
+          break;
+        }
+
+        if (subscription) {
+          await supabase
+            .from("subscriptions")
+            .update({
+              status: "past_due",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("stripe_subscription_id", subscriptionId);
+        }
       }
       break;
     }
@@ -275,12 +423,55 @@ async function processStripeEvent(
           stripeSubscriptionId: subscriptionId,
           status: mappedStatus,
           periodFields,
+          eventCreated: event.created,
+          isReplacement: false,
         });
 
         if (mappedStatus === "active" || mappedStatus === "trialing") {
           await approveOrganizationIfEligible(supabase, organizationId);
         }
       } else {
+        const { data: currentSub } = await supabase
+          .from("subscriptions")
+          .select("organization_id, updated_at, status")
+          .eq("stripe_subscription_id", subscriptionId)
+          .maybeSingle();
+
+        // Stale event guard: prevent out-of-order webhook delivery from overwriting newer state
+        if (
+          currentSub?.updated_at &&
+          event.created * 1000 < new Date(currentSub.updated_at).getTime() - 5000
+        ) {
+          console.warn(
+            `[stripe-webhook] Stale out-of-order event ${event.id} received for subscription ${subscriptionId}. Attempting authoritative retrieval from Stripe...`,
+          );
+          try {
+            const authoritativeSub = await getStripe().subscriptions.retrieve(subscriptionId);
+            const authStatus = SUBSCRIPTION_STATUS_MAP[authoritativeSub.status] || "incomplete";
+            const authPlan = resolvePlanFromSubscription(authoritativeSub);
+            const authPeriods = getSubscriptionPeriodFields(authoritativeSub);
+
+            await supabase
+              .from("subscriptions")
+              .update({
+                status: authStatus,
+                ...(authPlan ? { plan_code: authPlan.plan, billing_interval: authPlan.interval } : {}),
+                ...authPeriods,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("stripe_subscription_id", subscriptionId);
+
+            console.info(
+              `[stripe-webhook] Synchronized subscription ${subscriptionId} with authoritative Stripe state.`,
+            );
+          } catch (authErr) {
+            console.warn(
+              `[stripe-webhook] Could not retrieve authoritative subscription ${subscriptionId} from Stripe (${authErr instanceof Error ? authErr.message : authErr}). Skipping stale payload.`,
+            );
+          }
+          break;
+        }
+
         const { data: updatedSub } = await supabase
           .from("subscriptions")
           .update({
@@ -294,11 +485,27 @@ async function processStripeEvent(
           .maybeSingle();
 
         if (updatedSub) {
-          if (mappedStatus === "canceled" || mappedStatus === "unpaid") {
+          if (mappedStatus === "canceled") {
+            // Apply Starter entitlement when subscription is canceled; do not suspend organization
             await supabase
-              .from("organizations")
-              .update({ status: "suspended", suspended_at: new Date().toISOString() })
-              .eq("id", updatedSub.organization_id);
+              .from("subscriptions")
+              .update({
+                plan_code: "starter",
+                status: "active",
+                billing_interval: "monthly",
+                stripe_subscription_id: null,
+                cancel_at_period_end: false,
+                canceled_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq("stripe_subscription_id", subscriptionId);
+
+            await supabase.from("audit_logs").insert({
+              action: "subscription_reverted_to_starter",
+              resource_type: "subscription",
+              resource_id: updatedSub.organization_id,
+              metadata: { reason: "stripe_subscription_updated_canceled" },
+            });
           } else if (mappedStatus === "active" || mappedStatus === "trialing") {
             const { data: org } = await supabase
               .from("organizations")
@@ -319,6 +526,8 @@ async function processStripeEvent(
             }
           }
         } else if (organizationId && planInfo) {
+          // Fallback when subscription row not found by stripe_subscription_id (e.g. out-of-order customer.subscription.updated before created).
+          // Serialized upsertSubscriptionRecord handles stale checks, concurrency, and secondary subscription rejection.
           await upsertSubscriptionRecord(supabase, {
             organizationId,
             plan: planInfo.plan,
@@ -327,6 +536,8 @@ async function processStripeEvent(
             stripeSubscriptionId: subscriptionId,
             status: mappedStatus,
             periodFields,
+            eventCreated: event.created,
+            isReplacement: false,
           });
 
           if (mappedStatus === "active" || mappedStatus === "trialing") {
@@ -341,22 +552,101 @@ async function processStripeEvent(
       const subscription = event.data.object as Stripe.Subscription;
       const subscriptionId = subscription.id;
 
-      const { data: deletedSub } = await supabase
+      // 1. Verify subscription matching stripe_subscription_id exists and check for stale event
+      const { data: targetSub } = await supabase
         .from("subscriptions")
-        .update({
-          status: "canceled",
-          updated_at: new Date().toISOString(),
-        })
+        .select("organization_id, updated_at, stripe_subscription_id, version")
         .eq("stripe_subscription_id", subscriptionId)
-        .select("organization_id")
         .maybeSingle();
 
-      if (deletedSub) {
-        await supabase
-          .from("organizations")
-          .update({ status: "suspended", suspended_at: new Date().toISOString() })
-          .eq("id", deletedSub.organization_id);
+      // If no subscription matches this stripe_subscription_id, it is already deleted or superseded.
+      // Do NOT revert the active subscription to Starter!
+      if (!targetSub) {
+        console.warn(
+          `[stripe-webhook] Skipping deletion event ${event.id}: No local subscription matches stripe_subscription_id ${subscriptionId}`,
+        );
+        break;
       }
+
+      // Stale event guard: do not revert if a newer event already updated this subscription
+      if (
+        targetSub.updated_at &&
+        event.created * 1000 < new Date(targetSub.updated_at).getTime() - 5000
+      ) {
+        console.warn(
+          `[stripe-webhook] Skipping stale customer.subscription.deleted event ${event.id} for subscription ${subscriptionId}`,
+        );
+        break;
+      }
+
+      // 2. Database-level atomic concurrency protection:
+      // First attempt atomic RPC using PostgreSQL row-level lock (SELECT FOR UPDATE)
+      let revertedSuccessfully = false;
+      try {
+        const { data: rpcSuccess, error: rpcErr } = await supabase.rpc(
+          "atomic_subscription_revert_to_starter",
+          {
+            p_organization_id: targetSub.organization_id,
+            p_stripe_subscription_id: subscriptionId,
+            p_expected_version: targetSub.version ?? null,
+          },
+        );
+        if (!rpcErr && rpcSuccess === true) {
+          revertedSuccessfully = true;
+        }
+      } catch {
+        // RPC not deployed in this environment yet; fall through to atomic conditional update
+      }
+
+      // Fallback: Database-level atomic conditional update with version or exact updated_at OCC
+      if (!revertedSuccessfully) {
+        const updateQuery = supabase
+          .from("subscriptions")
+          .update({
+            plan_code: "starter",
+            status: "active",
+            billing_interval: "monthly",
+            stripe_subscription_id: null,
+            cancel_at_period_end: false,
+            canceled_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", subscriptionId)
+          .eq("organization_id", targetSub.organization_id);
+
+        if (typeof targetSub.version === "number") {
+          updateQuery.eq("version", targetSub.version);
+        } else {
+          updateQuery.eq("updated_at", targetSub.updated_at);
+        }
+
+        const { data: deletedSub } = await updateQuery
+          .select("organization_id")
+          .maybeSingle();
+
+        if (deletedSub) {
+          revertedSuccessfully = true;
+        }
+      }
+
+      if (!revertedSuccessfully) {
+        console.warn(
+          `[stripe-webhook] Concurrent write or state change detected for subscription ${subscriptionId}. Preserving newer committed state.`,
+        );
+        break;
+      }
+
+      // Revert organization to Starter plan entitlement.
+      // Organization remains approved; existing inventory is preserved.
+      await supabase.from("audit_logs").insert({
+        action: "subscription_reverted_to_starter",
+        resource_type: "subscription",
+        resource_id: targetSub.organization_id,
+        metadata: {
+          reason: "stripe_subscription_deleted",
+          stripe_subscription_id: subscriptionId,
+        },
+      });
       break;
     }
 
