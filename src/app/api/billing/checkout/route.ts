@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { readFormDataBody, readJsonBody } from "@/lib/api/request";
-import { createCheckoutSession } from "@/lib/billing/stripe";
+import { createCheckoutSession, getStripe } from "@/lib/billing/stripe";
 import { requireApiUser } from "@/lib/security/auth";
 import { checkoutSchema } from "@/lib/validation/schemas";
 import { ensureUserCanManageOrganization } from "@/lib/data/vendor";
@@ -36,24 +36,89 @@ export async function POST(request: NextRequest) {
   const supabase = createAdminClient();
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("stripe_customer_id, status")
+    .select("stripe_customer_id, stripe_subscription_id, plan_code, status")
     .eq("organization_id", payload.data.organizationId)
     .maybeSingle();
 
-  if (subscription?.status === "active" || subscription?.status === "trialing") {
+  if (payload.data.plan === "starter") {
+    return NextResponse.json(
+      { error: "The Starter plan is completely free and does not require Stripe Checkout. Please activate it directly from the billing dashboard." },
+      { status: 400 },
+    );
+  }
+
+  const isPaidActive =
+    (subscription?.status === "active" || subscription?.status === "trialing") &&
+    subscription.plan_code !== "starter" &&
+    Boolean(subscription.stripe_subscription_id);
+
+  if (isPaidActive) {
     return NextResponse.json({ 
       error: "You already have an active subscription. Please use the Billing Portal to switch plans." 
     }, { status: 409 });
   }
 
-  const session = await createCheckoutSession({
+  // Safely expire stale abandoned open checkout sessions for this organization and customer.
+  // Safety rules:
+  // 1. Only expire if client_reference_id matches target organizationId (never touch other orgs).
+  // 2. Only expire sessions created > 60 seconds ago so concurrent users/tabs do not invalidate each other.
+  // 3. Skip gracefully if customer ID is not yet assigned (e.g. Starter tier).
+  if (subscription?.stripe_customer_id) {
+    try {
+      const openSessions = await getStripe().checkout.sessions.list({
+        customer: subscription.stripe_customer_id,
+        status: "open",
+        limit: 10,
+      });
+
+      const staleThresholdSeconds = Math.floor(Date.now() / 1000) - 60;
+      for (const openSession of openSessions.data) {
+        if (
+          openSession.client_reference_id === payload.data.organizationId &&
+          openSession.created < staleThresholdSeconds
+        ) {
+          await getStripe().checkout.sessions.expire(openSession.id).catch(() => {});
+        }
+      }
+    } catch (listErr) {
+      console.warn("[checkout] Could not cleanup stale open checkout sessions:", listErr);
+    }
+  }
+
+  // Robust checkout attempt lifecycle:
+  // - If client supplies an attemptId (e.g. from UI checkout button / retry state), use it.
+  // - Otherwise, generate a fresh unique UUID for this checkout attempt.
+  // - Unique attempt token ensures genuine retries reuse the session, but different attempts get fresh keys.
+  const attemptId = payload.data.attemptId || crypto.randomUUID();
+  const selectedInterval = payload.data.interval ?? "monthly";
+  let idempotencyKey = `chk_${payload.data.organizationId}_${payload.data.plan}_${selectedInterval}_${attemptId}`;
+
+  let session = await createCheckoutSession({
     plan: payload.data.plan,
     interval: payload.data.interval,
     organizationId: payload.data.organizationId,
     userId: user.id,
     email: user.email,
     customerId: subscription?.stripe_customer_id ?? undefined,
+    existingSubscriptionId: subscription?.stripe_subscription_id ?? null,
+    idempotencyKey,
   });
+
+  // If Stripe idempotency returned an expired session, immediately reissue with a fresh attempt token
+  if (session.status === "expired") {
+    const freshAttemptId = crypto.randomUUID();
+    idempotencyKey = `chk_${payload.data.organizationId}_${payload.data.plan}_${selectedInterval}_${freshAttemptId}`;
+    session = await createCheckoutSession({
+      plan: payload.data.plan,
+      interval: payload.data.interval,
+      organizationId: payload.data.organizationId,
+      userId: user.id,
+      email: user.email,
+      customerId: subscription?.stripe_customer_id ?? undefined,
+      existingSubscriptionId: subscription?.stripe_subscription_id ?? null,
+      idempotencyKey,
+    });
+  }
 
   if (!session.url) {
     return NextResponse.json({ error: "Stripe did not return a Checkout URL" }, { status: 500 });

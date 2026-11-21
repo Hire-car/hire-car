@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { BadgeCheck, Phone, Eye, Star, MapPin, ChevronRight, Users, Fuel, Settings, Check, Info } from "lucide-react";
 import { SiteHeader } from "@/components/server-site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -19,6 +19,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { headers } from "next/headers";
+import { after } from "next/server";
 import { hashIpForStorage } from "@/lib/security/rate-limit";
 import type { Metadata } from "next";
 import {
@@ -33,7 +34,7 @@ import {
 } from "@/lib/seo";
 import { resolveGalleryImages, buildStorageUrl, getVehicleImages } from "@/lib/image-utils";
 
-export const revalidate = 3600; // Cache for 1 hour at edge (ISR)
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -41,9 +42,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const data = await getCachedVehicleMetadata(slug);
+  const decodedSlug = decodeURIComponent(slug).trim();
+  const data = await getCachedVehicleMetadata(decodedSlug);
 
-  if (!data) return {};
+  if (!data) {
+    notFound();
+  }
 
   type BranchMeta = { city: string; state: string };
   type ImageRecord = { storage_path: string; approved: boolean; sort_order: number };
@@ -86,27 +90,60 @@ export default async function VehicleDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug).trim();
   
-  const data = await getCachedVehicleDetails(slug);
+  const data = await getCachedVehicleDetails(decodedSlug);
   
   if (!data) {
     notFound();
   }
 
   const { vehicle, vendorSub, reviews } = data;
+
+  // Canonical redirect: If accessed via UUID or non-canonical casing, 301 redirect to canonical slug
+  if (decodedSlug !== vehicle.slug) {
+    redirect(`/cars/${vehicle.slug}`);
+  }
   const supabase = createAdminClient();
 
+  // Parallelise user auth + request headers — both are needed before render
+  const [user, headersList] = await Promise.all([
+    getCurrentUser(),
+    headers(),
+  ]);
 
+  // Profile fetch only when logged in; fire it concurrently with the view log.
+  const profilePromise = user
+    ? supabase
+        .from("profiles")
+        .select("full_name, email, phone")
+        .eq("id", user.id)
+        .single()
+    : Promise.resolve({ data: null });
 
-  // Get user for enquiry widget auth state
-  const user = await getCurrentUser();
+  // Background execution: scheduled via after() so it runs after response
+  // streaming without blocking render, while ensuring the serverless execution
+  // context stays alive until logging finishes.
+  const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
+  const ipHash = hashIpForStorage(ip);
+  const vehicleId = vehicle.id;
+  const currentUserId = user?.id || null;
+
+  after(async () => {
+    try {
+      await supabase.rpc("increment_vehicle_view", {
+        p_vehicle_id: vehicleId,
+        p_ip_hash: ipHash,
+        p_user_id: currentUserId,
+      });
+    } catch (err: unknown) {
+      console.error("Failed to log view in background:", err);
+    }
+  });
+
   let userProfile = null;
   if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("full_name, email, phone")
-      .eq("id", user.id)
-      .single();
+    const { data: profile } = await profilePromise;
     if (profile) {
       userProfile = {
         name: profile.full_name || "",
@@ -114,20 +151,6 @@ export default async function VehicleDetailPage({
         phone: profile.phone || "",
       };
     }
-  }
-
-  // Log view (non-blocking)
-  try {
-    const headersList = await headers();
-    const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "127.0.0.1";
-    const ipHash = hashIpForStorage(ip);
-    await supabase.rpc("increment_vehicle_view", {
-      p_vehicle_id: vehicle.id,
-      p_ip_hash: ipHash,
-      p_user_id: user?.id || null,
-    });
-  } catch (err) {
-    console.error("Failed to log view:", err);
   }
 
   // Cast related records

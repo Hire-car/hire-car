@@ -54,16 +54,26 @@ export async function generateMetadata({
     const lowestPrice = vehicles.length > 0 ? Math.min(...vehicles.map(v => v.pricePerDayAud)) : undefined;
 
     const defaultTitle = cityCategoryTitle(city, category, meta.state, lowestPrice);
-    const metaTitle = city.toLowerCase() === "sydney" && category === "Sports car"
-      ? "Sports Car Hire Sydney, Compare Prices & Features (2026)"
-      : defaultTitle;
+    const isSydneyLuxury = city.toLowerCase() === "sydney" && category === "Luxury";
+    const metaTitle =
+      city.toLowerCase() === "sydney" && category === "Sports car"
+        ? "Sports Car Hire Sydney, Compare Prices & Features (2026)"
+        : defaultTitle;
+
+    const exactClientTitle = "Premium & Luxury Car Hire Sydney - BMW,Ferrari , AUDI";
+    const exactClientDesc = "Hire premium and luxury cars in Sydney . Explore fleet of Mercedes, BMW, Audi, Ferrari and more for travel,  special event, airport transfer and weddings.";
 
     return {
-      title: metaTitle,
-      description: cityCategoryDescription(city, category, total, meta.state),
+      title: isSydneyLuxury ? { absolute: exactClientTitle } : metaTitle,
+      description: isSydneyLuxury ? exactClientDesc : cityCategoryDescription(city, category, total, meta.state),
       openGraph: {
-        title: defaultTitle,
-        description: cityCategoryDescription(city, category, total, meta.state),
+        title: isSydneyLuxury ? exactClientTitle : metaTitle,
+        description: isSydneyLuxury ? exactClientDesc : cityCategoryDescription(city, category, total, meta.state),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: isSydneyLuxury ? exactClientTitle : metaTitle,
+        description: isSydneyLuxury ? exactClientDesc : cityCategoryDescription(city, category, total, meta.state),
       },
       alternates: { canonical: `/locations/${city}/${segment}` },
       robots: cityCategoryRobots(total),
@@ -180,8 +190,8 @@ async function BrandCityPage({
                 </Link>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {vehicles.map((v) => (
-                  <VehicleCard key={v.id} vehicle={v} />
+                {vehicles.map((v, index) => (
+                  <VehicleCard key={v.id} vehicle={v} priority={index < 4} />
                 ))}
               </div>
             </>

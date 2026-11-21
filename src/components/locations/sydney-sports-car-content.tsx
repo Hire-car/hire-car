@@ -4,7 +4,7 @@ export function SydneySportsCarContent() {
   const faqs = [
     {
       question: "How much does it cost to hire a sports car in Sydney?",
-      answer: "Sports car hire can start at around AUD $130 per day, while premium performance and exotic cars can cost several hundred or even more than AUD $1,000 per day.",
+      answer: "Sports car hire can start at around AUD $500 per day, while premium performance and exotic cars can cost several hundred or even more than AUD $1,000 per day.",
     },
     {
       question: "What is the cheapest sports car to hire in Sydney?",
@@ -48,7 +48,7 @@ export function SydneySportsCarContent() {
     <div className="space-y-12">
       <section className="space-y-6 text-slate-600 leading-relaxed">
         <p>
-          With Hire Car Marketplace, you can make your Sydney trip more exciting by hiring a sports car. Renting a sports car in Sydney can make your driving journey more enjoyable, stylish, and memorable. On Hire Car Marketplace, you can find your preferred vehicle from different car rental dealers near your location. Depending on the car model, sports cars in Sydney are currently available from around AUD $130 per day.
+          With Hire Car Marketplace, you can make your Sydney trip more exciting by hiring a sports car. Renting a sports car in Sydney can make your driving journey more enjoyable, stylish, and memorable. On Hire Car Marketplace, you can find your preferred vehicle from different car rental dealers near your location. Depending on the car model, sports cars in Sydney are currently available from around AUD $500 per day.
         </p>
         <p>
           You can compare the prices, vehicle features, and rental terms of premium cars such as Mercedes, BMW, Audi, Maserati, Mustang, Chevrolet, and other high-end vehicles. Choose a car that suits your needs and enjoy a great driving experience with a performance vehicle.
@@ -73,6 +73,29 @@ export function SydneySportsCarContent() {
               <div>
                 <strong className="block text-slate-900 font-semibold mb-1">{tip.title}</strong>
                 <span className="text-sm text-slate-600">{tip.desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="text-2xl font-bold text-slate-900 mb-6">Why Choose Hire Car Marketplace?</h3>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[
+            { title: "Wide Range of Vehicles", desc: "Discover sports cars, luxury cars, SUVs, sedans, vans and more across Australia." },
+            { title: "Flexible Rental Packages", desc: "Choose from hourly, daily, weekend and custom hire packages based on your travel needs." },
+            { title: "Easy Vehicle Comparison", desc: "Compare vehicles based on price, features, seating capacity and rental requirements." },
+            { title: "Multiple Rental Options", desc: "Explore vehicles from different rental providers in one convenient marketplace." },
+            { title: "24/7 Support", desc: "Get access to 24/7 customer support for assistance" },
+            { title: "Roadside Assistance", desc: "Roadside assistance can provide added peace of mind during your rental." },
+            { title: "Options for Different Budgets", desc: "Find vehicles ranging from practical everyday cars to premium and performance models." },
+          ].map((reason, idx) => (
+            <div key={idx} className="flex gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <Check className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block text-slate-900 font-semibold mb-1">{reason.title}</strong>
+                <span className="text-sm text-slate-600">{reason.desc}</span>
               </div>
             </div>
           ))}
@@ -107,7 +130,14 @@ export function SydneySportsCarContent() {
       <section>
         <h3 className="text-2xl font-bold text-slate-900 mb-4">How Much Does It Cost to Hire a Sports Car in Sydney?</h3>
         <p className="text-slate-600">
-          The cost of sports car rental in Sydney varies widely depending on the model, age of the vehicle, rental period, season and supplier. Current Sydney sports-car listings provide a useful example. Audi S3 models are listed at around AUD $131 per day, Porsche Boxster models around AUD $163 per day, BMW M3 models around AUD $294 per day, and BMW M2 models around AUD $261–$326 per day in current listings. Some newer Ford Mustang models are listed above AUD $400 per day.
+          The average sports car hire price in Sydney is around $500 per day, with current listings showing performance cars from about $475–$700 per day. Premium Porsche models can reach $900+, while Ferrari and Lamborghini rentals can range from $1,400 to $2,500+ per day, with some high-end models exceeding $3,000. Rates depend on the vehicle and rental terms.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-2xl font-bold text-slate-900 mb-4">Explore High-Performance Sports Car Hire in Australia</h3>
+        <p className="text-slate-600">
+          Planning to explore Australia beyond Sydney? Hire Car Marketplace makes it easier to find rental vehicles for your next destination. Whether you are travelling to Melbourne, Brisbane, Perth, Adelaide or another Australian city, you can explore suitable car hire options for your journey and enjoy greater freedom to travel at your own pace.
         </p>
       </section>
 

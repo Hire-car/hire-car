@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -13,6 +14,21 @@ type SupabaseUser = {
 };
 
 export const getCurrentUser = cache(async function getCurrentUser() {
+  // Fast path for guest users: if no Supabase auth token cookie exists,
+  // skip creating the Supabase client and making a network round-trip.
+  try {
+    const cookieStore = await cookies();
+    const allCookies = cookieStore.getAll();
+    const hasAuthCookie = allCookies.some(
+      (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token")
+    );
+    if (!hasAuthCookie) {
+      return null;
+    }
+  } catch {
+    // In contexts where cookies() is unavailable, fall through to client check
+  }
+
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 

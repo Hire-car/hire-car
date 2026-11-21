@@ -104,6 +104,29 @@ export function getSubscriptionPeriodFields(subscription: Stripe.Subscription) {
   };
 }
 
+// In-memory mutex to serialize concurrent webhook processing per organization
+const orgProcessingLocks = new Map<string, Promise<void>>();
+
+export async function withSerializedOrgProcessing<T>(
+  organizationId: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  while (orgProcessingLocks.has(organizationId)) {
+    await orgProcessingLocks.get(organizationId);
+  }
+  let unlock!: () => void;
+  const lockPromise = new Promise<void>((resolve) => {
+    unlock = resolve;
+  });
+  orgProcessingLocks.set(organizationId, lockPromise);
+  try {
+    return await fn();
+  } finally {
+    orgProcessingLocks.delete(organizationId);
+    unlock();
+  }
+}
+
 export async function upsertSubscriptionRecord(
   supabase: AdminClient,
   input: {
@@ -114,25 +137,65 @@ export async function upsertSubscriptionRecord(
     stripeSubscriptionId: string;
     status: string;
     periodFields?: Partial<ReturnType<typeof getSubscriptionPeriodFields>>;
+    eventCreated?: number;
+    isReplacement?: boolean;
   },
 ) {
-  const { error } = await supabase.from("subscriptions").upsert(
-    {
-      organization_id: input.organizationId,
-      plan_code: input.plan,
-      billing_interval: input.interval,
-      stripe_customer_id: input.stripeCustomerId,
-      stripe_subscription_id: input.stripeSubscriptionId,
-      status: input.status,
-      ...input.periodFields,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "organization_id" },
-  );
+  return withSerializedOrgProcessing(input.organizationId, async () => {
+    // 1. Fetch current subscription state for this organization
+    const { data: current } = await supabase
+      .from("subscriptions")
+      .select("id, updated_at, stripe_subscription_id, status")
+      .eq("organization_id", input.organizationId)
+      .maybeSingle();
 
-  if (error) {
-    throw new Error(`Failed to upsert subscription: ${error.message}`);
-  }
+    if (current) {
+      // 2. Stale Event Guard: Reject any event older than the local record's updated_at (with 5s buffer)
+      if (input.eventCreated && current.updated_at) {
+        const isStale = input.eventCreated * 1000 < new Date(current.updated_at).getTime() - 5000;
+        if (isStale) {
+          console.warn(
+            `[webhook-helpers] Skipping stale upsert for org ${input.organizationId}. Event created at ${new Date(input.eventCreated * 1000).toISOString()} is older than local record ${current.updated_at}.`,
+          );
+          return;
+        }
+      }
+
+      // 3. Secondary / Superseded Subscription Protection:
+      // If the organization already has an active primary subscription with a DIFFERENT Stripe ID:
+      // Reject secondary events unless explicitly marked as a legitimate replacement (e.g. from checkout.session.completed).
+      const hasActivePrimary =
+        Boolean(current.stripe_subscription_id) &&
+        current.stripe_subscription_id !== input.stripeSubscriptionId &&
+        (current.status === "active" || current.status === "trialing");
+
+      if (hasActivePrimary && !input.isReplacement) {
+        console.warn(
+          `[webhook-helpers] Rejecting secondary subscription ${input.stripeSubscriptionId} for org ${input.organizationId}. Primary subscription ${current.stripe_subscription_id} is active. Only explicit replacement checkouts can replace primary.`,
+        );
+        return;
+      }
+    }
+
+    // 4. In-place upsert onConflict: "organization_id" preserving primary key and existing relations
+    const { error } = await supabase.from("subscriptions").upsert(
+      {
+        organization_id: input.organizationId,
+        plan_code: input.plan,
+        billing_interval: input.interval,
+        stripe_customer_id: input.stripeCustomerId,
+        stripe_subscription_id: input.stripeSubscriptionId,
+        status: input.status,
+        ...input.periodFields,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "organization_id" },
+    );
+
+    if (error) {
+      throw new Error(`Failed to upsert subscription: ${error.message}`);
+    }
+  });
 }
 
 export async function approveOrganizationIfEligible(
