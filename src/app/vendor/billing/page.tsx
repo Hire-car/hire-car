@@ -20,7 +20,7 @@ const PLANS = [
   {
     code: "starter",
     name: "Starter",
-    price: { monthly: 20, annual: 216 },
+    price: { monthly: 20, annual: null },
     vehicles: 5,
     color: "border-slate-200",
     badge: null,
@@ -418,9 +418,14 @@ export default async function VendorBillingPage(props: {
                   </h3>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className={`text-3xl font-black ${isCurrent ? "text-white" : "text-slate-900"}`}>
-                      ${interval === "annual" ? p.price.annual : p.price.monthly}
+                      ${interval === "annual" && p.price.annual !== null ? p.price.annual : p.price.monthly}
                     </span>
-                    <span className={`text-sm ${isCurrent ? "text-slate-400" : "text-slate-500"}`}>/{interval === "annual" ? "year" : "month"}</span>
+                    <span className={`text-sm ${isCurrent ? "text-slate-400" : "text-slate-500"}`}>/{interval === "annual" && p.price.annual !== null ? "year" : "month"}</span>
+                    {interval === "annual" && p.price.annual === null && (
+                      <span className={`text-xs ml-1.5 font-semibold ${isCurrent ? "text-slate-400" : "text-slate-500"}`}>
+                        (Monthly only)
+                      </span>
+                    )}
                   </div>
                   <p className={`text-sm mt-1 ${isCurrent ? "text-slate-300" : "text-slate-500"}`}>
                     Up to {p.vehicles} vehicles
@@ -457,7 +462,7 @@ export default async function VendorBillingPage(props: {
                 ) : (
                   <CheckoutForm
                     plan={p.code}
-                    interval={interval}
+                    interval={p.code === "starter" ? "monthly" : interval}
                     organizationId={organization.id}
                     isPopular={isPopular}
                     buttonText={`Start ${p.name}`}

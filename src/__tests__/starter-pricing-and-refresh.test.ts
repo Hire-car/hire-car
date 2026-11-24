@@ -63,20 +63,10 @@ describe("Starter Pricing ($20/mo) and Vehicle Refresh Test Suite", () => {
       expect(price).toBe("price_starter_nextpub_789");
     });
 
-    it("resolves Starter annual price from STRIPE_PRICE_STARTER_ANNUAL", () => {
-      process.env.STRIPE_PRICE_STARTER_ANNUAL = "price_starter_annual_123";
-      delete process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL;
-
-      const price = getStripePrice("starter", "annual");
-      expect(price).toBe("price_starter_annual_123");
-    });
-
-    it("resolves Starter annual price from NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL fallback", () => {
-      delete process.env.STRIPE_PRICE_STARTER_ANNUAL;
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL = "price_starter_annual_nextpub_456";
-
-      const price = getStripePrice("starter", "annual");
-      expect(price).toBe("price_starter_annual_nextpub_456");
+    it("throws clear error when Starter annual interval is requested (monthly only)", () => {
+      expect(() => getStripePrice("starter", "annual")).toThrow(
+        "The Starter plan does not currently offer an annual billing option",
+      );
     });
 
     it("throws clear error when Starter monthly price environment variable is missing", () => {
@@ -86,15 +76,6 @@ describe("Starter Pricing ($20/mo) and Vehicle Refresh Test Suite", () => {
 
       expect(() => getStripePrice("starter", "monthly")).toThrow(
         "STRIPE_PRICE_STARTER_MONTHLY or STRIPE_PRICE_STARTER is not configured",
-      );
-    });
-
-    it("throws clear error when Starter annual price environment variable is missing", () => {
-      delete process.env.STRIPE_PRICE_STARTER_ANNUAL;
-      delete process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL;
-
-      expect(() => getStripePrice("starter", "annual")).toThrow(
-        "STRIPE_PRICE_STARTER_ANNUAL is not configured",
       );
     });
   });
