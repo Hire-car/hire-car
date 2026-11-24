@@ -12,12 +12,12 @@ const PLANS = [
   {
     code: "starter",
     name: "Starter",
-    monthlyPrice: 0,
-    annualPrice: 0,
+    monthlyPrice: 20,
+    annualPrice: 216,
     vehicles: 5,
     highlight: false,
     badge: null,
-    cta: "Get started free",
+    cta: "Start listing",
     description: "Perfect for small local operators just getting started.",
     features: {
       listings: "5 vehicles",
@@ -91,8 +91,8 @@ const FEATURE_ROWS = [
 
 const FAQS = [
   {
-    q: "Is there a free plan available for new operators?",
-    a: "Yes, absolutely! You can start with our Starter plan which is completely free of charge for up to 5 vehicle listings. This is the perfect way to test the waters, experience the platform's features, and start generating leads without any upfront financial commitment. You can upgrade, downgrade, or cancel at any time as your business needs evolve.",
+    q: "Is there an entry-level plan available for new operators?",
+    a: "Yes! Our Starter plan is just $20/month for up to 5 vehicle listings. This is the perfect way to test the waters, experience the platform's features, and start generating leads at an accessible price. You can upgrade, downgrade, or cancel at any time as your business needs evolve.",
   },
   {
     q: "Can I change my subscription plan later as my fleet grows?",
