@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { ActionButton } from "@/components/admin/action-button";
+import { formatAustralianDate, formatAustralianTime } from "@/lib/date-utils";
 
 interface VendorRow {
   id: string;
@@ -51,6 +52,7 @@ export function AdminVendorsTable({ data, statusFilter, moderateVendor }: AdminV
         v.name.toLowerCase().includes(q) ||
         v.abn.toLowerCase().includes(q) ||
         v.billing_email.toLowerCase().includes(q) ||
+        v.phone?.toLowerCase().includes(q) ||
         v.owner.toLowerCase().includes(q)
     );
   }, [data, search]);
@@ -78,17 +80,42 @@ export function AdminVendorsTable({ data, statusFilter, moderateVendor }: AdminV
       sortable: true,
     },
     {
+      key: "phone",
+      label: "Phone",
+      sortable: true,
+      render: (val) => {
+        const phone = (val as string)?.trim();
+        return phone ? (
+          <a href={`tel:${phone}`} className="text-sm text-foreground hover:underline">
+            {phone}
+          </a>
+        ) : (
+          <span className="text-sm text-muted-foreground italic">Not provided</span>
+        );
+      },
+    },
+    {
       key: "branchCount",
       label: "Branches",
       sortable: true,
     },
     {
       key: "created_at",
-      label: "Submitted",
+      label: "Submitted date",
       sortable: true,
       render: (val) => (
         <span className="text-sm text-muted-foreground">
-          {new Date(val as string).toLocaleDateString("en-AU")}
+          {formatAustralianDate(val as string)}
+        </span>
+      ),
+    },
+    {
+      key: "submitted_time",
+      label: "Submitted time",
+      sortable: false,
+      render: (_val, row) => (
+        <span className="text-sm text-muted-foreground">
+          {formatAustralianTime(row.created_at as string)}
         </span>
       ),
     },

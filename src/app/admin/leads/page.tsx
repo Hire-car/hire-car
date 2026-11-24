@@ -32,6 +32,10 @@ export default async function AdminLeadsPage() {
       .limit(100),
   ]);
 
+  if (error) {
+    console.error("Failed to fetch leads:", error.message);
+  }
+
   if (waError) {
     // Non-fatal: log but don't crash the page
     console.error("Failed to fetch WhatsApp leads:", waError.message);
@@ -41,6 +45,7 @@ export default async function AdminLeadsPage() {
     id: lead.id,
     customer_name: lead.customer_name ?? "Anonymous",
     customer_email: lead.customer_email ?? "",
+    customer_phone: lead.customer_phone ?? "",
     lead_type: "enquiry",
     status: lead.status ?? "new",
     vendor_name: (lead.organizations as unknown as { name: string })?.name ?? "Unknown",

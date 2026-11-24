@@ -5,6 +5,7 @@ import Link from "next/link";
 import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Search, ExternalLink } from "lucide-react";
+import { formatAustralianDateTime } from "@/lib/date-utils";
 
 interface WhatsAppLeadRow {
   id: string;
@@ -109,12 +110,7 @@ export function WhatsAppLeadsTable({ data }: WhatsAppLeadsTableProps) {
       sortable: true,
       render: (val) => (
         <span className="text-sm text-muted-foreground">
-          {new Date(val as string).toLocaleDateString("en-AU", {
-            day: "numeric",
-            month: "short",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {formatAustralianDateTime(val as string)}
         </span>
       ),
     },
