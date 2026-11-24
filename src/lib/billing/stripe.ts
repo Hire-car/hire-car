@@ -15,7 +15,11 @@ export function getStripe() {
 export function getStripePrice(plan: PlanCode, interval: "monthly" | "annual" = "monthly"): string {
   if (plan === "starter") {
     if (interval === "annual") {
-      throw new Error("The Starter plan does not currently offer an annual billing option. Please choose monthly billing.");
+      const priceId =
+        process.env.STRIPE_PRICE_STARTER_ANNUAL ||
+        process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL;
+      if (!priceId) throw new Error("STRIPE_PRICE_STARTER_ANNUAL is not configured in environment variables.");
+      return priceId;
     }
     const priceId =
       process.env.STRIPE_PRICE_STARTER_MONTHLY ||

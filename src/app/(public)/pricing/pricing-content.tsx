@@ -13,7 +13,7 @@ const PLANS = [
     code: "starter",
     name: "Starter",
     monthlyPrice: 20,
-    annualPrice: null,
+    annualPrice: 216,
     vehicles: 5,
     highlight: false,
     badge: null,
@@ -183,8 +183,7 @@ export function PricingContent() {
         <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 relative z-10">
           <MotionScroll variant="stagger-container" className="grid gap-8 md:grid-cols-3">
             {PLANS.map((plan) => {
-              const isAnnual = annual && plan.annualPrice !== null;
-              const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
+              const price = annual ? plan.annualPrice : plan.monthlyPrice;
 
               return (
                 <MotionScroll
@@ -211,17 +210,14 @@ export function PricingContent() {
 
                     <div className="mt-6 flex items-baseline gap-1">
                       <span className="text-6xl font-black text-slate-900 tracking-tight">${price}</span>
-                      <span className="text-slate-500 font-medium">/{isAnnual ? "year" : "month"}</span>
-                      {annual && plan.annualPrice === null && (
-                        <span className="text-xs text-slate-400 ml-2 font-semibold bg-slate-100 px-2 py-0.5 rounded-full">Monthly only</span>
-                      )}
+                      <span className="text-slate-500 font-medium">/{annual ? "year" : "month"}</span>
                     </div>
-                    {isAnnual && (
+                    {annual && (
                       <p className="mt-2 text-xs text-emerald-600 font-bold bg-emerald-50 inline-block px-2 py-1 rounded-md">
-                        Save ${plan.monthlyPrice * 12 - plan.annualPrice!}/year vs monthly
+                        Save ${plan.monthlyPrice * 12 - plan.annualPrice}/year vs monthly
                       </p>
                     )}
-                    {!isAnnual && (
+                    {!annual && (
                       <p className="mt-2 text-xs text-transparent bg-transparent inline-block px-2 py-1 rounded-md select-none">&nbsp;</p>
                     )}
                   </div>

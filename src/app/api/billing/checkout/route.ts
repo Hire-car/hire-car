@@ -40,13 +40,6 @@ export async function POST(request: NextRequest) {
     .eq("organization_id", payload.data.organizationId)
     .maybeSingle();
 
-  if (payload.data.plan === "starter" && payload.data.interval === "annual") {
-    return NextResponse.json(
-      { error: "The Starter plan is currently available on monthly billing only ($20/month)." },
-      { status: 400 },
-    );
-  }
-
   const isPaidActive =
     (subscription?.status === "active" || subscription?.status === "trialing") &&
     Boolean(subscription.stripe_subscription_id);

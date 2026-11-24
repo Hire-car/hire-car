@@ -1,14 +1,14 @@
 # Billing & Product Specification
 
 ## 1. Available Plans
-- **Starter**: $20/mo. Limits: 5 vehicles. Basic profile + inquiry leads.
+- **Starter**: $20/mo (or $216/year). Limits: 5 vehicles. Basic profile + inquiry leads.
 - **Growth**: $49/mo (or $529/year). Limits: 20 vehicles. WhatsApp, phone tracking, analytics, GPS badge.
 - **Pro**: $99/mo (or $1,069/year). Limits: 50 vehicles. Everything in Growth + featured placement, AI SEO, priority support.
 - **Business/Enterprise**: Custom sales-led tiers.
 
 ## 2. Billing Intervals
 - **Monthly**: Standard tier pricing. Starter: $20/mo, Growth: $49/mo, Pro: $99/mo.
-- **Annual**: 10% discount for paying upfront for 12 months (Growth: $529/year, Pro: $1,069/year). Starter is currently available on monthly billing only ($20/month).
+- **Annual**: 10% discount for paying upfront for 12 months. Starter: $216/year, Growth: $529/year, Pro: $1,069/year.
   
 ## 3. Upgrades & Downgrades
 - **Upgrades**: Processed immediately. Users pay a prorated amount for the remainder of the billing cycle. Premium access granted as soon as Stripe confirms the payment (`customer.subscription.updated` / `checkout.session.completed`).
