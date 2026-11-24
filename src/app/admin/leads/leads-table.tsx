@@ -4,11 +4,13 @@ import { useState, useMemo } from "react";
 import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
+import { formatAustralianDate, formatAustralianTime } from "@/lib/date-utils";
 
 interface LeadRow {
   id: string;
   customer_name: string;
   customer_email: string;
+  customer_phone: string;
   lead_type: string;
   status: string;
   vendor_name: string;
@@ -38,6 +40,8 @@ export function AdminLeadsTable({ data }: AdminLeadsTableProps) {
     return data.filter(
       (l) =>
         l.customer_name.toLowerCase().includes(q) ||
+        l.customer_email.toLowerCase().includes(q) ||
+        l.customer_phone.toLowerCase().includes(q) ||
         l.vendor_name.toLowerCase().includes(q) ||
         l.vehicle_title.toLowerCase().includes(q) ||
         l.lead_type.toLowerCase().includes(q)
@@ -50,6 +54,36 @@ export function AdminLeadsTable({ data }: AdminLeadsTableProps) {
       label: "Customer",
       sortable: true,
       render: (val) => <span className="font-medium text-foreground">{val as string}</span>,
+    },
+    {
+      key: "customer_email",
+      label: "Email",
+      sortable: true,
+      render: (val) => {
+        const email = (val as string)?.trim();
+        return email ? (
+          <a href={`mailto:${email}`} className="text-sm text-primary hover:underline">
+            {email}
+          </a>
+        ) : (
+          <span className="text-sm text-muted-foreground italic">Not provided</span>
+        );
+      },
+    },
+    {
+      key: "customer_phone",
+      label: "Phone",
+      sortable: true,
+      render: (val) => {
+        const phone = (val as string)?.trim();
+        return phone ? (
+          <a href={`tel:${phone}`} className="text-sm text-foreground hover:underline">
+            {phone}
+          </a>
+        ) : (
+          <span className="text-sm text-muted-foreground italic">Not provided</span>
+        );
+      },
     },
     {
       key: "lead_type",
@@ -85,7 +119,17 @@ export function AdminLeadsTable({ data }: AdminLeadsTableProps) {
       sortable: true,
       render: (val) => (
         <span className="text-sm text-muted-foreground">
-          {new Date(val as string).toLocaleDateString("en-AU")}
+          {formatAustralianDate(val as string)}
+        </span>
+      ),
+    },
+    {
+      key: "created_at_time",
+      label: "Time",
+      sortable: false,
+      render: (_val, row) => (
+        <span className="text-sm text-muted-foreground">
+          {formatAustralianTime(row.created_at as string)}
         </span>
       ),
     },

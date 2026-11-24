@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/security/auth";
 import { sendCustomerEnquiryConfirmation, sendLeadAlert } from "@/lib/email/ses";
@@ -233,6 +234,13 @@ export async function POST(request: NextRequest) {
       console.warn(`[Lead API] Failed to send customer confirmation for general lead:`, emailErr);
     }
 
+    try {
+      revalidatePath("/vendor/leads");
+      revalidatePath("/admin/leads");
+    } catch {
+      // Non-fatal in test or background environments
+    }
+
     return NextResponse.json(
       {
         leadId: lead.id,
@@ -422,6 +430,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (emailErr) {
     console.error(`[Lead API] Lead ${lead.id} created but failed to send customer confirmation:`, emailErr);
+  }
+
+  // Ensure vendor dashboard and admin dashboard cache are purged so new lead is immediately visible
+  try {
+    revalidatePath("/vendor/leads");
+    revalidatePath("/admin/leads");
+    revalidatePath(`/vendor/leads/${lead.id}`);
+  } catch {
+    // Non-fatal in test or background environments
   }
 
   return NextResponse.json({ leadId: lead.id, id: lead.id }, { status: 201 });

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { requireAdminRole } from "@/lib/security/auth";
@@ -245,7 +245,7 @@ export async function moderateListing(
 }
 
 const ModerateReviewSchema = z.object({
-  action: z.enum(["approve", "reject"]),
+  action: z.enum(["approve", "reject", "delete"]),
   reviewId: z.string().uuid(),
   reason: z.string().min(1, "Reason is required").max(500),
 });
@@ -259,6 +259,37 @@ export async function moderateReview(rawAction: string, rawReviewId: string, raw
     reviewId: rawReviewId,
     reason: rawReason,
   });
+
+  if (action === "delete") {
+    // Fetch review before deletion to capture in audit trail
+    const { data: reviewData } = await supabase
+      .from("reviews")
+      .select("id, organization_id, vehicle_id, customer_name, rating, status")
+      .eq("id", reviewId)
+      .single();
+
+    const { error } = await supabase
+      .from("reviews")
+      .delete()
+      .eq("id", reviewId);
+
+    if (error) {
+      throw new Error(`Failed to delete review: ${error.message}`);
+    }
+
+    // Log audit event
+    await supabase.from("audit_logs").insert({
+      actor_user_id: user.id,
+      action: "moderation_delete",
+      resource_type: "review",
+      resource_id: reviewId,
+      metadata: { reason, deleted_review: reviewData },
+    });
+
+    revalidatePath("/admin/reviews");
+    revalidatePath("/admin");
+    return { success: true };
+  }
 
   const statusMap: Record<string, string> = {
     approve: "approved",
@@ -298,6 +329,7 @@ export async function moderateReview(rawAction: string, rawReviewId: string, raw
 
   revalidatePath("/admin/reviews");
   revalidatePath("/admin");
+  return { success: true };
 }
 
 const UpdateFraudFlagStatusSchema = z.object({

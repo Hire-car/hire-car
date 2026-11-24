@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { organizationHasFeature } from "@/lib/plan-features";
 import { MessageSquare, Mail, Phone, MapPin, Calendar, ChevronRight, Inbox } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { formatAustralianDateTime } from "@/lib/date-utils";
 
 export const metadata = {
   title: "Leads",
@@ -147,7 +148,7 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
                     <p className="mt-2 text-sm text-slate-600 line-clamp-2">{wa.message_body}</p>
                   </div>
                   <span className="text-xs text-slate-400 shrink-0">
-                    {new Date(wa.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short" })}
+                    {formatAustralianDateTime(wa.created_at)}
                   </span>
                 </div>
               </div>
@@ -196,7 +197,7 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
                         </span>
                       )}
                       <span className="text-xs text-slate-400">
-                        {new Date(lead.createdAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                        {formatAustralianDateTime(lead.createdAt)}
                       </span>
                     </div>
 
@@ -249,7 +250,7 @@ export default async function VendorLeadsPage({ searchParams }: LeadsPageProps) 
                               <span className="h-1.5 w-1.5 rounded-full bg-slate-300 shrink-0" />
                               <span className="capitalize text-slate-500">{event.eventType.replace(/_/g, " ")}</span>
                               <span>·</span>
-                              <span>{new Date(event.createdAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                              <span>{formatAustralianDateTime(event.createdAt)}</span>
                               {event.actorName && <><span>·</span><span>{event.actorName}</span></>}
                             </div>
                           ))}

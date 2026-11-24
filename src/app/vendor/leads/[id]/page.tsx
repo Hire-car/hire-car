@@ -3,7 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { ChatInterface } from "@/components/chat-interface";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, User, Phone, Mail, MapPin, Calendar, CheckCircle2, MessageSquare, Sparkles } from "lucide-react";
+import { ArrowLeft, User, Phone, Mail, MapPin, Calendar, CheckCircle2, MessageSquare, Sparkles, Clock } from "lucide-react";
+import { formatAustralianDateTime } from "@/lib/date-utils";
 
 export default async function VendorChatRoomPage({
   params,
@@ -172,6 +173,13 @@ export default async function VendorChatRoomPage({
                   <Mail className="h-3.5 w-3.5" />
                   {lead.customer_email}
                 </a>
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 uppercase font-semibold">Received</p>
+                <p className="font-medium text-slate-900 mt-0.5 flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-slate-400" />
+                  {formatAustralianDateTime(lead.created_at)}
+                </p>
               </div>
             </div>
           </div>
