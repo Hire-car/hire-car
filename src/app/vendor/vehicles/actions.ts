@@ -274,7 +274,8 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
 
     revalidateTag(`vendor-vehicles-${organizationId}`);
     revalidateTag(`vendor-metrics-${organizationId}`);
-    revalidatePath("/vendor/vehicles");
+    revalidatePath("/vendor/vehicles", "page");
+    revalidatePath("/vendor/vehicles", "layout");
     revalidatePath("/vendor/dashboard");
     await invalidatePseoForVehicle(supabase, vehicle.id);
 
@@ -529,7 +530,8 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
 
   revalidateTag(`vendor-vehicles-${organizationId}`);
   revalidateTag(`vendor-metrics-${organizationId}`);
-  revalidatePath("/vendor/vehicles");
+  revalidatePath("/vendor/vehicles", "page");
+  revalidatePath("/vendor/vehicles", "layout");
   revalidatePath(`/vendor/vehicles/${vehicleId}`);
   await invalidatePseoForVehicle(supabase, vehicleId);
 
@@ -620,7 +622,8 @@ export async function deleteVehicle(formData: FormData): Promise<VehicleActionRe
   revalidateTag("vehicles");
   revalidateTag("featured");
   revalidateTag("stats");
-  revalidatePath("/vendor/vehicles");
+  revalidatePath("/vendor/vehicles", "page");
+  revalidatePath("/vendor/vehicles", "layout");
   revalidatePath("/vendor/dashboard");
   revalidatePath("/");
   revalidatePath("/search");

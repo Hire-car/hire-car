@@ -6,8 +6,8 @@ Create recurring prices in Stripe Dashboard (live and test):
 
 | Env variable | Plan | Amount |
 |--------------|------|--------|
-| `STRIPE_PRICE_STARTER` | Starter monthly | $0 AUD |
-| `STRIPE_PRICE_STARTER_ANNUAL` | Starter annual | $0 AUD |
+| `STRIPE_PRICE_STARTER` | Starter monthly | $20 AUD |
+| `STRIPE_PRICE_STARTER_ANNUAL` | Starter annual | $216 AUD |
 | `STRIPE_PRICE_GROWTH` | Growth monthly | $49 AUD |
 | `STRIPE_PRICE_GROWTH_ANNUAL` | Growth annual | $529 AUD |
 | `STRIPE_PRICE_PRO` | Pro monthly | $99 AUD |

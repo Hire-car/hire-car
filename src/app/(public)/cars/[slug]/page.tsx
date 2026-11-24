@@ -165,7 +165,7 @@ export default async function VehicleDetailPage({
   const features = (vehicle.vehicle_features as unknown as FeatureRecord[]) || [];
 
   // Determine whether this vendor's plan unlocks direct contact (WhatsApp/phone).
-  // Free Starter vendors rely on the on-platform enquiry form; Growth/Pro unlock
+  // Starter vendors rely on the on-platform enquiry form; Growth/Pro unlock
   // direct contact buttons. This matches what the pricing page sells.
   const directContactEnabled = planHasFeature(vendorSub?.plan_code, "directContact");
 

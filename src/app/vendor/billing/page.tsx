@@ -20,7 +20,7 @@ const PLANS = [
   {
     code: "starter",
     name: "Starter",
-    price: { monthly: 0, annual: 0 },
+    price: { monthly: 20, annual: 216 },
     vehicles: 5,
     color: "border-slate-200",
     badge: null,
@@ -186,8 +186,8 @@ export default async function VendorBillingPage(props: {
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm flex items-start gap-3">
           <Zap className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
           <p className="text-sm text-emerald-800">
-            <span className="font-semibold">Get started free:</span> activate the $0 Starter plan to list up to 5 vehicles.
-            Growth and Pro are our premium plans for expanding fleets.
+            <span className="font-semibold">Get started:</span> choose the $20/mo Starter plan to list up to 5 vehicles,
+            or select Growth or Pro for expanding fleets.
           </p>
         </div>
       )}
@@ -442,7 +442,7 @@ export default async function VendorBillingPage(props: {
                   <div className={`rounded-xl py-2.5 text-center text-sm font-semibold bg-white/10 text-white`}>
                     Your current plan
                   </div>
-                ) : hasActiveSub && subscription?.stripe_customer_id ? (
+                ) : hasActiveSub && subscription?.stripe_customer_id && subscription?.stripe_subscription_id ? (
                   <PortalForm
                     organizationId={organization.id}
                     stripeCustomerId={subscription.stripe_customer_id}

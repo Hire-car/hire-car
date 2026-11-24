@@ -40,16 +40,8 @@ export async function POST(request: NextRequest) {
     .eq("organization_id", payload.data.organizationId)
     .maybeSingle();
 
-  if (payload.data.plan === "starter") {
-    return NextResponse.json(
-      { error: "The Starter plan is completely free and does not require Stripe Checkout. Please activate it directly from the billing dashboard." },
-      { status: 400 },
-    );
-  }
-
   const isPaidActive =
     (subscription?.status === "active" || subscription?.status === "trialing") &&
-    subscription.plan_code !== "starter" &&
     Boolean(subscription.stripe_subscription_id);
 
   if (isPaidActive) {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/security/auth";
 import { getVendorContext, getVehicleLimitInfo } from "@/lib/data/vendor";
-import { getOrganizationVehicles, deleteVehicle, getVehicleFeatures, getVehicleImageCounts } from "./actions";
+import { getOrganizationVehicles, getVehicleFeatures, getVehicleImageCounts } from "./actions";
 import { getVehicleImages } from "./image-actions";
 import VehicleForm from "./vehicle-form";
 import { DeleteVehicleButton } from "./delete-button";
@@ -12,6 +12,9 @@ import { organizationHasFeature } from "@/lib/plan-features";
 import { Car, MapPin, Tag, Fuel, Settings2, Users, AlertCircle, Edit2, Eye } from "lucide-react";
 
 import { Suspense } from "react";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata = {
   title: "Vehicles",

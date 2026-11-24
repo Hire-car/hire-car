@@ -14,7 +14,19 @@ export function getStripe() {
 
 export function getStripePrice(plan: PlanCode, interval: "monthly" | "annual" = "monthly"): string {
   if (plan === "starter") {
-    throw new Error("The Starter plan is free and does not use Stripe checkout.");
+    if (interval === "annual") {
+      const priceId =
+        process.env.STRIPE_PRICE_STARTER_ANNUAL ||
+        process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL;
+      if (!priceId) throw new Error("STRIPE_PRICE_STARTER_ANNUAL is not configured in environment variables.");
+      return priceId;
+    }
+    const priceId =
+      process.env.STRIPE_PRICE_STARTER_MONTHLY ||
+      process.env.STRIPE_PRICE_STARTER ||
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_MONTHLY;
+    if (!priceId) throw new Error("STRIPE_PRICE_STARTER_MONTHLY or STRIPE_PRICE_STARTER is not configured in environment variables.");
+    return priceId;
   }
 
   if (plan === "growth") {
@@ -71,18 +83,25 @@ export function getPlanFromStripePrice(priceId: string): { plan: PlanCode; inter
     return { plan: "pro", interval: "annual" };
   }
 
-  // Starter (legacy / test fallbacks)
-  if (priceId === process.env.STRIPE_PRICE_STARTER) {
+  // Starter (monthly & annual aliases)
+  if (
+    priceId === process.env.STRIPE_PRICE_STARTER_MONTHLY ||
+    priceId === process.env.STRIPE_PRICE_STARTER ||
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_MONTHLY
+  ) {
     return { plan: "starter", interval: "monthly" };
   }
-  if (priceId === process.env.STRIPE_PRICE_STARTER_ANNUAL) {
+  if (
+    priceId === process.env.STRIPE_PRICE_STARTER_ANNUAL ||
+    priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ANNUAL
+  ) {
     return { plan: "starter", interval: "annual" };
   }
 
   return null;
 }
 
-const PAID_PLANS: PlanCode[] = ["growth", "pro"];
+const PAID_PLANS: PlanCode[] = ["starter", "growth", "pro"];
 
 export async function createCheckoutSession(input: {
   plan: PlanCode;
@@ -94,10 +113,6 @@ export async function createCheckoutSession(input: {
   existingSubscriptionId?: string | null;
   idempotencyKey?: string;
 }) {
-  if (input.plan === "starter") {
-    throw new Error("Starter plan is free and does not require Stripe checkout.");
-  }
-
   const interval = input.interval ?? "monthly";
   const isPaidPlan = PAID_PLANS.includes(input.plan);
   if (!isPaidPlan) {

@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/immutability, react-hooks/exhaustive-deps, @typescript-eslint/no-unused-vars */
 import Image from "next/image";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, startTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Sparkles, UploadCloud, X, AlertCircle, Loader2 } from "lucide-react";
@@ -269,10 +269,15 @@ export default function VehicleForm({
         setFormState({ title: "", seats: 5, fuel: "Petrol", transmission: "Automatic", category: "Sedan" });
         const formEl = document.getElementById("vehicle-form") as HTMLFormElement;
         if (formEl) formEl.reset();
+        startTransition(() => {
+          router.refresh();
+        });
+      } else {
+        startTransition(() => {
+          router.push("/vendor/vehicles");
+          router.refresh();
+        });
       }
-      
-      router.refresh();
-      router.push(`/vendor/vehicles?org=${organizationId}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setMessage({ type: "error", text: `Error: ${msg}` });
@@ -665,7 +670,7 @@ export default function VehicleForm({
             {editVehicle && (
               <button
                 type="button"
-                onClick={() => router.push(`/vendor/vehicles?org=${organizationId}`)}
+                onClick={() => router.push("/vendor/vehicles")}
                 className="flex-1 sm:flex-none rounded-lg border border-slate-300 bg-white px-6 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 Cancel
