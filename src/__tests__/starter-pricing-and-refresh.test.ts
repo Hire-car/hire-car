@@ -153,6 +153,23 @@ describe("Starter Monthly ($20) & Annual ($216) Pricing & Vehicle Refresh Test S
       expect(getPlanFromStripePrice("price_starter_a_pub")).toEqual({ plan: "starter", interval: "annual" });
     });
 
+    it("correctly identifies the new production Stripe Price IDs for Starter monthly and annual", () => {
+      process.env.STRIPE_PRICE_STARTER_MONTHLY = "price_1UfcwCK6a8gBhUsThp733zee";
+      process.env.STRIPE_PRICE_STARTER_ANNUAL = "price_1Ufd4pK6a8gBhUsTgrb80UQb";
+
+      expect(getStripePrice("starter", "monthly")).toBe("price_1UfcwCK6a8gBhUsThp733zee");
+      expect(getStripePrice("starter", "annual")).toBe("price_1Ufd4pK6a8gBhUsTgrb80UQb");
+
+      expect(getPlanFromStripePrice("price_1UfcwCK6a8gBhUsThp733zee")).toEqual({
+        plan: "starter",
+        interval: "monthly",
+      });
+      expect(getPlanFromStripePrice("price_1Ufd4pK6a8gBhUsTgrb80UQb")).toEqual({
+        plan: "starter",
+        interval: "annual",
+      });
+    });
+
     it("preserves Growth and Pro mappings without regression", () => {
       process.env.STRIPE_PRICE_GROWTH_MONTHLY = "price_growth_m";
       process.env.STRIPE_PRICE_GROWTH_ANNUAL = "price_growth_a";
