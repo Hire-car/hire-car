@@ -56,10 +56,10 @@ export async function getVehicleLimitInfo(organizationId: string): Promise<Vehic
   const subscription = subResult.data;
 
   // Strict subscription verification:
-  // An active subscription requires status "active" or "trialing", a valid plan_code,
-  // and for non-trialing accounts, a valid stripe_subscription_id.
+  // An active paid subscription requires status "active", a valid plan_code,
+  // and a valid stripe_subscription_id. Trialing without payment is not eligible.
   // Also check if current_period_end has expired.
-  const isStatusEligible = subscription?.status === "active" || subscription?.status === "trialing";
+  const isStatusEligible = subscription?.status === "active";
   const hasStripeId = Boolean(subscription?.stripe_subscription_id);
 
   let isExpired = false;

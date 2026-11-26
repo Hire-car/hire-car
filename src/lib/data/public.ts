@@ -43,7 +43,7 @@ export const getCachedVehicleDetails = unstable_cache(
         .from("subscriptions")
         .select("plan_code, status, stripe_subscription_id, current_period_end")
         .eq("organization_id", vehicle.organization_id)
-        .in("status", ["active", "trialing"])
+        .eq("status", "active")
         .maybeSingle(),
       supabase
         .from("reviews")

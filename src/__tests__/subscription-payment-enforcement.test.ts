@@ -62,14 +62,18 @@ describe("Hire Car Marketplace — Subscription Payment Enforcement Test Suite",
           data: subscription,
           error: null,
         });
+        const queryChain: any = {
+          maybeSingle: maybeSingleFn,
+          in: vi.fn().mockReturnValue({
+            maybeSingle: maybeSingleFn,
+          }),
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: maybeSingleFn,
+          }),
+        };
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: maybeSingleFn,
-              in: vi.fn().mockReturnValue({
-                maybeSingle: maybeSingleFn,
-              }),
-            }),
+            eq: vi.fn().mockReturnValue(queryChain),
           }),
         };
       }
@@ -546,7 +550,7 @@ describe("Hire Car Marketplace — Subscription Payment Enforcement Test Suite",
       expect(limitInfo.limit).toBe(0);
     });
 
-    it("allows vehicle listing entitlement for legitimate trialing status with stripe_subscription_id", async () => {
+    it("denies vehicle listing entitlement for trialing status even with stripe_subscription_id (no-free-trial business rule)", async () => {
       mockSupabaseDb({
         vehicleCount: 0,
         subscription: {
@@ -559,9 +563,9 @@ describe("Hire Car Marketplace — Subscription Payment Enforcement Test Suite",
       });
 
       const limitInfo = await getVehicleLimitInfo("org_valid_trial");
-      expect(limitInfo.hasActiveSubscription).toBe(true);
-      expect(limitInfo.canAddMore).toBe(true);
-      expect(limitInfo.limit).toBe(5);
+      expect(limitInfo.hasActiveSubscription).toBe(false);
+      expect(limitInfo.canAddMore).toBe(false);
+      expect(limitInfo.limit).toBe(0);
     });
   });
 

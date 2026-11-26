@@ -63,7 +63,7 @@ async function applyStripeSubscription(subscription: Stripe.Subscription) {
     periodFields: getSubscriptionPeriodFields(subscription),
   });
 
-  if (mappedStatus === "active" || mappedStatus === "trialing") {
+  if (mappedStatus === "active") {
     await approveOrganizationIfEligible(supabase, organizationId);
   }
 
@@ -98,14 +98,23 @@ async function applyCheckoutSession(session: Stripe.Checkout.Session) {
     stripeSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
   }
 
-  const periodFields = getSubscriptionPeriodFields(stripeSubscription);
+  const rawPeriodFields: Partial<ReturnType<typeof getSubscriptionPeriodFields>> =
+    stripeSubscription ? getSubscriptionPeriodFields(stripeSubscription) : {};
+  const periodFields = {
+    ...rawPeriodFields,
+    current_period_end:
+      rawPeriodFields.current_period_end ??
+      (interval === "annual"
+        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()),
+  };
   const rawStatus = stripeSubscription?.status;
   const mappedStripeStatus = rawStatus ? (SUBSCRIPTION_STATUS_MAP[rawStatus] || "incomplete") : "incomplete";
 
-  // A subscription can ONLY be active if payment is settled AND stripe subscription status is active or trialing
+  // A subscription can ONLY be active if payment is settled AND stripe subscription status is active
   const finalStatus =
-    isPaidSettled && (mappedStripeStatus === "active" || mappedStripeStatus === "trialing")
-      ? mappedStripeStatus
+    isPaidSettled && mappedStripeStatus === "active"
+      ? "active"
       : "incomplete";
 
   const supabase = createAdminClient();
@@ -119,7 +128,7 @@ async function applyCheckoutSession(session: Stripe.Checkout.Session) {
     periodFields,
   });
 
-  if (finalStatus === "active" || finalStatus === "trialing") {
+  if (finalStatus === "active") {
     await approveOrganizationIfEligible(supabase, organizationId);
   }
 

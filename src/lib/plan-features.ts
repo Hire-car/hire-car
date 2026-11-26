@@ -63,7 +63,7 @@ export async function getOrganizationPlanCode(
     .from("subscriptions")
     .select("plan_code, status, stripe_subscription_id, current_period_end")
     .eq("organization_id", organizationId)
-    .in("status", ["active", "trialing"])
+    .eq("status", "active")
     .maybeSingle();
 
   if (!data) return null;
