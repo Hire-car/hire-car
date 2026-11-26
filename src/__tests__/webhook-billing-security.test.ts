@@ -401,6 +401,7 @@ describe("Hire Car Marketplace — Comprehensive Billing Security & Webhook Test
           id: "sub_active_1",
           status: "active",
           customer: "cus_active_123",
+          current_period_end: Math.floor(Date.now() / 1000) + 30 * 24 * 3600,
           metadata: { organization_id: "org_active_sub", plan: "growth", interval: "monthly" },
           items: { data: [{ price: { id: "price_growth_monthly_live" } }] },
         },
@@ -465,10 +466,12 @@ describe("Hire Car Marketplace — Comprehensive Billing Security & Webhook Test
       updated_at: new Date(Date.now() - 60000).toISOString(),
     });
 
+    const periodEndSec = Math.floor(Date.now() / 1000) + 30 * 24 * 3600;
     mockState.stripeSubscriptions.set("sub_async_1", {
       id: "sub_async_1",
       status: "active",
       customer: "cus_async_1",
+      current_period_end: periodEndSec,
       metadata: { plan: "starter", interval: "monthly" },
       items: { data: [{ price: { id: "price_1UfcwCK6a8gBhUsThp733zee" } }] },
     });
@@ -633,6 +636,7 @@ describe("Hire Car Marketplace — Comprehensive Billing Security & Webhook Test
     mockState.subscriptionsMap.set("org_wrong_price", {
       organization_id: "org_wrong_price",
       stripe_subscription_id: "sub_wp_1",
+      stripe_customer_id: "cus_wp_1",
       status: "incomplete",
       updated_at: new Date(Date.now() - 60000).toISOString(),
     });
@@ -640,6 +644,7 @@ describe("Hire Car Marketplace — Comprehensive Billing Security & Webhook Test
     mockState.stripeSubscriptions.set("sub_wp_1", {
       id: "sub_wp_1",
       status: "active",
+      customer: "cus_wp_1",
       metadata: { plan: "starter", interval: "monthly" },
       items: { data: [{ price: { id: "price_ROGUE_FAKE_PRICE" } }] }, // Wrong price!
     });
@@ -652,6 +657,7 @@ describe("Hire Car Marketplace — Comprehensive Billing Security & Webhook Test
         object: {
           id: "cs_wp_1",
           client_reference_id: "org_wrong_price",
+          customer: "cus_wp_1",
           subscription: "sub_wp_1",
           payment_status: "paid",
         },
@@ -780,5 +786,317 @@ describe("Hire Car Marketplace — Comprehensive Billing Security & Webhook Test
     const durationM = new Date(subM.current_period_end).getTime() - Date.now();
     const durationA = new Date(subA.current_period_end).getTime() - Date.now();
     expect(durationA).toBeGreaterThan(durationM * 11);
+  });
+
+  // =========================================================================
+  // 16. Stripe Retrieval Failure in checkout.session.completed (Fail Closed)
+  // =========================================================================
+  it("fails closed and returns 500 when Stripe subscription retrieval fails in checkout.session.completed", async () => {
+    const event = {
+      id: "evt_fail_closed_retrieve",
+      type: "checkout.session.completed",
+      created: Math.floor(Date.now() / 1000),
+      data: {
+        object: {
+          id: "cs_fail_retrieve",
+          client_reference_id: "org_fail_retrieve",
+          customer: "cus_123",
+          subscription: "sub_unretrievable_id", // Does NOT exist in mockState.stripeSubscriptions
+          payment_status: "paid",
+          metadata: { plan: "starter", interval: "monthly" },
+        },
+      },
+    };
+
+    const res = await POST(createWebhookRequest(event));
+    // Must return 500 so Stripe retries the webhook
+    expect(res.status).toBe(500);
+
+    // Subscription must NOT be activated
+    const sub = mockState.subscriptionsMap.get("org_fail_retrieve");
+    expect(sub?.status).not.toBe("active");
+
+    // Organization must NOT be approved
+    const org = mockState.organizationsMap.get("org_fail_retrieve");
+    expect(org?.status).not.toBe("approved");
+  });
+
+  // =========================================================================
+  // 17. Missing Customer ID in async_payment_succeeded (Rejects)
+  // =========================================================================
+  it("rejects async_payment_succeeded when session customer ID is missing/null", async () => {
+    mockState.subscriptionsMap.set("org_missing_cust", {
+      organization_id: "org_missing_cust",
+      stripe_subscription_id: "sub_mc_1",
+      stripe_customer_id: "cus_stored_1",
+      status: "incomplete",
+      updated_at: new Date(Date.now() - 60000).toISOString(),
+    });
+
+    const event = {
+      id: "evt_missing_cust_1",
+      type: "checkout.session.async_payment_succeeded",
+      created: Math.floor(Date.now() / 1000),
+      data: {
+        object: {
+          id: "cs_mc_1",
+          client_reference_id: "org_missing_cust",
+          customer: null, // Null customer!
+          subscription: "sub_mc_1",
+          payment_status: "paid",
+        },
+      },
+    };
+
+    const res = await POST(createWebhookRequest(event));
+    expect(res.status).toBe(200);
+
+    const sub = mockState.subscriptionsMap.get("org_missing_cust");
+    expect(sub.status).toBe("incomplete");
+  });
+
+  // =========================================================================
+  // 18. Missing Stored Subscription ID in async_payment_succeeded (Rejects)
+  // =========================================================================
+  it("rejects async_payment_succeeded when stored stripe_subscription_id is null", async () => {
+    mockState.subscriptionsMap.set("org_null_stored_sub", {
+      organization_id: "org_null_stored_sub",
+      stripe_subscription_id: null, // Null stored subscription!
+      stripe_customer_id: "cus_nss_1",
+      status: "incomplete",
+      updated_at: new Date(Date.now() - 60000).toISOString(),
+    });
+
+    const event = {
+      id: "evt_nss_1",
+      type: "checkout.session.async_payment_succeeded",
+      created: Math.floor(Date.now() / 1000),
+      data: {
+        object: {
+          id: "cs_nss_1",
+          client_reference_id: "org_null_stored_sub",
+          customer: "cus_nss_1",
+          subscription: "sub_session_1",
+          payment_status: "paid",
+        },
+      },
+    };
+
+    const res = await POST(createWebhookRequest(event));
+    expect(res.status).toBe(200);
+
+    const sub = mockState.subscriptionsMap.get("org_null_stored_sub");
+    expect(sub.status).toBe("incomplete");
+  });
+
+  // =========================================================================
+  // 19. Missing Stored Customer ID in async_payment_succeeded (Rejects)
+  // =========================================================================
+  it("rejects async_payment_succeeded when stored stripe_customer_id is null", async () => {
+    mockState.subscriptionsMap.set("org_null_stored_cust", {
+      organization_id: "org_null_stored_cust",
+      stripe_subscription_id: "sub_nsc_1",
+      stripe_customer_id: null, // Null stored customer!
+      status: "incomplete",
+      updated_at: new Date(Date.now() - 60000).toISOString(),
+    });
+
+    const event = {
+      id: "evt_nsc_1",
+      type: "checkout.session.async_payment_succeeded",
+      created: Math.floor(Date.now() / 1000),
+      data: {
+        object: {
+          id: "cs_nsc_1",
+          client_reference_id: "org_null_stored_cust",
+          customer: "cus_session_1",
+          subscription: "sub_nsc_1",
+          payment_status: "paid",
+        },
+      },
+    };
+
+    const res = await POST(createWebhookRequest(event));
+    expect(res.status).toBe(200);
+
+    const sub = mockState.subscriptionsMap.get("org_null_stored_cust");
+    expect(sub.status).toBe("incomplete");
+  });
+
+  // =========================================================================
+  // 20. Failed Payment Arriving After Newer Payment (Stale Guard Preserves Active)
+  // =========================================================================
+  it("preserves active subscription when an older async_payment_failed arrives after a successful payment", async () => {
+    mockState.subscriptionsMap.set("org_active_stale", {
+      organization_id: "org_active_stale",
+      stripe_subscription_id: "sub_active_stale_1",
+      status: "active",
+      updated_at: new Date(Date.now() - 1000).toISOString(), // Updated 1 second ago
+    });
+
+    const event = {
+      id: "evt_stale_fail_1",
+      type: "checkout.session.async_payment_failed",
+      created: Math.floor(Date.now() / 1000) - 60, // Created 60 seconds ago (stale!)
+      data: {
+        object: {
+          id: "cs_stale_fail_1",
+          client_reference_id: "org_active_stale",
+          subscription: "sub_active_stale_1",
+        },
+      },
+    };
+
+    const res = await POST(createWebhookRequest(event));
+    expect(res.status).toBe(200);
+
+    const sub = mockState.subscriptionsMap.get("org_active_stale");
+    expect(sub.status).toBe("active");
+  });
+
+  // =========================================================================
+  // 21. Active Subscription Protected When Stripe Unavailable During async_payment_failed
+  // =========================================================================
+  it("never downgrades an active subscription when Stripe is temporarily unavailable during async_payment_failed", async () => {
+    mockState.subscriptionsMap.set("org_protect_active", {
+      organization_id: "org_protect_active",
+      stripe_subscription_id: "sub_protect_1",
+      status: "active",
+      updated_at: new Date(Date.now() - 60000).toISOString(),
+    });
+
+    // Note: "sub_protect_1" is NOT in mockState.stripeSubscriptions, so getStripe().subscriptions.retrieve will throw!
+    const event = {
+      id: "evt_stripe_down_fail",
+      type: "checkout.session.async_payment_failed",
+      created: Math.floor(Date.now() / 1000),
+      data: {
+        object: {
+          id: "cs_stripe_down",
+          client_reference_id: "org_protect_active",
+          subscription: "sub_protect_1",
+        },
+      },
+    };
+
+    const res = await POST(createWebhookRequest(event));
+    expect(res.status).toBe(200);
+
+    // Active subscription must be protected against downgrade!
+    const sub = mockState.subscriptionsMap.get("org_protect_active");
+    expect(sub.status).toBe("active");
+  });
+
+  // =========================================================================
+  // 22. Missing Billing-Period Dates in checkout.session.completed (Fail Closed)
+  // =========================================================================
+  it("fails closed when authoritative billing period dates are missing from Stripe subscription", async () => {
+    mockState.stripeSubscriptions.set("sub_no_period", {
+      id: "sub_no_period",
+      status: "active",
+      customer: "cus_no_period",
+      current_period_end: null, // Missing period end!
+      current_period_start: null,
+      items: { data: [{ price: { id: "price_1UfcwCK6a8gBhUsThp733zee" } }] },
+    });
+
+    const event = {
+      id: "evt_no_period_1",
+      type: "checkout.session.completed",
+      created: Math.floor(Date.now() / 1000),
+      data: {
+        object: {
+          id: "cs_no_period_1",
+          client_reference_id: "org_no_period",
+          customer: "cus_no_period",
+          subscription: "sub_no_period",
+          payment_status: "paid",
+          metadata: { plan: "starter", interval: "monthly" },
+        },
+      },
+    };
+
+    const res = await POST(createWebhookRequest(event));
+    // Fails closed with 500 error allowing retry
+    expect(res.status).toBe(500);
+
+    const sub = mockState.subscriptionsMap.get("org_no_period");
+    expect(sub?.status).not.toBe("active");
+
+    const org = mockState.organizationsMap.get("org_no_period");
+    expect(org?.status).not.toBe("approved");
+  });
+
+  // =========================================================================
+  // 23. Valid Monthly and Annual Billing Periods via Webhook
+  // =========================================================================
+  it("records exact authoritative monthly and annual timestamps on checkout.session.completed", async () => {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const monthlyEndSec = nowSec + 30 * 24 * 3600;
+    const annualEndSec = nowSec + 365 * 24 * 3600;
+
+    // Monthly
+    mockState.stripeSubscriptions.set("sub_wh_monthly", {
+      id: "sub_wh_monthly",
+      status: "active",
+      customer: "cus_wh_m",
+      current_period_end: monthlyEndSec,
+      current_period_start: nowSec,
+      items: { data: [{ price: { id: "price_1UfcwCK6a8gBhUsThp733zee" } }] },
+    });
+
+    const monthlyEvent = {
+      id: "evt_wh_m",
+      type: "checkout.session.completed",
+      created: nowSec,
+      data: {
+        object: {
+          id: "cs_wh_m",
+          client_reference_id: "org_wh_m",
+          customer: "cus_wh_m",
+          subscription: "sub_wh_monthly",
+          payment_status: "paid",
+          metadata: { plan: "starter", interval: "monthly" },
+        },
+      },
+    };
+
+    const resM = await POST(createWebhookRequest(monthlyEvent));
+    expect(resM.status).toBe(200);
+    const subM = mockState.subscriptionsMap.get("org_wh_m");
+    expect(subM.status).toBe("active");
+    expect(subM.current_period_end).toBe(new Date(monthlyEndSec * 1000).toISOString());
+
+    // Annual
+    mockState.stripeSubscriptions.set("sub_wh_annual", {
+      id: "sub_wh_annual",
+      status: "active",
+      customer: "cus_wh_a",
+      current_period_end: annualEndSec,
+      current_period_start: nowSec,
+      items: { data: [{ price: { id: "price_1Ufd4pK6a8gBhUsTgrb80UQb" } }] },
+    });
+
+    const annualEvent = {
+      id: "evt_wh_a",
+      type: "checkout.session.completed",
+      created: nowSec,
+      data: {
+        object: {
+          id: "cs_wh_a",
+          client_reference_id: "org_wh_a",
+          customer: "cus_wh_a",
+          subscription: "sub_wh_annual",
+          payment_status: "paid",
+          metadata: { plan: "starter", interval: "annual" },
+        },
+      },
+    };
+
+    const resA = await POST(createWebhookRequest(annualEvent));
+    expect(resA.status).toBe(200);
+    const subA = mockState.subscriptionsMap.get("org_wh_a");
+    expect(subA.status).toBe("active");
+    expect(subA.current_period_end).toBe(new Date(annualEndSec * 1000).toISOString());
   });
 });

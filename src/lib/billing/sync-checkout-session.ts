@@ -98,18 +98,19 @@ async function applyCheckoutSession(session: Stripe.Checkout.Session) {
     stripeSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
   }
 
-  const rawPeriodFields: Partial<ReturnType<typeof getSubscriptionPeriodFields>> =
-    stripeSubscription ? getSubscriptionPeriodFields(stripeSubscription) : {};
-  const periodFields = {
-    ...rawPeriodFields,
-    current_period_end:
-      rawPeriodFields.current_period_end ??
-      (interval === "annual"
-        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()),
-  };
-  const rawStatus = stripeSubscription?.status;
+  if (!stripeSubscription) {
+    throw new Error(`Stripe subscription ${subscriptionId} could not be retrieved`);
+  }
+
+  const rawStatus = stripeSubscription.status;
   const mappedStripeStatus = rawStatus ? (SUBSCRIPTION_STATUS_MAP[rawStatus] || "incomplete") : "incomplete";
+
+  const periodFields = getSubscriptionPeriodFields(stripeSubscription);
+  if (isPaidSettled && mappedStripeStatus === "active" && !periodFields.current_period_end) {
+    throw new Error(
+      `Authoritative billing period end is missing from Stripe subscription ${subscriptionId}`,
+    );
+  }
 
   // A subscription can ONLY be active if payment is settled AND stripe subscription status is active
   const finalStatus =

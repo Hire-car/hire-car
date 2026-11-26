@@ -177,38 +177,6 @@ async function processStripeEvent(
         );
       }
 
-      // All plans are strictly paid plans. "no_payment_required" is explicitly rejected to prevent zero-value bypass.
-      const isPaidSettled = session.payment_status === "paid";
-
-      // Authoritatively retrieve subscription from Stripe to obtain accurate billing period dates and status
-      let stripeSubscription: Stripe.Subscription | null = null;
-      if (session.subscription && typeof session.subscription === "object") {
-        stripeSubscription = session.subscription as Stripe.Subscription;
-      } else {
-        try {
-          stripeSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
-        } catch (subErr) {
-          console.error(
-            `[stripe-webhook] Could not retrieve subscription ${subscriptionId} in checkout.session.completed:`,
-            subErr,
-          );
-        }
-      }
-
-      const rawPeriodFields: Partial<ReturnType<typeof getSubscriptionPeriodFields>> =
-        stripeSubscription ? getSubscriptionPeriodFields(stripeSubscription) : {};
-      const periodFields = {
-        ...rawPeriodFields,
-        current_period_end:
-          rawPeriodFields.current_period_end ??
-          (interval === "annual"
-            ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()),
-      };
-
-      const isStripeSubActive = stripeSubscription ? stripeSubscription.status === "active" : isPaidSettled;
-      const sessionStatus = isPaidSettled && isStripeSubActive ? "active" : "incomplete";
-
       // Check current subscription state to protect against out-of-order stale events
       const { data: existingSub } = await supabase
         .from("subscriptions")
@@ -225,6 +193,48 @@ async function processStripeEvent(
         );
         break;
       }
+
+      // All plans are strictly paid plans. "no_payment_required" is explicitly rejected to prevent zero-value bypass.
+      const isPaidSettled = session.payment_status === "paid";
+
+      // Authoritatively retrieve subscription from Stripe to obtain accurate billing period dates and status.
+      // Never activate if authoritative retrieval fails; fail closed and allow webhook retry.
+      let stripeSubscription: Stripe.Subscription;
+      if (session.subscription && typeof session.subscription === "object") {
+        stripeSubscription = session.subscription as Stripe.Subscription;
+      } else {
+        try {
+          stripeSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
+        } catch (subErr) {
+          const errMsg = subErr instanceof Error ? subErr.message : String(subErr);
+          console.error(
+            `[stripe-webhook] Failed to retrieve subscription ${subscriptionId} in checkout.session.completed: ${errMsg}`,
+          );
+          throw new Error(
+            `Stripe subscription retrieval failed for ${subscriptionId}: ${errMsg}`,
+          );
+        }
+      }
+
+      if (!stripeSubscription) {
+        throw new Error(
+          `Stripe subscription ${subscriptionId} could not be retrieved in checkout.session.completed`,
+        );
+      }
+
+      const isStripeSubActive = stripeSubscription.status === "active";
+      const periodFields = getSubscriptionPeriodFields(stripeSubscription);
+
+      // Authoritative billing periods only: never invent arbitrary 30-day or 365-day fallback dates.
+      // If payment is settled and stripe subscription is active, fail closed if period end is missing.
+      if (isPaidSettled && isStripeSubActive && !periodFields.current_period_end) {
+        throw new Error(
+          `Authoritative billing period end is missing from Stripe subscription ${subscriptionId}`,
+        );
+      }
+
+      // Never use isPaidSettled alone as a substitute for verifying the Stripe subscription
+      const sessionStatus = isPaidSettled && isStripeSubActive ? "active" : "incomplete";
 
       // Multiple active subscription guard:
       // If organization ALREADY has an active primary subscription with a DIFFERENT Stripe ID:
@@ -380,14 +390,27 @@ async function processStripeEvent(
       const customerId =
         typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
 
-      if (!organizationId || !subscriptionId) {
+      // 1. Require complete customer and subscription association:
+      // Require non-null customerId, subscriptionId, and organizationId
+      if (!organizationId || !subscriptionId || !customerId) {
         console.warn(
-          `[stripe-webhook] Missing organization (${organizationId}) or subscription (${subscriptionId}) in async_payment_succeeded ${event.id}`,
+          `[stripe-webhook] Missing required identifiers in async_payment_succeeded ${event.id}: org=${organizationId}, sub=${subscriptionId}, customer=${customerId}`,
         );
+        if (organizationId) {
+          await supabase.from("security_events").insert({
+            event_type: "async_payment_rejected_missing_identifiers",
+            metadata: {
+              organization_id: organizationId,
+              subscription_id: subscriptionId,
+              customer_id: customerId,
+              event_id: event.id,
+            },
+          });
+        }
         break;
       }
 
-      // 1. Verify session payment_status is genuinely settled ("paid")
+      // 2. Verify session payment_status is genuinely settled ("paid")
       if (session.payment_status !== "paid") {
         console.warn(
           `[stripe-webhook] async_payment_succeeded ${event.id} received but payment_status is '${session.payment_status}'. Skipping activation.`,
@@ -395,7 +418,7 @@ async function processStripeEvent(
         break;
       }
 
-      // 2. Query stored subscription by organization_id to verify relationship
+      // 3. Query stored subscription by organization_id to verify relationship
       const { data: existingSub } = await supabase
         .from("subscriptions")
         .select("id, organization_id, stripe_subscription_id, stripe_customer_id, updated_at, status, plan_code")
@@ -409,7 +432,85 @@ async function processStripeEvent(
         break;
       }
 
-      // 3. Stale event guard: Reject if event is older than local record's updated_at (with 5s buffer)
+      // 4. Require organization association match
+      if (existingSub.organization_id !== organizationId) {
+        console.warn(
+          `[stripe-webhook] Organization association mismatch in async_payment_succeeded: stored ${existingSub.organization_id}, session ${organizationId}. Skipping.`,
+        );
+        await supabase.from("security_events").insert({
+          event_type: "async_payment_rejected_organization_mismatch",
+          metadata: {
+            expected_organization_id: existingSub.organization_id,
+            actual_organization_id: organizationId,
+            event_id: event.id,
+          },
+        });
+        break;
+      }
+
+      // 5. Require a non-null stored Stripe subscription ID and match
+      if (!existingSub.stripe_subscription_id) {
+        console.warn(
+          `[stripe-webhook] Missing stored stripe_subscription_id for organization ${organizationId} in async_payment_succeeded ${event.id}. Skipping.`,
+        );
+        await supabase.from("security_events").insert({
+          event_type: "async_payment_rejected_missing_stored_subscription",
+          metadata: {
+            organization_id: organizationId,
+            session_subscription_id: subscriptionId,
+            event_id: event.id,
+          },
+        });
+        break;
+      }
+
+      if (existingSub.stripe_subscription_id !== subscriptionId) {
+        console.warn(
+          `[stripe-webhook] Mismatched subscription ID in async_payment_succeeded: stored ${existingSub.stripe_subscription_id}, session ${subscriptionId}. Skipping.`,
+        );
+        await supabase.from("security_events").insert({
+          event_type: "async_payment_rejected_subscription_mismatch",
+          metadata: {
+            expected_subscription_id: existingSub.stripe_subscription_id,
+            actual_subscription_id: subscriptionId,
+            event_id: event.id,
+          },
+        });
+        break;
+      }
+
+      // 6. Require a non-null stored customer ID and match
+      if (!existingSub.stripe_customer_id) {
+        console.warn(
+          `[stripe-webhook] Missing stored stripe_customer_id for organization ${organizationId} in async_payment_succeeded ${event.id}. Skipping.`,
+        );
+        await supabase.from("security_events").insert({
+          event_type: "async_payment_rejected_missing_stored_customer",
+          metadata: {
+            organization_id: organizationId,
+            session_customer_id: customerId,
+            event_id: event.id,
+          },
+        });
+        break;
+      }
+
+      if (existingSub.stripe_customer_id !== customerId) {
+        console.warn(
+          `[stripe-webhook] Mismatched customer ID in async_payment_succeeded: stored ${existingSub.stripe_customer_id}, session ${customerId}. Skipping.`,
+        );
+        await supabase.from("security_events").insert({
+          event_type: "async_payment_rejected_customer_mismatch",
+          metadata: {
+            expected_customer_id: existingSub.stripe_customer_id,
+            actual_customer_id: customerId,
+            event_id: event.id,
+          },
+        });
+        break;
+      }
+
+      // 7. Stale event guard: Reject if event is older than local record's updated_at (with 5s buffer)
       if (
         existingSub.updated_at &&
         event.created * 1000 < new Date(existingSub.updated_at).getTime() - 5000
@@ -420,42 +521,21 @@ async function processStripeEvent(
         break;
       }
 
-      // 4. Verify subscription association matches stored subscription
-      if (
-        existingSub.stripe_subscription_id &&
-        existingSub.stripe_subscription_id !== subscriptionId
-      ) {
-        console.warn(
-          `[stripe-webhook] Mismatched subscription ID in async_payment_succeeded: expected ${existingSub.stripe_subscription_id}, got ${subscriptionId}. Skipping.`,
-        );
-        break;
-      }
-
-      // 5. Verify customer matches stored customer (if stored)
-      if (
-        existingSub.stripe_customer_id &&
-        customerId &&
-        existingSub.stripe_customer_id !== customerId
-      ) {
-        console.warn(
-          `[stripe-webhook] Mismatched customer ID in async_payment_succeeded: expected ${existingSub.stripe_customer_id}, got ${customerId}. Skipping.`,
-        );
-        break;
-      }
-
-      // 6. Authoritatively retrieve subscription from Stripe to verify status, price, and period
+      // 8. Authoritatively retrieve subscription from Stripe to verify status, price, and period
       let stripeSubscription: Stripe.Subscription;
       try {
         stripeSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
       } catch (subErr) {
+        const errMsg = subErr instanceof Error ? subErr.message : String(subErr);
         console.error(
-          `[stripe-webhook] Failed to retrieve subscription ${subscriptionId} from Stripe in async_payment_succeeded:`,
-          subErr,
+          `[stripe-webhook] Failed to retrieve subscription ${subscriptionId} from Stripe in async_payment_succeeded: ${errMsg}`,
         );
-        break;
+        throw new Error(
+          `Stripe subscription retrieval failed in async_payment_succeeded for ${subscriptionId}: ${errMsg}`,
+        );
       }
 
-      // 7. Verify retrieved Stripe subscription status is active
+      // 9. Verify retrieved Stripe subscription status is active
       if (stripeSubscription.status !== "active") {
         console.warn(
           `[stripe-webhook] Retrieved subscription ${subscriptionId} status is '${stripeSubscription.status}', not 'active'. Skipping activation.`,
@@ -463,7 +543,7 @@ async function processStripeEvent(
         break;
       }
 
-      // 8. Verify Price ID matches the selected paid plan
+      // 10. Verify Price ID matches the selected paid plan
       const planInfo = resolvePlanFromSubscription(stripeSubscription);
       if (!planInfo) {
         console.warn(
@@ -479,6 +559,14 @@ async function processStripeEvent(
           console.warn(
             `[stripe-webhook] Price ID mismatch in async_payment_succeeded: expected ${expectedPriceId}, got ${actualPriceId}. Skipping.`,
           );
+          await supabase.from("security_events").insert({
+            event_type: "async_payment_rejected_price_mismatch",
+            metadata: {
+              expected_price_id: expectedPriceId,
+              actual_price_id: actualPriceId,
+              event_id: event.id,
+            },
+          });
           break;
         }
       } catch (priceErr) {
@@ -489,22 +577,28 @@ async function processStripeEvent(
         break;
       }
 
-      // 9. Retrieve authoritative period dates
+      // 11. Retrieve authoritative period dates - NO synthetic fallback dates
       const periodFields = getSubscriptionPeriodFields(stripeSubscription);
+      if (!periodFields.current_period_end) {
+        throw new Error(
+          `Authoritative billing period end is missing from Stripe subscription ${subscriptionId} in async_payment_succeeded`,
+        );
+      }
 
-      // 10. Idempotent update
+      // 12. Idempotent conditional update
       await supabase
         .from("subscriptions")
         .update({
           status: "active",
           plan_code: planInfo.plan,
           billing_interval: planInfo.interval,
-          stripe_customer_id: customerId ?? existingSub.stripe_customer_id,
+          stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
           ...periodFields,
           updated_at: new Date().toISOString(),
         })
-        .eq("organization_id", organizationId);
+        .eq("organization_id", organizationId)
+        .eq("stripe_subscription_id", subscriptionId);
 
       await approveOrganizationIfEligible(supabase, organizationId);
 
@@ -546,24 +640,24 @@ async function processStripeEvent(
       }
 
       // 1. Stale event guard: Reject if event is older than local record's updated_at (with 5s buffer)
+      // Protects against downgrading a newer payment or newer subscription state
       if (
         existingSub.updated_at &&
         event.created * 1000 < new Date(existingSub.updated_at).getTime() - 5000
       ) {
         console.warn(
-          `[stripe-webhook] Skipping stale async_payment_failed event ${event.id} for org ${organizationId}.`,
+          `[stripe-webhook] Skipping stale async_payment_failed event ${event.id} for org ${organizationId}. Preserving newer payment state.`,
         );
         break;
       }
 
-      // 2. Guard: Do not downgrade if existing subscription is active with a DIFFERENT subscription ID
+      // 2. Guard: Do not downgrade if existing subscription has a DIFFERENT subscription ID
       if (
         existingSub.stripe_subscription_id &&
-        existingSub.stripe_subscription_id !== subscriptionId &&
-        existingSub.status === "active"
+        existingSub.stripe_subscription_id !== subscriptionId
       ) {
         console.warn(
-          `[stripe-webhook] Rejecting async_payment_failed for superseded/mismatched subscription ${subscriptionId} (active is ${existingSub.stripe_subscription_id}).`,
+          `[stripe-webhook] Rejecting async_payment_failed for superseded/mismatched subscription ${subscriptionId} (stored is ${existingSub.stripe_subscription_id}).`,
         );
         break;
       }
@@ -578,11 +672,17 @@ async function processStripeEvent(
             );
             break;
           }
-        } catch {
-          // If retrieval fails or returns error, proceed with downgrade
+        } catch (retrieveErr) {
+          // NEVER downgrade an active subscription if Stripe verification fails (e.g. temporary Stripe outage/unavailability)
+          console.warn(
+            `[stripe-webhook] Stripe subscription retrieval failed during async_payment_failed for active subscription ${subscriptionId}. Protecting active subscription from downgrade:`,
+            retrieveErr,
+          );
+          break;
         }
       }
 
+      // 4. Safe conditional DB update: only downgrade matching organization AND matching stripe_subscription_id
       await supabase
         .from("subscriptions")
         .update({
@@ -711,6 +811,11 @@ async function processStripeEvent(
         });
 
         if (mappedStatus === "active") {
+          if (!periodFields.current_period_end) {
+            throw new Error(
+              `Authoritative billing period end is missing from Stripe subscription ${subscriptionId}`,
+            );
+          }
           await approveOrganizationIfEligible(supabase, organizationId);
         }
       } else {
