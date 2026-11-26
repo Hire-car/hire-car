@@ -3,7 +3,12 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { syncCheckoutSessionForOrganization } from "@/lib/billing/sync-checkout-session";
 import { requireUser } from "@/lib/security/auth";
-import { getVendorContext } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+  invalidateVendorMetrics,
+} from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   CheckCircle, Clock, AlertTriangle, Zap,
@@ -59,7 +64,7 @@ export default async function VendorBillingPage(props: {
   searchParams: Promise<{ interval?: string; checkout?: string; session_id?: string; synced?: string; plan?: string }>;
 }) {
   const user = await requireUser();
-  const context = await getVendorContext(user.id);
+  let context = await getVendorContext(user.id);
   const searchParams = await props.searchParams;
   const interval = searchParams.interval === "annual" ? "annual" : "monthly";
   let checkoutSyncError: string | null = null;
@@ -74,7 +79,14 @@ export default async function VendorBillingPage(props: {
   }
 
   if (context.organizations.length === 0) {
-    redirect("/vendor/upgrade");
+    // Fail-safe check directly from database before redirecting to upgrade
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      context = directContext;
+      invalidateVendorContext(user.id);
+    } else {
+      redirect("/vendor/upgrade");
+    }
   }
 
   const cookieStore = await cookies();
@@ -87,6 +99,8 @@ export default async function VendorBillingPage(props: {
         organization.id,
         searchParams.session_id,
       );
+      // Invalidate metrics and context cache so dashboard and vehicles immediately reflect active plan
+      invalidateVendorMetrics(organization.id, user.id);
     } catch (error) {
       checkoutSyncError =
         error instanceof Error ? error.message : "Could not activate your subscription";
@@ -150,11 +164,30 @@ export default async function VendorBillingPage(props: {
   return (
     <div className="space-y-6">
       {searchParams.synced === "1" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm flex items-start gap-3">
-          <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-          <p className="text-sm text-emerald-800">
-            Your subscription is now active. You can start listing vehicles on the marketplace.
-          </p>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="h-6 w-6 text-emerald-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-emerald-900">Subscription Active</h3>
+              <p className="text-sm text-emerald-800 mt-0.5">
+                Your subscription has been activated successfully. You can now add vehicles and manage your fleet.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Link
+              href="/vendor/dashboard"
+              className="flex-1 sm:flex-initial text-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors shadow-sm"
+            >
+              Go to Dashboard
+            </Link>
+            <Link
+              href="/vendor/vehicles/new"
+              className="flex-1 sm:flex-initial text-center rounded-xl border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-50 transition-colors"
+            >
+              Add First Vehicle
+            </Link>
+          </div>
         </div>
       )}
 

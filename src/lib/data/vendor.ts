@@ -1,5 +1,10 @@
 import { cache } from "react";
-import { unstable_cache } from "next/cache";
+import {
+  unstable_cache,
+  revalidatePath,
+  revalidateTag as nextRevalidateTag,
+  updateTag as nextUpdateTag,
+} from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type VendorContext = {
@@ -125,67 +130,111 @@ export async function enforceVehicleLimit(organizationId: string): Promise<void>
   }
 }
 
-export const getVendorContext = cache(async function getVendorContext(userId: string): Promise<VendorContext> {
-  return unstable_cache(
-    async (id: string) => {
-      const supabase = createAdminClient();
+export function safeInvalidateTag(tag: string) {
+  try {
+    (nextUpdateTag as unknown as (t: string) => void)(tag);
+  } catch {}
+  try {
+    (nextRevalidateTag as unknown as (t: string, p?: string) => void)(tag, "max");
+  } catch {
+    try {
+      (nextRevalidateTag as unknown as (t: string) => void)(tag);
+    } catch {}
+  }
+}
 
-      const { data, error } = await supabase
-        .from("organization_members")
-        .select(`
+export function invalidateVendorContext(userId: string) {
+  safeInvalidateTag(`vendor-context-${userId}`);
+  safeInvalidateTag("vendor-context");
+  try {
+    revalidatePath("/vendor/billing");
+    revalidatePath("/vendor/upgrade");
+    revalidatePath("/vendor/onboarding");
+    revalidatePath("/vendor/dashboard");
+    revalidatePath("/vendor/branches");
+  } catch {}
+}
+
+export function invalidateVendorMetrics(organizationId: string, userId?: string) {
+  safeInvalidateTag(`vendor-metrics-${organizationId}`);
+  if (userId) {
+    safeInvalidateTag(`vendor-context-${userId}`);
+  }
+  safeInvalidateTag("vendor-context");
+  try {
+    revalidatePath("/vendor/dashboard");
+    revalidatePath("/vendor/billing");
+    revalidatePath("/vendor/vehicles");
+    revalidatePath("/vendor/branches");
+  } catch {}
+}
+
+export async function fetchVendorContextFromDb(userId: string): Promise<VendorContext> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("organization_members")
+    .select(`
       role,
       organizations (
         id, name, slug, status, abn,
         branches (id, name, city, state, address, status, phone, whatsapp)
       )
     `)
-        .eq("user_id", userId);
+    .eq("user_id", userId);
 
-      if (error) {
-        return {
-          organizations: [],
-          setupError:
-            "Database tables are not available yet. Apply the Supabase migration before using vendor workflows.",
-        };
-      }
+  if (error) {
+    return {
+      organizations: [],
+      setupError:
+        "Database tables are not available yet. Apply the Supabase migration before using vendor workflows.",
+    };
+  }
 
-      if (!data || data.length === 0) {
-        return { organizations: [] };
-      }
+  if (!data || data.length === 0) {
+    return { organizations: [] };
+  }
 
-      // Filter out any members that don't have an associated organization (shouldn't happen, but safe)
-      // and map to the required structure
-      const organizations = data
-        .filter(row => row.organizations != null)
-        .map(row => {
-          // Cast because Supabase nested queries typing can be strict
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const org = row.organizations as any;
-          return {
-            id: org.id,
-            name: org.name,
-            slug: org.slug,
-            status: org.status,
-            abn: org.abn,
-            // Ensure branches is an array
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            branches: Array.isArray(org.branches) ? org.branches.map((b: any) => ({
-              id: b.id,
-              name: b.name,
-              city: b.city,
-              state: b.state,
-              address: b.address,
-              status: b.status,
-              phone: b.phone,
-              whatsapp: b.whatsapp,
-            })) : [],
-          };
-        });
+  // Filter out any members that don't have an associated organization (shouldn't happen, but safe)
+  // and map to the required structure
+  const organizations = data
+    .filter((row) => row.organizations != null)
+    .map((row) => {
+      // Cast because Supabase nested queries typing can be strict
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const org = row.organizations as any;
+      return {
+        id: org.id,
+        name: org.name,
+        slug: org.slug,
+        status: org.status,
+        abn: org.abn,
+        // Ensure branches is an array
+        branches: Array.isArray(org.branches)
+          ? (org.branches as Array<Record<string, string | null>>).map((b) => ({
+              id: String(b.id),
+              name: String(b.name),
+              city: String(b.city),
+              state: String(b.state),
+              address: String(b.address),
+              status: String(b.status),
+              phone: b.phone ? String(b.phone) : null,
+              whatsapp: b.whatsapp ? String(b.whatsapp) : null,
+            }))
+          : [],
+      };
+    });
 
-      return { organizations };
+  return { organizations };
+}
+
+export const getVendorContext = cache(async function getVendorContext(userId: string): Promise<VendorContext> {
+  return unstable_cache(
+    async (id: string) => {
+      return fetchVendorContextFromDb(id);
     },
     [`vendor-context-${userId}`],
-    { tags: [`vendor-context-${userId}`], revalidate: 3600 }
+    { tags: [`vendor-context-${userId}`, "vendor-context"], revalidate: 3600 }
   )(userId);
 });
 

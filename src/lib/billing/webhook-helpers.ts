@@ -1,4 +1,5 @@
 import { getPlanFromStripePrice } from "@/lib/billing/stripe";
+import { invalidateVendorMetrics } from "@/lib/data/vendor";
 import type { PlanCode } from "@/lib/types";
 import type { createAdminClient } from "@/lib/supabase/admin";
 import type Stripe from "stripe";
@@ -195,6 +196,8 @@ export async function upsertSubscriptionRecord(
     if (error) {
       throw new Error(`Failed to upsert subscription: ${error.message}`);
     }
+
+    invalidateVendorMetrics(input.organizationId);
   });
 }
 

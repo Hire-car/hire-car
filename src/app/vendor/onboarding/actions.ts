@@ -1,12 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/security/auth";
 import { uniqueSlug } from "@/lib/slug";
 import { onboardingSchema } from "@/lib/validation/schemas";
 import { sendWelcomeEmail } from "@/lib/email/ses";
+import {
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 
 type OnboardingActionResult = {
   error?: string;
@@ -104,6 +107,21 @@ async function createVendorOnboardingRecords(
 
 export async function submitVendorOnboarding(formData: FormData): Promise<OnboardingActionResult> {
   const user = await requireUser();
+
+  const plan = formData.get("plan");
+  const planParam =
+    plan && typeof plan === "string" && ["starter", "growth", "pro"].includes(plan)
+      ? plan
+      : "starter";
+
+  // Prevent duplicate onboarding writes if the user already has an organization
+  // (e.g. from a retried submission or if user arrived while already onboarded)
+  const existingContext = await fetchVendorContextFromDb(user.id);
+  if (existingContext.organizations.length > 0) {
+    invalidateVendorContext(user.id);
+    redirect(`/vendor/billing?plan=${planParam}`);
+  }
+
   const parsed = onboardingSchema.safeParse({
     businessName: formData.get("businessName"),
     abn: formData.get("abn"),
@@ -195,14 +213,8 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
     console.error("Failed to send vendor welcome email:", err);
   });
 
-  revalidatePath("/vendor/dashboard");
-  revalidatePath("/vendor/branches");
-
-  const plan = formData.get("plan");
-  const planParam =
-    plan && typeof plan === "string" && ["starter", "growth", "pro"].includes(plan)
-      ? plan
-      : "starter";
+  // Invalidate stale vendor-context cache so /vendor/billing sees the new organization immediately
+  invalidateVendorContext(user.id);
 
   redirect(`/vendor/billing?plan=${planParam}`);
 }
