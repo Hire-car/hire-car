@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   const isPaidActive =
-    (subscription?.status === "active" || subscription?.status === "trialing") &&
+    subscription?.status === "active" &&
     Boolean(subscription.stripe_subscription_id);
 
   if (isPaidActive) {
