@@ -139,7 +139,7 @@ export default async function VendorBillingPage(props: {
   const hasActiveSub = Boolean(
     subscription &&
     ["active", "trialing"].includes(subscription.status) &&
-    (subscription.stripe_subscription_id || subscription.status === "trialing")
+    subscription.stripe_subscription_id
   );
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("en-AU", {

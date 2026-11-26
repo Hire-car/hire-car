@@ -146,7 +146,7 @@ export async function createCheckoutSession(input: {
       is_replacement: input.existingSubscriptionId ? "true" : "false",
     },
     subscription_data: subscriptionData,
-    payment_method_collection: "if_required",
+    payment_method_collection: "always",
   };
 
   if (input.customerId) {

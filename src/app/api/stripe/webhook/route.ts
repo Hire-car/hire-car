@@ -177,6 +177,10 @@ async function processStripeEvent(
         );
       }
 
+      // All plans are strictly paid plans. "no_payment_required" is explicitly rejected to prevent zero-value bypass.
+      const isPaidSettled = session.payment_status === "paid";
+      const sessionStatus = isPaidSettled ? "active" : "incomplete";
+
       // Check current subscription state to protect against out-of-order stale events
       const { data: existingSub } = await supabase
         .from("subscriptions")
@@ -251,7 +255,7 @@ async function processStripeEvent(
           interval,
           stripeCustomerId: customerId,
           stripeSubscriptionId: subscriptionId,
-          status: "active",
+          status: sessionStatus,
           periodFields: {
             current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
           },
@@ -259,7 +263,9 @@ async function processStripeEvent(
           isReplacement: true,
         });
 
-        await approveOrganizationIfEligible(supabase, organizationId);
+        if (isPaidSettled) {
+          await approveOrganizationIfEligible(supabase, organizationId);
+        }
 
         // 2. Only AFTER replacement subscription is confirmed, safely cancel superseded subscription in Stripe
         const supersededSubId = currentPrimarySubId;
@@ -288,10 +294,15 @@ async function processStripeEvent(
         }
 
         await supabase.from("audit_logs").insert({
-          action: "subscription_activated",
+          action: isPaidSettled ? "subscription_activated" : "subscription_checkout_unpaid",
           resource_type: "subscription",
           resource_id: organizationId,
-          metadata: { plan, stripe_subscription_id: subscriptionId, replaced_subscription_id: supersededSubId },
+          metadata: {
+            plan,
+            stripe_subscription_id: subscriptionId,
+            replaced_subscription_id: supersededSubId,
+            payment_status: session.payment_status,
+          },
         });
         break;
       }
@@ -302,7 +313,7 @@ async function processStripeEvent(
         interval,
         stripeCustomerId: customerId,
         stripeSubscriptionId: subscriptionId,
-        status: "active",
+        status: sessionStatus,
         periodFields: {
           current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         },
@@ -310,14 +321,89 @@ async function processStripeEvent(
         isReplacement: true,
       });
 
-      await approveOrganizationIfEligible(supabase, organizationId);
+      if (isPaidSettled) {
+        await approveOrganizationIfEligible(supabase, organizationId);
 
-      await supabase.from("audit_logs").insert({
-        action: "subscription_activated",
-        resource_type: "subscription",
-        resource_id: organizationId,
-        metadata: { plan, stripe_subscription_id: subscriptionId },
-      });
+        await supabase.from("audit_logs").insert({
+          action: "subscription_activated",
+          resource_type: "subscription",
+          resource_id: organizationId,
+          metadata: { plan, stripe_subscription_id: subscriptionId },
+        });
+      } else {
+        await supabase.from("audit_logs").insert({
+          action: "subscription_checkout_unpaid",
+          resource_type: "subscription",
+          resource_id: organizationId,
+          metadata: {
+            plan,
+            stripe_subscription_id: subscriptionId,
+            payment_status: session.payment_status,
+          },
+        });
+      }
+      break;
+    }
+
+    case "checkout.session.async_payment_succeeded": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const organizationId = session.client_reference_id;
+      const subscriptionId =
+        typeof session.subscription === "string"
+          ? session.subscription
+          : session.subscription?.id ?? null;
+
+      if (organizationId && subscriptionId) {
+        await supabase
+          .from("subscriptions")
+          .update({
+            status: "active",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", subscriptionId);
+
+        await approveOrganizationIfEligible(supabase, organizationId);
+
+        await supabase.from("audit_logs").insert({
+          action: "subscription_async_payment_succeeded",
+          resource_type: "subscription",
+          resource_id: organizationId,
+          metadata: {
+            stripe_subscription_id: subscriptionId,
+            session_id: session.id,
+          },
+        });
+      }
+      break;
+    }
+
+    case "checkout.session.async_payment_failed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      const organizationId = session.client_reference_id;
+      const subscriptionId =
+        typeof session.subscription === "string"
+          ? session.subscription
+          : session.subscription?.id ?? null;
+
+      if (organizationId && subscriptionId) {
+        await supabase
+          .from("subscriptions")
+          .update({
+            status: "incomplete",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("stripe_subscription_id", subscriptionId);
+
+        await supabase.from("audit_logs").insert({
+          action: "subscription_async_payment_failed",
+          resource_type: "subscription",
+          resource_id: organizationId,
+          metadata: {
+            stripe_subscription_id: subscriptionId,
+            session_id: session.id,
+          },
+        });
+      }
       break;
     }
 

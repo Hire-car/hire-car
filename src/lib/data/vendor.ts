@@ -61,7 +61,6 @@ export async function getVehicleLimitInfo(organizationId: string): Promise<Vehic
   // Also check if current_period_end has expired.
   const isStatusEligible = subscription?.status === "active" || subscription?.status === "trialing";
   const hasStripeId = Boolean(subscription?.stripe_subscription_id);
-  const isTrial = subscription?.status === "trialing";
 
   let isExpired = false;
   if (subscription?.current_period_end) {
@@ -74,7 +73,7 @@ export async function getVehicleLimitInfo(organizationId: string): Promise<Vehic
   const hasActiveSubscription = Boolean(
     isStatusEligible &&
     subscription?.plan_code &&
-    (hasStripeId || isTrial) &&
+    hasStripeId &&
     !isExpired
   );
 

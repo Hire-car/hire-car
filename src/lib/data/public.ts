@@ -41,7 +41,7 @@ export const getCachedVehicleDetails = unstable_cache(
     const [vendorSubRes, reviewsRes] = await Promise.all([
       supabase
         .from("subscriptions")
-        .select("plan_code, status")
+        .select("plan_code, status, stripe_subscription_id, current_period_end")
         .eq("organization_id", vehicle.organization_id)
         .in("status", ["active", "trialing"])
         .maybeSingle(),
@@ -54,9 +54,15 @@ export const getCachedVehicleDetails = unstable_cache(
         .limit(20)
     ]);
 
+    const isValidSub = Boolean(
+      vendorSubRes.data?.stripe_subscription_id &&
+      (!vendorSubRes.data.current_period_end ||
+        new Date(vendorSubRes.data.current_period_end).getTime() > Date.now())
+    );
+
     return {
       vehicle,
-      vendorSub: vendorSubRes.data,
+      vendorSub: isValidSub ? vendorSubRes.data : null,
       reviews: reviewsRes.data ?? []
     };
   },

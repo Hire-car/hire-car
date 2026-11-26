@@ -36,6 +36,9 @@ export async function createBranch(prevState: any, formData: FormData) {
 
     const supabase = createAdminClient();
     const planCode = await getOrganizationPlanCode(payload.organizationId);
+    if (!planCode) {
+      return { error: "An active paid subscription is required to add branches. Please subscribe in Billing." };
+    }
     const branchLimit = getBranchLimit(planCode);
 
     if (branchLimit !== null) {

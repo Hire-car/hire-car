@@ -87,13 +87,26 @@ async function applyCheckoutSession(session: Stripe.Checkout.Session) {
     throw new Error("Checkout session is not complete yet");
   }
 
-  let periodFields: Partial<ReturnType<typeof getSubscriptionPeriodFields>> = {};
+  // Authoritative payment and subscription verification
+  // All plans are strictly paid plans. "no_payment_required" is explicitly rejected to prevent zero-value bypass.
+  const isPaidSettled = session.payment_status === "paid";
+
+  let stripeSubscription: Stripe.Subscription | null = null;
   if (session.subscription && typeof session.subscription === "object") {
-    periodFields = getSubscriptionPeriodFields(session.subscription);
+    stripeSubscription = session.subscription as Stripe.Subscription;
   } else {
-    const stripeSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
-    periodFields = getSubscriptionPeriodFields(stripeSubscription);
+    stripeSubscription = await getStripe().subscriptions.retrieve(subscriptionId);
   }
+
+  const periodFields = getSubscriptionPeriodFields(stripeSubscription);
+  const rawStatus = stripeSubscription?.status;
+  const mappedStripeStatus = rawStatus ? (SUBSCRIPTION_STATUS_MAP[rawStatus] || "incomplete") : "incomplete";
+
+  // A subscription can ONLY be active if payment is settled AND stripe subscription status is active or trialing
+  const finalStatus =
+    isPaidSettled && (mappedStripeStatus === "active" || mappedStripeStatus === "trialing")
+      ? mappedStripeStatus
+      : "incomplete";
 
   const supabase = createAdminClient();
   await upsertSubscriptionRecord(supabase, {
@@ -102,14 +115,17 @@ async function applyCheckoutSession(session: Stripe.Checkout.Session) {
     interval,
     stripeCustomerId: customerId,
     stripeSubscriptionId: subscriptionId,
-    status: "active",
+    status: finalStatus,
     periodFields,
   });
 
-  await approveOrganizationIfEligible(supabase, organizationId);
+  if (finalStatus === "active" || finalStatus === "trialing") {
+    await approveOrganizationIfEligible(supabase, organizationId);
+  }
+
   await syncLatestInvoice(subscriptionId);
 
-  return { organizationId, plan, status: "active" as const };
+  return { organizationId, plan, status: finalStatus };
 }
 
 export async function syncCheckoutSessionForOrganization(
