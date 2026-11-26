@@ -8,7 +8,11 @@ import {
   Store,
   X,
 } from "lucide-react";
-import { getVendorContext } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 import {
   buildVendorOnboardingHref,
   isSafeRedirectPath,
@@ -49,8 +53,18 @@ export default async function VendorUpgradePage({
   const plan = params.plan ?? null;
   const from = params.from && isSafeRedirectPath(params.from) ? params.from : null;
 
-  if (context.organizations.length > 0) {
-    redirect(from ?? "/vendor/dashboard");
+  let currentContext = context;
+  if (currentContext.organizations.length === 0) {
+    // Fail-safe: check database directly before displaying upgrade gate
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      currentContext = directContext;
+      invalidateVendorContext(user.id);
+    }
+  }
+
+  if (currentContext.organizations.length > 0) {
+    redirect(from ?? (plan ? `/vendor/billing?plan=${plan}` : "/vendor/dashboard"));
   }
 
   const onboardingHref = buildVendorOnboardingHref({ plan, from });

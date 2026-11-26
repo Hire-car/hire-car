@@ -175,6 +175,7 @@ export const getCachedSimilarVehicles = unstable_cache(
         branchName: branch.name,
         verified: true,
         instantBook: v.instant_book || false,
+        imageCount: imgs.length || 1,
       };
     });
   },

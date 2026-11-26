@@ -259,6 +259,7 @@ export async function searchVehicles(
               sort_order: i.sort_order,
             }));
           v.imageUrl = resolveVehicleImage(supabaseUrl, matchingImgs, v.category);
+          v.imageCount = matchingImgs.length || 1;
         });
       } else {
         vehiclesMissingImages.forEach(v => { v.imageUrl = getCategoryPlaceholder(v.category); });

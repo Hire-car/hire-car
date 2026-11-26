@@ -2,11 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isVendorPreOrgPath } from "@/lib/routing";
 import { isAllowlistedAdminEmail } from "@/lib/security/admin-allowlist";
+import { redirectWithCookies as baseRedirectWithCookies } from "@/lib/security/cookies";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request,
   });
+
+  const redirectWithCookies = (redirectUrl: URL, status = 307) =>
+    baseRedirectWithCookies(response, redirectUrl, status);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -41,7 +45,7 @@ export async function middleware(request: NextRequest) {
   ) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = path.toLowerCase();
-    return NextResponse.redirect(redirectUrl, 301); // 301 Permanent Redirect for SEO
+    return redirectWithCookies(redirectUrl, 301); // 301 Permanent Redirect for SEO
   }
 
   const isAdminRoute =
@@ -71,7 +75,7 @@ export async function middleware(request: NextRequest) {
       "redirectedFrom",
       request.nextUrl.pathname + request.nextUrl.search,
     );
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl);
   }
 
   if (isAdminRoute && user) {
@@ -98,7 +102,7 @@ export async function middleware(request: NextRequest) {
     if (!isAuthorizedAdmin) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/"; // Redirect unauthorized users away from admin
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
   }
 
@@ -117,7 +121,7 @@ export async function middleware(request: NextRequest) {
       redirectUrl.search = "";
       if (plan) redirectUrl.searchParams.set("plan", plan);
       redirectUrl.searchParams.set("from", from);
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
   }
 

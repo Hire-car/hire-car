@@ -3,7 +3,12 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { syncCheckoutSessionForOrganization } from "@/lib/billing/sync-checkout-session";
 import { requireUser } from "@/lib/security/auth";
-import { getVendorContext } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+  invalidateVendorMetrics,
+} from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   CheckCircle, Clock, AlertTriangle, Zap,
@@ -48,7 +53,7 @@ const PLANS = [
 
 const STATUS_CONFIG = {
   active: { label: "Active", icon: CheckCircle, cls: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  trialing: { label: "Trial", icon: Clock, cls: "bg-blue-100 text-blue-700 border-blue-200" },
+  trialing: { label: "Payment Required", icon: Clock, cls: "bg-amber-100 text-amber-700 border-amber-200" },
   past_due: { label: "Past Due", icon: AlertTriangle, cls: "bg-red-100 text-red-700 border-red-200" },
   canceled: { label: "Canceled", icon: AlertTriangle, cls: "bg-slate-100 text-slate-600 border-slate-200" },
   unpaid: { label: "Unpaid", icon: AlertTriangle, cls: "bg-red-100 text-red-700 border-red-200" },
@@ -59,7 +64,7 @@ export default async function VendorBillingPage(props: {
   searchParams: Promise<{ interval?: string; checkout?: string; session_id?: string; synced?: string; plan?: string }>;
 }) {
   const user = await requireUser();
-  const context = await getVendorContext(user.id);
+  let context = await getVendorContext(user.id);
   const searchParams = await props.searchParams;
   const interval = searchParams.interval === "annual" ? "annual" : "monthly";
   let checkoutSyncError: string | null = null;
@@ -74,7 +79,14 @@ export default async function VendorBillingPage(props: {
   }
 
   if (context.organizations.length === 0) {
-    redirect("/vendor/upgrade");
+    // Fail-safe check directly from database before redirecting to upgrade
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      context = directContext;
+      invalidateVendorContext(user.id);
+    } else {
+      redirect("/vendor/upgrade");
+    }
   }
 
   const cookieStore = await cookies();
@@ -87,6 +99,8 @@ export default async function VendorBillingPage(props: {
         organization.id,
         searchParams.session_id,
       );
+      // Invalidate metrics and context cache so dashboard and vehicles immediately reflect active plan
+      invalidateVendorMetrics(organization.id, user.id);
     } catch (error) {
       checkoutSyncError =
         error instanceof Error ? error.message : "Could not activate your subscription";
@@ -95,7 +109,7 @@ export default async function VendorBillingPage(props: {
 
     // redirect() throws NEXT_REDIRECT internally — must stay outside try/catch
     if (!checkoutSyncError) {
-      redirect("/vendor/billing?synced=1");
+      redirect("/vendor/dashboard?welcome=1");
     }
   }
 
@@ -150,11 +164,30 @@ export default async function VendorBillingPage(props: {
   return (
     <div className="space-y-6">
       {searchParams.synced === "1" && (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm flex items-start gap-3">
-          <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-          <p className="text-sm text-emerald-800">
-            Your subscription is now active. You can start listing vehicles on the marketplace.
-          </p>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="h-6 w-6 text-emerald-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-emerald-900">Subscription Active</h3>
+              <p className="text-sm text-emerald-800 mt-0.5">
+                Your subscription has been activated successfully. You can now add vehicles and manage your fleet.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <Link
+              href="/vendor/dashboard"
+              className="flex-1 sm:flex-initial text-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors shadow-sm"
+            >
+              Go to Dashboard
+            </Link>
+            <Link
+              href="/vendor/vehicles/new"
+              className="flex-1 sm:flex-initial text-center rounded-xl border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-50 transition-colors"
+            >
+              Add First Vehicle
+            </Link>
+          </div>
         </div>
       )}
 
@@ -176,13 +209,24 @@ export default async function VendorBillingPage(props: {
         </div>
       )}
 
-      {subscription?.status === "trialing" && periodEnd && (
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm flex items-start gap-3">
-          <Clock className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-          <p className="text-sm text-blue-800">
-            Your <span className="font-semibold">14-day free trial</span> ends on{" "}
-            <span className="font-semibold">{periodEnd}</span>. Add a payment method before then to continue uninterrupted.
-          </p>
+      {searchParams.synced === "1" && hasActiveSub && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-6 w-6 text-emerald-600 shrink-0" />
+            <div>
+              <h3 className="text-base font-bold text-emerald-900">Subscription Active</h3>
+              <p className="text-sm text-emerald-700">
+                Your subscription has been confirmed and activated.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/vendor/dashboard"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+          >
+            Go to Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       )}
 
@@ -291,7 +335,7 @@ export default async function VendorBillingPage(props: {
                 <div className="flex items-center gap-3 rounded-xl bg-slate-50 border border-slate-100 px-4 py-3">
                   <Clock className="h-4 w-4 text-slate-400 shrink-0" />
                   <p className="text-sm text-slate-600">
-                    {subscription.status === "trialing" ? "Trial ends" : "Next renewal"}{" "}
+                    Next renewal{" "}
                     <span className="font-semibold text-slate-900">{periodEnd}</span>
                   </p>
                 </div>

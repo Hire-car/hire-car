@@ -179,7 +179,7 @@ export async function processCancellationQueue(
       if (
         Boolean(currentOrgSub?.stripe_subscription_id) &&
         currentOrgSub?.stripe_subscription_id === item.stripe_subscription_id &&
-        (currentOrgSub?.status === "active" || currentOrgSub?.status === "trialing")
+        currentOrgSub?.status === "active"
       ) {
         console.error(
           `[cancellation-recovery] SAFETY ABORT: Subscription ${item.stripe_subscription_id} is currently recorded as ACTIVE primary for org ${item.organization_id}. Refusing to cancel.`,

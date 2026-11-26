@@ -5,6 +5,7 @@ import {
 } from "@/lib/billing/claim-webhook-event";
 import { getStripe, getStripePrice } from "@/lib/billing/stripe";
 import { enqueueFailedCancellation } from "@/lib/billing/cancellation-recovery";
+import { invalidateVendorMetrics } from "@/lib/data/vendor";
 import {
   approveOrganizationIfEligible,
   getInvoiceSubscriptionId,
@@ -1018,6 +1019,8 @@ async function processStripeEvent(
         );
         break;
       }
+
+      invalidateVendorMetrics(targetSub.organization_id);
 
       // Revert organization to Starter plan entitlement.
       // Organization remains approved; existing inventory is preserved.

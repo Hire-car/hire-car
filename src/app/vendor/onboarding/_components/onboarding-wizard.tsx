@@ -73,6 +73,9 @@ export function OnboardingWizard({ plan }: { plan?: string }) {
     }
     startTransition(async () => {
       try {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("hirecar_user_context");
+        }
         const fd = toFormDataObject(formData);
         if (plan) fd.set("plan", plan);
         const result = await submitVendorOnboarding(fd);
@@ -80,6 +83,9 @@ export function OnboardingWizard({ plan }: { plan?: string }) {
           toast.error(result.error);
         }
       } catch (err) {
+        if ((err as { digest?: string })?.digest?.startsWith("NEXT_REDIRECT")) {
+          throw err;
+        }
         toast.error(err instanceof Error ? err.message : "Submission failed");
       }
     });

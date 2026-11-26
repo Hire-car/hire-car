@@ -602,9 +602,9 @@ export default function VehicleForm({
                 
                 {/* Existing Images */}
                 {editImages.map((img) => (
-                  <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+                  <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100 flex items-center justify-center">
                     {img.url ? (
-                      <Image src={img.url} alt={img.alt_text || "Vehicle image"} fill className="object-cover transition-transform group-hover:scale-105" />
+                      <Image src={img.url} alt={img.alt_text || "Vehicle image"} fill className="object-contain p-1" />
                     ) : null}
                     
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
@@ -622,8 +622,8 @@ export default function VehicleForm({
 
                 {/* Newly Dropped & Uploading Images */}
                 {pendingUploads.map((pending) => (
-                  <div key={pending.id} className={`group relative aspect-square rounded-xl overflow-hidden border shadow-sm ${pending.error ? "border-red-300" : "border-slate-200"} bg-slate-50`}>
-                    <Image src={pending.previewUrl} alt="Pending upload" fill unoptimized className={`object-cover transition-all ${pending.uploading ? "opacity-40 scale-105 blur-sm" : ""}`} />
+                  <div key={pending.id} className={`group relative aspect-square rounded-xl overflow-hidden border shadow-sm ${pending.error ? "border-red-300" : "border-slate-200"} bg-slate-50 flex items-center justify-center`}>
+                    <Image src={pending.previewUrl} alt="Pending upload" fill unoptimized className={`object-contain p-1 transition-all ${pending.uploading ? "opacity-40 blur-sm" : ""}`} />
                     
                     {pending.uploading && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
