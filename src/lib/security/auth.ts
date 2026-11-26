@@ -20,7 +20,10 @@ export const getCurrentUser = cache(async function getCurrentUser() {
     const cookieStore = await cookies();
     const allCookies = cookieStore.getAll();
     const hasAuthCookie = allCookies.some(
-      (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token")
+      (c) =>
+        (c.name.startsWith("sb-") && c.name.includes("-auth-token")) ||
+        c.name.includes("auth-token") ||
+        c.name.startsWith("sb:")
     );
     if (!hasAuthCookie) {
       return null;

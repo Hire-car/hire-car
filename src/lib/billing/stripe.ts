@@ -112,6 +112,7 @@ export async function createCheckoutSession(input: {
   customerId?: string;
   existingSubscriptionId?: string | null;
   idempotencyKey?: string;
+  origin?: string;
 }) {
   const interval = input.interval ?? "monthly";
   const isPaidPlan = PAID_PLANS.includes(input.plan);
@@ -120,6 +121,11 @@ export async function createCheckoutSession(input: {
   }
 
   const priceId = getStripePrice(input.plan, interval);
+
+  const baseUrl =
+    input.origin && (input.origin.startsWith("http://") || input.origin.startsWith("https://"))
+      ? input.origin.replace(/\/+$/, "")
+      : getAppUrl();
 
   const subscriptionData = {
     metadata: {
@@ -134,8 +140,8 @@ export async function createCheckoutSession(input: {
   const params: Parameters<Stripe["checkout"]["sessions"]["create"]>[0] = {
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${getAppUrl()}/vendor/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${getAppUrl()}/vendor/billing?checkout=cancelled`,
+    success_url: `${baseUrl}/vendor/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/vendor/billing?checkout=cancelled`,
     client_reference_id: input.organizationId,
     metadata: {
       organization_id: input.organizationId,

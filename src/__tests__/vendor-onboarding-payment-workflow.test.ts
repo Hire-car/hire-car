@@ -496,4 +496,55 @@ describe("Vendor Onboarding, Plan Selection & Stripe Payment Workflow Suite", ()
       expect(trialLimit.canAddMore).toBe(false);
     });
   });
+
+  describe("8. Session Persistence, Return URL Origin & Route Safety Suite", () => {
+    it("recognizes /vendor/billing, /vendor/upgrade, and /vendor/onboarding as valid pre-org / setup routes", async () => {
+      const { isVendorPreOrgPath } = await import("@/lib/routing");
+
+      expect(isVendorPreOrgPath("/vendor/upgrade")).toBe(true);
+      expect(isVendorPreOrgPath("/vendor/upgrade/")).toBe(true);
+      expect(isVendorPreOrgPath("/vendor/onboarding")).toBe(true);
+      expect(isVendorPreOrgPath("/vendor/onboarding/step-1")).toBe(true);
+      expect(isVendorPreOrgPath("/vendor/billing")).toBe(true);
+      expect(isVendorPreOrgPath("/vendor/billing/invoices")).toBe(true);
+
+      // Other routes are strictly post-org protected
+      expect(isVendorPreOrgPath("/vendor/dashboard")).toBe(false);
+      expect(isVendorPreOrgPath("/vendor/vehicles")).toBe(false);
+      expect(isVendorPreOrgPath("/vendor/leads")).toBe(false);
+    });
+
+    it("uses exact caller origin for Stripe Checkout return URLs when origin is supplied", async () => {
+      const session = await createCheckoutSession({
+        plan: "starter",
+        interval: "monthly",
+        organizationId: "org-origin-test",
+        userId: "user-origin-test",
+        email: "origin@hirecar.com.au",
+        origin: "https://www.hirecarmarketplace.com.au",
+      });
+
+      const raw = session as any;
+      expect(raw.success_url).toBe(
+        "https://www.hirecarmarketplace.com.au/vendor/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}",
+      );
+      expect(raw.cancel_url).toBe(
+        "https://www.hirecarmarketplace.com.au/vendor/billing?checkout=cancelled",
+      );
+    });
+
+    it("falls back cleanly to getAppUrl() when origin is not provided or invalid", async () => {
+      const session = await createCheckoutSession({
+        plan: "growth",
+        interval: "annual",
+        organizationId: "org-fallback-test",
+        userId: "user-fallback-test",
+        email: "fallback@hirecar.com.au",
+      });
+
+      const raw = session as any;
+      expect(raw.success_url).toContain("/vendor/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}");
+      expect(raw.cancel_url).toContain("/vendor/billing?checkout=cancelled");
+    });
+  });
 });

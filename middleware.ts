@@ -8,6 +8,14 @@ export async function middleware(request: NextRequest) {
     request,
   });
 
+  function redirectWithCookies(redirectUrl: URL, status = 307): NextResponse {
+    const redirectResponse = NextResponse.redirect(redirectUrl, status);
+    response.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+    });
+    return redirectResponse;
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
@@ -41,7 +49,7 @@ export async function middleware(request: NextRequest) {
   ) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = path.toLowerCase();
-    return NextResponse.redirect(redirectUrl, 301); // 301 Permanent Redirect for SEO
+    return redirectWithCookies(redirectUrl, 301); // 301 Permanent Redirect for SEO
   }
 
   const isAdminRoute =
@@ -71,7 +79,7 @@ export async function middleware(request: NextRequest) {
       "redirectedFrom",
       request.nextUrl.pathname + request.nextUrl.search,
     );
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl);
   }
 
   if (isAdminRoute && user) {
@@ -98,7 +106,7 @@ export async function middleware(request: NextRequest) {
     if (!isAuthorizedAdmin) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/"; // Redirect unauthorized users away from admin
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
   }
 
@@ -117,7 +125,7 @@ export async function middleware(request: NextRequest) {
       redirectUrl.search = "";
       if (plan) redirectUrl.searchParams.set("plan", plan);
       redirectUrl.searchParams.set("from", from);
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
   }
 
