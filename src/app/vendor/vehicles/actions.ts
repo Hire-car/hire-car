@@ -17,6 +17,8 @@ import { processSearchIndexJobs } from "@/lib/search/typesense";
 
 export async function syncVehicleCompletenessStatus(vehicleId: string, supabase: ReturnType<typeof createAdminClient>) {
   const { data: vehicle } = await supabase.from("vehicles").select("*").eq("id", vehicleId).single();
+  if (!vehicle) return;
+
   const { count: imagesCount } = await supabase
     .from("vehicle_images")
     .select("id", { count: "exact", head: true })
@@ -27,8 +29,11 @@ export async function syncVehicleCompletenessStatus(vehicleId: string, supabase:
   if (!vehicle.color) missing.push("Color");
   if (imagesCount === 0) missing.push("At least 1 Image");
 
+  // Verify that the organization has an active paid subscription before approving/publishing
+  const limitInfo = await getVehicleLimitInfo(vehicle.organization_id);
+
   if (vehicle.status !== "suspended") {
-    const newStatus = missing.length === 0 ? "approved" : "pending";
+    const newStatus = (missing.length === 0 && limitInfo.hasActiveSubscription) ? "approved" : "pending";
     if (vehicle.status !== newStatus) {
       await supabase.from("vehicles").update({ status: newStatus }).eq("id", vehicleId);
 
@@ -65,12 +70,18 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
     // Verify user has permission
     await ensureUserCanManageOrganization(user.id, organizationId);
 
-    // Enforce vehicle limit based on subscription plan
+    // Enforce active subscription and vehicle limit
     const limitInfo = await getVehicleLimitInfo(organizationId);
+    if (!limitInfo.hasActiveSubscription) {
+      return {
+        success: false,
+        error: "An active paid subscription (Starter, Growth, or Pro) is required to list vehicles. Please select a plan on the Billing page to get started.",
+      };
+    }
     if (!limitInfo.canAddMore) {
       return {
         success: false,
-        error: `Vehicle limit reached. Your ${limitInfo.planCode ?? "free"} plan allows ${limitInfo.limit} vehicles. Please upgrade to add more.`,
+        error: `Vehicle limit reached. Your ${limitInfo.planCode} plan allows ${limitInfo.limit} vehicles. Please upgrade to add more.`,
       };
     }
 

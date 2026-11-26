@@ -4,6 +4,7 @@ import { authenticateApiKey } from "@/lib/security/api-key";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
 import { apiVehicleCreateSchema } from "@/lib/validation/schemas";
+import { getVehicleLimitInfo } from "@/lib/data/vendor";
 
 async function requireApiAccess(request: NextRequest) {
   const auth = await authenticateApiKey(request.headers.get("authorization"));
@@ -39,6 +40,21 @@ export async function POST(request: NextRequest) {
   if ("error" in result && result.error) return result.error;
 
   const organizationId = result.auth!.organizationId;
+
+  // Strict subscription and vehicle limit enforcement on API
+  const limitInfo = await getVehicleLimitInfo(organizationId);
+  if (!limitInfo.hasActiveSubscription) {
+    return NextResponse.json(
+      { error: "An active paid subscription is required to create vehicles. Please complete subscription payment." },
+      { status: 402 },
+    );
+  }
+  if (!limitInfo.canAddMore) {
+    return NextResponse.json(
+      { error: `Vehicle limit reached. Your ${limitInfo.planCode} plan allows ${limitInfo.limit} vehicles.` },
+      { status: 403 },
+    );
+  }
 
   let rawBody: unknown;
   try {

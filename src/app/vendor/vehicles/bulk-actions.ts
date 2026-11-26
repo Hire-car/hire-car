@@ -73,6 +73,12 @@ export async function processBulkUpload(formData: FormData) {
     }
 
     const limitInfo = await getVehicleLimitInfo(organizationId);
+    if (!limitInfo.hasActiveSubscription) {
+      return { success: false, error: "An active paid subscription is required to upload vehicles. Please complete subscription payment." };
+    }
+    if (!limitInfo.canAddMore) {
+      return { success: false, error: `Vehicle limit reached. Your ${limitInfo.planCode} plan allows ${limitInfo.limit} vehicles.` };
+    }
     if (limitInfo.hasLimit && limitInfo.limit !== null) {
       if (limitInfo.currentCount + rows.length > limitInfo.limit) {
         return { success: false, error: `Upload rejected. Your current plan limit is ${limitInfo.limit} vehicles. You already have ${limitInfo.currentCount}, and this file contains ${rows.length} vehicles. Please upgrade your plan or upload fewer vehicles.` };

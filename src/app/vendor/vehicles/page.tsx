@@ -70,8 +70,8 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
   const vehicleIds = vehicles.map((v) => v.id);
   const imageCounts = await getVehicleImageCounts(vehicleIds);
 
-  const isAtLimit = limitInfo.hasLimit && limitInfo.currentCount >= (limitInfo.limit ?? 0);
-  const usagePercent = limitInfo.limit ? Math.min((limitInfo.currentCount / limitInfo.limit) * 100, 100) : 0;
+  const isAtLimit = !limitInfo.hasActiveSubscription || (limitInfo.hasLimit && limitInfo.currentCount >= (limitInfo.limit ?? 0));
+  const usagePercent = limitInfo.limit && limitInfo.limit > 0 ? Math.min((limitInfo.currentCount / limitInfo.limit) * 100, 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -86,31 +86,53 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
           </div>
         </div>
 
-        {/* Plan Usage */}
-        <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-5">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-semibold text-slate-700">
-              Plan Limit <span className="text-slate-400 font-normal">({limitInfo.planCode || "Free"})</span>
-            </span>
-            <span className="text-sm font-medium text-slate-700">
-              {limitInfo.currentCount} <span className="text-slate-400 font-normal">/ {limitInfo.limit ?? "∞"} vehicles</span>
-            </span>
+        {/* Plan Usage or Subscription Required Alert */}
+        {!limitInfo.hasActiveSubscription ? (
+          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-bold text-amber-900">Subscription Required</h3>
+                  <p className="mt-1 text-sm text-amber-800">
+                    An active paid subscription is required to add and publish vehicles on the marketplace.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/vendor/billing"
+                className="inline-flex shrink-0 items-center justify-center rounded-xl bg-[#ea580c] px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-600 transition-colors"
+              >
+                Choose a Plan
+              </Link>
+            </div>
           </div>
-          {limitInfo.hasLimit && (
-            <div className="h-2.5 rounded-full bg-slate-200 overflow-hidden">
-              <div
-                className={`h-2.5 rounded-full transition-all duration-700 ${isAtLimit ? "bg-red-500" : "bg-gradient-to-r from-blue-500 to-indigo-500"}`}
-                style={{ width: `${usagePercent}%` }}
-              />
+        ) : (
+          <div className="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-5">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-semibold text-slate-700">
+                Plan Limit <span className="text-slate-400 font-normal">({limitInfo.planCode})</span>
+              </span>
+              <span className="text-sm font-medium text-slate-700">
+                {limitInfo.currentCount} <span className="text-slate-400 font-normal">/ {limitInfo.limit ?? "∞"} vehicles</span>
+              </span>
             </div>
-          )}
-          {isAtLimit && (
-            <div className="mt-3 flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">
-              <AlertCircle className="h-4.5 w-4.5 shrink-0" />
-              <p>You have reached your vehicle limit. <Link href="/vendor/billing" className="font-semibold underline hover:text-red-700">Upgrade your plan</Link> to add more.</p>
-            </div>
-          )}
-        </div>
+            {limitInfo.hasLimit && (
+              <div className="h-2.5 rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  className={`h-2.5 rounded-full transition-all duration-700 ${isAtLimit ? "bg-red-500" : "bg-gradient-to-r from-blue-500 to-indigo-500"}`}
+                  style={{ width: `${usagePercent}%` }}
+                />
+              </div>
+            )}
+            {isAtLimit && (
+              <div className="mt-3 flex items-start gap-2 text-sm text-red-600 bg-red-50 p-3 rounded-lg border border-red-100">
+                <AlertCircle className="h-4.5 w-4.5 shrink-0" />
+                <p>You have reached your vehicle limit. <Link href="/vendor/billing" className="font-semibold underline hover:text-red-700">Upgrade your plan</Link> to add more.</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {!editVehicle && hasBulkUpload && (
@@ -125,15 +147,35 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
         </div>
       )}
 
-      {/* Vehicle Form */}
-      <VehicleForm
-        organizationId={selectedOrgId}
-        branches={organization.branches}
-        isAtLimit={isAtLimit}
-        canUseAi={canUseAi}
-        editVehicle={editVehicle}
-        editImages={editImages}
-      />
+      {/* Vehicle Form or Subscription Gate */}
+      {!editVehicle && !limitInfo.hasActiveSubscription ? (
+        <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-600 mb-4">
+            <Car className="h-7 w-7" />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900">Vehicle Creation Locked</h2>
+          <p className="mt-2 text-sm text-slate-600 max-w-md mx-auto">
+            Subscribe to Starter ($20/mo), Growth ($49/mo), or Pro ($99/mo) to unlock vehicle listing creation and receive verified customer enquiries.
+          </p>
+          <div className="mt-6">
+            <Link
+              href="/vendor/billing"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#ea580c] to-amber-500 px-6 py-3 text-sm font-bold text-white shadow-md hover:shadow-lg transition-all"
+            >
+              Subscribe to Start Listing
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <VehicleForm
+          organizationId={selectedOrgId}
+          branches={organization.branches}
+          isAtLimit={isAtLimit}
+          canUseAi={canUseAi}
+          editVehicle={editVehicle}
+          editImages={editImages}
+        />
+      )}
 
       {/* Vehicles List */}
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">

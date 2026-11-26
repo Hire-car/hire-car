@@ -136,7 +136,11 @@ export default async function VendorBillingPage(props: {
   const statusCfg = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG.incomplete;
   const StatusIcon = statusCfg.icon;
 
-  const hasActiveSub = subscription && ["active", "trialing"].includes(subscription.status);
+  const hasActiveSub = Boolean(
+    subscription &&
+    ["active", "trialing"].includes(subscription.status) &&
+    (subscription.stripe_subscription_id || subscription.status === "trialing")
+  );
   const periodEnd = subscription?.current_period_end
     ? new Date(subscription.current_period_end).toLocaleDateString("en-AU", {
         day: "numeric", month: "long", year: "numeric",
@@ -244,11 +248,11 @@ export default async function VendorBillingPage(props: {
               <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Current Plan</p>
               <div className="flex items-center gap-3">
                 <h2 className="text-3xl font-black text-slate-900">
-                  {plan?.name ?? "No Plan"}
+                  {hasActiveSub ? (plan?.name ?? "No Plan") : "No Active Plan"}
                 </h2>
-                <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${statusCfg.cls}`}>
+                <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${hasActiveSub ? statusCfg.cls : "bg-amber-100 text-amber-700 border-amber-200"}`}>
                   <StatusIcon className="h-3.5 w-3.5" />
-                  {statusCfg.label}
+                  {hasActiveSub ? statusCfg.label : "Payment Required"}
                 </span>
               </div>
             </div>
@@ -385,7 +389,7 @@ export default async function VendorBillingPage(props: {
 
         <div className="grid gap-4 md:grid-cols-3">
           {PLANS.map((p) => {
-            const isCurrent = subscription?.plan_code === p.code;
+            const isCurrent = Boolean(hasActiveSub && subscription?.plan_code === p.code);
             const isPopular = p.badge === "Most Popular";
 
             return (

@@ -29,6 +29,7 @@ export type VehicleLimitInfo = {
   hasLimit: boolean;
   canAddMore: boolean;
   planCode: string | null;
+  hasActiveSubscription: boolean;
 };
 
 export async function getVehicleLimitInfo(organizationId: string): Promise<VehicleLimitInfo> {
@@ -36,7 +37,11 @@ export async function getVehicleLimitInfo(organizationId: string): Promise<Vehic
 
   const [countResult, subResult] = await Promise.all([
     supabase.from("vehicles").select("id", { count: "exact", head: true }).eq("organization_id", organizationId),
-    supabase.from("subscriptions").select("plan_code, status").eq("organization_id", organizationId).eq("status", "active").maybeSingle(),
+    supabase
+      .from("subscriptions")
+      .select("plan_code, status, stripe_subscription_id, current_period_end")
+      .eq("organization_id", organizationId)
+      .maybeSingle(),
   ]);
 
   if (countResult.error) {
@@ -47,24 +52,37 @@ export async function getVehicleLimitInfo(organizationId: string): Promise<Vehic
     throw new Error(`Failed to get subscription: ${subResult.error.message}`);
   }
 
-  const currentCount = countResult.count;
+  const currentCount = countResult.count ?? 0;
   const subscription = subResult.data;
 
-  // If no active subscription, check for trialing
-  let planCode = subscription?.plan_code;
-  if (!planCode) {
-    const { data: trialing } = await supabase
-      .from("subscriptions")
-      .select("plan_code")
-      .eq("organization_id", organizationId)
-      .eq("status", "trialing")
-      .maybeSingle();
-    planCode = trialing?.plan_code;
+  // Strict subscription verification:
+  // An active subscription requires status "active" or "trialing", a valid plan_code,
+  // and for non-trialing accounts, a valid stripe_subscription_id.
+  // Also check if current_period_end has expired.
+  const isStatusEligible = subscription?.status === "active" || subscription?.status === "trialing";
+  const hasStripeId = Boolean(subscription?.stripe_subscription_id);
+  const isTrial = subscription?.status === "trialing";
+
+  let isExpired = false;
+  if (subscription?.current_period_end) {
+    const periodEndMs = new Date(subscription.current_period_end).getTime();
+    if (periodEndMs > 0 && periodEndMs < Date.now()) {
+      isExpired = true;
+    }
   }
 
-  // Get plan limit
+  const hasActiveSubscription = Boolean(
+    isStatusEligible &&
+    subscription?.plan_code &&
+    (hasStripeId || isTrial) &&
+    !isExpired
+  );
+
+  let planCode: string | null = null;
   let limit: number | null = null;
-  if (planCode) {
+
+  if (hasActiveSubscription && subscription?.plan_code) {
+    planCode = subscription.plan_code;
     const { data: plan } = await supabase
       .from("plans")
       .select("vehicle_limit")
@@ -72,25 +90,33 @@ export async function getVehicleLimitInfo(organizationId: string): Promise<Vehic
       .single();
     limit = plan?.vehicle_limit ?? null;
   } else {
-    // If there is no active or trialing plan, default to 5 limit (Starter plan).
-    limit = 5;
+    // Unpaid or unsubscribed organizations receive 0 limit and CANNOT add vehicles.
+    planCode = null;
+    limit = 0;
   }
 
   // null limit means unlimited (enterprise/business plans)
   const hasLimit = limit !== null;
-  const canAddMore = !hasLimit || (currentCount ?? 0) < (limit ?? 0);
+  const canAddMore = hasActiveSubscription && (!hasLimit || currentCount < (limit ?? 0));
 
   return {
-    currentCount: currentCount ?? 0,
+    currentCount,
     limit,
     hasLimit,
     canAddMore,
-    planCode: planCode ?? null,
+    planCode,
+    hasActiveSubscription,
   };
 }
 
 export async function enforceVehicleLimit(organizationId: string): Promise<void> {
   const limitInfo = await getVehicleLimitInfo(organizationId);
+
+  if (!limitInfo.hasActiveSubscription) {
+    throw new Error(
+      "An active paid subscription (Starter, Growth, or Pro) is required to list vehicles. Please select a plan and complete payment to continue.",
+    );
+  }
 
   if (!limitInfo.canAddMore) {
     throw new Error(
