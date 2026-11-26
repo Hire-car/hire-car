@@ -68,9 +68,7 @@ export async function GET(request: NextRequest) {
           await supabase
             .from("subscriptions")
             .update({
-              plan_code: "starter",
-              status: "active",
-              billing_interval: "monthly",
+              status: "canceled",
               stripe_subscription_id: null,
               cancel_at_period_end: false,
               canceled_at: new Date().toISOString(),
@@ -79,7 +77,7 @@ export async function GET(request: NextRequest) {
             .eq("id", sub.id);
 
           await supabase.from("audit_logs").insert({
-            action: "subscription_reconciled_to_starter",
+            action: "subscription_reconciled_canceled",
             resource_type: "subscription",
             resource_id: sub.organization_id,
             metadata: {
@@ -89,7 +87,6 @@ export async function GET(request: NextRequest) {
             },
           });
 
-          results.revertedToStarter++;
           results.reconciled++;
           continue;
         }
@@ -100,16 +97,12 @@ export async function GET(request: NextRequest) {
         const isPastGrace = graceEndMs > 0 && Date.now() > graceEndMs;
 
         if (stripeSub.status === "past_due" && isPastGrace) {
-          // Revert to Starter after grace period expires
+          // Mark past due without active paid privileges after grace period expires
           await supabase
             .from("subscriptions")
             .update({
-              plan_code: "starter",
-              status: "active",
-              billing_interval: "monthly",
-              stripe_subscription_id: null,
+              status: "past_due",
               cancel_at_period_end: false,
-              canceled_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             })
             .eq("id", sub.id);
@@ -124,7 +117,6 @@ export async function GET(request: NextRequest) {
             },
           });
 
-          results.revertedToStarter++;
           results.reconciled++;
           continue;
         }

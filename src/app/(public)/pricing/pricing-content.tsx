@@ -213,9 +213,14 @@ export function PricingContent() {
                       <span className="text-slate-500 font-medium">/{annual ? "year" : "month"}</span>
                     </div>
                     {annual && (
-                      <p className="mt-2 text-xs text-emerald-600 font-bold bg-emerald-50 inline-block px-2 py-1 rounded-md">
-                        Save ${plan.monthlyPrice * 12 - plan.annualPrice}/year vs monthly
-                      </p>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-slate-500 font-medium">
+                          ${Math.round(plan.annualPrice / 12)}/month effective
+                        </p>
+                        <p className="text-xs text-emerald-600 font-bold bg-emerald-50 inline-block px-2 py-1 rounded-md">
+                          Save ${plan.monthlyPrice * 12 - plan.annualPrice}/year vs monthly
+                        </p>
+                      </div>
                     )}
                     {!annual && (
                       <p className="mt-2 text-xs text-transparent bg-transparent inline-block px-2 py-1 rounded-md select-none">&nbsp;</p>
@@ -260,7 +265,7 @@ export function PricingContent() {
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
-                  <p className="mt-4 text-center text-xs font-medium text-slate-400">No credit card required</p>
+                  <p className="mt-4 text-center text-xs font-medium text-slate-400">Secure checkout via Stripe</p>
                 </MotionScroll>
               );
             })}

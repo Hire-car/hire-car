@@ -486,14 +486,11 @@ async function processStripeEvent(
 
         if (updatedSub) {
           if (mappedStatus === "canceled") {
-            // Apply Starter entitlement when subscription is canceled; do not suspend organization
+            // Mark subscription canceled; do not grant active entitlement without payment
             await supabase
               .from("subscriptions")
               .update({
-                plan_code: "starter",
-                status: "active",
-                billing_interval: "monthly",
-                stripe_subscription_id: null,
+                status: "canceled",
                 cancel_at_period_end: false,
                 canceled_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
@@ -501,7 +498,7 @@ async function processStripeEvent(
               .eq("stripe_subscription_id", subscriptionId);
 
             await supabase.from("audit_logs").insert({
-              action: "subscription_reverted_to_starter",
+              action: "subscription_canceled",
               resource_type: "subscription",
               resource_id: updatedSub.organization_id,
               metadata: { reason: "stripe_subscription_updated_canceled" },
@@ -603,9 +600,7 @@ async function processStripeEvent(
         const updateQuery = supabase
           .from("subscriptions")
           .update({
-            plan_code: "starter",
-            status: "active",
-            billing_interval: "monthly",
+            status: "canceled",
             stripe_subscription_id: null,
             cancel_at_period_end: false,
             canceled_at: new Date().toISOString(),
