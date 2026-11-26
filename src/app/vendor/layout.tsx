@@ -4,7 +4,11 @@ import { DashboardShell } from "@/components/dashboard-shell";
 import { requireUser } from "@/lib/security/auth";
 import { cookies } from "next/headers";
 
-import { getVendorContext } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +23,16 @@ export default async function VendorLayout({ children }: { children: ReactNode }
 
   const isAdmin = await userHasAdminAccess(user);
 
-  if (context.organizations.length === 0) {
+  let currentContext = context;
+  if (currentContext.organizations.length === 0) {
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      currentContext = directContext;
+      invalidateVendorContext(user.id);
+    }
+  }
+
+  if (currentContext.organizations.length === 0) {
     return <div className="min-h-screen bg-slate-50">{children}</div>;
   }
 
@@ -27,9 +40,9 @@ export default async function VendorLayout({ children }: { children: ReactNode }
   const cookieStore = await cookies();
   const selectedOrgId = cookieStore.get("vendor_org_id")?.value;
   
-  let activeOrg = context.organizations.find(o => o.id === selectedOrgId);
+  let activeOrg = currentContext.organizations.find(o => o.id === selectedOrgId);
   if (!activeOrg) {
-    activeOrg = context.organizations[0];
+    activeOrg = currentContext.organizations[0];
   }
   const organizationId = activeOrg.id;
   

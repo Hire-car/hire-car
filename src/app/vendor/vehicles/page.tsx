@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/security/auth";
-import { getVendorContext, getVehicleLimitInfo } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  getVehicleLimitInfo,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 import { getOrganizationVehicles, getVehicleFeatures, getVehicleImageCounts } from "./actions";
 import { getVehicleImages } from "./image-actions";
 import VehicleForm from "./vehicle-form";
@@ -38,13 +43,20 @@ async function VehiclesContent({ searchParams }: VehiclesPageProps) {
     );
   }
 
-  if (context.organizations.length === 0) {
-    redirect("/vendor/upgrade");
+  let currentContext = context;
+  if (currentContext.organizations.length === 0) {
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      currentContext = directContext;
+      invalidateVendorContext(user.id);
+    } else {
+      redirect("/vendor/upgrade");
+    }
   }
 
   const cookieStore = await cookies();
-  const selectedOrgId = cookieStore.get("vendor_org_id")?.value || context.organizations[0]?.id;
-  const organization = context.organizations.find((o) => o.id === selectedOrgId);
+  const selectedOrgId = cookieStore.get("vendor_org_id")?.value || currentContext.organizations[0]?.id;
+  const organization = currentContext.organizations.find((o) => o.id === selectedOrgId);
 
   if (!organization) {
     redirect("/vendor/vehicles");

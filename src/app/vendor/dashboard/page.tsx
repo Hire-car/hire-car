@@ -5,7 +5,12 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { MetricCard } from "@/components/metric-card";
 import { requireUser } from "@/lib/security/auth";
-import { getVendorContext, getDashboardMetrics } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  getDashboardMetrics,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 import { 
   Car, BarChart3, MessageSquare, TrendingUp, 
   GitBranch, CreditCard, ArrowRight, Bell,
@@ -263,7 +268,7 @@ function DashboardSkeleton() {
 
 async function DashboardWrapper() {
   const user = await requireUser();
-  const context = await getVendorContext(user.id);
+  let context = await getVendorContext(user.id);
 
   if (context.setupError) {
     return (
@@ -278,7 +283,14 @@ async function DashboardWrapper() {
   }
 
   if (context.organizations.length === 0) {
-    redirect("/vendor/upgrade");
+    // Fail-safe: check database directly before redirecting to upgrade
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      context = directContext;
+      invalidateVendorContext(user.id);
+    } else {
+      redirect("/vendor/upgrade");
+    }
   }
 
   const cookieStore = await cookies();
