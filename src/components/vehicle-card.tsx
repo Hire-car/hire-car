@@ -48,7 +48,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             fill
             priority={priority}
             sizes="128px"
-            className="object-contain object-center transition-transform duration-500"
+            className="object-contain object-center"
           />
         </div>
         <CardContent className="flex-1 min-w-0 py-3 px-4 flex flex-col justify-between">
@@ -88,11 +88,9 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               priority={priority}
               fetchPriority={priority ? "high" : "auto"}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain object-center transition-transform duration-500"
+              className="object-contain object-center"
             />
           </Link>
-          {/* Subtle bottom gradient overlay for badge readability */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-900/40 to-transparent pointer-events-none z-20" />
         </div>
         
         {/* Top Left: Featured Badge */}
