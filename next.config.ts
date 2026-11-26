@@ -1,19 +1,18 @@
 import type { NextConfig } from "next";
 
-const scriptSrc =
-  process.env.NODE_ENV === "development"
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com;"
-    : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com;";
+const isDev = process.env.NODE_ENV !== "production";
 
-const connectSrc =
-  process.env.NODE_ENV === "development"
-    ? "connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:* https://images.unsplash.com https://upload.wikimedia.org https://*.supabase.co https://api.stripe.com https://api.resend.com https://*.typesense.net https://challenges.cloudflare.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;"
-    : "connect-src 'self' https://images.unsplash.com https://upload.wikimedia.org https://*.supabase.co https://api.stripe.com https://api.resend.com https://*.typesense.net https://challenges.cloudflare.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;";
+const scriptSrc = isDev
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com;"
+  : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com;";
 
-const imgSrc =
-  process.env.NODE_ENV === "development"
-    ? "img-src 'self' data: blob: http://127.0.0.1:* http://localhost:* https://images.unsplash.com https://*.supabase.co https://upload.wikimedia.org;"
-    : "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://upload.wikimedia.org;";
+const connectSrc = isDev
+  ? "connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:* https://images.unsplash.com https://upload.wikimedia.org https://*.supabase.co https://api.stripe.com https://api.resend.com https://*.typesense.net https://challenges.cloudflare.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;"
+  : "connect-src 'self' https://images.unsplash.com https://upload.wikimedia.org https://*.supabase.co https://api.stripe.com https://api.resend.com https://*.typesense.net https://challenges.cloudflare.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;";
+
+const imgSrc = isDev
+  ? "img-src 'self' data: blob: http://127.0.0.1:* http://localhost:* https://images.unsplash.com https://*.supabase.co https://upload.wikimedia.org;"
+  : "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://upload.wikimedia.org;";
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,

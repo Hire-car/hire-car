@@ -17,6 +17,11 @@ export default function customImageLoader({
     return src;
   }
 
+  // Bypass transformation for local Supabase emulator instances (which do not run imgproxy)
+  if (src.includes("127.0.0.1") || src.includes("localhost")) {
+    return src;
+  }
+
   // If it's a Supabase storage URL, rewrite to the render (transformation) endpoint
   if (src.includes("/storage/v1/object/public/")) {
     try {
