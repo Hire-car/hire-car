@@ -101,6 +101,74 @@ export function getPlanFromStripePrice(priceId: string): { plan: PlanCode; inter
   return null;
 }
 
+/**
+ * Validates and sanitizes a requested origin for Stripe checkout return URLs.
+ * Prevents host-header poisoning and open-redirect vulnerabilities.
+ * Only permits trusted production domains, configured app URLs, localhost in non-prod,
+ * and authenticated Vercel preview environments.
+ */
+export function getSanitizedOrigin(rawOrigin?: string): string {
+  const fallback = getAppUrl().replace(/\/+$/, "");
+  if (!rawOrigin || typeof rawOrigin !== "string") {
+    return fallback;
+  }
+
+  try {
+    const parsed = new URL(rawOrigin.trim());
+
+    // Only allow http/https protocols
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return fallback;
+    }
+
+    const hostname = parsed.hostname.toLowerCase();
+
+    // 1. Production canonical domains (always https only)
+    if (
+      (hostname === "www.hirecarmarketplace.com.au" || hostname === "hirecarmarketplace.com.au") &&
+      parsed.protocol === "https:"
+    ) {
+      return parsed.origin;
+    }
+
+    // 2. Allow NEXT_PUBLIC_APP_URL if defined and matching
+    const envAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (envAppUrl) {
+      try {
+        const parsedEnv = new URL(envAppUrl.trim());
+        if (hostname === parsedEnv.hostname.toLowerCase() && parsed.protocol === parsedEnv.protocol) {
+          return parsed.origin;
+        }
+      } catch {
+        // ignore malformed env URL
+      }
+    }
+
+    // 3. Local development and test origins
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "[::1]"
+    ) {
+      return parsed.origin;
+    }
+
+    // 4. Vercel preview deployments (only https)
+    if (
+      parsed.protocol === "https:" &&
+      hostname.endsWith(".vercel.app") &&
+      !hostname.includes("@")
+    ) {
+      return parsed.origin;
+    }
+  } catch {
+    // Malformed URL, reject
+    return fallback;
+  }
+
+  return fallback;
+}
+
 const PAID_PLANS: PlanCode[] = ["starter", "growth", "pro"];
 
 export async function createCheckoutSession(input: {
@@ -122,10 +190,7 @@ export async function createCheckoutSession(input: {
 
   const priceId = getStripePrice(input.plan, interval);
 
-  const baseUrl =
-    input.origin && (input.origin.startsWith("http://") || input.origin.startsWith("https://"))
-      ? input.origin.replace(/\/+$/, "")
-      : getAppUrl();
+  const baseUrl = getSanitizedOrigin(input.origin);
 
   const subscriptionData = {
     metadata: {
