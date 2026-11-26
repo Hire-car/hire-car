@@ -54,7 +54,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="gallery-main-frame group relative aspect-[16/10] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none"
+        className="gallery-main-frame group relative aspect-[16/10] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none flex items-center justify-center"
       >
 
         <div
@@ -75,7 +75,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
             position: "relative",
             zIndex: 10,
           }}
-          className=""
+          className="flex items-center justify-center"
         >
           <ImageWithFallback
             src={images[currentIndex].url}
@@ -84,7 +84,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
             priority={currentIndex === 0}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-cover transition-opacity duration-300 cursor-pointer"
+            className="object-contain object-center transition-opacity duration-300 cursor-pointer"
             onClick={() => setIsModalOpen(true)}
           />
         </div>
@@ -130,7 +130,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
                 onClick={() => setCurrentIndex(index)}
                 aria-label={`View image ${index + 1} of ${images.length}`}
                 aria-current={index === currentIndex}
-                className={`relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all bg-white ${
+                className={`relative h-20 w-32 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all bg-slate-100 flex items-center justify-center ${
                   index === currentIndex ? "border-[#FF5F00] opacity-100 shadow-sm" : "border-slate-200 opacity-60 hover:opacity-100"
                 }`}
               >
@@ -139,7 +139,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
                   alt={img.alt_text || "Thumbnail"}
                   fill
                   sizes="128px"
-                  className="object-cover object-center"
+                  className="object-contain object-center p-0.5"
                 />
               </button>
             ))}

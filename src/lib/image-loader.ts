@@ -26,7 +26,7 @@ export default function customImageLoader({
         "/storage/v1/render/image/public/"
       );
       url.searchParams.set("width", width.toString());
-      url.searchParams.set("resize", "cover");
+      url.searchParams.set("resize", "contain");
       if (quality) url.searchParams.set("quality", quality.toString());
       return url.href;
     } catch {

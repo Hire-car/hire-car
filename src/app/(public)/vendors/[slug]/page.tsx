@@ -201,6 +201,7 @@ async function getVendorVehicles(organizationId: string): Promise<Vehicle[]> {
       vendorSlug: org.slug,
       branchName: branch.name,
       verified: true,
+      imageCount: imgs.length || 1,
     };
   });
 }

@@ -61,6 +61,7 @@ export default async function SavedVehiclesPage() {
         branchName: v.branches?.name ?? "",
         verified: !!v.organizations?.verified_at,
         instantBook: v.instant_book,
+        imageCount: imgs.length || 1,
       };
     })
     .filter(Boolean);
