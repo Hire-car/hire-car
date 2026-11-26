@@ -2,19 +2,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { isVendorPreOrgPath } from "@/lib/routing";
 import { isAllowlistedAdminEmail } from "@/lib/security/admin-allowlist";
+import { redirectWithCookies as baseRedirectWithCookies } from "@/lib/security/cookies";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request,
   });
 
-  function redirectWithCookies(redirectUrl: URL, status = 307): NextResponse {
-    const redirectResponse = NextResponse.redirect(redirectUrl, status);
-    response.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
-    });
-    return redirectResponse;
-  }
+  const redirectWithCookies = (redirectUrl: URL, status = 307) =>
+    baseRedirectWithCookies(response, redirectUrl, status);
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;

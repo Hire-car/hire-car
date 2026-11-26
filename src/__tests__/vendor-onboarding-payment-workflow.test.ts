@@ -4,7 +4,9 @@ import {
   getStripePrice,
   getPlanFromStripePrice,
   createCheckoutSession,
+  getSanitizedOrigin,
 } from "@/lib/billing/stripe";
+import { redirectWithCookies } from "@/lib/security/cookies";
 import {
   fetchVendorContextFromDb,
   invalidateVendorContext,
@@ -514,8 +516,43 @@ describe("Vendor Onboarding, Plan Selection & Stripe Payment Workflow Suite", ()
       expect(isVendorPreOrgPath("/vendor/leads")).toBe(false);
     });
 
-    it("uses exact caller origin for Stripe Checkout return URLs when origin is supplied", async () => {
-      const session = await createCheckoutSession({
+    it("validates and allows trusted origins while strictly blocking untrusted origins", () => {
+      // 1. Trusted canonical production domains
+      expect(getSanitizedOrigin("https://www.hirecarmarketplace.com.au")).toBe(
+        "https://www.hirecarmarketplace.com.au",
+      );
+      expect(getSanitizedOrigin("https://hirecarmarketplace.com.au")).toBe(
+        "https://hirecarmarketplace.com.au",
+      );
+
+      // 2. Trusted local development origins
+      expect(getSanitizedOrigin("http://localhost:3000")).toBe("http://localhost:3000");
+      expect(getSanitizedOrigin("http://127.0.0.1:3000")).toBe("http://127.0.0.1:3000");
+
+      // 3. Trusted Vercel preview environments
+      expect(getSanitizedOrigin("https://hirecar-pr-12.vercel.app")).toBe(
+        "https://hirecar-pr-12.vercel.app",
+      );
+
+      // 4. Untrusted external attacker origins - MUST fall back to getAppUrl()
+      expect(getSanitizedOrigin("https://evil-attacker.com")).not.toContain("evil-attacker.com");
+      expect(getSanitizedOrigin("http://attacker.com/bypass")).not.toContain("attacker.com");
+      expect(getSanitizedOrigin("https://spoofed-hirecar.com")).not.toContain("spoofed-hirecar.com");
+
+      // 5. Insecure HTTP on production domain - MUST fall back
+      expect(getSanitizedOrigin("http://www.hirecarmarketplace.com.au")).not.toBe(
+        "http://www.hirecarmarketplace.com.au",
+      );
+
+      // 6. Malformed and dangerous protocols
+      expect(getSanitizedOrigin("javascript:alert(1)")).not.toContain("javascript");
+      expect(getSanitizedOrigin("data:text/html,<script>alert(1)</script>")).not.toContain("data");
+      expect(getSanitizedOrigin("not-a-url")).not.toContain("not-a-url");
+      expect(getSanitizedOrigin(undefined)).toBeDefined();
+    });
+
+    it("uses sanitized origin for Stripe Checkout return URLs and blocks host header spoofing", async () => {
+      const trustedSession = await createCheckoutSession({
         plan: "starter",
         interval: "monthly",
         organizationId: "org-origin-test",
@@ -524,13 +561,27 @@ describe("Vendor Onboarding, Plan Selection & Stripe Payment Workflow Suite", ()
         origin: "https://www.hirecarmarketplace.com.au",
       });
 
-      const raw = session as any;
-      expect(raw.success_url).toBe(
+      const rawTrusted = trustedSession as any;
+      expect(rawTrusted.success_url).toBe(
         "https://www.hirecarmarketplace.com.au/vendor/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}",
       );
-      expect(raw.cancel_url).toBe(
+      expect(rawTrusted.cancel_url).toBe(
         "https://www.hirecarmarketplace.com.au/vendor/billing?checkout=cancelled",
       );
+
+      // Attempted host spoofing with an attacker origin
+      const spoofedSession = await createCheckoutSession({
+        plan: "starter",
+        interval: "monthly",
+        organizationId: "org-spoof-test",
+        userId: "user-spoof-test",
+        email: "spoof@hirecar.com.au",
+        origin: "https://evil-phishing-site.com",
+      });
+
+      const rawSpoofed = spoofedSession as any;
+      expect(rawSpoofed.success_url).not.toContain("evil-phishing-site.com");
+      expect(rawSpoofed.cancel_url).not.toContain("evil-phishing-site.com");
     });
 
     it("falls back cleanly to getAppUrl() when origin is not provided or invalid", async () => {
@@ -545,6 +596,54 @@ describe("Vendor Onboarding, Plan Selection & Stripe Payment Workflow Suite", ()
       const raw = session as any;
       expect(raw.success_url).toContain("/vendor/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}");
       expect(raw.cancel_url).toContain("/vendor/billing?checkout=cancelled");
+    });
+
+    it("preserves session cookies and security attributes across HTTP redirects via redirectWithCookies()", () => {
+      const mockCookies = [
+        {
+          name: "sb-access-token",
+          value: "jwt_token_header.payload.signature",
+          httpOnly: true,
+          secure: true,
+          sameSite: "lax" as const,
+          path: "/",
+        },
+        {
+          name: "vendor_org_id",
+          value: "org-uuid-456",
+          httpOnly: false,
+          secure: true,
+          sameSite: "lax" as const,
+          path: "/",
+        },
+      ];
+
+      const sourceResponse = {
+        cookies: {
+          getAll: () => mockCookies,
+        },
+      };
+
+      const redirectResponse = redirectWithCookies(
+        sourceResponse,
+        "https://www.hirecarmarketplace.com.au/vendor/billing?plan=starter",
+        307,
+      );
+
+      expect(redirectResponse.status).toBe(307);
+      expect(redirectResponse.headers.get("location")).toBe(
+        "https://www.hirecarmarketplace.com.au/vendor/billing?plan=starter",
+      );
+
+      // Verify cookies are copied onto the redirect response
+      const copiedAccessToken = redirectResponse.cookies.get("sb-access-token");
+      expect(copiedAccessToken).toBeDefined();
+      expect(copiedAccessToken?.value).toBe("jwt_token_header.payload.signature");
+      expect(copiedAccessToken?.httpOnly).toBe(true);
+
+      const copiedOrgCookie = redirectResponse.cookies.get("vendor_org_id");
+      expect(copiedOrgCookie).toBeDefined();
+      expect(copiedOrgCookie?.value).toBe("org-uuid-456");
     });
   });
 });
