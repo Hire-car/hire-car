@@ -79,7 +79,9 @@ export function isVendorPreOrgPath(path: string): boolean {
     path === "/vendor/upgrade" ||
     path.startsWith("/vendor/upgrade/") ||
     path === "/vendor/onboarding" ||
-    path.startsWith("/vendor/onboarding/")
+    path.startsWith("/vendor/onboarding/") ||
+    path === "/vendor/billing" ||
+    path.startsWith("/vendor/billing/")
   );
 }
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/security/auth";
 import { uniqueSlug } from "@/lib/slug";
@@ -118,6 +119,15 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
   // (e.g. from a retried submission or if user arrived while already onboarded)
   const existingContext = await fetchVendorContextFromDb(user.id);
   if (existingContext.organizations.length > 0) {
+    const existingOrgId = existingContext.organizations[0].id;
+    try {
+      const cookieStore = await cookies();
+      cookieStore.set("vendor_org_id", existingOrgId, {
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+    } catch {}
     invalidateVendorContext(user.id);
     redirect(`/vendor/billing?plan=${planParam}`);
   }
@@ -159,7 +169,9 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
   // This ensures organization, member, branch, legal acceptance, and audit log are all created together
   const organizationSlug = uniqueSlug(payload.businessName);
   const branchSlug = uniqueSlug(`${payload.businessName} ${payload.city}`);
-  const { error: onboardingError } = await supabase.rpc(
+  let createdOrgId: string | undefined;
+
+  const { data: rpcOrgId, error: onboardingError } = await supabase.rpc(
     "create_vendor_onboarding",
     {
       p_user_id: user.id,
@@ -176,6 +188,10 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
       p_branch_slug: branchSlug,
     },
   );
+
+  if (rpcOrgId) {
+    createdOrgId = String(rpcOrgId);
+  }
 
   if (onboardingError) {
     console.error("Vendor onboarding RPC failed:", onboardingError);
@@ -202,6 +218,20 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
       console.error("Vendor onboarding fallback failed:", fallback.error);
       return { error: "Vendor onboarding failed. Please try again." };
     }
+
+    createdOrgId = fallback.organizationId;
+  }
+
+  // Set vendor_org_id cookie for immediate active organization resolution
+  if (createdOrgId) {
+    try {
+      const cookieStore = await cookies();
+      cookieStore.set("vendor_org_id", createdOrgId, {
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+    } catch {}
   }
 
   // Send the welcome/approval email now that they are automatically approved

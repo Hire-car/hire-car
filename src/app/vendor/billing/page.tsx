@@ -109,7 +109,7 @@ export default async function VendorBillingPage(props: {
 
     // redirect() throws NEXT_REDIRECT internally — must stay outside try/catch
     if (!checkoutSyncError) {
-      redirect("/vendor/billing?synced=1");
+      redirect("/vendor/dashboard?welcome=1");
     }
   }
 
@@ -206,6 +206,27 @@ export default async function VendorBillingPage(props: {
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {searchParams.synced === "1" && hasActiveSub && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-6 w-6 text-emerald-600 shrink-0" />
+            <div>
+              <h3 className="text-base font-bold text-emerald-900">Subscription Active</h3>
+              <p className="text-sm text-emerald-700">
+                Your subscription has been confirmed and activated.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/vendor/dashboard"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+          >
+            Go to Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       )}
 

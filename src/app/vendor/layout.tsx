@@ -66,7 +66,7 @@ export default async function VendorLayout({ children }: { children: ReactNode }
       // A better approach would be to fetch this inside a Client Component or use SWR.
       // For now, to unblock TTFB, we default to empty array and let the user click to load if needed,
       // or we can just fetch it before if it's fast. Let's just fetch it but use Promise.all with the others.
-      organizations={context.organizations.map(o => ({ id: o.id, name: o.name }))}
+      organizations={currentContext.organizations.map(o => ({ id: o.id, name: o.name }))}
     >
       {children}
     </DashboardShell>
