@@ -48,12 +48,10 @@ export function planHasFeature(
 }
 
 export function getBranchLimit(planCode: string | null | undefined): number | null {
-  if (!planCode) return 1;
+  if (!planCode) return 0;
   const normalized = planCode.trim().toLowerCase() as PlanCode;
-  // If the plan is recognized but its limit is explicitly null (unlimited), ?? 1 will override it to 1!
-  // Since we don't have nulls right now, ?? 1 is fine for unknown plans, but let's be explicit:
   const limit = BRANCH_LIMITS[normalized];
-  if (limit === undefined) return 1; // Unknown plans default to 1
+  if (limit === undefined) return 0;
   return limit;
 }
 
@@ -63,12 +61,22 @@ export async function getOrganizationPlanCode(
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("subscriptions")
-    .select("plan_code, status")
+    .select("plan_code, status, stripe_subscription_id, current_period_end")
     .eq("organization_id", organizationId)
-    .in("status", ["active", "trialing"])
+    .eq("status", "active")
     .maybeSingle();
 
-  return (data?.plan_code as PlanCode) ?? null;
+  if (!data) return null;
+  // A subscription is only valid if it has an authoritative Stripe subscription ID
+  if (!data.stripe_subscription_id) return null;
+
+  // If period end has expired, the subscription is not active
+  if (data.current_period_end) {
+    const isExpired = new Date(data.current_period_end).getTime() < Date.now();
+    if (isExpired) return null;
+  }
+
+  return (data.plan_code as PlanCode) ?? null;
 }
 
 export async function organizationHasFeature(

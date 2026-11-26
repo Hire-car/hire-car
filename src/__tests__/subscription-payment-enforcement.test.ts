@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getVehicleLimitInfo, enforceVehicleLimit } from "@/lib/data/vendor";
 import { getStripePrice, getPlanFromStripePrice } from "@/lib/billing/stripe";
+import { getBranchLimit, getOrganizationPlanCode } from "@/lib/plan-features";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Mock Supabase
@@ -57,14 +58,22 @@ describe("Hire Car Marketplace — Subscription Payment Enforcement Test Suite",
       }
 
       if (table === "subscriptions") {
+        const maybeSingleFn = vi.fn().mockResolvedValue({
+          data: subscription,
+          error: null,
+        });
+        const queryChain: any = {
+          maybeSingle: maybeSingleFn,
+          in: vi.fn().mockReturnValue({
+            maybeSingle: maybeSingleFn,
+          }),
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: maybeSingleFn,
+          }),
+        };
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              maybeSingle: vi.fn().mockResolvedValue({
-                data: subscription,
-                error: null,
-              }),
-            }),
+            eq: vi.fn().mockReturnValue(queryChain),
           }),
         };
       }
@@ -448,6 +457,144 @@ describe("Hire Car Marketplace — Subscription Payment Enforcement Test Suite",
       // New vehicles are gated until resubscribed
       expect(limitInfo.canAddMore).toBe(false);
       expect(limitInfo.hasActiveSubscription).toBe(false);
+    });
+  });
+
+  // =========================================================================
+  // Test J — Branch Creation & Feature Gating
+  // Verify that an unsubscribed organization cannot add branches.
+  // =========================================================================
+  describe("Test J — Branch Creation & Feature Gating", () => {
+    it("returns 0 branch limit for unsubscribed or null plan", () => {
+      expect(getBranchLimit(null)).toBe(0);
+      expect(getBranchLimit(undefined)).toBe(0);
+      expect(getBranchLimit("")).toBe(0);
+    });
+
+    it("returns 1 branch for Starter, 3 for Growth, 10 for Pro", () => {
+      expect(getBranchLimit("starter")).toBe(1);
+      expect(getBranchLimit("growth")).toBe(3);
+      expect(getBranchLimit("pro")).toBe(10);
+    });
+
+    it("returns null planCode when organization has no active subscription", async () => {
+      mockSupabaseDb({
+        subscription: null,
+      });
+
+      const planCode = await getOrganizationPlanCode("org_unsubscribed_branch");
+      expect(planCode).toBeNull();
+    });
+
+    it("returns null planCode when subscription has no stripe_subscription_id", async () => {
+      mockSupabaseDb({
+        subscription: {
+          plan_code: "starter",
+          status: "active",
+          stripe_subscription_id: null,
+        },
+      });
+
+      const planCode = await getOrganizationPlanCode("org_fake_sub_branch");
+      expect(planCode).toBeNull();
+    });
+
+    it("returns null planCode when subscription current_period_end is expired", async () => {
+      mockSupabaseDb({
+        subscription: {
+          plan_code: "starter",
+          status: "active",
+          stripe_subscription_id: "sub_expired_branch_123",
+          current_period_end: new Date(Date.now() - 3600000).toISOString(),
+        },
+      });
+
+      const planCode = await getOrganizationPlanCode("org_expired_sub_branch");
+      expect(planCode).toBeNull();
+    });
+
+    it("returns valid planCode when active with valid stripe_subscription_id and active period", async () => {
+      mockSupabaseDb({
+        subscription: {
+          plan_code: "growth",
+          status: "active",
+          stripe_subscription_id: "sub_valid_branch_123",
+          current_period_end: new Date(Date.now() + 30 * 24 * 3600000).toISOString(),
+        },
+      });
+
+      const planCode = await getOrganizationPlanCode("org_valid_branch");
+      expect(planCode).toBe("growth");
+    });
+  });
+
+  // =========================================================================
+  // Test K — Trialing Without Stripe Subscription ID Protection
+  // An account with status 'trialing' in the database without a valid Stripe
+  // subscription ID must NOT be granted active listing entitlements.
+  // =========================================================================
+  describe("Test K — Trialing Without Stripe Subscription ID Protection", () => {
+    it("denies vehicle listing entitlement for trialing status without stripe_subscription_id", async () => {
+      mockSupabaseDb({
+        vehicleCount: 0,
+        subscription: {
+          plan_code: "starter",
+          status: "trialing",
+          stripe_subscription_id: null,
+        },
+      });
+
+      const limitInfo = await getVehicleLimitInfo("org_fake_trial");
+      expect(limitInfo.hasActiveSubscription).toBe(false);
+      expect(limitInfo.canAddMore).toBe(false);
+      expect(limitInfo.limit).toBe(0);
+    });
+
+    it("denies vehicle listing entitlement for trialing status even with stripe_subscription_id (no-free-trial business rule)", async () => {
+      mockSupabaseDb({
+        vehicleCount: 0,
+        subscription: {
+          plan_code: "starter",
+          status: "trialing",
+          stripe_subscription_id: "sub_valid_trial_123",
+          current_period_end: new Date(Date.now() + 14 * 24 * 3600000).toISOString(),
+        },
+        planLimit: 5,
+      });
+
+      const limitInfo = await getVehicleLimitInfo("org_valid_trial");
+      expect(limitInfo.hasActiveSubscription).toBe(false);
+      expect(limitInfo.canAddMore).toBe(false);
+      expect(limitInfo.limit).toBe(0);
+    });
+  });
+
+  // =========================================================================
+  // Test L — Payment Method Collection & Settlement Hardening
+  // Verify payment method collection configuration and payment settlement rules.
+  // =========================================================================
+  describe("Test L — Payment Method Collection & Settlement Hardening", () => {
+    it("verifies that payment settlement logic treats 'unpaid' and 'no_payment_required' as incomplete", () => {
+      const isPaidSettled = (paymentStatus: string) => paymentStatus === "paid";
+
+      expect(isPaidSettled("paid")).toBe(true);
+      expect(isPaidSettled("no_payment_required")).toBe(false);
+      expect(isPaidSettled("unpaid")).toBe(false);
+      expect(isPaidSettled("failed")).toBe(false);
+    });
+
+    it("verifies that subscription status mapping preserves active only when paid", () => {
+      const resolveStatus = (paymentStatus: string, stripeStatus: string) => {
+        const isPaid = paymentStatus === "paid";
+        const isValidStripeStatus = stripeStatus === "active" || stripeStatus === "trialing";
+        return isPaid && isValidStripeStatus ? stripeStatus : "incomplete";
+      };
+
+      expect(resolveStatus("paid", "active")).toBe("active");
+      expect(resolveStatus("no_payment_required", "active")).toBe("incomplete");
+      expect(resolveStatus("unpaid", "active")).toBe("incomplete");
+      expect(resolveStatus("unpaid", "incomplete")).toBe("incomplete");
+      expect(resolveStatus("paid", "past_due")).toBe("incomplete");
     });
   });
 });

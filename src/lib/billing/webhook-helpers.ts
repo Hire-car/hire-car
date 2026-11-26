@@ -167,7 +167,7 @@ export async function upsertSubscriptionRecord(
       const hasActivePrimary =
         Boolean(current.stripe_subscription_id) &&
         current.stripe_subscription_id !== input.stripeSubscriptionId &&
-        (current.status === "active" || current.status === "trialing");
+        current.status === "active";
 
       if (hasActivePrimary && !input.isReplacement) {
         console.warn(
