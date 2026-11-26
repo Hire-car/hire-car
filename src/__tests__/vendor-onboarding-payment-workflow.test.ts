@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/vendor";
 import { getBranchLimit } from "@/lib/plan-features";
 import { getVehicleLimitInfo } from "@/lib/data/vendor";
+import { getSupportConfig } from "@/lib/support-channels";
 
 // Mock next/cache
 vi.mock("next/cache", async (importOriginal) => {
@@ -413,6 +414,86 @@ describe("Vendor Onboarding, Plan Selection & Stripe Payment Workflow Suite", ()
       expect(getBranchLimit("starter")).toBe(1);
       expect(getBranchLimit("growth")).toBe(3);
       expect(getBranchLimit("pro")).toBe(10);
+    });
+  });
+
+  describe("7. Strict No-Free-Trial Enforcement Across All Plans", () => {
+    it("guarantees checkout sessions for all six plans have no trial days and require payment method upfront", async () => {
+      const planConfigs = [
+        { plan: "starter" as const, interval: "monthly" as const },
+        { plan: "starter" as const, interval: "annual" as const },
+        { plan: "growth" as const, interval: "monthly" as const },
+        { plan: "growth" as const, interval: "annual" as const },
+        { plan: "pro" as const, interval: "monthly" as const },
+        { plan: "pro" as const, interval: "annual" as const },
+      ];
+
+      for (const cfg of planConfigs) {
+        const session = await createCheckoutSession({
+          plan: cfg.plan,
+          interval: cfg.interval,
+          organizationId: "org-no-trial",
+          userId: "user-no-trial",
+          email: "notrial@hirecar.com.au",
+        });
+
+        const rawSession = session as any;
+        expect(rawSession.mode).toBe("subscription");
+        expect(rawSession.payment_method_collection).toBe("always");
+        expect(rawSession.subscription_data?.trial_period_days).toBeUndefined();
+        expect(rawSession.subscription_data?.trial_end).toBeUndefined();
+        expect(rawSession.subscription_data?.trial_settings).toBeUndefined();
+        expect(rawSession.trial_period_days).toBeUndefined();
+      }
+    });
+
+    it("denies premium support access if subscription status is 'trialing'", () => {
+      // Active growth gets priority email + phone
+      const activeGrowth = getSupportConfig("growth", "active");
+      expect(activeGrowth.channels).toContain("phone");
+      expect(activeGrowth.channels).toContain("priorityEmail");
+
+      // Trialing growth is demoted to starter support (email only)
+      const trialingGrowth = getSupportConfig("growth", "trialing");
+      expect(trialingGrowth.channels).toEqual(["email"]);
+
+      // Active pro gets dedicated phone + account manager
+      const activePro = getSupportConfig("pro", "active");
+      expect(activePro.channels).toContain("dedicatedPhone");
+      expect(activePro.channels).toContain("accountManager");
+
+      // Trialing pro is demoted to starter support (email only)
+      const trialingPro = getSupportConfig("pro", "trialing");
+      expect(trialingPro.channels).toEqual(["email"]);
+    });
+
+    it("denies vehicle listing entitlement if subscription status is 'trialing'", async () => {
+      const { createAdminClient } = await import("@/lib/supabase/admin");
+
+      (createAdminClient as any).mockReturnValueOnce({
+        from: vi.fn((table: string) => {
+          if (table === "subscriptions") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({
+                data: {
+                  plan_code: "pro",
+                  status: "trialing", // trialing status must give 0 limit
+                  stripe_subscription_id: "sub_trial",
+                  current_period_end: new Date(Date.now() + 86400000).toISOString(),
+                },
+                error: null,
+              }),
+            };
+          }
+          return mockSupabaseQuery;
+        }),
+      });
+
+      const trialLimit = await getVehicleLimitInfo("org-trial");
+      expect(trialLimit.limit).toBe(0);
+      expect(trialLimit.canAddMore).toBe(false);
     });
   });
 });

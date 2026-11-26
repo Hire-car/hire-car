@@ -19,11 +19,11 @@ Create recurring prices in Stripe Dashboard (live and test):
 2. Enable subscription management (cancel, switch plans)
 3. Enable payment method updates
 
-## Trials
+## No Free Trials Policy
 
-- Growth and Pro checkouts use `trial_period_days: 14`
-- `payment_method_collection: if_required` allows trial without card
-- Enable "Allow customers to start trials without payment methods" in Stripe Billing settings
+- Hire Car Marketplace does not offer free trials on any subscription plan (Starter, Growth, Pro).
+- All six plans are paid recurring plans requiring upfront card authorization (`payment_method_collection: "always"`).
+- Zero-dollar checkouts, unverified trials, and trial-based entitlements are strictly rejected.
 
 ## Webhook
 
