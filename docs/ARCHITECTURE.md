@@ -25,3 +25,8 @@ The repository is structured to separate different user boundaries:
 - **Rate Limiting**: Applied on all `/api` endpoints and critical server actions using Redis (`src/lib/security/rate-limit-redis.ts`).
 - **Fraud Engine**: Fraud flags are automatically generated and reviewed by admins for suspicious patterns.
 - **Bot Protection**: Cloudflare Turnstile integration protects contact and enquiry forms.
+
+## Media & Image Display Architecture
+- **Vehicle Image Display Policy**: To ensure vehicles are shown accurately to prospective renters, vehicle photos are never cropped. They use `object-contain object-center` on all listing cards, search grids, and detail galleries.
+- **Image Loader & Supabase Storage**: `src/lib/image-loader.ts` transforms Supabase Storage assets with `resize=contain` and width-only parameters to avoid server-side cropping.
+- **Regression Protection**: Banned patterns (`object-cover`, `resize=cover`, and `group-hover:scale` on vehicle photos) are guarded by `src/__tests__/vehicle-image-full-display.test.tsx`.

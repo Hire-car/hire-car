@@ -3,6 +3,8 @@
  */
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
+import fs from "fs";
+import path from "path";
 import { VehicleCard } from "@/components/vehicle-card";
 import { ImageGallery } from "@/components/image-gallery";
 import customImageLoader from "@/lib/image-loader";
@@ -33,24 +35,29 @@ const mockVehicle: Vehicle = {
 
 describe("Global Vehicle Image System — Full-Image Display & Regression Protection", () => {
   describe("1. VehicleCard Shared Display Policy", () => {
-    it("renders vehicle hero image with original object-cover presentation and hover scale", () => {
+    it("renders vehicle hero image with object-contain and never object-cover", () => {
       const { container } = render(<VehicleCard vehicle={mockVehicle} />);
       const img = container.querySelector("img[alt='2022 Toyota Hiace Commuter 12-Seater']");
       expect(img).not.toBeNull();
       const className = img?.getAttribute("class") || "";
 
-      expect(className).toContain("object-cover");
-      expect(className).toContain("group-hover:scale");
+      // MUST use object-contain to display full photograph
+      expect(className).toContain("object-contain");
+      // MUST NOT use object-cover which crops portrait/square vehicle images
+      expect(className).not.toContain("object-cover");
+      // MUST NOT use hover zoom on the image that causes clipping
+      expect(className).not.toContain("group-hover:scale");
     });
 
-    it("renders compact vehicle card variant with object-cover", () => {
+    it("renders compact vehicle card variant with object-contain and never object-cover", () => {
       const { container } = render(<VehicleCard vehicle={mockVehicle} variant="compact" />);
       const img = container.querySelector("img[alt='2022 Toyota Hiace Commuter 12-Seater']");
       expect(img).not.toBeNull();
       const className = img?.getAttribute("class") || "";
 
-      expect(className).toContain("object-cover");
-      expect(className).toContain("group-hover:scale");
+      expect(className).toContain("object-contain");
+      expect(className).not.toContain("object-cover");
+      expect(className).not.toContain("group-hover:scale");
     });
 
     it("displays the exact imageCount on the photo badge and does not default to 1/1 when imageCount > 1", () => {
@@ -108,7 +115,7 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
   });
 
   describe("3. Supabase Storage Image Loader & Transformation Policy", () => {
-    it("rewrites Supabase Storage URLs with resize=cover", () => {
+    it("rewrites Supabase Storage URLs with resize=contain and never resize=cover", () => {
       const rawSupabaseUrl =
         "https://xyzcompany.supabase.co/storage/v1/object/public/vehicle-images/org-123/hiace-portrait.jpg";
       const transformedUrl = customImageLoader({
@@ -119,7 +126,9 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
 
       expect(transformedUrl).toContain("/storage/v1/render/image/public/vehicle-images/org-123/hiace-portrait.jpg");
       expect(transformedUrl).toContain("width=820");
-      expect(transformedUrl).toContain("resize=cover");
+      expect(transformedUrl).toContain("resize=contain");
+      // MUST NOT contain resize=cover
+      expect(transformedUrl).not.toContain("resize=cover");
       expect(transformedUrl).toContain("quality=80");
     });
 
@@ -161,14 +170,15 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
     ];
 
     orientations.forEach(({ name, url }) => {
-      it(`VehicleCard displays ${name} photograph with original object-cover presentation`, () => {
+      it(`VehicleCard displays ${name} photograph with full image containment`, () => {
         const testVehicle = { ...mockVehicle, id: `test-${name}`, imageUrl: url };
         const { container } = render(<VehicleCard vehicle={testVehicle} />);
         const img = container.querySelector(`img[alt='${testVehicle.title}']`);
         expect(img).not.toBeNull();
         const className = img?.getAttribute("class") || "";
 
-        expect(className).toContain("object-cover");
+        expect(className).toContain("object-contain");
+        expect(className).not.toContain("object-cover");
       });
     });
   });
@@ -184,6 +194,52 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
       expect(logoImg).not.toBeNull();
       const className = logoImg?.getAttribute("class") || "";
       expect(className).toContain("rounded-full");
+    });
+  });
+
+  describe("6. Static Guard — Full-Image Containment Policy Enforcement", () => {
+    const rootDir = path.resolve(__dirname, "../..");
+
+    it("ensures src/components/vehicle-card.tsx never uses object-cover or hover-scale on vehicle photos", () => {
+      const cardSource = fs.readFileSync(path.join(rootDir, "src/components/vehicle-card.tsx"), "utf-8");
+      
+      // Hero image and compact image must use object-contain
+      expect(cardSource).toContain('className="object-contain object-center"');
+
+      // The only allowed object-cover in vehicle-card is on the vendorLogoUrl avatar (rounded-full)
+      const nonLogoLines = cardSource
+        .split("\n")
+        .filter((line) => !line.includes("vendorLogoUrl") && !line.includes("rounded-full"));
+
+      nonLogoLines.forEach((line) => {
+        expect(line).not.toContain("object-cover");
+        expect(line).not.toContain("group-hover:scale");
+      });
+    });
+
+    it("ensures src/lib/image-loader.ts enforces resize=contain and bans resize=cover", () => {
+      const loaderSource = fs.readFileSync(path.join(rootDir, "src/lib/image-loader.ts"), "utf-8");
+      
+      expect(loaderSource).toContain('url.searchParams.set("resize", "contain")');
+      expect(loaderSource).not.toContain('resize=cover');
+      expect(loaderSource).not.toContain('"resize", "cover"');
+      expect(loaderSource).not.toContain("'resize', 'cover'");
+    });
+
+    it("ensures src/components/image-gallery.tsx never uses object-cover for main, thumbnail, or modal images", () => {
+      const gallerySource = fs.readFileSync(path.join(rootDir, "src/components/image-gallery.tsx"), "utf-8");
+      
+      expect(gallerySource).not.toContain("object-cover");
+      expect(gallerySource).toContain('className="object-contain object-center transition-opacity');
+      expect(gallerySource).toContain('className="object-contain object-center p-0.5"');
+      expect(gallerySource).toContain('className="object-contain"');
+    });
+
+    it("ensures src/app/vendor/vehicles/vehicle-form.tsx uses object-contain on photo previews", () => {
+      const formSource = fs.readFileSync(path.join(rootDir, "src/app/vendor/vehicles/vehicle-form.tsx"), "utf-8");
+      
+      expect(formSource).toContain('className="object-contain p-1"');
+      expect(formSource).not.toContain('className="object-cover');
     });
   });
 });

@@ -33,3 +33,15 @@ This guide explains where to find key components within the `src/` directory.
 - **Security First**: Always wrap protected layouts and actions with `await requireUser()` or `await requireAdmin()`.
 - **Environment Variables**: Never hardcode keys. Use `.env.local` for development and check `.env.example` for required keys.
 - **Data Fetching**: Rely on Server Components and Supabase SSR for fast, secure data loading without exposing DB logic to the client.
+
+## Vehicle Image Display Policy (Full-Image Containment)
+
+Every vehicle photograph across the entire platform must ALWAYS be displayed complete without cropping:
+- **Presentation Policy**: Vehicle photos must use `object-contain object-center` within fixed-aspect containers (such as `aspect-[16/10]`) with a neutral `bg-slate-100` backdrop.
+- **Image Loader Directive**: `src/lib/image-loader.ts` MUST use `resize=contain` for Supabase Storage transformation URLs. Width-only optimization is permitted; height parameters must never be sent to avoid server-side cropping.
+- **Banned Patterns**:
+  - `object-cover` on vehicle photos (crops top/bottom or sides of cars depending on aspect ratio).
+  - `resize=cover` in Supabase transformation URLs (forces server-side cropping).
+  - Hover zoom scaling (`group-hover:scale-*`) on contained vehicle images (creates optical edge clipping).
+- **Exceptions**: Vendor logos and circular avatars (`rounded-full`) may use `object-cover`.
+- **Regression Protection**: Enforced statically and dynamically via `src/__tests__/vehicle-image-full-display.test.tsx` and `src/__tests__/marketplace-visibility-and-indexing.test.tsx`.

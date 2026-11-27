@@ -41,14 +41,14 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
   if (variant === "compact") {
     return (
       <Card variant="interactive" className="flex-row p-0 gap-0 card-lift border-slate-200/60 shadow-sm overflow-hidden bg-white/95 relative group">
-        <div className="relative w-32 h-32 shrink-0 overflow-hidden rounded-none bg-slate-100">
+        <div className="relative w-32 h-32 shrink-0 overflow-hidden rounded-none bg-slate-100 flex items-center justify-center">
           <ImageWithFallback
             src={vehicle.imageUrl}
             alt={`${vehicle.title}`}
             fill
             priority={priority}
             sizes="128px"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-contain object-center"
           />
         </div>
         <CardContent className="flex-1 min-w-0 py-3 px-4 flex flex-col justify-between">
@@ -78,9 +78,9 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       {/* 1. HERO IMAGE SECTION */}
       <div className="relative w-full aspect-[16/10] z-20">
         {/* Inner container for images to keep them contained */}
-        <div className="absolute inset-0 bg-slate-100 overflow-hidden rounded-t-xl">
+        <div className="absolute inset-0 bg-slate-100 overflow-hidden rounded-t-xl flex items-center justify-center">
           {/* Foreground Image */}
-          <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10" aria-label={vehicle.title}>
+          <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10 flex items-center justify-center" aria-label={vehicle.title}>
             <ImageWithFallback
               src={vehicle.imageUrl}
               alt={vehicle.title}
@@ -88,7 +88,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               priority={priority}
               fetchPriority={priority ? "high" : "auto"}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
+              className="object-contain object-center"
             />
           </Link>
           {/* Gradient Overlay for text readability (badges, etc) */}

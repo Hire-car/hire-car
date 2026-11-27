@@ -44,9 +44,10 @@ describe("Marketplace Vehicle Card & Indexing Synchronization Integrity", () => 
       expect(heroSection?.textContent).toContain("Weekly from");
       expect(heroSection?.textContent).toContain("$1950");
 
-      // Verify image uses object-cover
+      // Verify image uses object-contain and never object-cover
       const img = heroSection?.querySelector("img");
-      expect(img?.getAttribute("class")).toContain("object-cover");
+      expect(img?.getAttribute("class")).toContain("object-contain");
+      expect(img?.getAttribute("class")).not.toContain("object-cover");
     });
 
     it("renders vehicle title, vendor info, and specs in the card body", () => {
