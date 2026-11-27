@@ -305,7 +305,7 @@ export default async function VendorBillingPage(props: {
             </div>
           </div>
 
-          {subscription ? (
+          {hasActiveSub && subscription && plan ? (
             <div className="space-y-5">
               {/* Vehicle Usage */}
               <div>

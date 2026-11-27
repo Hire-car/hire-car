@@ -8,12 +8,13 @@ import {
 import { redirect } from "next/navigation";
 
 export default async function VendorOnboardingPage(props: {
-  searchParams: Promise<{ plan?: string; from?: string }>;
+  searchParams: Promise<{ plan?: string; from?: string; interval?: string }>;
 }) {
   const user = await requireUser();
   let context = await getVendorContext(user.id);
   const searchParams = await props.searchParams;
   const plan = searchParams.plan;
+  const interval = searchParams.interval;
 
   if (context.organizations.length === 0) {
     // Fail-safe: check database directly before displaying onboarding form
@@ -25,7 +26,10 @@ export default async function VendorOnboardingPage(props: {
   }
 
   if (context.organizations.length > 0) {
-    redirect(plan ? `/vendor/billing?plan=${plan}` : "/vendor/dashboard");
+    const query = new URLSearchParams();
+    if (plan) query.set("plan", plan);
+    if (interval) query.set("interval", interval);
+    redirect(query.toString() ? `/vendor/billing?${query.toString()}` : "/vendor/dashboard");
   }
 
   return (
@@ -41,7 +45,7 @@ export default async function VendorOnboardingPage(props: {
           </p>
         </div>
 
-        <OnboardingWizard plan={plan} />
+        <OnboardingWizard plan={plan} interval={interval} />
       </section>
     </div>
   );

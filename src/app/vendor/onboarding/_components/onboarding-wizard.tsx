@@ -27,7 +27,7 @@ const STEPS = [
   { label: "Extras & Agreement" },
 ] as const;
 
-export function OnboardingWizard({ plan }: { plan?: string }) {
+export function OnboardingWizard({ plan, interval }: { plan?: string; interval?: string }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(initialFormData());
   const [errors, setErrors] = useState<FormErrors>({});
@@ -78,6 +78,7 @@ export function OnboardingWizard({ plan }: { plan?: string }) {
         }
         const fd = toFormDataObject(formData);
         if (plan) fd.set("plan", plan);
+        if (interval) fd.set("interval", interval);
         const result = await submitVendorOnboarding(fd);
         if (result?.error) {
           toast.error(result.error);

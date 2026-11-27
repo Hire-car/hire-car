@@ -33,7 +33,7 @@ const FEATURES_BY_PLAN: Record<PlanCode, PlanFeature[]> = {
 const BRANCH_LIMITS: Record<PlanCode, number | null> = {
   starter: 1,
   growth: 3,
-  pro: 10,
+  pro: null,
 };
 
 export function planHasFeature(

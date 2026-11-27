@@ -415,7 +415,7 @@ describe("Vendor Onboarding, Plan Selection & Stripe Payment Workflow Suite", ()
       expect(getBranchLimit("")).toBe(0);
       expect(getBranchLimit("starter")).toBe(1);
       expect(getBranchLimit("growth")).toBe(3);
-      expect(getBranchLimit("pro")).toBe(10);
+      expect(getBranchLimit("pro")).toBeNull();
     });
   });
 

@@ -93,9 +93,11 @@ export function isVendorOnboardingPath(path: string): boolean {
 export function buildVendorOnboardingHref(options?: {
   plan?: string | null;
   from?: string | null;
+  interval?: string | null;
 }): string {
   const params = new URLSearchParams();
   if (options?.plan) params.set("plan", options.plan);
+  if (options?.interval) params.set("interval", options.interval);
   if (options?.from && isSafeRedirectPath(options.from)) {
     params.set("from", options.from);
   }
@@ -106,9 +108,11 @@ export function buildVendorOnboardingHref(options?: {
 export function buildVendorUpgradeHref(options?: {
   plan?: string | null;
   from?: string | null;
+  interval?: string | null;
 }): string {
   const params = new URLSearchParams();
   if (options?.plan) params.set("plan", options.plan);
+  if (options?.interval) params.set("interval", options.interval);
   if (options?.from && isSafeRedirectPath(options.from)) {
     params.set("from", options.from);
   }

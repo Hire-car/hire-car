@@ -114,6 +114,9 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
     plan && typeof plan === "string" && ["starter", "growth", "pro"].includes(plan)
       ? plan
       : "starter";
+  const interval = formData.get("interval");
+  const intervalParam = interval === "annual" ? "annual" : null;
+  const billingRedirect = `/vendor/billing?plan=${planParam}${intervalParam ? `&interval=${intervalParam}` : ""}`;
 
   // Prevent duplicate onboarding writes if the user already has an organization
   // (e.g. from a retried submission or if user arrived while already onboarded)
@@ -129,7 +132,7 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
       });
     } catch {}
     invalidateVendorContext(user.id);
-    redirect(`/vendor/billing?plan=${planParam}`);
+    redirect(billingRedirect);
   }
 
   const parsed = onboardingSchema.safeParse({
@@ -246,5 +249,5 @@ export async function submitVendorOnboarding(formData: FormData): Promise<Onboar
   // Invalidate stale vendor-context cache so /vendor/billing sees the new organization immediately
   invalidateVendorContext(user.id);
 
-  redirect(`/vendor/billing?plan=${planParam}`);
+  redirect(billingRedirect);
 }

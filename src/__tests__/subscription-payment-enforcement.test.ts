@@ -471,10 +471,10 @@ describe("Hire Car Marketplace — Subscription Payment Enforcement Test Suite",
       expect(getBranchLimit("")).toBe(0);
     });
 
-    it("returns 1 branch for Starter, 3 for Growth, 10 for Pro", () => {
+    it("returns 1 branch for Starter, 3 for Growth, unlimited (null) for Pro", () => {
       expect(getBranchLimit("starter")).toBe(1);
       expect(getBranchLimit("growth")).toBe(3);
-      expect(getBranchLimit("pro")).toBe(10);
+      expect(getBranchLimit("pro")).toBeNull();
     });
 
     it("returns null planCode when organization has no active subscription", async () => {
