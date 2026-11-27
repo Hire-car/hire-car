@@ -54,7 +54,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="gallery-main-frame group relative aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none flex items-center justify-center"
+        className="gallery-main-frame group relative w-full min-w-0 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none flex items-center justify-center"
       >
 
         <div
@@ -71,20 +71,20 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
             // browser does not keep a compositor layer alive longer than needed.
             willChange: isPinching ? "transform" : "auto",
             width: "100%",
-            height: "100%",
             position: "relative",
             zIndex: 10,
           }}
-          className="flex items-center justify-center"
+          className="flex items-center justify-center w-full"
         >
           <ImageWithFallback
             src={images[currentIndex].url}
             alt={images[currentIndex].alt_text || "Vehicle Image"}
-            fill
+            width={1200}
+            height={900}
             priority={currentIndex === 0}
             fetchPriority={currentIndex === 0 ? "high" : "auto"}
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-contain object-center transition-opacity duration-300 cursor-pointer"
+            className="w-full h-auto block object-contain object-center transition-opacity duration-300 cursor-pointer"
             onClick={() => setIsModalOpen(true)}
           />
         </div>

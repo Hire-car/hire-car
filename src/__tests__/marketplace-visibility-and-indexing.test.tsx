@@ -34,8 +34,8 @@ describe("Marketplace Vehicle Card & Indexing Synchronization Integrity", () => 
     it("renders hero image section with original floating price card and image containment", () => {
       const { container } = render(<VehicleCard vehicle={sampleVehicle} />);
       
-      // Hero image container
-      const heroSection = container.querySelector(".aspect-\\[4\\/3\\]");
+      // Hero image container (dynamic natural aspect ratio)
+      const heroSection = container.querySelector(".relative.w-full.z-20");
       expect(heroSection).not.toBeNull();
 
       // Original floating price badge inside hero section

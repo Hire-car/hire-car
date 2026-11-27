@@ -76,19 +76,20 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     <div className="min-w-0 w-full h-full bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-[#ea580c]/30 transition-all duration-300 group flex flex-col overflow-hidden">
       
       {/* 1. HERO IMAGE SECTION */}
-      <div className="relative w-full aspect-[4/3] z-20">
-        {/* Inner container for images to keep them contained */}
-        <div className="absolute inset-0 bg-slate-100 overflow-hidden rounded-t-xl flex items-center justify-center">
+      <div className="relative w-full z-20">
+        {/* Inner container for image at natural aspect ratio */}
+        <div className="relative w-full overflow-hidden rounded-t-xl bg-slate-100">
           {/* Foreground Image */}
-          <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10 flex items-center justify-center" aria-label={vehicle.title}>
+          <Link href={`/cars/${vehicle.slug}`} className="block relative z-10 w-full" aria-label={vehicle.title}>
             <ImageWithFallback
               src={vehicle.imageUrl}
               alt={vehicle.title}
-              fill
+              width={800}
+              height={600}
               priority={priority}
               fetchPriority={priority ? "high" : "auto"}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain object-center"
+              className="w-full h-auto block object-contain object-center"
             />
           </Link>
           {/* Gradient Overlay for text readability (badges, etc) */}

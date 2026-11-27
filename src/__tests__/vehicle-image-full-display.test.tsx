@@ -204,7 +204,7 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
       const cardSource = fs.readFileSync(path.join(rootDir, "src/components/vehicle-card.tsx"), "utf-8");
       
       // Hero image and compact image must use object-contain
-      expect(cardSource).toContain('className="object-contain object-center"');
+      expect(cardSource).toContain("object-contain object-center");
 
       // The only allowed object-cover in vehicle-card is on the vendorLogoUrl avatar (rounded-full)
       const nonLogoLines = cardSource
@@ -230,7 +230,7 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
       const gallerySource = fs.readFileSync(path.join(rootDir, "src/components/image-gallery.tsx"), "utf-8");
       
       expect(gallerySource).not.toContain("object-cover");
-      expect(gallerySource).toContain('className="object-contain object-center transition-opacity');
+      expect(gallerySource).toContain("object-contain object-center");
       expect(gallerySource).toContain('className="object-contain object-center p-0.5"');
       expect(gallerySource).toContain('className="object-contain"');
     });
