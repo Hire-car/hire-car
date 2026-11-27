@@ -34,8 +34,8 @@ describe("Marketplace Vehicle Card & Indexing Synchronization Integrity", () => 
     it("renders hero image section with original floating price card and image containment", () => {
       const { container } = render(<VehicleCard vehicle={sampleVehicle} />);
       
-      // Hero image container (dynamic natural aspect ratio)
-      const heroSection = container.querySelector(".relative.w-full.z-20");
+      // Hero image container (4:3 aspect ratio with blurred background extension)
+      const heroSection = container.querySelector(".aspect-\\[4\\/3\\]");
       expect(heroSection).not.toBeNull();
 
       // Original floating price badge inside hero section
@@ -44,10 +44,14 @@ describe("Marketplace Vehicle Card & Indexing Synchronization Integrity", () => 
       expect(heroSection?.textContent).toContain("Weekly from");
       expect(heroSection?.textContent).toContain("$1950");
 
-      // Verify image uses object-contain and never object-cover
-      const img = heroSection?.querySelector("img");
+      // Verify foreground car image uses object-contain and never object-cover
+      const img = heroSection?.querySelector("img[alt='2024 BMW M4 Competition Coupe']");
       expect(img?.getAttribute("class")).toContain("object-contain");
       expect(img?.getAttribute("class")).not.toContain("object-cover");
+
+      // Verify blurred background extension layer is present
+      const blurredBg = heroSection?.querySelector("img[aria-hidden='true']");
+      expect(blurredBg?.getAttribute("class")).toContain("blur-2xl");
     });
 
     it("renders vehicle title, vendor info, and specs in the card body", () => {
