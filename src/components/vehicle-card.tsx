@@ -42,16 +42,18 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     return (
       <Card variant="interactive" className="flex-row p-0 gap-0 card-lift border-slate-200/60 shadow-sm overflow-hidden bg-white/95 relative group">
         <div className="relative w-32 h-32 shrink-0 overflow-hidden rounded-none bg-slate-100 flex items-center justify-center">
-          {/* Layer 1: Blurred Background Extension */}
-          <ImageWithFallback
-            src={vehicle.imageUrl}
-            alt=""
-            fill
-            priority={priority}
-            sizes="128px"
-            className="object-cover blur-2xl scale-150 opacity-90 pointer-events-none"
-            aria-hidden="true"
-          />
+          {/* Layer 1: Blurred Background Extension (Guaranteed Edge Overflow) */}
+          <div className="absolute -inset-4 pointer-events-none overflow-hidden">
+            <ImageWithFallback
+              src={vehicle.imageUrl}
+              alt=""
+              fill
+              priority={priority}
+              sizes="128px"
+              className="object-cover blur-2xl scale-150 opacity-90"
+              aria-hidden="true"
+            />
+          </div>
           {/* Layer 2: Main Contained Image */}
           <ImageWithFallback
             src={vehicle.imageUrl}
@@ -90,16 +92,18 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       <div className="relative w-full aspect-[4/3] z-20">
         <div className="absolute inset-0 bg-slate-100 overflow-hidden rounded-t-xl">
           
-          {/* Layer 1: Blurred Background Extension */}
-          <ImageWithFallback
-            src={vehicle.imageUrl}
-            alt=""
-            fill
-            priority={priority}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover blur-3xl scale-150 opacity-90 pointer-events-none"
-            aria-hidden="true"
-          />
+          {/* Layer 1: Blurred Background Extension (Guaranteed Edge Overflow) */}
+          <div className="absolute -inset-8 pointer-events-none overflow-hidden">
+            <ImageWithFallback
+              src={vehicle.imageUrl}
+              alt=""
+              fill
+              priority={priority}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover blur-3xl scale-150 opacity-90"
+              aria-hidden="true"
+            />
+          </div>
 
           {/* Layer 2: Main Contained Image */}
           <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10 flex items-center justify-center" aria-label={vehicle.title}>
