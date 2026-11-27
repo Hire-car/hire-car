@@ -67,13 +67,13 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
 
     it("renders blurred background extension layer behind contained vehicle image", () => {
       const { container } = render(<VehicleCard vehicle={mockVehicle} />);
-      const blurredBg = container.querySelector("img[aria-hidden='true']");
+      const blurredBg = container.querySelector("div[aria-hidden='true']");
       expect(blurredBg).not.toBeNull();
       const className = blurredBg?.getAttribute("class") || "";
-      expect(className).toContain("blur-3xl");
-      expect(className).toContain("object-cover");
-      expect(className).toContain("scale-150");
-      expect(className).toContain("opacity-90");
+      expect(className).toContain("bg-cover");
+      expect(className).toContain("bg-center");
+      expect(blurredBg?.getAttribute("style")).toContain("blur(40px)");
+      expect(blurredBg?.getAttribute("style")).toContain(mockVehicle.imageUrl);
     });
 
     it("safely displays 1/1 when imageCount is undefined or 1", () => {

@@ -42,18 +42,15 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
     return (
       <Card variant="interactive" className="flex-row p-0 gap-0 card-lift border-slate-200/60 shadow-sm overflow-hidden bg-white/95 relative group">
         <div className="relative w-32 h-32 shrink-0 overflow-hidden rounded-none bg-slate-100 flex items-center justify-center">
-          {/* Layer 1: Blurred Background Extension (Guaranteed Edge Overflow) */}
-          <div className="absolute -inset-4 pointer-events-none overflow-hidden">
-            <ImageWithFallback
-              src={vehicle.imageUrl}
-              alt=""
-              fill
-              priority={priority}
-              sizes="128px"
-              className="object-cover blur-2xl scale-150 opacity-90"
-              aria-hidden="true"
-            />
-          </div>
+          {/* Layer 1: Ambient blurred background (full opacity, CSS background, oversized so blur falloff is clipped outside the visible box) */}
+          <div
+            aria-hidden="true"
+            className="absolute -inset-[15%] bg-cover bg-center pointer-events-none"
+            style={{
+              backgroundImage: `url(${vehicle.imageUrl})`,
+              filter: "blur(40px)",
+            }}
+          />
           {/* Layer 2: Main Contained Image */}
           <ImageWithFallback
             src={vehicle.imageUrl}
@@ -90,23 +87,24 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       
       {/* 1. HERO IMAGE SECTION */}
       <div className="relative w-full aspect-[4/3] z-20">
-        <div className="absolute inset-0 bg-slate-100 overflow-hidden rounded-t-xl">
-          
-          {/* Layer 1: Blurred Background Extension (Guaranteed Edge Overflow) */}
-          <div className="absolute -inset-8 pointer-events-none overflow-hidden">
-            <ImageWithFallback
-              src={vehicle.imageUrl}
-              alt=""
-              fill
-              priority={priority}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover blur-3xl scale-150 opacity-90"
-              aria-hidden="true"
-            />
-          </div>
+        <div className="absolute inset-0 overflow-hidden rounded-t-xl bg-slate-100">
 
-          {/* Layer 2: Main Contained Image */}
-          <Link href={`/cars/${vehicle.slug}`} className="absolute inset-0 z-10 flex items-center justify-center" aria-label={vehicle.title}>
+          {/* Layer 1: Ambient blurred background (full opacity, CSS background, oversized so blur falloff is clipped outside the visible box) */}
+          <div
+            aria-hidden="true"
+            className="absolute -inset-[15%] bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${vehicle.imageUrl})`,
+              filter: "blur(40px)",
+            }}
+          />
+
+          {/* Layer 2: Main contained image (object-contain = never cropped) */}
+          <Link
+            href={`/cars/${vehicle.slug}`}
+            className="absolute inset-0 z-10 flex items-center justify-center"
+            aria-label={vehicle.title}
+          >
             <ImageWithFallback
               src={vehicle.imageUrl}
               alt={vehicle.title}
@@ -114,12 +112,11 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               priority={priority}
               fetchPriority={priority ? "high" : "auto"}
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-contain object-center transition-transform duration-500"
+              className="object-contain object-center"
             />
           </Link>
 
-          {/* Gradient Overlay for badge readability */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-900/40 to-transparent pointer-events-none z-20" />
+          {/* NO gradient overlay — removed (it created the dark bottom band) */}
         </div>
         
         {/* Top Left: Featured Badge */}

@@ -56,18 +56,15 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
         ref={galleryRef}
         className="gallery-main-frame group relative aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none flex items-center justify-center"
       >
-        {/* Layer 1: Blurred Background Extension (Guaranteed Edge Overflow) */}
-        <div className="absolute -inset-8 pointer-events-none overflow-hidden">
-          <ImageWithFallback
-            src={images[currentIndex].url}
-            alt=""
-            fill
-            priority={currentIndex === 0}
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-            className="object-cover blur-3xl scale-150 opacity-90"
-            aria-hidden="true"
-          />
-        </div>
+        {/* Layer 1: Ambient blurred background (full opacity, CSS background, oversized so blur falloff is clipped outside the visible box) */}
+        <div
+          aria-hidden="true"
+          className="absolute -inset-[15%] bg-cover bg-center pointer-events-none"
+          style={{
+            backgroundImage: `url(${images[currentIndex].url})`,
+            filter: "blur(40px)",
+          }}
+        />
 
         {/* Layer 2: Main Contained Image */}
         <div
