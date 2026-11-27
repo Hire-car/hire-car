@@ -3,6 +3,7 @@ import { organizationHasFeature } from "@/lib/plan-features";
 import { authenticateApiKey } from "@/lib/security/api-key";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
+import { syncVehicleCompletenessStatus } from "@/app/vendor/vehicles/actions";
 
 async function requireApiAccess(request: NextRequest) {
   const auth = await authenticateApiKey(request.headers.get("authorization"));
@@ -63,14 +64,17 @@ export async function PUT(
     return NextResponse.json({ error: "Vehicle not found" }, { status: 404 });
   }
 
-  await supabase.from("search_index_jobs").insert({
-    vehicle_id: id,
-    operation: "upsert",
-    status: "pending",
-  });
+  // Sync completeness status based on details and images, and trigger indexing
+  await syncVehicleCompletenessStatus(id, supabase);
   await invalidatePseoForVehicle(supabase, id);
 
-  return NextResponse.json({ vehicle: data });
+  const { data: finalVehicle } = await supabase
+    .from("vehicles")
+    .select("id, slug, title, status")
+    .eq("id", id)
+    .single();
+
+  return NextResponse.json({ vehicle: finalVehicle ?? data });
 }
 
 export async function DELETE(

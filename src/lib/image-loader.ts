@@ -31,7 +31,7 @@ export default function customImageLoader({
         "/storage/v1/render/image/public/"
       );
       url.searchParams.set("width", width.toString());
-      url.searchParams.set("resize", "contain");
+      url.searchParams.set("resize", "cover");
       if (quality) url.searchParams.set("quality", quality.toString());
       return url.href;
     } catch {
@@ -52,12 +52,12 @@ export default function customImageLoader({
     }
   }
 
-  // Fallback for everything else (e.g. local images)
-  // Route local assets through Next.js built-in optimizer
+  // Fallback for local assets (served directly from /public without broken /_next/image endpoint)
+  if (src.startsWith("/") && !src.startsWith("//")) {
+    return src;
+  }
+
   try {
-    if (src.startsWith("/") && !src.startsWith("//")) {
-      return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality || 75}`;
-    }
     
     // For absolute URLs not caught above, just append width
     const url = new URL(src);

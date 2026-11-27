@@ -48,6 +48,15 @@ export async function syncVehicleCompletenessStatus(vehicleId: string, supabase:
       }).then(async () => {
         await processSearchIndexJobs();
       });
+    } else if (newStatus === "approved") {
+      // Vehicle remains approved but images or details may have updated - ensure search index is refreshed
+      await supabase.from("search_index_jobs").insert({
+        vehicle_id: vehicleId,
+        operation: "upsert",
+        status: "pending",
+      }).then(async () => {
+        await processSearchIndexJobs();
+      });
     }
   }
 }
@@ -227,16 +236,6 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
         .then(({ error: e }) => { if (e) console.warn("vehicle_features insert failed:", e.message); });
     }
 
-    // Create search index job (fire and forget - don't fail on this)
-    await supabase.from("search_index_jobs").insert({
-      vehicle_id: vehicle.id,
-      operation: "upsert",
-      status: "pending",
-    }).then(async ({ error: e }) => { 
-      if (e) console.warn("search_index_jobs insert failed:", e.message); 
-      else await processSearchIndexJobs();
-    });
-
     // Log audit event (fire and forget - don't fail on this)
     await supabase.from("audit_logs").insert({
       actor_user_id: user.id,
@@ -269,18 +268,7 @@ export async function createVehicle(formData: FormData): Promise<VehicleActionRe
       }
     }
 
-    // Create search index job (fire and forget - don't fail on this)
-    // Done at the very end to ensure all relations (images, features) are committed.
-    await supabase.from("search_index_jobs").insert({
-      vehicle_id: vehicle.id,
-      operation: "upsert",
-      status: "pending",
-    }).then(async ({ error: e }) => {
-      if (e) console.warn("search_index_jobs insert failed:", e.message);
-      else await processSearchIndexJobs();
-    });
-
-    // Sync completeness status based on details and images
+    // Sync completeness status based on details and images, and trigger indexing with resolved status
     await syncVehicleCompletenessStatus(vehicle.id, supabase);
 
     revalidateTag(`vendor-vehicles-${organizationId}`);
@@ -524,19 +512,7 @@ export async function updateVehicle(formData: FormData): Promise<VehicleActionRe
     }
   }
 
-  // Create search index job after everything else is saved
-  if (Object.keys(updateData).length > 0 || data.features !== undefined || tempImagePathsJson) {
-    await supabase.from("search_index_jobs").insert({
-      vehicle_id: vehicleId,
-      operation: (updateData.status || existingVehicle.status) === "approved" ? "upsert" : "delete",
-      status: "pending",
-    }).then(async ({ error: e }) => {
-      if (e) console.warn("search_index_jobs insert failed:", e.message);
-      else await processSearchIndexJobs();
-    });
-  }
-
-  // Sync completeness status based on details and images
+  // Sync completeness status based on details and images, and sync search index with true resolved status
   await syncVehicleCompletenessStatus(vehicleId, supabase);
 
   revalidateTag(`vendor-vehicles-${organizationId}`);

@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { invalidatePseoForVehicle } from "@/lib/seo/vehicle-invalidation";
 import { apiVehicleCreateSchema } from "@/lib/validation/schemas";
 import { getVehicleLimitInfo } from "@/lib/data/vendor";
+import { syncVehicleCompletenessStatus } from "@/app/vendor/vehicles/actions";
 
 async function requireApiAccess(request: NextRequest) {
   const auth = await authenticateApiKey(request.headers.get("authorization"));
@@ -112,12 +113,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 
-  await supabase.from("search_index_jobs").insert({
-    vehicle_id: data.id,
-    operation: "upsert",
-    status: "pending",
-  });
+  // Sync completeness status based on details and images, and trigger indexing
+  await syncVehicleCompletenessStatus(data.id, supabase);
   await invalidatePseoForVehicle(supabase, data.id);
 
-  return NextResponse.json({ vehicle: data }, { status: 201 });
+  const { data: finalVehicle } = await supabase
+    .from("vehicles")
+    .select("id, slug, title, status")
+    .eq("id", data.id)
+    .single();
+
+  return NextResponse.json({ vehicle: finalVehicle ?? data }, { status: 201 });
 }

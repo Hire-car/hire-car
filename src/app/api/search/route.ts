@@ -9,7 +9,7 @@ const searchParamsSchema = z.object({
   q: z.string().max(100).optional().default(""),
   city: z.string().max(80).optional(),
   state: z.string().max(40).optional(),
-  category: z.enum(["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury"]).optional(),
+  category: z.string().trim().max(60).optional(),
   make: z.string().max(80).optional(),
   minPrice: z.coerce.number().int().min(0).max(2000).optional(),
   maxPrice: z.coerce.number().int().min(0).max(2000).optional(),
