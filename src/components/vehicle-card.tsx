@@ -41,17 +41,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
   if (variant === "compact") {
     return (
       <Card variant="interactive" className="flex-row p-0 gap-0 card-lift border-slate-200/60 shadow-sm overflow-hidden bg-white/95 relative group">
-        <div className="relative w-32 h-32 shrink-0 overflow-hidden rounded-none bg-slate-100 flex items-center justify-center">
-          {/* Layer 1: Ambient blurred background (full opacity, CSS background, oversized so blur falloff is clipped outside the visible box) */}
-          <div
-            aria-hidden="true"
-            className="absolute -inset-[15%] bg-cover bg-center pointer-events-none"
-            style={{
-              backgroundImage: `url(${vehicle.imageUrl})`,
-              filter: "blur(40px)",
-            }}
-          />
-          {/* Layer 2: Main Contained Image */}
+        <div className="relative w-32 h-32 shrink-0 overflow-hidden rounded-none bg-white flex items-center justify-center">
           <ImageWithFallback
             src={vehicle.imageUrl}
             alt={`${vehicle.title}`}
@@ -87,19 +77,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
       
       {/* 1. HERO IMAGE SECTION */}
       <div className="relative w-full aspect-[4/3] z-20">
-        <div className="absolute inset-0 overflow-hidden rounded-t-xl bg-slate-100">
-
-          {/* Layer 1: Ambient blurred background (full opacity, CSS background, oversized so blur falloff is clipped outside the visible box) */}
-          <div
-            aria-hidden="true"
-            className="absolute -inset-[15%] bg-cover bg-center"
-            style={{
-              backgroundImage: `url(${vehicle.imageUrl})`,
-              filter: "blur(40px)",
-            }}
-          />
-
-          {/* Layer 2: Main contained image (object-contain = never cropped) */}
+        <div className="absolute inset-0 overflow-hidden rounded-t-xl bg-white">
           <Link
             href={`/cars/${vehicle.slug}`}
             className="absolute inset-0 z-10 flex items-center justify-center"
@@ -115,8 +93,6 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
               className="object-contain object-center"
             />
           </Link>
-
-          {/* NO gradient overlay — removed (it created the dark bottom band) */}
         </div>
         
         {/* Top Left: Featured Badge */}

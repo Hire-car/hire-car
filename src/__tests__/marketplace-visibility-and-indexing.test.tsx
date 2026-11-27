@@ -49,10 +49,9 @@ describe("Marketplace Vehicle Card & Indexing Synchronization Integrity", () => 
       expect(img?.getAttribute("class")).toContain("object-contain");
       expect(img?.getAttribute("class")).not.toContain("object-cover");
 
-      // Verify blurred background extension layer is present
-      const blurredBg = heroSection?.querySelector("[aria-hidden='true']");
-      expect(blurredBg).not.toBeNull();
-      expect(blurredBg?.getAttribute("style")).toContain("blur(40px)");
+      // Verify hero image section uses clean white product card containment
+      const innerBox = heroSection?.querySelector(".bg-white");
+      expect(innerBox).not.toBeNull();
     });
 
     it("renders vehicle title, vendor info, and specs in the card body", () => {

@@ -37,7 +37,7 @@ This guide explains where to find key components within the `src/` directory.
 ## Vehicle Image Display Policy (Full-Image Containment)
 
 Every vehicle photograph across the entire platform must ALWAYS be displayed complete without cropping:
-- **Presentation Policy**: Vehicle photos must use the **Ambient CSS Background Extension** pattern: a fixed `aspect-[4/3]` container featuring an ambient blurred CSS background layer (`<div aria-hidden="true" className="absolute -inset-[15%] bg-cover bg-center" style={{ backgroundImage: "url(...)", filter: "blur(40px)" }} />`) beneath the crisp foreground vehicle photo (`object-contain object-center`). The ambient layer is full opacity and oversized so blur falloff is clipped outside the visible container. The obsolete bottom gradient overlay is removed to eliminate dark bands, ensuring pristine presentation with zero cropping.
+- **Presentation Policy**: Vehicle photos must use the **Clean White Product Card Containment** pattern: a fixed `aspect-[4/3]` container featuring pure white backdrop (`bg-white`) beneath the crisp foreground vehicle photo (`object-contain object-center`). For studio vehicle renders with white backgrounds, the letterbox is completely seamless and invisible (white-on-white) with zero cropping and uniform card heights across the entire marketplace grid. No artificial gradient overlays or discolored blurred ambient layers.
 - **Image Loader Directive**: `src/lib/image-loader.ts` MUST use `resize=contain` for Supabase Storage transformation URLs. Width-only optimization is permitted; height parameters must never be sent to avoid server-side cropping.
 - **Banned Patterns**:
   - `object-cover` on vehicle photos (crops top/bottom or sides of cars depending on aspect ratio).
