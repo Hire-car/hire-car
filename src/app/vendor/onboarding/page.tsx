@@ -1,18 +1,35 @@
 import { OnboardingWizard } from "./_components/onboarding-wizard";
 import { requireUser } from "@/lib/security/auth";
-import { getVendorContext } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 import { redirect } from "next/navigation";
 
 export default async function VendorOnboardingPage(props: {
-  searchParams: Promise<{ plan?: string; from?: string }>;
+  searchParams: Promise<{ plan?: string; from?: string; interval?: string }>;
 }) {
   const user = await requireUser();
-  const context = await getVendorContext(user.id);
+  let context = await getVendorContext(user.id);
   const searchParams = await props.searchParams;
   const plan = searchParams.plan;
+  const interval = searchParams.interval;
+
+  if (context.organizations.length === 0) {
+    // Fail-safe: check database directly before displaying onboarding form
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      context = directContext;
+      invalidateVendorContext(user.id);
+    }
+  }
 
   if (context.organizations.length > 0) {
-    redirect("/vendor/dashboard");
+    const query = new URLSearchParams();
+    if (plan) query.set("plan", plan);
+    if (interval) query.set("interval", interval);
+    redirect(query.toString() ? `/vendor/billing?${query.toString()}` : "/vendor/dashboard");
   }
 
   return (
@@ -28,7 +45,7 @@ export default async function VendorOnboardingPage(props: {
           </p>
         </div>
 
-        <OnboardingWizard plan={plan} />
+        <OnboardingWizard plan={plan} interval={interval} />
       </section>
     </div>
   );

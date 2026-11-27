@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   const isPaidActive =
-    (subscription?.status === "active" || subscription?.status === "trialing") &&
+    subscription?.status === "active" &&
     Boolean(subscription.stripe_subscription_id);
 
   if (isPaidActive) {
@@ -85,6 +85,8 @@ export async function POST(request: NextRequest) {
   const selectedInterval = payload.data.interval ?? "monthly";
   let idempotencyKey = `chk_${payload.data.organizationId}_${payload.data.plan}_${selectedInterval}_${attemptId}`;
 
+  const origin = request.nextUrl.origin;
+
   let session = await createCheckoutSession({
     plan: payload.data.plan,
     interval: payload.data.interval,
@@ -94,6 +96,7 @@ export async function POST(request: NextRequest) {
     customerId: subscription?.stripe_customer_id ?? undefined,
     existingSubscriptionId: subscription?.stripe_subscription_id ?? null,
     idempotencyKey,
+    origin,
   });
 
   // If Stripe idempotency returned an expired session, immediately reissue with a fresh attempt token
@@ -109,6 +112,7 @@ export async function POST(request: NextRequest) {
       customerId: subscription?.stripe_customer_id ?? undefined,
       existingSubscriptionId: subscription?.stripe_subscription_id ?? null,
       idempotencyKey,
+      origin,
     });
   }
 

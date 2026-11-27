@@ -167,9 +167,7 @@ export const apiVehicleCreateSchema = z.object({
   seats: z.coerce.number().int().min(2).max(12).default(5),
   fuel: z.enum(["Petrol", "Diesel", "Hybrid", "Electric"]).default("Petrol"),
   transmission: z.enum(["Automatic", "Manual"]).default("Automatic"),
-  category: z
-    .enum(["Sedan", "SUV", "People mover", "Van", "Ute", "Luxury"])
-    .default("Sedan"),
+  category: z.enum(VEHICLE_CATEGORIES).default("Sedan"),
   pricePerDayAud: z.coerce.number().int().min(20).max(2000),
   offerPriceAud: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : Number(val)), z.number().int().min(10).max(2000).nullable().optional()),
   offerLabel: z.preprocess((val) => (val === "" || val === null || val === undefined ? null : String(val)), z.string().trim().max(100).nullable().optional()),

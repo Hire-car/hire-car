@@ -19,6 +19,7 @@ import { ImageIcon } from "lucide-react";
  */
 export function ImageWithFallback({ alt, onError, src, ...props }: ImageProps) {
   const [errored, setErrored] = useState(false);
+  const isLocal = typeof src === "string" && src.startsWith("/") && !src.startsWith("//");
 
   // Reset the error state if the source changes (e.g. gallery navigation),
   // so a previously-broken image doesn't keep showing the fallback.
@@ -47,6 +48,7 @@ export function ImageWithFallback({ alt, onError, src, ...props }: ImageProps) {
     <Image
       src={src}
       alt={alt}
+      unoptimized={isLocal || props.unoptimized}
       onError={(event) => {
         setErrored(true);
         onError?.(event);

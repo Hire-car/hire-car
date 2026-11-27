@@ -31,7 +31,7 @@ const SUPPORT_BY_PLAN: Record<PlanCode, SupportConfig> = {
 /**
  * Returns the support configuration for a given plan code.
  * Falls back to starter-level support if plan is null/undefined
- * or subscription is not active/trialing.
+ * or subscription is not active.
  */
 export function getSupportConfig(
   planCode: string | null | undefined,
@@ -39,7 +39,7 @@ export function getSupportConfig(
 ): SupportConfig {
   if (
     !planCode ||
-    (subscriptionStatus && !["active", "trialing"].includes(subscriptionStatus))
+    (subscriptionStatus && subscriptionStatus !== "active")
   ) {
     return SUPPORT_BY_PLAN.starter;
   }

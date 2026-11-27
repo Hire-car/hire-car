@@ -8,7 +8,11 @@ import {
   Store,
   X,
 } from "lucide-react";
-import { getVendorContext } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 import {
   buildVendorOnboardingHref,
   isSafeRedirectPath,
@@ -30,7 +34,7 @@ const vendorBenefits = [
 export default async function VendorUpgradePage({
   searchParams,
 }: {
-  searchParams: Promise<{ plan?: string; from?: string }>;
+  searchParams: Promise<{ plan?: string; from?: string; interval?: string }>;
 }) {
   const user = await requireUser();
   const supabase = createAdminClient();
@@ -48,12 +52,26 @@ export default async function VendorUpgradePage({
   const params = await searchParams;
   const plan = params.plan ?? null;
   const from = params.from && isSafeRedirectPath(params.from) ? params.from : null;
+  const interval = params.interval === "annual" ? "annual" : null;
 
-  if (context.organizations.length > 0) {
-    redirect(from ?? "/vendor/dashboard");
+  let currentContext = context;
+  if (currentContext.organizations.length === 0) {
+    // Fail-safe: check database directly before displaying upgrade gate
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      currentContext = directContext;
+      invalidateVendorContext(user.id);
+    }
   }
 
-  const onboardingHref = buildVendorOnboardingHref({ plan, from });
+  if (currentContext.organizations.length > 0) {
+    const billingUrl = plan
+      ? `/vendor/billing?plan=${plan}${interval ? `&interval=${interval}` : ""}`
+      : "/vendor/dashboard";
+    redirect(from ?? billingUrl);
+  }
+
+  const onboardingHref = buildVendorOnboardingHref({ plan, from, interval });
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl items-center px-4 py-12 sm:px-6">

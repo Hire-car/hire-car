@@ -50,7 +50,7 @@ const PLANS = [
       support: "Priority email + Phone",
       api: false,
       bulk: false,
-      featured: true,
+      featured: false,
     },
   },
   {
@@ -254,7 +254,7 @@ export function PricingContent() {
 
                   <div className="mt-auto">
                     <Link
-                      href={`/vendor/upgrade?plan=${plan.code}`}
+                      href={`/vendor/upgrade?plan=${plan.code}&interval=${annual ? "annual" : "monthly"}`}
                       className={`w-full rounded-full py-4 text-base font-bold transition-all flex items-center justify-center gap-2 ${
                         plan.highlight
                           ? "bg-gradient-to-r from-[#ea580c] to-amber-500 text-white hover:shadow-lg hover:shadow-orange-500/30 hover:scale-[1.02]"

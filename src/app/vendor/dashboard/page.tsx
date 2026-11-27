@@ -5,7 +5,12 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { MetricCard } from "@/components/metric-card";
 import { requireUser } from "@/lib/security/auth";
-import { getVendorContext, getDashboardMetrics } from "@/lib/data/vendor";
+import {
+  getVendorContext,
+  getDashboardMetrics,
+  fetchVendorContextFromDb,
+  invalidateVendorContext,
+} from "@/lib/data/vendor";
 import { 
   Car, BarChart3, MessageSquare, TrendingUp, 
   GitBranch, CreditCard, ArrowRight, Bell,
@@ -16,7 +21,15 @@ export const metadata = {
   title: "Dashboard",
 };
 
-async function DashboardContent({ organization, userId }: { organization: any, userId: string }) {
+async function DashboardContent({
+  organization,
+  userId,
+  welcome,
+}: {
+  organization: any;
+  userId: string;
+  welcome?: boolean;
+}) {
   const metrics = await getDashboardMetrics(organization.id, userId);
 
   const isApproved = organization.status === "approved";
@@ -32,6 +45,19 @@ async function DashboardContent({ organization, userId }: { organization: any, u
 
   return (
     <div className="space-y-6">
+      {/* Welcome Banner after checkout */}
+      {welcome && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm flex items-start gap-4">
+          <CheckCircle className="h-6 w-6 text-emerald-600 shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-base font-bold text-emerald-900">Welcome to Hire Car Marketplace!</h3>
+            <p className="mt-1 text-sm text-emerald-700">
+              Your subscription is active. You can now add vehicles, manage your branches, and start receiving direct inquiries.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* High-Converting Upsell Banner */}
       {!hasActiveSubscription && (
         <div className="relative overflow-hidden rounded-2xl bg-slate-950 p-8 shadow-xl border border-white/5">
@@ -261,9 +287,9 @@ function DashboardSkeleton() {
   );
 }
 
-async function DashboardWrapper() {
+async function DashboardWrapper({ welcome }: { welcome?: boolean }) {
   const user = await requireUser();
-  const context = await getVendorContext(user.id);
+  let context = await getVendorContext(user.id);
 
   if (context.setupError) {
     return (
@@ -278,20 +304,32 @@ async function DashboardWrapper() {
   }
 
   if (context.organizations.length === 0) {
-    redirect("/vendor/upgrade");
+    // Fail-safe: check database directly before redirecting to upgrade
+    const directContext = await fetchVendorContextFromDb(user.id);
+    if (directContext.organizations.length > 0) {
+      context = directContext;
+      invalidateVendorContext(user.id);
+    } else {
+      redirect("/vendor/upgrade");
+    }
   }
 
   const cookieStore = await cookies();
   const selectedOrgId = cookieStore.get("vendor_org_id")?.value;
   const organization = context.organizations.find((o) => o.id === selectedOrgId) || context.organizations[0];
 
-  return <DashboardContent organization={organization} userId={user.id} />;
+  return <DashboardContent organization={organization} userId={user.id} welcome={welcome} />;
 }
 
-export default function VendorDashboardPage() {
+export default async function VendorDashboardPage(props: {
+  searchParams?: Promise<{ welcome?: string }>;
+}) {
+  const searchParams = props.searchParams ? await props.searchParams : undefined;
+  const welcome = searchParams?.welcome === "1";
+
   return (
     <Suspense fallback={<DashboardSkeleton />}>
-      <DashboardWrapper />
+      <DashboardWrapper welcome={welcome} />
     </Suspense>
   );
 }

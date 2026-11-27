@@ -27,7 +27,7 @@ const STEPS = [
   { label: "Extras & Agreement" },
 ] as const;
 
-export function OnboardingWizard({ plan }: { plan?: string }) {
+export function OnboardingWizard({ plan, interval }: { plan?: string; interval?: string }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(initialFormData());
   const [errors, setErrors] = useState<FormErrors>({});
@@ -73,13 +73,20 @@ export function OnboardingWizard({ plan }: { plan?: string }) {
     }
     startTransition(async () => {
       try {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("hirecar_user_context");
+        }
         const fd = toFormDataObject(formData);
         if (plan) fd.set("plan", plan);
+        if (interval) fd.set("interval", interval);
         const result = await submitVendorOnboarding(fd);
         if (result?.error) {
           toast.error(result.error);
         }
       } catch (err) {
+        if ((err as { digest?: string })?.digest?.startsWith("NEXT_REDIRECT")) {
+          throw err;
+        }
         toast.error(err instanceof Error ? err.message : "Submission failed");
       }
     });

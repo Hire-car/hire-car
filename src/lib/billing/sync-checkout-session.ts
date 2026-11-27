@@ -7,6 +7,7 @@ import {
   syncInvoiceRecord,
   upsertSubscriptionRecord,
 } from "@/lib/billing/webhook-helpers";
+import { invalidateVendorMetrics } from "@/lib/data/vendor";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { PlanCode } from "@/lib/types";
 import type Stripe from "stripe";
@@ -66,6 +67,8 @@ async function applyStripeSubscription(subscription: Stripe.Subscription) {
   if (mappedStatus === "active") {
     await approveOrganizationIfEligible(supabase, organizationId);
   }
+
+  invalidateVendorMetrics(organizationId);
 
   await syncLatestInvoice(subscription.id);
 
@@ -132,6 +135,8 @@ async function applyCheckoutSession(session: Stripe.Checkout.Session) {
   if (finalStatus === "active") {
     await approveOrganizationIfEligible(supabase, organizationId);
   }
+
+  invalidateVendorMetrics(organizationId);
 
   await syncLatestInvoice(subscriptionId);
 

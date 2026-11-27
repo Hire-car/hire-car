@@ -17,6 +17,11 @@ export default function customImageLoader({
     return src;
   }
 
+  // Bypass transformation for local Supabase emulator instances (which do not run imgproxy)
+  if (src.includes("127.0.0.1") || src.includes("localhost")) {
+    return src;
+  }
+
   // If it's a Supabase storage URL, rewrite to the render (transformation) endpoint
   if (src.includes("/storage/v1/object/public/")) {
     try {
@@ -47,12 +52,12 @@ export default function customImageLoader({
     }
   }
 
-  // Fallback for everything else (e.g. local images)
-  // Route local assets through Next.js built-in optimizer
+  // Fallback for local assets (served directly from /public without broken /_next/image endpoint)
+  if (src.startsWith("/") && !src.startsWith("//")) {
+    return src;
+  }
+
   try {
-    if (src.startsWith("/") && !src.startsWith("//")) {
-      return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality || 75}`;
-    }
     
     // For absolute URLs not caught above, just append width
     const url = new URL(src);

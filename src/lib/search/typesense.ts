@@ -259,6 +259,7 @@ export async function searchVehicles(
               sort_order: i.sort_order,
             }));
           v.imageUrl = resolveVehicleImage(supabaseUrl, matchingImgs, v.category);
+          v.imageCount = matchingImgs.length || 1;
         });
       } else {
         vehiclesMissingImages.forEach(v => { v.imageUrl = getCategoryPlaceholder(v.category); });
@@ -360,16 +361,21 @@ async function fallbackDatabaseSearch(
     dbQuery = dbQuery.ilike("branches.state", filters.state);
   }
   if (filters.category) {
-    dbQuery = dbQuery.eq("category", filters.category);
+    const cat = filters.category.toLowerCase().trim();
+    if (cat === "sports" || cat === "sports car" || cat === "sports-car") {
+      dbQuery = dbQuery.or("category.ilike.%Sports%,category.ilike.%Sports car%");
+    } else {
+      dbQuery = dbQuery.ilike("category", filters.category);
+    }
   }
   if (filters.make) {
-    dbQuery = dbQuery.eq("make", filters.make);
+    dbQuery = dbQuery.ilike("make", filters.make);
   }
   if (filters.transmission) {
-    dbQuery = dbQuery.eq("transmission", filters.transmission);
+    dbQuery = dbQuery.ilike("transmission", filters.transmission);
   }
   if (filters.fuel) {
-    dbQuery = dbQuery.eq("fuel", filters.fuel);
+    dbQuery = dbQuery.ilike("fuel", filters.fuel);
   }
   if (filters.minPrice !== undefined) {
     dbQuery = dbQuery.gte("price_per_day_aud", filters.minPrice);
@@ -523,11 +529,11 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
   const supabase = createAdminClient();
   const errors: string[] = [];
 
-  // Fetch pending jobs
+  // Fetch pending or retryable failed jobs (up to 5 attempts)
   const { data: jobs, error: jobsError } = await supabase
     .from("search_index_jobs")
-    .select("id, vehicle_id, operation")
-    .eq("status", "pending")
+    .select("id, vehicle_id, operation, attempts")
+    .or("status.eq.pending,and(status.eq.failed,attempts.lt.5)")
     .order("created_at", { ascending: true })
     .limit(limit);
 
@@ -620,7 +626,13 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
             }
 
             await upsertVehicleDocument(document);
+          } else {
+            // Organization or branch is unapproved - remove from search index
+            await deleteVehicleDocument(job.vehicle_id);
           }
+        } else {
+          // Vehicle is no longer approved or was deleted - remove from search index
+          await deleteVehicleDocument(job.vehicle_id);
         }
       }
 
@@ -633,10 +645,19 @@ export async function processSearchIndexJobs(limit = 10): Promise<{
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
       errors.push(`Job ${job.id} failed: ${errorMsg}`);
 
-      // Mark job as failed
+      const nextAttempts = ((job as { attempts?: number | null }).attempts ?? 0) + 1;
+      const willRetry = nextAttempts < 5;
+
+      // Mark job as retryable (pending) or permanently failed
       await supabase
         .from("search_index_jobs")
-        .update({ status: "failed", error: errorMsg })
+        .update({
+          status: willRetry ? "pending" : "failed",
+          attempts: nextAttempts,
+          error: errorMsg,
+          last_error: errorMsg,
+          processed_at: new Date().toISOString(),
+        })
         .eq("id", job.id);
     }
   }
