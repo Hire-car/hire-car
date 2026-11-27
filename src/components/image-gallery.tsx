@@ -54,7 +54,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
       {/* Main Image */}
       <div
         ref={galleryRef}
-        className="gallery-main-frame group relative aspect-[16/10] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none flex items-center justify-center"
+        className="gallery-main-frame group relative aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 shadow-sm touch-pan-y select-none flex items-center justify-center"
       >
 
         <div

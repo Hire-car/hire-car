@@ -37,7 +37,7 @@ This guide explains where to find key components within the `src/` directory.
 ## Vehicle Image Display Policy (Full-Image Containment)
 
 Every vehicle photograph across the entire platform must ALWAYS be displayed complete without cropping:
-- **Presentation Policy**: Vehicle photos must use `object-contain object-center` within fixed-aspect containers (such as `aspect-[16/10]`) with a neutral `bg-slate-100` backdrop.
+- **Presentation Policy**: Vehicle photos must use `object-contain object-center` within fixed-aspect containers (such as `aspect-[4/3]`) with a neutral `bg-slate-100` backdrop.
 - **Image Loader Directive**: `src/lib/image-loader.ts` MUST use `resize=contain` for Supabase Storage transformation URLs. Width-only optimization is permitted; height parameters must never be sent to avoid server-side cropping.
 - **Banned Patterns**:
   - `object-cover` on vehicle photos (crops top/bottom or sides of cars depending on aspect ratio).
