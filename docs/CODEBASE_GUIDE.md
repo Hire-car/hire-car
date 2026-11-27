@@ -37,7 +37,7 @@ This guide explains where to find key components within the `src/` directory.
 ## Vehicle Image Display Policy (Full-Image Containment)
 
 Every vehicle photograph across the entire platform must ALWAYS be displayed complete without cropping:
-- **Presentation Policy**: Vehicle photos must use the **Blurred Background Extension** pattern: a fixed `aspect-[4/3]` container featuring a blurred ambient background layer (`object-cover blur-2xl scale-110 opacity-60`) beneath the crisp foreground vehicle photo (`object-contain object-center`). This ensures 100% uniform grid card heights while completely eliminating empty gray letterbox bars with zero cropping.
+- **Presentation Policy**: Vehicle photos must use the **Blurred Background Extension** pattern: a fixed `aspect-[4/3]` container featuring an aggressively scaled blurred ambient background layer (`object-cover blur-3xl scale-150 opacity-90`) beneath the crisp foreground vehicle photo (`object-contain object-center`). This ensures 100% uniform grid card heights while completely eliminating edge blur falloff and empty gray letterbox bars with zero cropping.
 - **Image Loader Directive**: `src/lib/image-loader.ts` MUST use `resize=contain` for Supabase Storage transformation URLs. Width-only optimization is permitted; height parameters must never be sent to avoid server-side cropping.
 - **Banned Patterns**:
   - `object-cover` on vehicle photos (crops top/bottom or sides of cars depending on aspect ratio).

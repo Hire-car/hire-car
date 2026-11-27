@@ -51,7 +51,7 @@ describe("Marketplace Vehicle Card & Indexing Synchronization Integrity", () => 
 
       // Verify blurred background extension layer is present
       const blurredBg = heroSection?.querySelector("img[aria-hidden='true']");
-      expect(blurredBg?.getAttribute("class")).toContain("blur-2xl");
+      expect(blurredBg?.getAttribute("class")).toContain("blur-3xl");
     });
 
     it("renders vehicle title, vendor info, and specs in the card body", () => {

@@ -63,7 +63,7 @@ export function ImageGallery({ images, vehicleId }: { images: GalleryImage[], ve
           fill
           priority={currentIndex === 0}
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 820px"
-          className="object-cover blur-2xl scale-110 opacity-60 pointer-events-none"
+          className="object-cover blur-3xl scale-150 opacity-90 pointer-events-none"
           aria-hidden="true"
         />
 

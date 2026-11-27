@@ -70,10 +70,10 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
       const blurredBg = container.querySelector("img[aria-hidden='true']");
       expect(blurredBg).not.toBeNull();
       const className = blurredBg?.getAttribute("class") || "";
-      expect(className).toContain("blur-2xl");
+      expect(className).toContain("blur-3xl");
       expect(className).toContain("object-cover");
-      expect(className).toContain("scale-110");
-      expect(className).toContain("opacity-60");
+      expect(className).toContain("scale-150");
+      expect(className).toContain("opacity-90");
     });
 
     it("safely displays 1/1 when imageCount is undefined or 1", () => {
@@ -218,10 +218,10 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
       expect(cardSource).toContain("object-contain object-center");
 
       // The only allowed object-cover in vehicle-card is on the vendorLogoUrl avatar (rounded-full)
-      // or the blurred background extension layers (blur-2xl / blur-xl)
+      // or the blurred background extension layers (blur-3xl / blur-2xl / blur-xl)
       const nonLogoNonBlurLines = cardSource
         .split("\n")
-        .filter((line) => !line.includes("vendorLogoUrl") && !line.includes("rounded-full") && !line.includes("blur-2xl") && !line.includes("blur-xl"));
+        .filter((line) => !line.includes("vendorLogoUrl") && !line.includes("rounded-full") && !line.includes("blur-3xl") && !line.includes("blur-2xl") && !line.includes("blur-xl"));
 
       nonLogoNonBlurLines.forEach((line) => {
         expect(line).not.toContain("object-cover");
@@ -241,10 +241,10 @@ describe("Global Vehicle Image System — Full-Image Display & Regression Protec
     it("ensures src/components/image-gallery.tsx never uses object-cover for main, thumbnail, or modal images", () => {
       const gallerySource = fs.readFileSync(path.join(rootDir, "src/components/image-gallery.tsx"), "utf-8");
       
-      // Foreground vehicle images must not use object-cover (only blurred background layer uses blur-2xl)
+      // Foreground vehicle images must not use object-cover (only blurred background layer uses blur-3xl)
       const nonBlurLines = gallerySource
         .split("\n")
-        .filter((line) => !line.includes("blur-2xl") && !line.includes("blur-xl"));
+        .filter((line) => !line.includes("blur-3xl") && !line.includes("blur-2xl") && !line.includes("blur-xl"));
 
       nonBlurLines.forEach((line) => {
         expect(line).not.toContain("object-cover");

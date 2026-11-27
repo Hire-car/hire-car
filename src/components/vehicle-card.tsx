@@ -49,7 +49,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             fill
             priority={priority}
             sizes="128px"
-            className="object-cover blur-xl scale-110 opacity-60 pointer-events-none"
+            className="object-cover blur-2xl scale-150 opacity-90 pointer-events-none"
             aria-hidden="true"
           />
           {/* Layer 2: Main Contained Image */}
@@ -97,7 +97,7 @@ export function VehicleCard({ vehicle, priority = false, variant = "default", sa
             fill
             priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover blur-2xl scale-110 opacity-60 pointer-events-none"
+            className="object-cover blur-3xl scale-150 opacity-90 pointer-events-none"
             aria-hidden="true"
           />
 
